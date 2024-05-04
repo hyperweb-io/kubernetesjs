@@ -7,7 +7,6 @@ KubernetesJS is a **fully-typed**, zero-dependency TypeScript library designed t
 - **🔒 Fully Typed**: Complete TypeScript definitions for all functions and models for an enhanced development experience.
 - **🚀 Zero Dependencies**: Works out of the box without the need for additional installations.
 - **📡 Full Kubernetes API Coverage**: Supports all Kubernetes API endpoints with detailed TypeScript types.
-- **👍 Easy to Use**: Simple, clear API methods that make Kubernetes operations straightforward.
 - **🌐 Cross-Platform**: Works with both Node.js and browser environments.
 
 ## Installation
