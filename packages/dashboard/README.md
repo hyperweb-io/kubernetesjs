@@ -1,13 +1,14 @@
 # KubernetesJS
 
-KubernetesJS is a zero-dependency JavaScript library designed to simplify interactions with Kubernetes APIs. It provides an easy-to-use, lightweight interface for managing Kubernetes resources directly from JavaScript environments.
+KubernetesJS is a **fully-typed**, zero-dependency TypeScript library designed to simplify interactions with Kubernetes APIs. With comprehensive TypeScript support, it provides a strongly-typed interface that makes managing Kubernetes resources clear and predictable, ideal for TypeScript developers looking to integrate Kubernetes management into their applications.
 
 ## Features
 
-- **Zero Dependencies**: Works out of the box without the need for additional installations.
-- **Full Kubernetes API Coverage**: Supports all Kubernetes API endpoints.
-- **Easy to Use**: Simple, clear API methods that make Kubernetes operations straightforward.
-- **Cross-Platform**: Works with Node.js and browser environments.
+- **🔒 Fully Typed**: Complete TypeScript definitions for all functions and models for an enhanced development experience.
+- **🚀 Zero Dependencies**: Works out of the box without the need for additional installations.
+- **📡 Full Kubernetes API Coverage**: Supports all Kubernetes API endpoints with detailed TypeScript types.
+- **👍 Easy to Use**: Simple, clear API methods that make Kubernetes operations straightforward.
+- **🌐 Cross-Platform**: Works with both Node.js and browser environments.
 
 ## Installation
 
@@ -17,6 +18,7 @@ To install KubernetesJS, you can use npm or yarn:
 npm install kubernetesjs
 # or
 yarn add kubernetesjs
+
 ```
 
 ## Example (WIP)
