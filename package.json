@@ -51,8 +51,5 @@
     "schema-sdk": "^0.7.0",
     "ts-node": "10.9.2",
     "typescript": "^5.0.4"
-  },
-  "dependencies": {
-    "@interweb/fetch-api-client": "^0.5.0"
   }
 }
