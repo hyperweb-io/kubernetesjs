@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Fully Typed Kubernetes",
   "author": "Dan Lynch <pyramation@gmail.com>",
-  "homepage": "https://github.com/pyramation/kubernetesjs#readme",
+  "homepage": "https://github.com/cosmology-tech/kubernetesjs#readme",
   "license": "SEE LICENSE IN LICENSE",
   "main": "main/index.js",
   "module": "module/index.js",
@@ -34,11 +34,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pyramation/kubernetesjs"
+    "url": "https://github.com/cosmology-tech/kubernetesjs"
   },
   "keywords": [],
   "bugs": {
-    "url": "https://github.com/pyramation/kubernetesjs/issues"
+    "url": "https://github.com/cosmology-tech/kubernetesjs/issues"
   },
   "devDependencies": {
     "@types/node": "^20.12.12",
