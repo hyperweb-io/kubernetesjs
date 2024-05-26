@@ -1,4 +1,4 @@
-import { APIClient, APIClientRequestOpts } from "@interweb/fetch-api-client";
+import { APIClient, APIClientRequestOpts } from "./client";
 export interface MutatingWebhook {
     admissionReviewVersions: string[];
     clientConfig: WebhookClientConfig;

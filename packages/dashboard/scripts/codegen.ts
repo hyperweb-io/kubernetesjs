@@ -17,6 +17,7 @@ const options = getDefaultSchemaSDKOptions({
 const code = generateOpenApiClient(
   {
     ...options,
+    npmApiClient: './client',
     operationNamingStrategy: {
       aliases: {
         listCoreV1PodForAllNamespaces: 'getPods',
