@@ -3,6 +3,7 @@ import { getDefaultSchemaSDKOptions, generateOpenApiClient } from 'schema-sdk';
 import schema from './swagger.json';
 
 const options = getDefaultSchemaSDKOptions({
+  includePropertyComments: true,
   clientName: 'KubernetesClient',
   includeSwaggerUrl: true,
   exclude: [
