@@ -1,4 +1,4 @@
-import { APIClient } from "./client";
+import { APIClient } from "@interweb/fetch-api-client";
 export interface MutatingWebhook {
     admissionReviewVersions: string[];
     clientConfig: WebhookClientConfig;
@@ -10864,7 +10864,8 @@ export declare class KubernetesClient extends APIClient {
     readCoreV1PersistentVolumeStatus(params: ReadCoreV1PersistentVolumeStatusRequest): Promise<PersistentVolume>;
     replaceCoreV1PersistentVolumeStatus(params: ReplaceCoreV1PersistentVolumeStatusRequest): Promise<PersistentVolume>;
     patchCoreV1PersistentVolumeStatus(params: PatchCoreV1PersistentVolumeStatusRequest): Promise<PersistentVolume>;
-    listCoreV1PodForAllNamespaces(params: ListCoreV1PodForAllNamespacesRequest): Promise<PodList>;
+    getPods(params: ListCoreV1PodForAllNamespacesRequest): Promise<PodList>;
+    listPods(params: ListCoreV1PodForAllNamespacesRequest): Promise<PodList>;
     listCoreV1PodTemplateForAllNamespaces(params: ListCoreV1PodTemplateForAllNamespacesRequest): Promise<PodTemplateList>;
     listCoreV1ReplicationControllerForAllNamespaces(params: ListCoreV1ReplicationControllerForAllNamespacesRequest): Promise<ReplicationControllerList>;
     listCoreV1ResourceQuotaForAllNamespaces(params: ListCoreV1ResourceQuotaForAllNamespacesRequest): Promise<ResourceQuotaList>;
