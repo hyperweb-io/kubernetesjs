@@ -1,5 +1,4 @@
-import { APIClient } from "./client";
-
+import { APIClient } from "@interweb/fetch-api-client";
 /* io.k8s.api.admissionregistration.v1.MutatingWebhook */
 /* MutatingWebhook describes an admission webhook and the resources and operations it applies to. */
 export interface MutatingWebhook {
@@ -3648,26 +3647,26 @@ export interface WatchEvent {
 To use this, make a field which has RawExtension as its type in your external, versioned struct, and Object in your internal struct. You also need to register your various plugin types.
 
 // Internal package: type MyAPIObject struct {
-  runtime.TypeMeta `json:",inline"`
-  MyPlugin runtime.Object `json:"myPlugin"`
+	runtime.TypeMeta `json:",inline"`
+	MyPlugin runtime.Object `json:"myPlugin"`
 } type PluginA struct {
-  AOption string `json:"aOption"`
+	AOption string `json:"aOption"`
 }
 
 // External package: type MyAPIObject struct {
-  runtime.TypeMeta `json:",inline"`
-  MyPlugin runtime.RawExtension `json:"myPlugin"`
+	runtime.TypeMeta `json:",inline"`
+	MyPlugin runtime.RawExtension `json:"myPlugin"`
 } type PluginA struct {
-  AOption string `json:"aOption"`
+	AOption string `json:"aOption"`
 }
 
 // On the wire, the JSON will look something like this: {
-  "kind":"MyAPIObject",
-  "apiVersion":"v1",
-  "myPlugin": {
-    "kind":"PluginA",
-    "aOption":"foo",
-  },
+	"kind":"MyAPIObject",
+	"apiVersion":"v1",
+	"myPlugin": {
+		"kind":"PluginA",
+		"aOption":"foo",
+	},
 }
 
 So what happens? Decode first uses json or yaml to unmarshal the serialized data into your external MyAPIObject. That causes the raw JSON to be stored, but not unpacked. The next step is to copy (using pkg/conversion) into the internal struct. The runtime package's DefaultScheme has conversion functions installed which will unpack the JSON stored in RawExtension, turning it into the correct object type, and storing it in the Object. (TODO: In the case where the object is of an unknown type, a runtime.Unknown object will be created and stored.) */
@@ -3739,9 +3738,9 @@ export interface ServiceReference {
   namespace?: string;
   port?: number;
 }
-export interface GetServiceAccountIssuerOpenIDConfigurationRequest { }
-export interface GetCoreAPIVersionsRequest { }
-export interface GetCoreV1APIResourcesRequest { }
+export interface GetServiceAccountIssuerOpenIDConfigurationRequest {}
+export interface GetCoreAPIVersionsRequest {}
+export interface GetCoreV1APIResourcesRequest {}
 export interface ListCoreV1ComponentStatusRequest {
   query: {
     allowWatchBookmarks?: boolean;
@@ -6668,9 +6667,9 @@ export interface WatchCoreV1ServiceListForAllNamespacesRequest {
     watch?: boolean;
   };
 }
-export interface GetAPIVersionsRequest { }
-export interface GetAdmissionregistrationAPIGroupRequest { }
-export interface GetAdmissionregistrationV1APIResourcesRequest { }
+export interface GetAPIVersionsRequest {}
+export interface GetAdmissionregistrationAPIGroupRequest {}
+export interface GetAdmissionregistrationV1APIResourcesRequest {}
 export interface ListAdmissionregistrationV1MutatingWebhookConfigurationRequest {
   query: {
     pretty?: string;
@@ -6895,8 +6894,8 @@ export interface WatchAdmissionregistrationV1ValidatingWebhookConfigurationReque
     name: string;
   };
 }
-export interface GetApiextensionsAPIGroupRequest { }
-export interface GetApiextensionsV1APIResourcesRequest { }
+export interface GetApiextensionsAPIGroupRequest {}
+export interface GetApiextensionsV1APIResourcesRequest {}
 export interface ListApiextensionsV1CustomResourceDefinitionRequest {
   query: {
     pretty?: string;
@@ -7040,8 +7039,8 @@ export interface WatchApiextensionsV1CustomResourceDefinitionRequest {
     name: string;
   };
 }
-export interface GetApiregistrationAPIGroupRequest { }
-export interface GetApiregistrationV1APIResourcesRequest { }
+export interface GetApiregistrationAPIGroupRequest {}
+export interface GetApiregistrationV1APIResourcesRequest {}
 export interface ListApiregistrationV1APIServiceRequest {
   query: {
     pretty?: string;
@@ -7185,8 +7184,8 @@ export interface WatchApiregistrationV1APIServiceRequest {
     name: string;
   };
 }
-export interface GetAppsAPIGroupRequest { }
-export interface GetAppsV1APIResourcesRequest { }
+export interface GetAppsAPIGroupRequest {}
+export interface GetAppsV1APIResourcesRequest {}
 export interface ListAppsV1ControllerRevisionForAllNamespacesRequest {
   query: {
     allowWatchBookmarks?: boolean;
@@ -8210,8 +8209,8 @@ export interface WatchAppsV1StatefulSetListForAllNamespacesRequest {
     watch?: boolean;
   };
 }
-export interface GetAuthenticationAPIGroupRequest { }
-export interface GetAuthenticationV1APIResourcesRequest { }
+export interface GetAuthenticationAPIGroupRequest {}
+export interface GetAuthenticationV1APIResourcesRequest {}
 export interface CreateAuthenticationV1TokenReviewRequest {
   query: {
     dryRun?: string;
@@ -8220,8 +8219,8 @@ export interface CreateAuthenticationV1TokenReviewRequest {
   };
   body: TokenReview;
 }
-export interface GetAuthorizationAPIGroupRequest { }
-export interface GetAuthorizationV1APIResourcesRequest { }
+export interface GetAuthorizationAPIGroupRequest {}
+export interface GetAuthorizationV1APIResourcesRequest {}
 export interface CreateAuthorizationV1NamespacedLocalSubjectAccessReviewRequest {
   query: {
     dryRun?: string;
@@ -8257,8 +8256,8 @@ export interface CreateAuthorizationV1SubjectAccessReviewRequest {
   };
   body: SubjectAccessReview;
 }
-export interface GetAutoscalingAPIGroupRequest { }
-export interface GetAutoscalingV1APIResourcesRequest { }
+export interface GetAutoscalingAPIGroupRequest {}
+export interface GetAutoscalingV1APIResourcesRequest {}
 export interface ListAutoscalingV1HorizontalPodAutoscalerForAllNamespacesRequest {
   query: {
     allowWatchBookmarks?: boolean;
@@ -8450,7 +8449,7 @@ export interface WatchAutoscalingV1NamespacedHorizontalPodAutoscalerRequest {
     namespace: string;
   };
 }
-export interface GetAutoscalingV2beta2APIResourcesRequest { }
+export interface GetAutoscalingV2beta2APIResourcesRequest {}
 export interface ListAutoscalingV2beta2HorizontalPodAutoscalerForAllNamespacesRequest {
   query: {
     allowWatchBookmarks?: boolean;
@@ -8642,8 +8641,8 @@ export interface WatchAutoscalingV2beta2NamespacedHorizontalPodAutoscalerRequest
     namespace: string;
   };
 }
-export interface GetBatchAPIGroupRequest { }
-export interface GetBatchV1APIResourcesRequest { }
+export interface GetBatchAPIGroupRequest {}
+export interface GetBatchV1APIResourcesRequest {}
 export interface ListBatchV1CronJobForAllNamespacesRequest {
   query: {
     allowWatchBookmarks?: boolean;
@@ -9026,8 +9025,8 @@ export interface WatchBatchV1NamespacedJobRequest {
     namespace: string;
   };
 }
-export interface GetCertificatesAPIGroupRequest { }
-export interface GetCertificatesV1APIResourcesRequest { }
+export interface GetCertificatesAPIGroupRequest {}
+export interface GetCertificatesV1APIResourcesRequest {}
 export interface ListCertificatesV1CertificateSigningRequestRequest {
   query: {
     pretty?: string;
@@ -9202,8 +9201,8 @@ export interface WatchCertificatesV1CertificateSigningRequestRequest {
     name: string;
   };
 }
-export interface GetCoordinationAPIGroupRequest { }
-export interface GetCoordinationV1APIResourcesRequest { }
+export interface GetCoordinationAPIGroupRequest {}
+export interface GetCoordinationV1APIResourcesRequest {}
 export interface ListCoordinationV1LeaseForAllNamespacesRequest {
   query: {
     allowWatchBookmarks?: boolean;
@@ -9361,8 +9360,8 @@ export interface WatchCoordinationV1NamespacedLeaseRequest {
     namespace: string;
   };
 }
-export interface GetDiscoveryAPIGroupRequest { }
-export interface GetDiscoveryV1APIResourcesRequest { }
+export interface GetDiscoveryAPIGroupRequest {}
+export interface GetDiscoveryV1APIResourcesRequest {}
 export interface ListDiscoveryV1EndpointSliceForAllNamespacesRequest {
   query: {
     allowWatchBookmarks?: boolean;
@@ -9520,8 +9519,8 @@ export interface WatchDiscoveryV1NamespacedEndpointSliceRequest {
     namespace: string;
   };
 }
-export interface GetEventsAPIGroupRequest { }
-export interface GetEventsV1APIResourcesRequest { }
+export interface GetEventsAPIGroupRequest {}
+export interface GetEventsV1APIResourcesRequest {}
 export interface ListEventsV1EventForAllNamespacesRequest {
   query: {
     allowWatchBookmarks?: boolean;
@@ -9679,9 +9678,9 @@ export interface WatchEventsV1NamespacedEventRequest {
     namespace: string;
   };
 }
-export interface GetFlowcontrolApiserverAPIGroupRequest { }
-export interface GetNetworkingAPIGroupRequest { }
-export interface GetNetworkingV1APIResourcesRequest { }
+export interface GetFlowcontrolApiserverAPIGroupRequest {}
+export interface GetNetworkingAPIGroupRequest {}
+export interface GetNetworkingV1APIResourcesRequest {}
 export interface ListNetworkingV1IngressClassRequest {
   query: {
     pretty?: string;
@@ -10142,8 +10141,8 @@ export interface WatchNetworkingV1NetworkPolicyListForAllNamespacesRequest {
     watch?: boolean;
   };
 }
-export interface GetNodeAPIGroupRequest { }
-export interface GetNodeV1APIResourcesRequest { }
+export interface GetNodeAPIGroupRequest {}
+export interface GetNodeV1APIResourcesRequest {}
 export interface ListNodeV1RuntimeClassRequest {
   query: {
     pretty?: string;
@@ -10256,8 +10255,8 @@ export interface WatchNodeV1RuntimeClassRequest {
     name: string;
   };
 }
-export interface GetPolicyAPIGroupRequest { }
-export interface GetPolicyV1APIResourcesRequest { }
+export interface GetPolicyAPIGroupRequest {}
+export interface GetPolicyV1APIResourcesRequest {}
 export interface ListPolicyV1NamespacedPodDisruptionBudgetRequest {
   query: {
     pretty?: string;
@@ -10449,8 +10448,8 @@ export interface WatchPolicyV1PodDisruptionBudgetListForAllNamespacesRequest {
     watch?: boolean;
   };
 }
-export interface GetRbacAuthorizationAPIGroupRequest { }
-export interface GetRbacAuthorizationV1APIResourcesRequest { }
+export interface GetRbacAuthorizationAPIGroupRequest {}
+export interface GetRbacAuthorizationV1APIResourcesRequest {}
 export interface ListRbacAuthorizationV1ClusterRoleBindingRequest {
   query: {
     pretty?: string;
@@ -10989,8 +10988,8 @@ export interface WatchRbacAuthorizationV1RoleListForAllNamespacesRequest {
     watch?: boolean;
   };
 }
-export interface GetSchedulingAPIGroupRequest { }
-export interface GetSchedulingV1APIResourcesRequest { }
+export interface GetSchedulingAPIGroupRequest {}
+export interface GetSchedulingV1APIResourcesRequest {}
 export interface ListSchedulingV1PriorityClassRequest {
   query: {
     pretty?: string;
@@ -11103,8 +11102,8 @@ export interface WatchSchedulingV1PriorityClassRequest {
     name: string;
   };
 }
-export interface GetStorageAPIGroupRequest { }
-export interface GetStorageV1APIResourcesRequest { }
+export interface GetStorageAPIGroupRequest {}
+export interface GetStorageV1APIResourcesRequest {}
 export interface ListStorageV1CSIDriverRequest {
   query: {
     pretty?: string;
@@ -11584,14 +11583,14 @@ export interface WatchStorageV1VolumeAttachmentRequest {
     name: string;
   };
 }
-export interface LogFileListHandlerRequest { }
+export interface LogFileListHandlerRequest {}
 export interface LogFileHandlerRequest {
   path: {
     logpath: string;
   };
 }
-export interface GetServiceAccountIssuerOpenIDKeysetRequest { }
-export interface GetCodeVersionRequest { }
+export interface GetServiceAccountIssuerOpenIDKeysetRequest {}
+export interface GetCodeVersionRequest {}
 export class KubernetesClient extends APIClient {
   constructor(options) {
     super(options);
@@ -11834,7 +11833,7 @@ export class KubernetesClient extends APIClient {
   }
   async connectCoreV1PostNamespacedPodAttach(params: ConnectCoreV1PostNamespacedPodAttachRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/pods/${params.path.name}/attach`;
-    return await this.post<string>(path, {});
+    return await this.post<string>(path, params.body);
   }
   async createCoreV1NamespacedPodBinding(params: CreateCoreV1NamespacedPodBindingRequest): Promise<Binding> {
     const path = `/api/v1/namespaces/${params.path.namespace}/pods/${params.path.name}/binding`;
@@ -11850,7 +11849,7 @@ export class KubernetesClient extends APIClient {
   }
   async connectCoreV1PostNamespacedPodExec(params: ConnectCoreV1PostNamespacedPodExecRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/pods/${params.path.name}/exec`;
-    return await this.post<string>(path, {});
+    return await this.post<string>(path, params.body);
   }
   async readCoreV1NamespacedPodLog(params: ReadCoreV1NamespacedPodLogRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/pods/${params.path.name}/log`;
@@ -11862,7 +11861,7 @@ export class KubernetesClient extends APIClient {
   }
   async connectCoreV1PostNamespacedPodPortforward(params: ConnectCoreV1PostNamespacedPodPortforwardRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/pods/${params.path.name}/portforward`;
-    return await this.post<string>(path, {});
+    return await this.post<string>(path, params.body);
   }
   async connectCoreV1GetNamespacedPodProxy(params: ConnectCoreV1GetNamespacedPodProxyRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/pods/${params.path.name}/proxy`;
@@ -11870,11 +11869,11 @@ export class KubernetesClient extends APIClient {
   }
   async connectCoreV1PostNamespacedPodProxy(params: ConnectCoreV1PostNamespacedPodProxyRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/pods/${params.path.name}/proxy`;
-    return await this.post<string>(path, {});
+    return await this.post<string>(path, params.body);
   }
   async connectCoreV1PutNamespacedPodProxy(params: ConnectCoreV1PutNamespacedPodProxyRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/pods/${params.path.name}/proxy`;
-    return await this.put<string>(path, {});
+    return await this.put<string>(path, params.body);
   }
   async connectCoreV1DeleteNamespacedPodProxy(params: ConnectCoreV1DeleteNamespacedPodProxyRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/pods/${params.path.name}/proxy`;
@@ -11882,7 +11881,7 @@ export class KubernetesClient extends APIClient {
   }
   async connectCoreV1PatchNamespacedPodProxy(params: ConnectCoreV1PatchNamespacedPodProxyRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/pods/${params.path.name}/proxy`;
-    return await this.patch<string>(path, {});
+    return await this.patch<string>(path, params.body);
   }
   async connectCoreV1GetNamespacedPodProxyWithPath(params: ConnectCoreV1GetNamespacedPodProxyWithPathRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/pods/${params.path.name}/proxy/${params.path.path}`;
@@ -11890,11 +11889,11 @@ export class KubernetesClient extends APIClient {
   }
   async connectCoreV1PostNamespacedPodProxyWithPath(params: ConnectCoreV1PostNamespacedPodProxyWithPathRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/pods/${params.path.name}/proxy/${params.path.path}`;
-    return await this.post<string>(path, {});
+    return await this.post<string>(path, params.body);
   }
   async connectCoreV1PutNamespacedPodProxyWithPath(params: ConnectCoreV1PutNamespacedPodProxyWithPathRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/pods/${params.path.name}/proxy/${params.path.path}`;
-    return await this.put<string>(path, {});
+    return await this.put<string>(path, params.body);
   }
   async connectCoreV1DeleteNamespacedPodProxyWithPath(params: ConnectCoreV1DeleteNamespacedPodProxyWithPathRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/pods/${params.path.name}/proxy/${params.path.path}`;
@@ -11902,7 +11901,7 @@ export class KubernetesClient extends APIClient {
   }
   async connectCoreV1PatchNamespacedPodProxyWithPath(params: ConnectCoreV1PatchNamespacedPodProxyWithPathRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/pods/${params.path.name}/proxy/${params.path.path}`;
-    return await this.patch<string>(path, {});
+    return await this.patch<string>(path, params.body);
   }
   async readCoreV1NamespacedPodStatus(params: ReadCoreV1NamespacedPodStatusRequest): Promise<Pod> {
     const path = `/api/v1/namespaces/${params.path.namespace}/pods/${params.path.name}/status`;
@@ -12126,11 +12125,11 @@ export class KubernetesClient extends APIClient {
   }
   async connectCoreV1PostNamespacedServiceProxy(params: ConnectCoreV1PostNamespacedServiceProxyRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/services/${params.path.name}/proxy`;
-    return await this.post<string>(path, {});
+    return await this.post<string>(path, params.body);
   }
   async connectCoreV1PutNamespacedServiceProxy(params: ConnectCoreV1PutNamespacedServiceProxyRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/services/${params.path.name}/proxy`;
-    return await this.put<string>(path, {});
+    return await this.put<string>(path, params.body);
   }
   async connectCoreV1DeleteNamespacedServiceProxy(params: ConnectCoreV1DeleteNamespacedServiceProxyRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/services/${params.path.name}/proxy`;
@@ -12138,7 +12137,7 @@ export class KubernetesClient extends APIClient {
   }
   async connectCoreV1PatchNamespacedServiceProxy(params: ConnectCoreV1PatchNamespacedServiceProxyRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/services/${params.path.name}/proxy`;
-    return await this.patch<string>(path, {});
+    return await this.patch<string>(path, params.body);
   }
   async connectCoreV1GetNamespacedServiceProxyWithPath(params: ConnectCoreV1GetNamespacedServiceProxyWithPathRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/services/${params.path.name}/proxy/${params.path.path}`;
@@ -12146,11 +12145,11 @@ export class KubernetesClient extends APIClient {
   }
   async connectCoreV1PostNamespacedServiceProxyWithPath(params: ConnectCoreV1PostNamespacedServiceProxyWithPathRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/services/${params.path.name}/proxy/${params.path.path}`;
-    return await this.post<string>(path, {});
+    return await this.post<string>(path, params.body);
   }
   async connectCoreV1PutNamespacedServiceProxyWithPath(params: ConnectCoreV1PutNamespacedServiceProxyWithPathRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/services/${params.path.name}/proxy/${params.path.path}`;
-    return await this.put<string>(path, {});
+    return await this.put<string>(path, params.body);
   }
   async connectCoreV1DeleteNamespacedServiceProxyWithPath(params: ConnectCoreV1DeleteNamespacedServiceProxyWithPathRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/services/${params.path.name}/proxy/${params.path.path}`;
@@ -12158,7 +12157,7 @@ export class KubernetesClient extends APIClient {
   }
   async connectCoreV1PatchNamespacedServiceProxyWithPath(params: ConnectCoreV1PatchNamespacedServiceProxyWithPathRequest): Promise<string> {
     const path = `/api/v1/namespaces/${params.path.namespace}/services/${params.path.name}/proxy/${params.path.path}`;
-    return await this.patch<string>(path, {});
+    return await this.patch<string>(path, params.body);
   }
   async readCoreV1NamespacedServiceStatus(params: ReadCoreV1NamespacedServiceStatusRequest): Promise<Service> {
     const path = `/api/v1/namespaces/${params.path.namespace}/services/${params.path.name}/status`;
@@ -12238,11 +12237,11 @@ export class KubernetesClient extends APIClient {
   }
   async connectCoreV1PostNodeProxy(params: ConnectCoreV1PostNodeProxyRequest): Promise<string> {
     const path = `/api/v1/nodes/${params.path.name}/proxy`;
-    return await this.post<string>(path, {});
+    return await this.post<string>(path, params.body);
   }
   async connectCoreV1PutNodeProxy(params: ConnectCoreV1PutNodeProxyRequest): Promise<string> {
     const path = `/api/v1/nodes/${params.path.name}/proxy`;
-    return await this.put<string>(path, {});
+    return await this.put<string>(path, params.body);
   }
   async connectCoreV1DeleteNodeProxy(params: ConnectCoreV1DeleteNodeProxyRequest): Promise<string> {
     const path = `/api/v1/nodes/${params.path.name}/proxy`;
@@ -12250,7 +12249,7 @@ export class KubernetesClient extends APIClient {
   }
   async connectCoreV1PatchNodeProxy(params: ConnectCoreV1PatchNodeProxyRequest): Promise<string> {
     const path = `/api/v1/nodes/${params.path.name}/proxy`;
-    return await this.patch<string>(path, {});
+    return await this.patch<string>(path, params.body);
   }
   async connectCoreV1GetNodeProxyWithPath(params: ConnectCoreV1GetNodeProxyWithPathRequest): Promise<string> {
     const path = `/api/v1/nodes/${params.path.name}/proxy/${params.path.path}`;
@@ -12258,11 +12257,11 @@ export class KubernetesClient extends APIClient {
   }
   async connectCoreV1PostNodeProxyWithPath(params: ConnectCoreV1PostNodeProxyWithPathRequest): Promise<string> {
     const path = `/api/v1/nodes/${params.path.name}/proxy/${params.path.path}`;
-    return await this.post<string>(path, {});
+    return await this.post<string>(path, params.body);
   }
   async connectCoreV1PutNodeProxyWithPath(params: ConnectCoreV1PutNodeProxyWithPathRequest): Promise<string> {
     const path = `/api/v1/nodes/${params.path.name}/proxy/${params.path.path}`;
-    return await this.put<string>(path, {});
+    return await this.put<string>(path, params.body);
   }
   async connectCoreV1DeleteNodeProxyWithPath(params: ConnectCoreV1DeleteNodeProxyWithPathRequest): Promise<string> {
     const path = `/api/v1/nodes/${params.path.name}/proxy/${params.path.path}`;
@@ -12270,7 +12269,7 @@ export class KubernetesClient extends APIClient {
   }
   async connectCoreV1PatchNodeProxyWithPath(params: ConnectCoreV1PatchNodeProxyWithPathRequest): Promise<string> {
     const path = `/api/v1/nodes/${params.path.name}/proxy/${params.path.path}`;
-    return await this.patch<string>(path, {});
+    return await this.patch<string>(path, params.body);
   }
   async readCoreV1NodeStatus(params: ReadCoreV1NodeStatusRequest): Promise<Node> {
     const path = `/api/v1/nodes/${params.path.name}/status`;
@@ -12328,7 +12327,11 @@ export class KubernetesClient extends APIClient {
     const path = `/api/v1/persistentvolumes/${params.path.name}/status`;
     return await this.patch<PersistentVolume>(path, params.body);
   }
-  async listCoreV1PodForAllNamespaces(params: ListCoreV1PodForAllNamespacesRequest): Promise<PodList> {
+  async getPods(params: ListCoreV1PodForAllNamespacesRequest): Promise<PodList> {
+    const path = `/api/v1/pods`;
+    return await this.get<PodList>(path);
+  }
+  async listPods(params: ListCoreV1PodForAllNamespacesRequest): Promise<PodList> {
     const path = `/api/v1/pods`;
     return await this.get<PodList>(path);
   }
