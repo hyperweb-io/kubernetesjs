@@ -31,7 +31,7 @@ yarn add kubernetesjs
 
 ```
 
-## Example (WIP)
+## Example
 
 ```js
 import { KubernetesClient } from "kubernetesjs";
@@ -74,3 +74,27 @@ client.listCoreV1NamespacedPod({
   console.error('Failed to fetch pods:', reason);
 });
 ```
+
+
+## Related
+
+Checkout these related projects:
+
+* [`schema-typescript`](https://github.com/cosmology-tech/schema-typescript/tree/main/packages/schema-typescript)  
+  Provides robust tools for handling JSON schemas and converting them to TypeScript interfaces with ease and efficiency.
+* [`@schema-typescript/cli`](https://github.com/cosmology-tech/schema-typescript/tree/main/packages/cli)  
+  CLI is the command line utility for `schema-typescript`.
+* [`schema-sdk`](https://github.com/cosmology-tech/schema-typescript/tree/main/packages/schema-sdk)  
+  Provides robust tools for handling OpenAPI schemas and converting them to TypeScript clients with ease and efficiency.
+* [`starship`](https://github.com/cosmology-tech/starship) Unified Testing and Development for the Interchain.
+
+## Credits
+
+🛠 Built by Cosmology — if you like our tools, please consider delegating to [our validator ⚛️](https://cosmology.zone/validator)
+
+
+## Disclaimer
+
+AS DESCRIBED IN THE LICENSES, THE SOFTWARE IS PROVIDED “AS IS”, AT YOUR OWN RISK, AND WITHOUT WARRANTIES OF ANY KIND.
+
+No developer or entity involved in creating this software will be liable for any claims or damages whatsoever associated with your use, inability to use, or your interaction with other users of the code, including any direct, indirect, incidental, special, exemplary, punitive or consequential damages, or loss of profits, cryptocurrencies, tokens, or anything else of value.
