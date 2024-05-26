@@ -24,7 +24,8 @@
     "build": "npm run build:module && npm run build:main",
     "clean": "rimraf ./types && rimraf ./main && rimraf ./module",
     "prepare": "npm run clean && npm run build",
-    "dev": "ts-node ./scripts/codegen.ts",
+    "dev": "ts-node ./test/test.ts",
+    "codegen": "ts-node ./scripts/codegen.ts",
     "lint": "eslint .",
     "format": "eslint . --fix"
   },
@@ -40,17 +41,18 @@
     "url": "https://github.com/pyramation/kubernetesjs/issues"
   },
   "devDependencies": {
+    "@types/node": "^20.12.12",
     "eslint": "8.38.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.0.0",
     "esprima": "4.0.1",
     "prettier": "^2.8.7",
     "rimraf": "5.0.0",
-    "schema-sdk": "^0.4.1",
+    "schema-sdk": "^0.7.0",
     "ts-node": "10.9.2",
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@interweb/fetch-api-client": "^0.4.1"
+    "@interweb/fetch-api-client": "^0.5.0"
   }
 }

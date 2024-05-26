@@ -1,17 +1,11 @@
 *.log
 npm-debug.log*
 
-protobuf
 scripts
-out
-*.proto
+test
 
 # snapshots
 *.snap
-
-# Coverage directory used by tools like istanbul
-coverage
-.nyc_output
 
 # Dependency directories
 node_modules
@@ -28,6 +22,5 @@ __tests__
 .eslintignore
 .eslintrc.js
 .gitignore
-.travis.yml
 .vscode
 CHANGELOG.md
