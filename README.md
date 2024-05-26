@@ -1,5 +1,16 @@
 # KubernetesJS
 
+<p align="center" width="100%">
+  <img src="https://github.com/cosmology-tech/interweb-utils/assets/545047/89c743c4-be88-409f-9a77-4b02cd7fe9a4" width="80">
+  <br/>
+  TypeScript Client for Kubernetes
+  <br />
+   <a href="https://github.com/cosmology-tech/kubernetesjs/blob/main/LICENSE">
+    <img height="20" src="https://img.shields.io/badge/license-MIT-blue.svg"/>
+  </a>
+</p>
+
+
 KubernetesJS is a **fully-typed**, zero-dependency TypeScript library designed to simplify interactions with Kubernetes APIs. With comprehensive TypeScript support, it provides a strongly-typed interface that makes managing Kubernetes resources clear and predictable, ideal for TypeScript developers looking to integrate Kubernetes management into their applications.
 
 ## Features
