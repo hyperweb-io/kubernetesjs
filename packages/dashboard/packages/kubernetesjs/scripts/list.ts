@@ -6,7 +6,7 @@ const client = new KubernetesClient({
 
 client.listCoreV1NamespacedPod({
   path: {
-    namespace: 'kube-system'
+    namespace: 'default'
   },
   query: {
     // Add any necessary query parameters here
