@@ -48,7 +48,7 @@ export default async (
 ) => {
   try {
     const client = new KubernetesClient({
-      restEndpoint: argv.clientUrl || 'http://127.0.0.1:8001'
+      restEndpoint: argv.clientUrl
     });
     
     const subcommand = argv._?.[0];
