@@ -3411,6 +3411,16 @@ inquirer@^8.2.4:
     through "^2.3.6"
     wrap-ansi "^6.0.1"
 
+inquirerer@^2.0.8:
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/inquirerer/-/inquirerer-2.0.8.tgz#bf2d22dcf105d1b3145edc8e3437800981f97c31"
+  integrity sha512-/LfmACfRG/pCg0C/Ll1matjeFWUQoyiHNJTgZqxpqw20mDg/9bdzcRQ/6PFRANKaC+BUf9J/bXvsQ6FEXJV3Xw==
+  dependencies:
+    chalk "^4.1.0"
+    deepmerge "^4.3.1"
+    js-yaml "^4.1.0"
+    minimist "^1.2.8"
+
 ip-address@^9.0.5:
   version "9.0.5"
   resolved "https://registry.yarnpkg.com/ip-address/-/ip-address-9.0.5.tgz#117a960819b08780c3bd1f14ef3c1cc1d3f3ea5a"
