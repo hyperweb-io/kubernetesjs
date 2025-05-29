@@ -48,7 +48,7 @@ export default async (
 ) => {
   try {
     const client = new KubernetesClient({
-      restEndpoint: 'http://localhost:8001' // Default kube-proxy endpoint
+      restEndpoint: argv.clientUrl
     });
     
     const subcommand = argv._?.[0];
