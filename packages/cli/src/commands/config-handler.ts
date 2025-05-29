@@ -16,7 +16,7 @@ export default async (
   prompter: Inquirerer,
   options: CLIOptions,
   commandMap: Record<string, Function>
-): Promise<boolean> {
+): Promise<boolean> => {
   if (!argv.config) {
     return false;
   }
