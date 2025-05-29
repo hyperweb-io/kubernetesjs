@@ -8,7 +8,7 @@ const nextConfig = {
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
-      kubernetesjs: path.resolve(__dirname, '../../kubernetesjs')
+      kubernetesjs: path.resolve(__dirname, '../kubernetesjs/dist')
     };
     return config;
   },
