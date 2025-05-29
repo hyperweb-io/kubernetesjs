@@ -7,7 +7,8 @@ export const options: Partial<CLIOptions> = {
   minimistOpts: {
     alias: {
       v: 'version',
-      h: 'help'
+      h: 'help',
+      c: 'clientUrl'
     }
   }
 };

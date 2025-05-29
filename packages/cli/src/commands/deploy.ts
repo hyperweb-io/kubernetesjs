@@ -196,7 +196,7 @@ export default async (
   try {
     // Initialize Kubernetes client
     const client = new KubernetesClient({
-      restEndpoint: 'http://localhost:8001' // Default kube-proxy endpoint
+      restEndpoint: argv.clientUrl || 'http://127.0.0.1:8001'
     });
 
     // Create deployment

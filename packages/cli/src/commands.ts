@@ -67,7 +67,7 @@ export const commands = async (argv: Partial<ParsedArgs>, prompter: Inquirerer, 
     command = answer.command;
   }
 
-  // Prompt for working directory
+  // Prompt for working directory and client URL
   newArgv = await prompter.prompt(newArgv, [
     {
       type: 'text',
@@ -75,6 +75,14 @@ export const commands = async (argv: Partial<ParsedArgs>, prompter: Inquirerer, 
       message: 'Working directory',
       required: false,
       default: process.cwd(),
+      useDefault: true
+    },
+    {
+      type: 'text',
+      name: 'clientUrl',
+      message: 'Kubernetes API URL',
+      required: false,
+      default: 'http://127.0.0.1:8001',
       useDefault: true
     }
   ]);
