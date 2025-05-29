@@ -32,6 +32,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:teardown": "ts-node scripts/teardown.ts",
+    "test:list": "ts-node scripts/list.ts",
     "test:deploy": "ts-node scripts/deploy.ts"
   },
   "keywords": [
