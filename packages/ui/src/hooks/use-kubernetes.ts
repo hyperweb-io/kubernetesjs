@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, createContext, useContext } from "react";
-import { KubernetesClient } from "kubernetesjs";
+import React, { useState, useEffect, createContext, useContext } from "react";
+import type { KubernetesClient } from "kubernetesjs";
 import { getKubernetesClient, getCurrentNamespace } from "@/lib/kubernetes";
 
 interface KubernetesContextType {
@@ -15,9 +15,9 @@ interface KubernetesContextType {
 const KubernetesContext = createContext<KubernetesContextType | undefined>(undefined);
 
 export function KubernetesProvider({ children }: { children: React.ReactNode }) {
-  const [client] = useState<KubernetesClient>(() => getKubernetesClient());
-  const [namespace, setNamespace] = useState<string>(getCurrentNamespace());
-  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [client] = useState(() => getKubernetesClient());
+  const [namespace, setNamespace] = useState(getCurrentNamespace());
+  const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -35,18 +35,18 @@ export function KubernetesProvider({ children }: { children: React.ReactNode }) 
     checkConnection();
   }, [client]);
 
-  return (
-    <KubernetesContext.Provider
-      value={{
+  return React.createElement(
+    KubernetesContext.Provider,
+    {
+      value: {
         client,
         namespace,
         setNamespace,
         isConnected,
-        error,
-      }}
-    >
-      {children}
-    </KubernetesContext.Provider>
+        error
+      }
+    },
+    children
   );
 }
 

@@ -32,7 +32,7 @@ export function NamespaceSelector() {
           query: {}
         });
         
-        const namespaceNames = response.items?.map(ns => ns.metadata.name) || [];
+        const namespaceNames = response.items?.map((ns: any) => ns.metadata.name) || [];
         setNamespaces(namespaceNames);
       } catch (error) {
         console.error("Failed to fetch namespaces:", error);
@@ -67,7 +67,7 @@ export function NamespaceSelector() {
               <CommandItem
                 key={ns}
                 value={ns}
-                onSelect={(currentValue) => {
+                onSelect={(currentValue: string) => {
                   setNamespace(currentValue);
                   setOpen(false);
                 }}
