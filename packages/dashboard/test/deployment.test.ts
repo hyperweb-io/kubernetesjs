@@ -2,12 +2,17 @@ import { KubernetesClient } from '../src';
 
 describe('PostgreSQL Deployment', () => {
   const client = new KubernetesClient({
-    restEndpoint: 'http://127.0.0.1:8001'
+    restEndpoint: process.env.KUBERNETES_API_URL || 'http://127.0.0.1:8001'
   });
 
   const namespace = 'default';
   const deploymentName = 'postgres-pgvector';
   const serviceName = 'postgres-pgvector';
+
+  beforeAll(async () => {
+    // Wait for cluster to be ready
+    await new Promise(resolve => setTimeout(resolve, 5000));
+  });
 
   it('should create a PostgreSQL deployment and service', async () => {
     // Create deployment
@@ -103,7 +108,7 @@ describe('PostgreSQL Deployment', () => {
             {
               name: 'postgres',
               port: 5432,
-              targetPort: 5432,
+              targetPort: '5432',
               nodePort: 30000,
               protocol: 'TCP'
             }
