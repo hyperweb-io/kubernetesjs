@@ -1,8 +1,16 @@
 # @kubernetesjs/cli
 
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/545047/188804067-28e67e5e-0214-4449-ab04-2e0c564a6885.svg" width="80"><br />
-    KubernetesJS CLI
+<p align="center" width="100%">
+  <img src="https://github.com/hyperweb-io/interweb-utils/assets/545047/89c743c4-be88-409f-9a77-4b02cd7fe9a4" width="80">
+  <br/>
+  TypeScript CLI for Kubernetes
+  <br />
+   <a href="https://github.com/hyperweb-io/kubernetesjs/actions/workflows/ci.yml">
+    <img height="20" src="https://github.com/hyperweb-io/kubernetesjs/actions/workflows/ci.yml/badge.svg"/>
+  </a>
+   <a href="https://github.com/hyperweb-io/kubernetesjs/blob/main/LICENSE">
+    <img height="20" src="https://img.shields.io/badge/license-MIT-blue.svg"/>
+  </a>
 </p>
 
 A command-line interface for interacting with Kubernetes clusters, built with TypeScript.
