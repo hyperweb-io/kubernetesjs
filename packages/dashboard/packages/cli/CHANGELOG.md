@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/hyperweb-io/kubernetes/compare/@kubernetesjs/cli@0.1.2...@kubernetesjs/cli@0.2.0) (2025-05-29)
+
+**Note:** Version bump only for package @kubernetesjs/cli
+
+
+
+
+
 ## [0.1.2](https://github.com/hyperweb-io/kubernetes/compare/@kubernetesjs/cli@0.1.1...@kubernetesjs/cli@0.1.2) (2025-05-29)
 
 **Note:** Version bump only for package @kubernetesjs/cli
