@@ -20,18 +20,30 @@ export function displayVersion() {
 }
 
 export const usageText = `
-  Usage: launchql <command> [options]
+  Usage: k8s <command> [options]
   
   Commands:
-    start              Start the Launchql services.
-    version, -v        Display the version of the Starship Client.
+    get [resource]         List resources (pods, services, deployments, etc.)
+    describe [resource]    Show detailed information about a specific resource
+    logs [pod]             Display logs from a container in a pod
+    exec [pod] -- [cmd]    Execute a command in a container
+    apply -f [file]        Apply a configuration to a resource by file name
+    delete [resource]      Delete resources
+    port-forward [svc]     Forward one or more local ports to a pod
+    cluster-info           Display cluster information
+    config                 Modify kubeconfig files
+    deploy                 Deploy a container to Kubernetes
+    version, -v            Display the version of the CLI
   
   Configuration File:
-    --config <path>       Specify the path to the configuration file containing the actual config file. Required.
-                          Command-line options will override settings from this file if both are provided.
+    --config <path>        Specify the path to a YAML configuration file.
+                           Command-line options will override settings from this file if both are provided.
+  
+  Namespace:
+    -n, --namespace        Specify the namespace to use. Default is from local config or "default".
   
   Additional Help:
-    $ launchql help          Display this help information.
+    $ k8s help             Display this help information.
   `;
 
 export function displayUsage() {
