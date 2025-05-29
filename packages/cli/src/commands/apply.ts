@@ -106,7 +106,7 @@ export default async (
 ) => {
   try {
     const client = new KubernetesClient({
-      restEndpoint: argv.clientUrl || 'http://127.0.0.1:8001'
+      restEndpoint: argv.clientUrl
     });
     
     const filePath = argv.f || argv._?.[0] || await promptYamlFilePath(prompter, argv);
