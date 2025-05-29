@@ -5,57 +5,156 @@
     KubernetesJS CLI
 </p>
 
-## install
+A command-line interface for interacting with Kubernetes clusters, built with TypeScript.
+
+## Installation
 
 ```sh
-npm install cli
+npm install -g @kubernetesjs/cli
 ```
-## Table of contents
 
-- [cli](#cli)
-  - [Install](#install)
-  - [Table of contents](#table-of-contents)
-- [Developing](#developing)
-- [Credits](#credits)
+## Usage
 
-## Developing
+The CLI provides several commands for managing Kubernetes resources. You can use either `k8s` or `kubernetes` as the command prefix:
+
+```sh
+k8s <command> [options]
+# or
+kubernetes <command> [options]
+```
+
+Options:
+-  `--client-url`: Kubernetes API server URL (default: http://localhost:8001)
+
+
+### Available Commands
+
+#### Get
+Retrieve information about Kubernetes resources.
+
+```sh
+k8s get <resource> [options]
+```
+
+#### Apply
+Apply configurations to your Kubernetes cluster.
+
+```sh
+k8s apply -f <file> [options]
+```
+
+#### Delete
+Delete resources from your Kubernetes cluster.
+
+```sh
+k8s delete <resource> <name> [options]
+```
+
+#### Describe
+Show detailed information about a specific resource.
+
+```sh
+k8s describe <resource> <name> [options]
+```
+
+#### Logs
+View logs from pods.
+
+```sh
+k8s logs <pod-name> [options]
+```
+
+#### Port Forward
+Forward ports from pods to your local machine.
+
+```sh
+k8s port-forward <pod-name> <local-port>:<pod-port> [options]
+```
+
+#### Exec
+Execute commands in a container.
+
+```sh
+k8s exec <pod-name> -- <command> [options]
+```
+
+#### Cluster Info
+Display information about the current cluster.
+
+```sh
+k8s cluster-info
+```
+
+#### Config
+Manage Kubernetes configuration.
+
+```sh
+k8s config [options]
+```
+
+## Examples
+
+### Get Pod Information
+
+```sh
+k8s get pods
+```
+
+### Apply a Configuration File
+
+```sh
+k8s apply -f deployment.yaml
+```
+
+### View Pod Logs
+
+```sh
+k8s logs my-pod
+```
+
+### Port Forward to a Service
+
+```sh
+k8s port-forward my-pod 8080:80
+```
+
+## Configuration
+
+The CLI uses the default Kubernetes configuration from `~/.kube/config`. You can specify a different configuration file using the `--kubeconfig` option.
+
+## Development
 
 When first cloning the repo:
 
 ```sh
 yarn
-# build the prod packages. When devs would like to navigate to the source code, this will only navigate from references to their definitions (.d.ts files) between packages.
+# Build the production packages
 yarn build
 ```
 
-Or if you want to make your dev process smoother, you can run:
+For development with source maps:
 
 ```sh
 yarn
-# build the dev packages with .map files, this enables navigation from references to their source code between packages.
+# Build with source maps for better debugging
 yarn build:dev
 ```
 
-## Interchain JavaScript Stack 
+## Related
 
-A unified toolkit for building applications and smart contracts in the Interchain ecosystem ⚛️
+Checkout these related projects:
 
-| Category              | Tools                                                                                                                  | Description                                                                                           |
-|----------------------|------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| **Chain Information**   | [**Chain Registry**](https://github.com/hyperweb-io/chain-registry), [**Utils**](https://www.npmjs.com/package/@chain-registry/utils), [**Client**](https://www.npmjs.com/package/@chain-registry/client) | Everything from token symbols, logos, and IBC denominations for all assets you want to support in your application. |
-| **Wallet Connectors**| [**Interchain Kit**](https://github.com/hyperweb-io/interchain-kit)<sup>beta</sup>, [**Cosmos Kit**](https://github.com/hyperweb-io/cosmos-kit) | Experience the convenience of connecting with a variety of web3 wallets through a single, streamlined interface. |
-| **Signing Clients**          | [**InterchainJS**](https://github.com/hyperweb-io/interchainjs)<sup>beta</sup>, [**CosmJS**](https://github.com/cosmos/cosmjs) | A single, universal signing interface for any network |
-| **SDK Clients**              | [**Telescope**](https://github.com/hyperweb-io/telescope)                                                          | Your Frontend Companion for Building with TypeScript with Cosmos SDK Modules. |
-| **Starter Kits**     | [**Create Interchain App**](https://github.com/hyperweb-io/create-interchain-app)<sup>beta</sup>, [**Create Cosmos App**](https://github.com/hyperweb-io/create-cosmos-app) | Set up a modern Interchain app by running one command. |
-| **UI Kits**          | [**Interchain UI**](https://github.com/hyperweb-io/interchain-ui)                                                   | The Interchain Design System, empowering developers with a flexible, easy-to-use UI kit. |
-| **Testing Frameworks**          | [**Starship**](https://github.com/hyperweb-io/starship)                                                             | Unified Testing and Development for the Interchain. |
-| **TypeScript Smart Contracts** | [**Create Hyperweb App**](https://github.com/hyperweb-io/create-hyperweb-app)                              | Build and deploy full-stack blockchain applications with TypeScript |
-| **CosmWasm Contracts** | [**CosmWasm TS Codegen**](https://github.com/CosmWasm/ts-codegen)                                                   | Convert your CosmWasm smart contracts into dev-friendly TypeScript classes. |
+* [`schema-typescript`](https://github.com/hyperweb-io/schema-typescript/tree/main/packages/schema-typescript)  
+  Provides robust tools for handling JSON schemas and converting them to TypeScript interfaces with ease and efficiency.
+* [`@schema-typescript/cli`](https://github.com/hyperweb-io/schema-typescript/tree/main/packages/cli)  
+  CLI is the command line utility for `schema-typescript`.
+* [`schema-sdk`](https://github.com/hyperweb-io/schema-typescript/tree/main/packages/schema-sdk)  
+  Provides robust tools for handling OpenAPI schemas and converting them to TypeScript clients with ease and efficiency.
+* [`starship`](https://github.com/hyperweb-io/starship) Unified Testing and Development for the Interchain.
 
 ## Credits
 
-🛠 Built by Hyperweb (formerly Cosmology) — if you like our tools, please checkout and contribute to [our github ⚛️](https://github.com/hyperweb-io)
-
+🛠 Built by Hyperweb — if you like our tools, please checkout and contribute to [our github ⚛️](https://github.com/hyperweb-io)
 
 ## Disclaimer
 

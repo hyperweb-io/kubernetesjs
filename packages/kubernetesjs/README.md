@@ -5,6 +5,9 @@
   <br/>
   TypeScript Client for Kubernetes
   <br />
+   <a href="https://github.com/hyperweb-io/kubernetesjs/actions/workflows/ci.yml">
+    <img height="20" src="https://github.com/hyperweb-io/kubernetesjs/actions/workflows/ci.yml/badge.svg"/>
+  </a>
    <a href="https://github.com/hyperweb-io/kubernetesjs/blob/main/LICENSE">
     <img height="20" src="https://img.shields.io/badge/license-MIT-blue.svg"/>
   </a>
