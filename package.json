@@ -3,7 +3,7 @@
   "version": "0.5.0",
   "description": "Fully Typed Kubernetes",
   "author": "Dan Lynch <pyramation@gmail.com>",
-  "homepage": "https://github.com/cosmology-tech/kubernetesjs#readme",
+  "homepage": "https://github.com/hyperweb-io/kubernetesjs#readme",
   "license": "SEE LICENSE IN LICENSE",
   "main": "main/index.js",
   "module": "module/index.js",
@@ -30,18 +30,20 @@
     "lint": "eslint .",
     "format": "eslint . --fix",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:teardown": "ts-node scripts/teardown.ts",
+    "test:deploy": "ts-node scripts/deploy.ts"
   },
   "publishConfig": {
     "access": "public"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cosmology-tech/kubernetesjs"
+    "url": "https://github.com/hyperweb-io/kubernetesjs"
   },
   "keywords": [],
   "bugs": {
-    "url": "https://github.com/cosmology-tech/kubernetesjs/issues"
+    "url": "https://github.com/hyperweb-io/kubernetesjs/issues"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

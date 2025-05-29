@@ -1,11 +1,11 @@
 # KubernetesJS
 
 <p align="center" width="100%">
-  <img src="https://github.com/cosmology-tech/interweb-utils/assets/545047/89c743c4-be88-409f-9a77-4b02cd7fe9a4" width="80">
+  <img src="https://github.com/hyperweb-io/interweb-utils/assets/545047/89c743c4-be88-409f-9a77-4b02cd7fe9a4" width="80">
   <br/>
   TypeScript Client for Kubernetes
   <br />
-   <a href="https://github.com/cosmology-tech/kubernetesjs/blob/main/LICENSE">
+   <a href="https://github.com/hyperweb-io/kubernetesjs/blob/main/LICENSE">
     <img height="20" src="https://img.shields.io/badge/license-MIT-blue.svg"/>
   </a>
 </p>
@@ -40,58 +40,49 @@ const client = new KubernetesClient({
   restEndpoint: 'http://127.0.0.1:8001'
 });
 
-client.listCoreV1NamespacedPod({
-  path: {
-    namespace: 'default'
-  },
-  query: {
-    // Add any necessary query parameters here
-  }
-}).then(result => {
-  if (result.items && result.items.length) {
-    result.items.forEach(item => {
-      console.log('NODE:', item.spec.nodeName);
-
-      const initContainers = item.status.initContainerStatuses?.map(ic => ({
-        image: ic.image,
-        name: ic.name,
-        ready: ic.ready,
-        state: ic.state
-      }));
-
-      const containers = item.status.containerStatuses?.map(c => ({
-        image: c.image,
-        name: c.name,
-        ready: c.ready,
-        state: c.state
-      }));
-
-      console.log({ containers });
-      console.log({ initContainers });
-    });
-  }
-}).catch(reason => {
-  console.error('Failed to fetch pods:', reason);
+const result = await client.listCoreV1NamespacedPod({
+  path: { namespace: 'default' }
 });
-```
 
+if (result.items && result.items.length) {
+  result.items.forEach(item => {
+    console.log('NODE:', item.spec.nodeName);
+
+    const initContainers = item.status.initContainerStatuses?.map(ic => ({
+      image: ic.image,
+      name: ic.name,
+      ready: ic.ready,
+      state: ic.state
+    }));
+
+    const containers = item.status.containerStatuses?.map(c => ({
+      image: c.image,
+      name: c.name,
+      ready: c.ready,
+      state: c.state
+    }));
+
+    console.log({ containers });
+    console.log({ initContainers });
+  });
+}
+```
 
 ## Related
 
 Checkout these related projects:
 
-* [`schema-typescript`](https://github.com/cosmology-tech/schema-typescript/tree/main/packages/schema-typescript)  
+* [`schema-typescript`](https://github.com/hyperweb-io/schema-typescript/tree/main/packages/schema-typescript)  
   Provides robust tools for handling JSON schemas and converting them to TypeScript interfaces with ease and efficiency.
-* [`@schema-typescript/cli`](https://github.com/cosmology-tech/schema-typescript/tree/main/packages/cli)  
+* [`@schema-typescript/cli`](https://github.com/hyperweb-io/schema-typescript/tree/main/packages/cli)  
   CLI is the command line utility for `schema-typescript`.
-* [`schema-sdk`](https://github.com/cosmology-tech/schema-typescript/tree/main/packages/schema-sdk)  
+* [`schema-sdk`](https://github.com/hyperweb-io/schema-typescript/tree/main/packages/schema-sdk)  
   Provides robust tools for handling OpenAPI schemas and converting them to TypeScript clients with ease and efficiency.
-* [`starship`](https://github.com/cosmology-tech/starship) Unified Testing and Development for the Interchain.
+* [`starship`](https://github.com/hyperweb-io/starship) Unified Testing and Development for the Interchain.
 
 ## Credits
 
-🛠 Built by Cosmology — if you like our tools, please consider delegating to [our validator ⚛️](https://cosmology.zone/validator)
-
+🛠 Built by Hyperweb — if you like our tools, please checkout and contribute to [our github ⚛️](https://github.com/hyperweb-io)
 
 ## Disclaimer
 
