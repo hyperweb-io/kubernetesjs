@@ -142,20 +142,45 @@ describe('PostgreSQL Deployment', () => {
   afterAll(async () => {
     // Cleanup
     try {
-      await client.deleteAppsV1NamespacedDeployment({
-        path: {
-          namespace,
-          name: deploymentName
-        },
-        query: {}
-      });
-      await client.deleteCoreV1NamespacedService({
-        path: {
-          namespace,
-          name: serviceName
-        },
-        query: {}
-      });
+      // Check if deployment exists before trying to delete it
+      try {
+        await client.readAppsV1NamespacedDeployment({
+          path: {
+            namespace,
+            name: deploymentName
+          },
+          query: {}
+        });
+        await client.deleteAppsV1NamespacedDeployment({
+          path: {
+            namespace,
+            name: deploymentName
+          },
+          query: {}
+        });
+      } catch (error) {
+        // Deployment doesn't exist, that's fine
+      }
+
+      // Check if service exists before trying to delete it
+      try {
+        await client.readCoreV1NamespacedService({
+          path: {
+            namespace,
+            name: serviceName
+          },
+          query: {}
+        });
+        await client.deleteCoreV1NamespacedService({
+          path: {
+            namespace,
+            name: serviceName
+          },
+          query: {}
+        });
+      } catch (error) {
+        // Service doesn't exist, that's fine
+      }
     } catch (error) {
       console.error('Cleanup failed:', error);
     }
