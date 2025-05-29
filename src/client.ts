@@ -1,11 +1,12 @@
 import { URLSearchParams } from 'url';
 
 interface RequestOptions<Params> {
-  hostname: string;
+  hostname?: string;
   path: string;
   headers?: { [key: string]: string };
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   params?: Params;
+  body?: any;
   timeout?: number;
 }
 
@@ -117,7 +118,7 @@ export class APIClient {
   }
 
   private async request<Resp>(options: RequestOptions<any>): Promise<Resp> {
-    const { path, headers, method, params, timeout } = options;
+    const { path, headers, method, params, body, timeout } = options;
     const url = this.buildFullPath(path, method === 'GET' ? params : undefined);
 
     const controller = new AbortController();
@@ -127,7 +128,7 @@ export class APIClient {
       method,
       headers,
       signal: controller.signal,
-      body: method !== 'GET' && method !== 'DELETE' ? JSON.stringify(params) : null,
+      body: method !== 'GET' && method !== 'DELETE' ? JSON.stringify(body) : null,
     };
 
     try {
@@ -135,7 +136,8 @@ export class APIClient {
       clearTimeout(id);
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorBody = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}\nResponse body: ${errorBody}`);
       }
 
       return response.json() as Promise<Resp>;
@@ -167,26 +169,18 @@ export class APIClient {
     body?: Params,
     opts: APIClientRequestOpts = {}
   ): Promise<Resp> {
-    const headers = opts.isFormData
-      ? {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        ...opts.headers,
-      }
-      : {
-        'Content-Type': 'application/json',
-        ...opts.headers,
-      };
-    const bodyContent = opts.isFormData
-      ? new URLSearchParams(body as any).toString()
-      : JSON.stringify(body);
+    const headers: { [key: string]: string } = {
+      'Content-Type': 'application/json',
+      ...(opts.headers as { [key: string]: string } || {})
+    };
 
     return this.request<Resp>({
       path: endpoint,
       method: 'POST',
-      // @ts-ignore
       headers,
       timeout: opts.timeout || this.defaultTimeout,
-      params: bodyContent,
+      params: query,
+      body: body
     });
   }
 
