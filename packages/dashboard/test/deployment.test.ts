@@ -1,5 +1,7 @@
 import { KubernetesClient } from '../src';
 
+jest.setTimeout(150000);
+
 describe('PostgreSQL Deployment', () => {
   const client = new KubernetesClient({
     restEndpoint: process.env.KUBERNETES_API_URL || 'http://127.0.0.1:8001'
