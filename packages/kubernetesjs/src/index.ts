@@ -13760,7 +13760,7 @@ export interface LogFileHandlerRequest {
 export interface GetServiceAccountIssuerOpenIDKeysetRequest {}
 export interface GetCodeVersionRequest {}
 export class KubernetesClient extends APIClient {
-  constructor(options) {
+  constructor(options: any) {
     super(options);
   }
   async getSwaggerJSON() {
