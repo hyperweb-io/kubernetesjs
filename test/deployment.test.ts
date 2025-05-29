@@ -110,7 +110,7 @@ describe('PostgreSQL Deployment', () => {
             {
               name: 'postgres',
               port: 5432,
-              targetPort: '5432',
+              targetPort: 'postgres',
               nodePort: 30000,
               protocol: 'TCP'
             }
