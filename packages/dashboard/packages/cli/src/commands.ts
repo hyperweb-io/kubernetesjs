@@ -6,16 +6,44 @@ import { extractFirst, usageText } from './utils';
 
 // Commands
 import deploy from './commands/deploy';
+import get from './commands/get';
+import describe from './commands/describe';
+import logs from './commands/logs';
+import apply from './commands/apply';
+import deleteCmd from './commands/delete';
+import exec from './commands/exec';
+import portForward from './commands/port-forward';
+import clusterInfo from './commands/cluster-info';
+import config from './commands/config';
 
 const commandMap: Record<string, Function> = {
-  deploy
+  deploy,
+  get,
+  describe,
+  logs,
+  apply,
+  delete: deleteCmd,
+  exec,
+  'port-forward': portForward,
+  'cluster-info': clusterInfo,
+  config
 };
+
+import configHandler from './commands/config-handler';
 
 export const commands = async (argv: Partial<ParsedArgs>, prompter: Inquirerer, options: CLIOptions) => {
   if (argv.version || argv.v) {
     const pkg = readAndParsePackageJson();
     console.log(pkg.version);
     process.exit(0);
+  }
+
+  if (argv.config) {
+    const handled = await configHandler(argv, prompter, options, commandMap);
+    if (handled) {
+      prompter.close();
+      return argv;
+    }
   }
 
   let { first: command, newArgv } = extractFirst(argv);
