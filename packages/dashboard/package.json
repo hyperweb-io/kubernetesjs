@@ -25,6 +25,7 @@
     "clean": "rimraf ./types && rimraf ./main && rimraf ./module",
     "prepare": "npm run clean && npm run build",
     "dev": "ts-node ./test/test.ts",
+    "deploy": "ts-node ./test/deployment.ts",
     "codegen": "ts-node ./scripts/codegen.ts",
     "lint": "eslint .",
     "format": "eslint . --fix"

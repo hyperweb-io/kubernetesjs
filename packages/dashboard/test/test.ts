@@ -6,15 +6,19 @@ const client = new KubernetesClient({
 
 client.listCoreV1NamespacedPod({
   path: {
-    namespace: 'default'
+    namespace: 'kube-system'
   },
   query: {
     // Add any necessary query parameters here
   }
 }).then(result => {
+
+
   if (result.items && result.items.length) {
     result.items.forEach(item => {
       console.log('NODE:', item?.spec?.nodeName);
+
+
 
       const initContainers = item?.status?.initContainerStatuses?.map(ic => ({
         image: ic.image,
