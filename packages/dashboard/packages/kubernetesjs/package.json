@@ -3,6 +3,20 @@
   "version": "0.5.2",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "description": "Fully Typed Kubernetes",
+  "keywords": [
+    "kubernetes",
+    "k8s",
+    "typescript",
+    "api",
+    "client",
+    "sdk",
+    "container",
+    "orchestration",
+    "devops",
+    "cloud-native",
+    "openapi",
+    "swagger"
+  ],
   "main": "index.js",
   "module": "esm/index.js",
   "types": "index.d.ts",
@@ -35,10 +49,6 @@
     "test:list": "ts-node scripts/list.ts",
     "test:deploy": "ts-node scripts/deploy.ts"
   },
-  "keywords": [
-    "kubernetes",
-    "k8s"
-  ],
   "devDependencies": {
     "schema-sdk": "^0.7.0"
   }
