@@ -96,7 +96,7 @@ export default async (
 ) => {
   try {
     const client = new KubernetesClient({
-      restEndpoint: 'http://localhost:8001' // Default kube-proxy endpoint
+      restEndpoint: (_options as any).clientUrl || 'http://127.0.0.1:8001'
     });
 
     const namespace = argv.n || argv.namespace || getCurrentNamespace();

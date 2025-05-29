@@ -42,6 +42,10 @@ export const usageText = `
   Namespace:
     -n, --namespace        Specify the namespace to use. Default is from local config or "default".
   
+  Additional Options:
+    --clientUrl <url>      Specify the Kubernetes API endpoint URL.
+                           Default is http://127.0.0.1:8001 (kubectl proxy)
+  
   Additional Help:
     $ k8s help             Display this help information.
   `;

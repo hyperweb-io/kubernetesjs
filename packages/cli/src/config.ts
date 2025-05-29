@@ -6,6 +6,7 @@ import * as yaml from 'js-yaml';
 const KUBECONFIG_PATH = join(homedir(), '.kubeconfig');
 
 const DEFAULT_NAMESPACE = 'default';
+const DEFAULT_CLIENT_URL = 'http://127.0.0.1:8001';
 
 interface KubeConfig {
   currentNamespace: string;
@@ -80,4 +81,13 @@ export function setCurrentNamespace(namespace: string): void {
     console.error(`Error setting namespace: ${error}`);
     throw error;
   }
+}
+
+/**
+ * Get the Kubernetes client URL from CLI arguments or use default
+ * @param argv Command line arguments
+ * @returns The client URL to use
+ */
+export function getClientUrl(argv: any): string {
+  return argv.clientUrl || DEFAULT_CLIENT_URL;
 }

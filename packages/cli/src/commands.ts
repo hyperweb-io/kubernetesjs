@@ -3,6 +3,7 @@ import { ParsedArgs } from 'minimist';
 
 import { readAndParsePackageJson } from './package';
 import { extractFirst, usageText } from './utils';
+import { getClientUrl } from './config';
 
 // Commands
 import deploy from './commands/deploy';
@@ -87,7 +88,10 @@ export const commands = async (argv: Partial<ParsedArgs>, prompter: Inquirerer, 
     process.exit(1);
   }
 
-  await commandFn(newArgv, prompter, options);
+  const clientUrl = getClientUrl(newArgv);
+  const extendedOptions = { ...options, clientUrl };
+
+  await commandFn(newArgv, prompter, extendedOptions);
   prompter.close();
 
   return argv;
