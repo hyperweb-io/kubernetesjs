@@ -22,7 +22,10 @@ import {
   ChevronDown,
   ChevronRight
 } from 'lucide-react'
-import { k8sAPI, type ConfigMap as K8sConfigMap } from '@/services/k8s-api'
+import { KubernetesClient, type ConfigMap as K8sConfigMap, type ConfigMapList } from 'kubernetesjs'
+
+// Create APIClient instance
+const k8sClient = new KubernetesClient({ restEndpoint: '/api/k8s' })
 
 interface ConfigMap {
   name: string
@@ -49,13 +52,16 @@ export function ConfigMapsView() {
     setLoading(true)
     setError(null)
     try {
-      const data = await k8sAPI.listConfigMaps('default')
+      const data = await k8sClient.listCoreV1NamespacedConfigMap({
+        path: { namespace: 'default' },
+        query: {},
+      })
       const formattedConfigMaps: ConfigMap[] = data.items.map(item => ({
-        name: item.metadata.name,
-        namespace: item.metadata.namespace,
+        name: item.metadata!.name!,
+        namespace: item.metadata!.namespace!,
         dataKeys: Object.keys(item.data || {}),
         binaryDataKeys: Object.keys(item.binaryData || {}),
-        createdAt: item.metadata.creationTimestamp,
+        createdAt: item.metadata!.creationTimestamp!,
         immutable: item.immutable,
         k8sData: item
       }))
@@ -79,7 +85,10 @@ export function ConfigMapsView() {
   const handleDelete = async (configMap: ConfigMap) => {
     if (confirm(`Are you sure you want to delete ${configMap.name}?`)) {
       try {
-        await k8sAPI.deleteConfigMap(configMap.namespace, configMap.name)
+        await k8sClient.deleteCoreV1NamespacedConfigMap({
+          path: { namespace: configMap.namespace, name: configMap.name },
+          query: {},
+        })
         setConfigMaps(configMaps.filter(cm => cm.name !== configMap.name))
       } catch (err) {
         console.error('Failed to delete configmap:', err)
@@ -90,7 +99,7 @@ export function ConfigMapsView() {
 
   const handleEdit = (configMap: ConfigMap) => {
     setEditingConfigMap(configMap)
-    setEditedData(configMap.k8sData?.data || {})
+    setEditedData((configMap.k8sData?.data as Record<string, string>) || {})
     setExpandedKeys(new Set())
     setEditDialogOpen(true)
   }
@@ -115,11 +124,11 @@ export function ConfigMapsView() {
         data: editedData
       }
       
-      await k8sAPI.updateConfigMap(
-        editingConfigMap.namespace,
-        editingConfigMap.name,
-        updatedConfigMap
-      )
+      await k8sClient.replaceCoreV1NamespacedConfigMap({
+        path: { namespace: editingConfigMap.namespace, name: editingConfigMap.name },
+        query: {},
+        body: updatedConfigMap,
+      })
       
       setEditDialogOpen(false)
       await fetchConfigMaps()

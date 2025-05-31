@@ -16,7 +16,10 @@ import {
   Server,
   AlertCircle
 } from 'lucide-react'
-import { k8sAPI, type Service as K8sService } from '@/services/k8s-api'
+import { KubernetesClient, type Service as K8sService, type ServiceList } from 'kubernetesjs'
+
+// Create APIClient instance
+const k8sClient = new KubernetesClient({ restEndpoint: '/api/k8s' })
 
 interface Service {
   name: string
@@ -41,20 +44,29 @@ export function ServicesView() {
     setLoading(true)
     setError(null)
     try {
-      const data = await k8sAPI.listServices('default')
+      const data = await k8sClient.listCoreV1NamespacedService({
+        path: { namespace: 'default' },
+        query: {},
+      })
       const formattedServices: Service[] = data.items.map(item => {
         const loadBalancerIngress = item.status?.loadBalancer?.ingress?.[0]
         return {
-          name: item.metadata.name,
-          namespace: item.metadata.namespace,
-          type: item.spec.type,
-          clusterIP: item.spec.clusterIP || 'None',
-          ports: item.spec.ports || [],
-          selector: item.spec.selector || {},
-          createdAt: item.metadata.creationTimestamp,
-          externalIPs: item.spec.externalIPs,
+          name: item.metadata!.name!,
+          namespace: item.metadata!.namespace!,
+          type: item.spec!.type as Service['type'],
+          clusterIP: item.spec!.clusterIP || 'None',
+          ports: (item.spec!.ports || []).map(p => ({
+            name: p.name,
+            port: p.port,
+            targetPort: p.targetPort ?? p.port,
+            protocol: p.protocol || 'TCP',
+            nodePort: p.nodePort,
+          })),
+          selector: (item.spec!.selector ?? {}) as Record<string, string>,
+          createdAt: item.metadata!.creationTimestamp!,
+          externalIPs: item.spec!.externalIPs,
           loadBalancerIP: loadBalancerIngress?.ip || loadBalancerIngress?.hostname,
-          k8sData: item
+          k8sData: item,
         }
       })
       setServices(formattedServices)
@@ -77,7 +89,10 @@ export function ServicesView() {
   const handleDelete = async (service: Service) => {
     if (confirm(`Are you sure you want to delete ${service.name}?`)) {
       try {
-        await k8sAPI.deleteService(service.namespace, service.name)
+        await k8sClient.deleteCoreV1NamespacedService({
+          path: { namespace: service.namespace, name: service.name },
+          query: {},
+        })
         setServices(services.filter(s => s.name !== service.name))
       } catch (err) {
         console.error('Failed to delete service:', err)
