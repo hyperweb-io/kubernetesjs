@@ -25,7 +25,7 @@ const resources = [
   {
     id: 'services',
     title: 'Services', 
-    description: 'Manage your Kubernetes services and networking',
+    description: 'Manage your services and networking',
     icon: Server,
     href: '/services',
     color: 'text-green-600'
