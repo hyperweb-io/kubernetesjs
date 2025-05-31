@@ -22,7 +22,10 @@ import {
   Upload,
   AlertCircle
 } from 'lucide-react'
-import { k8sAPI, type Secret as K8sSecret } from '@/services/k8s-api'
+import { KubernetesClient, type Secret as K8sSecret, type SecretList } from 'kubernetesjs'
+
+// Create APIClient instance
+const k8sClient = new KubernetesClient({ restEndpoint: '/api/k8s' })
 
 interface Secret {
   name: string
@@ -50,15 +53,18 @@ export function SecretsView() {
     setLoading(true)
     setError(null)
     try {
-      const data = await k8sAPI.listSecrets('default')
+      const data = await k8sClient.listCoreV1NamespacedSecret({
+        path: { namespace: 'default' },
+        query: {},
+      })
       const formattedSecrets: Secret[] = data.items
-        .filter(item => !item.metadata.name.includes('default-token-')) // Filter out default service account tokens
+        .filter(item => !item.metadata!.name!.includes('default-token-')) // Filter out default service account tokens
         .map(item => ({
-          name: item.metadata.name,
-          namespace: item.metadata.namespace,
-          type: item.type,
+          name: item.metadata!.name!,
+          namespace: item.metadata!.namespace!,
+          type: item.type!,
           dataKeys: Object.keys(item.data || {}),
-          createdAt: item.metadata.creationTimestamp,
+          createdAt: item.metadata!.creationTimestamp!,
           immutable: item.immutable,
           k8sData: item
         }))
@@ -82,7 +88,10 @@ export function SecretsView() {
   const handleDelete = async (secret: Secret) => {
     if (confirm(`Are you sure you want to delete ${secret.name}? This action cannot be undone.`)) {
       try {
-        await k8sAPI.deleteSecret(secret.namespace, secret.name)
+        await k8sClient.deleteCoreV1NamespacedSecret({
+          path: { namespace: secret.namespace, name: secret.name },
+          query: {},
+        })
         setSecrets(secrets.filter(s => s.name !== secret.name))
       } catch (err) {
         console.error('Failed to delete secret:', err)
@@ -153,7 +162,11 @@ export function SecretsView() {
         data
       }
       
-      await k8sAPI.createSecret('default', secret)
+      await k8sClient.createCoreV1NamespacedSecret({
+        path: { namespace: 'default' },
+        query: {},
+        body: secret,
+      })
       
       // Reset form and refresh
       setSecretName('')

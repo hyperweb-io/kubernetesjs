@@ -1,5 +1,3 @@
-import { URLSearchParams } from 'url';
-
 interface RequestOptions<Params> {
   hostname?: string;
   path: string;
@@ -15,6 +13,7 @@ export interface APIClientOptions {
 }
 
 export interface APIClientRequestHeaders {
+  [key: string]: string | number | string[] | undefined;
   accept?: string | string[] | undefined;
   'accept-charset'?: string | string[] | undefined;
   'accept-encoding'?: string | string[] | undefined;
@@ -110,11 +109,28 @@ export class APIClient {
   }
 
   private buildFullPath(endpoint: string, query?: { [key: string]: any }): string {
-    const url = new URL(endpoint, this.baseUrl);
-    if (query) {
-      Object.keys(query).forEach(key => url.searchParams.append(key, query[key]));
+    // If baseUrl is a relative proxy path (e.g. '/api/k8s'), build manually
+    if (this.baseUrl.startsWith('/')) {
+      // Remove any trailing slash from baseUrl, ensure endpoint starts with '/'
+      const base = this.baseUrl.replace(/\/$/, '')
+      let url = `${base}${endpoint}`
+      if (query) {
+        // Build query params as a simple record so URLSearchParams can accept it
+        const record: Record<string, string> = {}
+        Object.keys(query).forEach(key => {
+          record[key] = String(query[key])
+        })
+        const params = new URLSearchParams(record).toString()
+        if (params) url += `?${params}`
+      }
+      return url
     }
-    return url.toString();
+    // Otherwise, treat baseUrl as an absolute URL
+    const url = new URL(endpoint, this.baseUrl)
+    if (query) {
+      Object.keys(query).forEach(key => url.searchParams.append(key, query[key]))
+    }
+    return url.toString()
   }
 
   private async request<Resp>(options: RequestOptions<any>): Promise<Resp> {

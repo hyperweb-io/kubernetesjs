@@ -6,6 +6,7 @@ import { DeploymentsView } from '@/components/resources/deployments'
 import { ServicesView } from '@/components/resources/services'
 import { SecretsView } from '@/components/resources/secrets'
 import { ConfigMapsView } from '@/components/resources/configmaps'
+import { TemplatesView } from '@/components/templates/templates'
 import {
   Package,
   Server,
@@ -16,7 +17,8 @@ import {
   Activity,
   Home,
   Menu,
-  X
+  X,
+  FileCode2
 } from 'lucide-react'
 
 const navigationItems = [
@@ -25,6 +27,7 @@ const navigationItems = [
   { id: 'services', label: 'Services', icon: Server },
   { id: 'secrets', label: 'Secrets', icon: Key },
   { id: 'configmaps', label: 'ConfigMaps', icon: Settings },
+  { id: 'templates', label: 'Templates', icon: FileCode2 },
   { id: 'replicasets', label: 'ReplicaSets', icon: Copy },
   { id: 'pods', label: 'Pods', icon: Activity },
 ]
@@ -117,8 +120,9 @@ export default function DashboardPage() {
             {activeSection === 'services' && <ServicesView />}
             {activeSection === 'secrets' && <SecretsView />}
             {activeSection === 'configmaps' && <ConfigMapsView />}
+            {activeSection === 'templates' && <TemplatesView />}
             
-            {activeSection !== 'overview' && activeSection !== 'deployments' && activeSection !== 'services' && activeSection !== 'secrets' && activeSection !== 'configmaps' && (
+            {activeSection !== 'overview' && activeSection !== 'deployments' && activeSection !== 'services' && activeSection !== 'secrets' && activeSection !== 'configmaps' && activeSection !== 'templates' && (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">
                   {activeSection} management interface coming soon...

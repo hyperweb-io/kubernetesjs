@@ -15,7 +15,10 @@ import {
   AlertCircle,
   CheckCircle
 } from 'lucide-react'
-import { k8sAPI, type Deployment as K8sDeployment } from '@/services/k8s-api'
+import { KubernetesClient, type Deployment as K8sDeployment, type DeploymentList } from 'kubernetesjs'
+
+// Create APIClient instance
+const k8sClient = new KubernetesClient({ restEndpoint: '/api/k8s' })
 
 interface Deployment {
   name: string
@@ -38,16 +41,19 @@ export function DeploymentsView() {
     setLoading(true)
     setError(null)
     try {
-      const data = await k8sAPI.listDeployments('default')
+      const data = await k8sClient.listAppsV1NamespacedDeployment({
+        path: { namespace: 'default' },
+        query: {},
+      })
       const formattedDeployments: Deployment[] = data.items.map(item => {
         const status = determineStatus(item)
         return {
-          name: item.metadata.name,
-          namespace: item.metadata.namespace,
-          replicas: item.spec.replicas,
-          availableReplicas: item.status.availableReplicas || 0,
-          image: item.spec.template.spec.containers[0]?.image || 'unknown',
-          createdAt: item.metadata.creationTimestamp,
+          name: item.metadata!.name!,
+          namespace: item.metadata!.namespace!,
+          replicas: item.spec!.replicas!,
+          availableReplicas: item.status!.availableReplicas || 0,
+          image: item.spec!.template!.spec!.containers[0]?.image || 'unknown',
+          createdAt: item.metadata!.creationTimestamp!,
           status,
           k8sData: item
         }
@@ -62,12 +68,12 @@ export function DeploymentsView() {
   }
 
   const determineStatus = (deployment: K8sDeployment): 'Running' | 'Pending' | 'Failed' => {
-    const conditions = deployment.status.conditions || []
+    const conditions = deployment.status!.conditions || []
     const progressingCondition = conditions.find(c => c.type === 'Progressing')
     const availableCondition = conditions.find(c => c.type === 'Available')
     
     if (availableCondition?.status === 'True' && 
-        deployment.status.availableReplicas === deployment.spec.replicas) {
+        deployment.status!.availableReplicas === deployment.spec!.replicas!) {
       return 'Running'
     } else if (progressingCondition?.status === 'True') {
       return 'Pending'
@@ -88,7 +94,15 @@ export function DeploymentsView() {
     const newReplicas = prompt(`Scale ${deployment.name} to how many replicas?`, deployment.replicas.toString())
     if (newReplicas && !isNaN(Number(newReplicas))) {
       try {
-        await k8sAPI.scaleDeployment(deployment.namespace, deployment.name, Number(newReplicas))
+        await k8sClient.patchAppsV1NamespacedDeployment({
+          path: { namespace: deployment.namespace, name: deployment.name },
+          query: {},
+          body: { spec: { replicas: Number(newReplicas) } },
+        }, {
+          headers: {
+            'Content-Type': 'application/strategic-merge-patch+json',
+          },
+        })
         await handleRefresh()
       } catch (err) {
         console.error('Failed to scale deployment:', err)
@@ -100,7 +114,10 @@ export function DeploymentsView() {
   const handleDelete = async (deployment: Deployment) => {
     if (confirm(`Are you sure you want to delete ${deployment.name}?`)) {
       try {
-        await k8sAPI.deleteDeployment(deployment.namespace, deployment.name)
+        await k8sClient.deleteAppsV1NamespacedDeployment({
+          path: { namespace: deployment.namespace, name: deployment.name },
+          query: {},
+        })
         setDeployments(deployments.filter(d => d.name !== deployment.name))
       } catch (err) {
         console.error('Failed to delete deployment:', err)
