@@ -12,12 +12,21 @@ export function usePods(namespace?: string) {
   return useQuery<PodList, Error>({
     queryKey: [...PODS_KEY, ns],
     queryFn: async () => {
-      const result = await client.listCoreV1NamespacedPod({
-        path: { namespace: ns },
-        query: {},
-      })
-      return result
+      if (ns === '_all') {
+        const result = await client.listCoreV1PodForAllNamespaces({
+          query: {},
+        })
+        return result
+      } else {
+        const result = await client.listCoreV1NamespacedPod({
+          path: { namespace: ns },
+          query: {},
+        })
+        return result
+      }
     },
+    refetchOnMount: 'always',
+    staleTime: 0,
   })
 }
 

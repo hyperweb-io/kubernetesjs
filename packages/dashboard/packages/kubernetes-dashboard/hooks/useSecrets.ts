@@ -12,12 +12,21 @@ export function useSecrets(namespace?: string) {
   return useQuery<SecretList, Error>({
     queryKey: [...SECRETS_KEY, ns],
     queryFn: async () => {
-      const result = await client.listCoreV1NamespacedSecret({
-        path: { namespace: ns },
-        query: {},
-      })
-      return result
+      if (ns === '_all') {
+        const result = await client.listCoreV1SecretForAllNamespaces({
+          query: {},
+        })
+        return result
+      } else {
+        const result = await client.listCoreV1NamespacedSecret({
+          path: { namespace: ns },
+          query: {},
+        })
+        return result
+      }
     },
+    refetchOnMount: 'always',
+    staleTime: 0,
   })
 }
 
@@ -35,6 +44,8 @@ export function useSecret(name: string, namespace?: string) {
       return result
     },
     enabled: !!name,
+    refetchOnMount: 'always',
+    staleTime: 0,
   })
 }
 

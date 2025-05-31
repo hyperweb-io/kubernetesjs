@@ -30,6 +30,14 @@ export function NamespaceSwitcher() {
           <SelectValue placeholder="Select namespace" />
         </SelectTrigger>
         <SelectContent>
+          <SelectItem value="_all">
+            <div className="flex items-center gap-2">
+              All Namespaces
+              <Badge variant="outline" className="text-xs">
+                All
+              </Badge>
+            </div>
+          </SelectItem>
           {namespaces.map((ns) => (
             <SelectItem key={ns} value={ns!}>
               <div className="flex items-center gap-2">
