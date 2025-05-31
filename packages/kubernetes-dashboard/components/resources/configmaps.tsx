@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -22,10 +22,8 @@ import {
   ChevronDown,
   ChevronRight
 } from 'lucide-react'
-import { KubernetesClient, type ConfigMap as K8sConfigMap, type ConfigMapList } from 'kubernetesjs'
-
-// Create APIClient instance
-const k8sClient = new KubernetesClient({ restEndpoint: '/api/k8s' })
+import { type ConfigMap as K8sConfigMap } from 'kubernetesjs'
+import { useConfigMaps, useDeleteConfigMap, useUpdateConfigMap } from '@/hooks'
 
 interface ConfigMap {
   name: string
@@ -38,58 +36,41 @@ interface ConfigMap {
 }
 
 export function ConfigMapsView() {
-  const [configMaps, setConfigMaps] = useState<ConfigMap[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [selectedConfigMap, setSelectedConfigMap] = useState<ConfigMap | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [editingConfigMap, setEditingConfigMap] = useState<ConfigMap | null>(null)
   const [editedData, setEditedData] = useState<Record<string, string>>({})
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set())
   const [saving, setSaving] = useState(false)
-
-  const fetchConfigMaps = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await k8sClient.listCoreV1NamespacedConfigMap({
-        path: { namespace: 'default' },
-        query: {},
-      })
-      const formattedConfigMaps: ConfigMap[] = data.items.map(item => ({
-        name: item.metadata!.name!,
-        namespace: item.metadata!.namespace!,
-        dataKeys: Object.keys(item.data || {}),
-        binaryDataKeys: Object.keys(item.binaryData || {}),
-        createdAt: item.metadata!.creationTimestamp!,
-        immutable: item.immutable,
-        k8sData: item
-      }))
-      setConfigMaps(formattedConfigMaps)
-    } catch (err) {
-      console.error('Failed to fetch configmaps:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch configmaps')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchConfigMaps()
-  }, [])
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
+  
+  // Use TanStack Query hooks
+  const { data, isLoading, error, refetch } = useConfigMaps()
+  const deleteConfigMapMutation = useDeleteConfigMap()
+  const updateConfigMapMutation = useUpdateConfigMap()
+  
+  // Format configmaps from query data
+  const configMaps: ConfigMap[] = data?.items?.map(item => ({
+    name: item.metadata!.name!,
+    namespace: item.metadata!.namespace!,
+    dataKeys: Object.keys(item.data || {}),
+    binaryDataKeys: Object.keys(item.binaryData || {}),
+    createdAt: item.metadata!.creationTimestamp!,
+    immutable: item.immutable,
+    k8sData: item
+  })) || []
 
   const handleRefresh = () => {
-    fetchConfigMaps()
+    refetch()
   }
 
   const handleDelete = async (configMap: ConfigMap) => {
     if (confirm(`Are you sure you want to delete ${configMap.name}?`)) {
       try {
-        await k8sClient.deleteCoreV1NamespacedConfigMap({
-          path: { namespace: configMap.namespace, name: configMap.name },
-          query: {},
+        await deleteConfigMapMutation.mutateAsync({
+          name: configMap.name,
+          namespace: configMap.namespace
         })
-        setConfigMaps(configMaps.filter(cm => cm.name !== configMap.name))
       } catch (err) {
         console.error('Failed to delete configmap:', err)
         alert(`Failed to delete configmap: ${err instanceof Error ? err.message : 'Unknown error'}`)
@@ -124,14 +105,13 @@ export function ConfigMapsView() {
         data: editedData
       }
       
-      await k8sClient.replaceCoreV1NamespacedConfigMap({
-        path: { namespace: editingConfigMap.namespace, name: editingConfigMap.name },
-        query: {},
-        body: updatedConfigMap,
+      await updateConfigMapMutation.mutateAsync({
+        name: editingConfigMap.name,
+        configMap: updatedConfigMap,
+        namespace: editingConfigMap.namespace
       })
       
       setEditDialogOpen(false)
-      await fetchConfigMaps()
     } catch (err) {
       console.error('Failed to update configmap:', err)
       alert(`Failed to update configmap: ${err instanceof Error ? err.message : 'Unknown error'}`)
@@ -191,11 +171,11 @@ export function ConfigMapsView() {
             variant="outline" 
             size="icon"
             onClick={handleRefresh}
-            disabled={loading}
+            disabled={isLoading}
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           </Button>
-          <Button>
+          <Button onClick={() => alert('Create ConfigMap functionality not yet implemented.\n\nTo create a ConfigMap, use kubectl:\nkubectl create configmap <name> --from-file=<path>')}>
             <Plus className="h-4 w-4 mr-2" />
             Create ConfigMap
           </Button>
@@ -264,13 +244,13 @@ export function ConfigMapsView() {
           {error ? (
             <div className="flex flex-col items-center justify-center py-8 text-destructive">
               <AlertCircle className="h-8 w-8 mb-2" />
-              <p className="text-sm">{error}</p>
+              <p className="text-sm">{error instanceof Error ? error.message : 'Failed to fetch configmaps'}</p>
               <Button variant="outline" size="sm" onClick={handleRefresh} className="mt-4">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Retry
               </Button>
             </div>
-          ) : loading ? (
+          ) : isLoading ? (
             <div className="flex justify-center py-8">
               <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>

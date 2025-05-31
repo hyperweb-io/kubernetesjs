@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -16,10 +16,8 @@ import {
   Server,
   AlertCircle
 } from 'lucide-react'
-import { KubernetesClient, type Service as K8sService, type ServiceList } from 'kubernetesjs'
-
-// Create APIClient instance
-const k8sClient = new KubernetesClient({ restEndpoint: '/api/k8s' })
+import { type Service as K8sService } from 'kubernetesjs'
+import { useServices, useDeleteService } from '@/hooks'
 
 interface Service {
   name: string
@@ -35,65 +33,46 @@ interface Service {
 }
 
 export function ServicesView() {
-  const [services, setServices] = useState<Service[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [selectedService, setSelectedService] = useState<Service | null>(null)
-
-  const fetchServices = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await k8sClient.listCoreV1NamespacedService({
-        path: { namespace: 'default' },
-        query: {},
-      })
-      const formattedServices: Service[] = data.items.map(item => {
-        const loadBalancerIngress = item.status?.loadBalancer?.ingress?.[0]
-        return {
-          name: item.metadata!.name!,
-          namespace: item.metadata!.namespace!,
-          type: item.spec!.type as Service['type'],
-          clusterIP: item.spec!.clusterIP || 'None',
-          ports: (item.spec!.ports || []).map(p => ({
-            name: p.name,
-            port: p.port,
-            targetPort: p.targetPort ?? p.port,
-            protocol: p.protocol || 'TCP',
-            nodePort: p.nodePort,
-          })),
-          selector: (item.spec!.selector ?? {}) as Record<string, string>,
-          createdAt: item.metadata!.creationTimestamp!,
-          externalIPs: item.spec!.externalIPs,
-          loadBalancerIP: loadBalancerIngress?.ip || loadBalancerIngress?.hostname,
-          k8sData: item,
-        }
-      })
-      setServices(formattedServices)
-    } catch (err) {
-      console.error('Failed to fetch services:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch services')
-    } finally {
-      setLoading(false)
+  
+  // Use TanStack Query hooks
+  const { data, isLoading, error, refetch } = useServices()
+  const deleteServiceMutation = useDeleteService()
+  
+  // Format services from query data
+  const services: Service[] = data?.items?.map(item => {
+    const loadBalancerIngress = item.status?.loadBalancer?.ingress?.[0]
+    return {
+      name: item.metadata!.name!,
+      namespace: item.metadata!.namespace!,
+      type: item.spec!.type as Service['type'],
+      clusterIP: item.spec!.clusterIP || 'None',
+      ports: (item.spec!.ports || []).map(p => ({
+        name: p.name,
+        port: p.port,
+        targetPort: p.targetPort ?? p.port,
+        protocol: p.protocol || 'TCP',
+        nodePort: p.nodePort,
+      })),
+      selector: (item.spec!.selector ?? {}) as Record<string, string>,
+      createdAt: item.metadata!.creationTimestamp!,
+      externalIPs: item.spec!.externalIPs,
+      loadBalancerIP: loadBalancerIngress?.ip || loadBalancerIngress?.hostname,
+      k8sData: item,
     }
-  }
-
-  useEffect(() => {
-    fetchServices()
-  }, [])
+  }) || []
 
   const handleRefresh = () => {
-    fetchServices()
+    refetch()
   }
 
   const handleDelete = async (service: Service) => {
     if (confirm(`Are you sure you want to delete ${service.name}?`)) {
       try {
-        await k8sClient.deleteCoreV1NamespacedService({
-          path: { namespace: service.namespace, name: service.name },
-          query: {},
+        await deleteServiceMutation.mutateAsync({
+          name: service.name,
+          namespace: service.namespace
         })
-        setServices(services.filter(s => s.name !== service.name))
       } catch (err) {
         console.error('Failed to delete service:', err)
         alert(`Failed to delete service: ${err instanceof Error ? err.message : 'Unknown error'}`)
@@ -155,11 +134,11 @@ export function ServicesView() {
             variant="outline" 
             size="icon"
             onClick={handleRefresh}
-            disabled={loading}
+            disabled={isLoading}
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           </Button>
-          <Button>
+          <Button onClick={() => alert('Create Service functionality not yet implemented.\n\nTo create a service, use kubectl:\nkubectl expose deployment <name> --port=<port> --type=<type>')}>
             <Plus className="h-4 w-4 mr-2" />
             Create Service
           </Button>
@@ -228,13 +207,13 @@ export function ServicesView() {
           {error ? (
             <div className="flex flex-col items-center justify-center py-8 text-destructive">
               <AlertCircle className="h-8 w-8 mb-2" />
-              <p className="text-sm">{error}</p>
+              <p className="text-sm">{error instanceof Error ? error.message : 'Failed to fetch services'}</p>
               <Button variant="outline" size="sm" onClick={handleRefresh} className="mt-4">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Retry
               </Button>
             </div>
-          ) : loading ? (
+          ) : isLoading ? (
             <div className="flex justify-center py-8">
               <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
