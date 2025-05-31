@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -22,10 +22,8 @@ import {
   Upload,
   AlertCircle
 } from 'lucide-react'
-import { KubernetesClient, type Secret as K8sSecret, type SecretList } from 'kubernetesjs'
-
-// Create APIClient instance
-const k8sClient = new KubernetesClient({ restEndpoint: '/api/k8s' })
+import { type Secret as K8sSecret } from 'kubernetesjs'
+import { useSecrets, useDeleteSecret, useCreateSecret } from '@/hooks'
 
 interface Secret {
   name: string
@@ -38,9 +36,6 @@ interface Secret {
 }
 
 export function SecretsView() {
-  const [secrets, setSecrets] = useState<Secret[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [selectedSecret, setSelectedSecret] = useState<Secret | null>(null)
   const [showValues, setShowValues] = useState<Set<string>>(new Set())
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
@@ -48,51 +43,36 @@ export function SecretsView() {
   const [secretContent, setSecretContent] = useState('')
   const [uploadMethod, setUploadMethod] = useState<'text' | 'file'>('text')
   const [creating, setCreating] = useState(false)
-
-  const fetchSecrets = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await k8sClient.listCoreV1NamespacedSecret({
-        path: { namespace: 'default' },
-        query: {},
-      })
-      const formattedSecrets: Secret[] = data.items
-        .filter(item => !item.metadata!.name!.includes('default-token-')) // Filter out default service account tokens
-        .map(item => ({
-          name: item.metadata!.name!,
-          namespace: item.metadata!.namespace!,
-          type: item.type!,
-          dataKeys: Object.keys(item.data || {}),
-          createdAt: item.metadata!.creationTimestamp!,
-          immutable: item.immutable,
-          k8sData: item
-        }))
-      setSecrets(formattedSecrets)
-    } catch (err) {
-      console.error('Failed to fetch secrets:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch secrets')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchSecrets()
-  }, [])
+  
+  // Use TanStack Query hooks
+  const { data, isLoading, error, refetch } = useSecrets()
+  const deleteSecretMutation = useDeleteSecret()
+  const createSecretMutation = useCreateSecret()
+  
+  // Format secrets from query data
+  const secrets: Secret[] = data?.items
+    ?.filter(item => !item.metadata!.name!.includes('default-token-')) // Filter out default service account tokens
+    .map(item => ({
+      name: item.metadata!.name!,
+      namespace: item.metadata!.namespace!,
+      type: item.type!,
+      dataKeys: Object.keys(item.data || {}),
+      createdAt: item.metadata!.creationTimestamp!,
+      immutable: item.immutable,
+      k8sData: item
+    })) || []
 
   const handleRefresh = () => {
-    fetchSecrets()
+    refetch()
   }
 
   const handleDelete = async (secret: Secret) => {
     if (confirm(`Are you sure you want to delete ${secret.name}? This action cannot be undone.`)) {
       try {
-        await k8sClient.deleteCoreV1NamespacedSecret({
-          path: { namespace: secret.namespace, name: secret.name },
-          query: {},
+        await deleteSecretMutation.mutateAsync({
+          name: secret.name,
+          namespace: secret.namespace
         })
-        setSecrets(secrets.filter(s => s.name !== secret.name))
       } catch (err) {
         console.error('Failed to delete secret:', err)
         alert(`Failed to delete secret: ${err instanceof Error ? err.message : 'Unknown error'}`)
@@ -162,17 +142,15 @@ export function SecretsView() {
         data
       }
       
-      await k8sClient.createCoreV1NamespacedSecret({
-        path: { namespace: 'default' },
-        query: {},
-        body: secret,
+      await createSecretMutation.mutateAsync({
+        secret,
+        namespace: 'default'
       })
       
-      // Reset form and refresh
+      // Reset form and close dialog
       setSecretName('')
       setSecretContent('')
       setCreateDialogOpen(false)
-      await fetchSecrets()
     } catch (err) {
       console.error('Failed to create secret:', err)
       alert(`Failed to create secret: ${err instanceof Error ? err.message : 'Unknown error'}`)
@@ -245,9 +223,9 @@ export function SecretsView() {
             variant="outline" 
             size="icon"
             onClick={handleRefresh}
-            disabled={loading}
+            disabled={isLoading}
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           </Button>
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
@@ -420,7 +398,7 @@ export function SecretsView() {
                 Retry
               </Button>
             </div>
-          ) : loading ? (
+          ) : isLoading ? (
             <div className="flex justify-center py-8">
               <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>

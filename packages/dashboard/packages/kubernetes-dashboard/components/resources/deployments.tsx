@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -15,10 +15,8 @@ import {
   AlertCircle,
   CheckCircle
 } from 'lucide-react'
-import { KubernetesClient, type Deployment as K8sDeployment, type DeploymentList } from 'kubernetesjs'
-
-// Create APIClient instance
-const k8sClient = new KubernetesClient({ restEndpoint: '/api/k8s' })
+import { type Deployment as K8sDeployment } from 'kubernetesjs'
+import { useDeployments, useDeleteDeployment, useScaleDeployment } from '@/hooks'
 
 interface Deployment {
   name: string
@@ -32,42 +30,14 @@ interface Deployment {
 }
 
 export function DeploymentsView() {
-  const [deployments, setDeployments] = useState<Deployment[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [selectedDeployment, setSelectedDeployment] = useState<Deployment | null>(null)
-
-  const fetchDeployments = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await k8sClient.listAppsV1NamespacedDeployment({
-        path: { namespace: 'default' },
-        query: {},
-      })
-      const formattedDeployments: Deployment[] = data.items.map(item => {
-        const status = determineStatus(item)
-        return {
-          name: item.metadata!.name!,
-          namespace: item.metadata!.namespace!,
-          replicas: item.spec!.replicas!,
-          availableReplicas: item.status!.availableReplicas || 0,
-          image: item.spec!.template!.spec!.containers[0]?.image || 'unknown',
-          createdAt: item.metadata!.creationTimestamp!,
-          status,
-          k8sData: item
-        }
-      })
-      setDeployments(formattedDeployments)
-    } catch (err) {
-      console.error('Failed to fetch deployments:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch deployments')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const determineStatus = (deployment: K8sDeployment): 'Running' | 'Pending' | 'Failed' => {
+  
+  // Use TanStack Query hooks
+  const { data, isLoading, error, refetch } = useDeployments()
+  const deleteDeploymentMutation = useDeleteDeployment()
+  const scaleDeploymentMutation = useScaleDeployment()
+  // Helper function to determine deployment status
+  function determineStatus(deployment: K8sDeployment): 'Running' | 'Pending' | 'Failed' {
     const conditions = deployment.status!.conditions || []
     const progressingCondition = conditions.find(c => c.type === 'Progressing')
     const availableCondition = conditions.find(c => c.type === 'Available')
@@ -81,29 +51,36 @@ export function DeploymentsView() {
       return 'Failed'
     }
   }
+  
+  // Format deployments from query data
+  const deployments: Deployment[] = data?.items?.map(item => {
+    const status = determineStatus(item)
+    return {
+      name: item.metadata!.name!,
+      namespace: item.metadata!.namespace!,
+      replicas: item.spec!.replicas!,
+      availableReplicas: item.status!.availableReplicas || 0,
+      image: item.spec!.template!.spec!.containers[0]?.image || 'unknown',
+      createdAt: item.metadata!.creationTimestamp!,
+      status,
+      k8sData: item
+    }
+  }) || []
 
-  useEffect(() => {
-    fetchDeployments()
-  }, [])
 
   const handleRefresh = () => {
-    fetchDeployments()
+    refetch()
   }
 
   const handleScale = async (deployment: Deployment) => {
     const newReplicas = prompt(`Scale ${deployment.name} to how many replicas?`, deployment.replicas.toString())
     if (newReplicas && !isNaN(Number(newReplicas))) {
       try {
-        await k8sClient.patchAppsV1NamespacedDeployment({
-          path: { namespace: deployment.namespace, name: deployment.name },
-          query: {},
-          body: { spec: { replicas: Number(newReplicas) } },
-        }, {
-          headers: {
-            'Content-Type': 'application/strategic-merge-patch+json',
-          },
+        await scaleDeploymentMutation.mutateAsync({
+          name: deployment.name,
+          replicas: Number(newReplicas),
+          namespace: deployment.namespace
         })
-        await handleRefresh()
       } catch (err) {
         console.error('Failed to scale deployment:', err)
         alert(`Failed to scale deployment: ${err instanceof Error ? err.message : 'Unknown error'}`)
@@ -114,11 +91,10 @@ export function DeploymentsView() {
   const handleDelete = async (deployment: Deployment) => {
     if (confirm(`Are you sure you want to delete ${deployment.name}?`)) {
       try {
-        await k8sClient.deleteAppsV1NamespacedDeployment({
-          path: { namespace: deployment.namespace, name: deployment.name },
-          query: {},
+        await deleteDeploymentMutation.mutateAsync({
+          name: deployment.name,
+          namespace: deployment.namespace
         })
-        setDeployments(deployments.filter(d => d.name !== deployment.name))
       } catch (err) {
         console.error('Failed to delete deployment:', err)
         alert(`Failed to delete deployment: ${err instanceof Error ? err.message : 'Unknown error'}`)
@@ -163,11 +139,11 @@ export function DeploymentsView() {
             variant="outline" 
             size="icon"
             onClick={handleRefresh}
-            disabled={loading}
+            disabled={isLoading}
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           </Button>
-          <Button>
+          <Button onClick={() => alert('Create Deployment functionality not yet implemented.\n\nTo create a deployment, use kubectl:\nkubectl create deployment <name> --image=<image>')}>
             <Plus className="h-4 w-4 mr-2" />
             Create Deployment
           </Button>
@@ -224,13 +200,13 @@ export function DeploymentsView() {
           {error ? (
             <div className="flex flex-col items-center justify-center py-8 text-destructive">
               <AlertCircle className="h-8 w-8 mb-2" />
-              <p className="text-sm">{error}</p>
+              <p className="text-sm">{error instanceof Error ? error.message : 'Failed to fetch deployments'}</p>
               <Button variant="outline" size="sm" onClick={handleRefresh} className="mt-4">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Retry
               </Button>
             </div>
-          ) : loading ? (
+          ) : isLoading ? (
             <div className="flex justify-center py-8">
               <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
