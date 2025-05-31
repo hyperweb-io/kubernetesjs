@@ -12,12 +12,21 @@ export function useConfigMaps(namespace?: string) {
   return useQuery<ConfigMapList, Error>({
     queryKey: [...CONFIGMAPS_KEY, ns],
     queryFn: async () => {
-      const result = await client.listCoreV1NamespacedConfigMap({
-        path: { namespace: ns },
-        query: {},
-      })
-      return result
+      if (ns === '_all') {
+        const result = await client.listCoreV1ConfigMapForAllNamespaces({
+          query: {},
+        })
+        return result
+      } else {
+        const result = await client.listCoreV1NamespacedConfigMap({
+          path: { namespace: ns },
+          query: {},
+        })
+        return result
+      }
     },
+    refetchOnMount: 'always',
+    staleTime: 0,
   })
 }
 
@@ -35,6 +44,8 @@ export function useConfigMap(name: string, namespace?: string) {
       return result
     },
     enabled: !!name,
+    refetchOnMount: 'always',
+    staleTime: 0,
   })
 }
 

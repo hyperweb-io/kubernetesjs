@@ -10,10 +10,20 @@ import {
   FileCode2,
   Copy,
   Activity,
-  ArrowRight
+  ArrowRight,
+  Layers
 } from 'lucide-react'
 
 const resources = [
+
+  {
+    id: 'all',
+    title: 'View All',
+    description: 'See all resources in one dashboard',
+    icon: Layers,
+    href: '/all',
+    color: 'text-gray-600'
+  },
   {
     id: 'deployments',
     title: 'Deployments',

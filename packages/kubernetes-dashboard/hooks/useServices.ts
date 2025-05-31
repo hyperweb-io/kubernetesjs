@@ -12,12 +12,21 @@ export function useServices(namespace?: string) {
   return useQuery<ServiceList, Error>({
     queryKey: [...SERVICES_KEY, ns],
     queryFn: async () => {
-      const result = await client.listCoreV1NamespacedService({
-        path: { namespace: ns },
-        query: {},
-      })
-      return result
+      if (ns === '_all') {
+        const result = await client.listCoreV1ServiceForAllNamespaces({
+          query: {},
+        })
+        return result
+      } else {
+        const result = await client.listCoreV1NamespacedService({
+          path: { namespace: ns },
+          query: {},
+        })
+        return result
+      }
     },
+    refetchOnMount: 'always',
+    staleTime: 0,
   })
 }
 
@@ -35,6 +44,8 @@ export function useService(name: string, namespace?: string) {
       return result
     },
     enabled: !!name,
+    refetchOnMount: 'always',
+    staleTime: 0,
   })
 }
 

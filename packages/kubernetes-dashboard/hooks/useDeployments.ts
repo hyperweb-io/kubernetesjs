@@ -12,12 +12,23 @@ export function useDeployments(namespace?: string) {
   return useQuery<DeploymentList, Error>({
     queryKey: [...DEPLOYMENTS_KEY, ns],
     queryFn: async () => {
-      const result = await client.listAppsV1NamespacedDeployment({
-        path: { namespace: ns },
-        query: {},
-      })
-      return result
+      if (ns === '_all') {
+        // Fetch from all namespaces
+        const result = await client.listAppsV1DeploymentForAllNamespaces({
+          query: {},
+        })
+        return result
+      } else {
+        // Fetch from specific namespace
+        const result = await client.listAppsV1NamespacedDeployment({
+          path: { namespace: ns },
+          query: {},
+        })
+        return result
+      }
     },
+    refetchOnMount: 'always',
+    staleTime: 0,
   })
 }
 
