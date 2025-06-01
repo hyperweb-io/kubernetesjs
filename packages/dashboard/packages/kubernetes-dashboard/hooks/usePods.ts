@@ -13,7 +13,7 @@ export function usePods(namespace?: string) {
     queryKey: [...PODS_KEY, ns],
     queryFn: async () => {
       if (ns === '_all') {
-        const result = await client.listCoreV1PodForAllNamespaces({
+        const result = await client.listPods({
           query: {},
         })
         return result

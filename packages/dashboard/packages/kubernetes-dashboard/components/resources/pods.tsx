@@ -17,7 +17,7 @@ import {
   XCircle
 } from 'lucide-react'
 import { type Pod as K8sPod } from 'kubernetesjs'
-import { usePods, useDeletePod, usePodLogs } from '@/hooks'
+import { usePods, useDeletePod, usePodLogs, useKubernetes } from '@/hooks'
 
 interface Pod {
   name: string
@@ -34,6 +34,7 @@ export function PodsView() {
   const [selectedPod, setSelectedPod] = useState<Pod | null>(null)
   
   // Use TanStack Query hooks
+  const { namespace } = useKubernetes()
   const { data, isLoading, error, refetch } = usePods()
   const deletePodMutation = useDeletePod()
   
@@ -230,7 +231,7 @@ export function PodsView() {
             </div>
           ) : pods.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-              <p className="text-sm">No pods found in the default namespace</p>
+              <p className="text-sm">No pods found {namespace === '_all' ? 'in any namespace' : `in the ${namespace} namespace`}</p>
               <Button variant="outline" size="sm" onClick={handleRefresh} className="mt-4">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
