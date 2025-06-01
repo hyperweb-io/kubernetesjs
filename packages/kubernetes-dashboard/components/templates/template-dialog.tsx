@@ -14,10 +14,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
-import { KubernetesClient, type Deployment, type Service } from 'kubernetesjs'
-
-// Create APIClient instance
-const k8sClient = new KubernetesClient({ restEndpoint: '/api/k8s' })
+import { type Deployment, type Service } from 'kubernetesjs'
+import { useKubernetes } from '@/hooks'
 
 interface Template {
   id: string
@@ -38,6 +36,7 @@ interface TemplateDialogProps {
 }
 
 export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogProps) {
+  const { client: k8sClient, namespace: contextNamespace } = useKubernetes()
 
   // Deploy template function
   const deployTemplate = async (params: {
@@ -138,7 +137,7 @@ export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogP
     }
   }
   const [deploymentName, setDeploymentName] = useState(`${template.id}-deployment`)
-  const [namespace, setNamespace] = useState('default')
+  const [namespace, setNamespace] = useState(contextNamespace === '_all' ? 'default' : contextNamespace)
   const [isDeploying, setIsDeploying] = useState(false)
   const [deploymentStatus, setDeploymentStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
@@ -150,7 +149,7 @@ export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogP
   useEffect(() => {
     if (open) {
       setDeploymentName(`${template.id}-deployment`)
-      setNamespace('default')
+      setNamespace(contextNamespace === '_all' ? 'default' : contextNamespace)
       setDeploymentStatus('idle')
       setErrorMessage('')
     }
