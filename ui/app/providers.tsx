@@ -9,7 +9,11 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <KubernetesProvider>
+    <KubernetesProvider 
+      initialConfig={{
+        restEndpoint: 'http://localhost:8001'
+      }}
+    >
       <NamespaceProvider>
         {children}
       </NamespaceProvider>
