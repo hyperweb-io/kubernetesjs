@@ -2266,10 +2266,10 @@ keyv@^4.5.3:
   dependencies:
     json-buffer "3.0.1"
 
-kubernetesjs@^0.6.0:
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/kubernetesjs/-/kubernetesjs-0.6.0.tgz#c5f214af515e9a12caa2edc1151456b897af8ac5"
-  integrity sha512-BgjPn6nYVm+R55dFHIM5owl6OswKshoRaL/ncLb9mNFJmmKDn1eAeNJPh41uMD6TDtlTcsVj2pPzsksRFgM2UA==
+kubernetesjs@^0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/kubernetesjs/-/kubernetesjs-0.6.1.tgz#de118adefb093baa042fdb49c009049409e5ddfa"
+  integrity sha512-N1djD3PDyulyYSXCm+nCnffOgmdCLb782mfuwizS0NJnf5ZeR3qPUDpjqYZ0ijjEq2caZUK/Fv9caNJLkKgnZg==
 
 language-subtag-registry@^0.3.20:
   version "0.3.23"
