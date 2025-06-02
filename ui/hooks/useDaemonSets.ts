@@ -3,7 +3,7 @@ import {
   useListAppsV1NamespacedDaemonSetQuery,
   useReadAppsV1NamespacedDaemonSetQuery,
   useDeleteAppsV1NamespacedDaemonSet,
-} from '@kubernetesjs/react'
+} from '../k8s/index'
 import { usePreferredNamespace } from '../contexts/NamespaceContext'
 import type { DaemonSet, DaemonSetList } from 'kubernetesjs'
 

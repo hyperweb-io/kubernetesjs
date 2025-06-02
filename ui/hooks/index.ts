@@ -7,6 +7,3 @@ export * from './useConfigMaps'
 export * from './usePods'
 export * from './useDaemonSets'
 export * from './useReplicaSets'
-
-// Re-export context hook
-export { useKubernetes } from '@kubernetesjs/react/context'

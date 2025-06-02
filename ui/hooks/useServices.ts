@@ -5,7 +5,7 @@ import {
   useCreateCoreV1NamespacedService,
   useReplaceCoreV1NamespacedService,
   useDeleteCoreV1NamespacedService,
-} from '@kubernetesjs/react'
+} from '../k8s/index'
 import { usePreferredNamespace } from '../contexts/NamespaceContext'
 import type { Service, ServiceList } from 'kubernetesjs'
 

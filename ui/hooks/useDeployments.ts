@@ -6,7 +6,7 @@ import {
   useReplaceAppsV1NamespacedDeployment,
   useDeleteAppsV1NamespacedDeployment,
   useReplaceAppsV1NamespacedDeploymentScale,
-} from '@kubernetesjs/react'
+} from '../k8s/index'
 import { usePreferredNamespace } from '../contexts/NamespaceContext'
 import type { Deployment, DeploymentList, Scale } from 'kubernetesjs'
 

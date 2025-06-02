@@ -5,7 +5,7 @@ import {
   useCreateCoreV1NamespacedConfigMap,
   useReplaceCoreV1NamespacedConfigMap,
   useDeleteCoreV1NamespacedConfigMap,
-} from '@kubernetesjs/react'
+} from '../k8s/index'
 import { usePreferredNamespace } from '../contexts/NamespaceContext'
 import type { ConfigMap, ConfigMapList } from 'kubernetesjs'
 

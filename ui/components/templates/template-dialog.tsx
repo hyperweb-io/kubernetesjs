@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
 import { type Deployment, type Service } from 'kubernetesjs'
-import { useKubernetes } from '@kubernetesjs/react/context'
+import { useKubernetes } from '../../k8s/context'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 
 interface Template {

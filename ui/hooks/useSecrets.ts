@@ -5,7 +5,7 @@ import {
   useCreateCoreV1NamespacedSecret,
   useReplaceCoreV1NamespacedSecret,
   useDeleteCoreV1NamespacedSecret,
-} from '@kubernetesjs/react'
+} from '../k8s/index'
 import { usePreferredNamespace } from '../contexts/NamespaceContext'
 import type { Secret, SecretList } from 'kubernetesjs'
 

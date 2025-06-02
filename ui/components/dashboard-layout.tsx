@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { NamespaceSwitcher } from '@/components/namespace-switcher'
-import { useKubernetes } from '@kubernetesjs/react/context'
+import { useKubernetes } from '../k8s/context'
 import {
   Package,
   Server,
@@ -38,8 +38,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const pathname = usePathname()
-  const { config } = useKubernetes()
-  
+  const { config } = useKubernetes();
   // Find active section based on pathname
   const activeSection = navigationItems.find(item => item.href === pathname)?.label || 'Overview'
 
