@@ -4,7 +4,7 @@ import {
   useReadAppsV1NamespacedReplicaSetQuery,
   useDeleteAppsV1NamespacedReplicaSet,
   useReplaceAppsV1NamespacedReplicaSetScale,
-} from '@kubernetesjs/react'
+} from '../k8s/index'
 import { usePreferredNamespace } from '../contexts/NamespaceContext'
 import type { ReplicaSet, ReplicaSetList, Scale } from 'kubernetesjs'
 

@@ -4,7 +4,7 @@ import {
   useReadCoreV1NamespacedPodQuery,
   useReadCoreV1NamespacedPodLogQuery,
   useDeleteCoreV1NamespacedPod,
-} from '@kubernetesjs/react'
+} from '../k8s/index'
 import { usePreferredNamespace } from '../contexts/NamespaceContext'
 import type { Pod, PodList } from 'kubernetesjs'
 

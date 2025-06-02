@@ -1,6 +1,6 @@
 'use client'
 
-import { KubernetesProvider } from '@kubernetesjs/react/context'
+import { KubernetesProvider } from '../k8s/context'
 import { NamespaceProvider } from '@/contexts/NamespaceContext'
 
 interface ProvidersProps {
@@ -9,7 +9,9 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <KubernetesProvider>
+    <KubernetesProvider initialConfig={{
+      restEndpoint: '/api/k8s'
+    }}>
       <NamespaceProvider>
         {children}
       </NamespaceProvider>

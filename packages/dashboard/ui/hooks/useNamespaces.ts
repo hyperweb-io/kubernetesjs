@@ -3,7 +3,7 @@ import {
   useReadCoreV1NamespaceQuery,
   useCreateCoreV1Namespace,
   useDeleteCoreV1Namespace,
-} from '@kubernetesjs/react'
+} from '../k8s/index'
 import type { Namespace, NamespaceList } from 'kubernetesjs'
 
 // Query keys
