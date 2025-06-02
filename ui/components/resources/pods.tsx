@@ -16,8 +16,8 @@ import {
   Clock,
   XCircle
 } from 'lucide-react'
-import { type Pod as K8sPod } from 'kubernetesjs'
-import { usePods, useDeletePod, usePodLogs, useKubernetes } from '@/hooks'
+
+import { usePods, useDeletePod, usePodLogs, usePreferredNamespace } from '@/hooks'
 
 interface Pod {
   name: string
@@ -27,19 +27,19 @@ interface Pod {
   restarts: number
   age: string
   nodeName: string
-  k8sData?: K8sPod
+  k8sData?: any
 }
 
 export function PodsView() {
   const [selectedPod, setSelectedPod] = useState<Pod | null>(null)
   
   // Use TanStack Query hooks
-  const { namespace } = useKubernetes()
+  const { namespace } = usePreferredNamespace()
   const { data, isLoading, error, refetch } = usePods()
   const deletePodMutation = useDeletePod()
   
   // Helper function to determine pod status
-  function determinePodStatus(pod: K8sPod): Pod['status'] {
+  function determinePodStatus(pod: any): Pod['status'] {
     const phase = pod.status?.phase
     if (phase === 'Running') return 'Running'
     if (phase === 'Pending') return 'Pending'
@@ -49,11 +49,11 @@ export function PodsView() {
   }
   
   // Format pods from query data
-  const pods: Pod[] = data?.items?.map(item => {
+  const pods: Pod[] = data?.items?.map((item: any) => {
     const containerStatuses = item.status?.containerStatuses || []
-    const readyContainers = containerStatuses.filter(cs => cs.ready).length
+    const readyContainers = containerStatuses.filter((cs: any) => cs.ready).length
     const totalContainers = containerStatuses.length
-    const totalRestarts = containerStatuses.reduce((sum, cs) => sum + (cs.restartCount || 0), 0)
+    const totalRestarts = containerStatuses.reduce((sum: number, cs: any) => sum + (cs.restartCount || 0), 0)
     
     return {
       name: item.metadata!.name!,
@@ -93,27 +93,27 @@ export function PodsView() {
   const getStatusBadge = (status: Pod['status']) => {
     switch (status) {
       case 'Running':
-        return <Badge variant="success" className="flex items-center gap-1">
+        return <Badge variant="default" className="flex items-center gap-1 bg-green-100 text-green-800">
           <CheckCircle className="w-3 h-3" />
           {status}
         </Badge>
       case 'Pending':
-        return <Badge variant="warning" className="flex items-center gap-1">
+        return <Badge variant="default" className="flex items-center gap-1 bg-yellow-100 text-yellow-800">
           <Clock className="w-3 h-3" />
           {status}
         </Badge>
       case 'Failed':
-        return <Badge variant="destructive" className="flex items-center gap-1">
+        return <Badge variant="default" className="flex items-center gap-1 bg-red-100 text-red-800">
           <XCircle className="w-3 h-3" />
           {status}
         </Badge>
       case 'Succeeded':
-        return <Badge variant="secondary" className="flex items-center gap-1">
+        return <Badge variant="default" className="flex items-center gap-1 bg-blue-100 text-blue-800">
           <CheckCircle className="w-3 h-3" />
           {status}
         </Badge>
       default:
-        return <Badge variant="outline">{status}</Badge>
+        return <Badge variant="default">{status}</Badge>
     }
   }
 

@@ -7,6 +7,7 @@ export * from './useConfigMaps'
 export * from './usePods'
 export * from './useDaemonSets'
 export * from './useReplicaSets'
+export * from './useJobs'
 
 // Re-export context hook
-export { useKubernetes } from '../contexts/KubernetesContext'
+export { usePreferredNamespace } from '../contexts/NamespaceContext'

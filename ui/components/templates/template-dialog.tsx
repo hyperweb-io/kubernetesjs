@@ -14,14 +14,15 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
-import { type Deployment, type Service } from 'kubernetesjs'
-import { useKubernetes } from '@/hooks'
+
+import { usePreferredNamespace } from '@/hooks'
+import { useCreateAppsV1NamespacedDeploymentMutation, useCreateCoreV1NamespacedServiceMutation } from '@kubernetesjs/react'
 
 interface Template {
   id: string
   name: string
   description: string
-  icon: React.ComponentType<{ className?: string }>
+  icon: any
   details: {
     image: string
     ports: number[]
@@ -36,7 +37,9 @@ interface TemplateDialogProps {
 }
 
 export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogProps) {
-  const { client: k8sClient, namespace: contextNamespace } = useKubernetes()
+  const { namespace: contextNamespace } = usePreferredNamespace()
+  const createDeployment = useCreateAppsV1NamespacedDeploymentMutation()
+  const createService = useCreateCoreV1NamespacedServiceMutation()
 
   // Deploy template function
   const deployTemplate = async (params: {
@@ -50,7 +53,7 @@ export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogP
     const { templateId, name, namespace, image, ports, environment } = params
 
     // Create deployment configuration
-    const deployment: Deployment = {
+    const deployment = {
       apiVersion: 'apps/v1',
       kind: 'Deployment',
       metadata: {
@@ -88,11 +91,13 @@ export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogP
 
     // Handle specific args for minio
     if (templateId === 'minio') {
-      deployment.spec!.template.spec!.containers[0].args = ['server', '/data']
+      if (deployment.spec?.template?.spec?.containers?.[0]) {
+        (deployment.spec.template.spec.containers[0] as any).args = ['server', '/data']
+      }
     }
 
     // Create service configuration
-    const service: Service = {
+    const service = {
       apiVersion: 'v1',
       kind: 'Service',
       metadata: {
@@ -117,14 +122,14 @@ export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogP
     }
 
     // Create deployment first using typed client
-    await k8sClient.createAppsV1NamespacedDeployment({
+    await createDeployment.mutateAsync({
       path: { namespace },
       query: {},
       body: deployment,
     })
 
     // Then create service using typed client
-    await k8sClient.createCoreV1NamespacedService({
+    await createService.mutateAsync({
       path: { namespace },
       query: {},
       body: service,
@@ -205,7 +210,7 @@ export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogP
             <Input
               id="name"
               value={deploymentName}
-              onChange={(e) => setDeploymentName(e.target.value)}
+              onChange={(e: any) => setDeploymentName(e.target.value)}
               className="col-span-3"
               disabled={isDeploying}
             />
@@ -218,7 +223,7 @@ export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogP
             <Input
               id="namespace"
               value={namespace}
-              onChange={(e) => setNamespace(e.target.value)}
+              onChange={(e: any) => setNamespace(e.target.value)}
               className="col-span-3"
               disabled={isDeploying}
             />

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { NamespaceSwitcher } from '@/components/namespace-switcher'
-import { useKubernetes } from '@/hooks'
+import { usePreferredNamespace } from '@/hooks'
 import {
   Package,
   Server,
@@ -38,7 +38,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const pathname = usePathname()
-  const { config } = useKubernetes()
+  const { namespace } = usePreferredNamespace()
   
   // Find active section based on pathname
   const activeSection = navigationItems.find(item => item.href === pathname)?.label || 'Overview'
@@ -87,7 +87,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </h2>
           </div>
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-muted-foreground">Cluster: {config.restEndpoint}</span>
+            <span className="text-sm text-muted-foreground">Namespace: {namespace}</span>
             <NamespaceSwitcher />
           </div>
         </header>

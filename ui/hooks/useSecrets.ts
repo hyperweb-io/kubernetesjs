@@ -1,111 +1,52 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useKubernetes } from '../contexts/KubernetesContext'
-import type { Secret, SecretList } from 'kubernetesjs'
+import { 
+  useListCoreV1NamespacedSecretQuery,
+  useListCoreV1SecretForAllNamespacesQuery,
+  useReadCoreV1NamespacedSecretQuery,
+  useCreateCoreV1NamespacedSecretMutation,
+  useReplaceCoreV1NamespacedSecretMutation,
+  useDeleteCoreV1NamespacedSecretMutation
+} from '@kubernetesjs/react'
+import { usePreferredNamespace } from '../contexts/NamespaceContext'
 
-// Query keys
-const SECRETS_KEY = ['secrets'] as const
 
 export function useSecrets(namespace?: string) {
-  const { client, namespace: defaultNamespace } = useKubernetes()
+  const { namespace: defaultNamespace } = usePreferredNamespace()
   const ns = namespace || defaultNamespace
 
-  return useQuery<SecretList, Error>({
-    queryKey: [...SECRETS_KEY, ns],
-    queryFn: async () => {
-      if (ns === '_all') {
-        const result = await client.listCoreV1SecretForAllNamespaces({
-          query: {},
-        })
-        return result
-      } else {
-        const result = await client.listCoreV1NamespacedSecret({
-          path: { namespace: ns },
-          query: {},
-        })
-        return result
-      }
-    },
-    refetchOnMount: 'always',
-    staleTime: 0,
+  const allSecretsQuery = useListCoreV1SecretForAllNamespacesQuery({
+    query: {},
   })
+
+  const namespacedSecretsQuery = useListCoreV1NamespacedSecretQuery({
+    path: { namespace: ns },
+    query: {},
+  })
+
+  if (ns === '_all') {
+    return allSecretsQuery
+  } else {
+    return namespacedSecretsQuery
+  }
 }
 
 export function useSecret(name: string, namespace?: string) {
-  const { client, namespace: defaultNamespace } = useKubernetes()
+  const { namespace: defaultNamespace } = usePreferredNamespace()
   const ns = namespace || defaultNamespace
 
-  return useQuery<Secret, Error>({
-    queryKey: [...SECRETS_KEY, ns, name],
-    queryFn: async () => {
-      const result = await client.readCoreV1NamespacedSecret({
-        path: { namespace: ns, name },
-        query: {},
-      })
-      return result
-    },
-    enabled: !!name,
-    refetchOnMount: 'always',
-    staleTime: 0,
+  return useReadCoreV1NamespacedSecretQuery({
+    path: { namespace: ns, name },
+    query: {},
   })
 }
 
 export function useCreateSecret() {
-  const { client, namespace: defaultNamespace } = useKubernetes()
-  const queryClient = useQueryClient()
-
-  return useMutation<Secret, Error, { secret: Secret; namespace?: string }>({
-    mutationFn: async ({ secret, namespace }) => {
-      const ns = namespace || defaultNamespace
-      const result = await client.createCoreV1NamespacedSecret({
-        path: { namespace: ns },
-        query: {},
-        body: secret,
-      })
-      return result
-    },
-    onSuccess: (_, variables) => {
-      const ns = variables.namespace || defaultNamespace
-      queryClient.invalidateQueries({ queryKey: [...SECRETS_KEY, ns] })
-    },
-  })
+  return useCreateCoreV1NamespacedSecretMutation()
 }
 
 export function useUpdateSecret() {
-  const { client, namespace: defaultNamespace } = useKubernetes()
-  const queryClient = useQueryClient()
-
-  return useMutation<Secret, Error, { name: string; secret: Secret; namespace?: string }>({
-    mutationFn: async ({ name, secret, namespace }) => {
-      const ns = namespace || defaultNamespace
-      const result = await client.replaceCoreV1NamespacedSecret({
-        path: { namespace: ns, name },
-        query: {},
-        body: secret,
-      })
-      return result
-    },
-    onSuccess: (_, variables) => {
-      const ns = variables.namespace || defaultNamespace
-      queryClient.invalidateQueries({ queryKey: [...SECRETS_KEY, ns] })
-    },
-  })
+  return useReplaceCoreV1NamespacedSecretMutation()
 }
 
 export function useDeleteSecret() {
-  const { client, namespace: defaultNamespace } = useKubernetes()
-  const queryClient = useQueryClient()
-
-  return useMutation<void, Error, { name: string; namespace?: string }>({
-    mutationFn: async ({ name, namespace }) => {
-      const ns = namespace || defaultNamespace
-      await client.deleteCoreV1NamespacedSecret({
-        path: { namespace: ns, name },
-        query: {},
-      })
-    },
-    onSuccess: (_, variables) => {
-      const ns = variables.namespace || defaultNamespace
-      queryClient.invalidateQueries({ queryKey: [...SECRETS_KEY, ns] })
-    },
-  })
+  return useDeleteCoreV1NamespacedSecretMutation()
 }

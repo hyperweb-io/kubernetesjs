@@ -1,6 +1,7 @@
 'use client'
 
-import { useKubernetes, useNamespaces } from '@/hooks'
+import { useNamespaces } from '@/hooks'
+import { usePreferredNamespace } from '../contexts/NamespaceContext'
 import {
   Select,
   SelectContent,
@@ -13,10 +14,10 @@ import { RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export function NamespaceSwitcher() {
-  const { namespace, setNamespace } = useKubernetes()
+  const { namespace, setNamespace } = usePreferredNamespace()
   const { data, isLoading, error, refetch } = useNamespaces()
 
-  const namespaces = data?.items?.map(item => item.metadata?.name).filter(Boolean) || []
+  const namespaces = data?.items?.map((item: any) => item.metadata?.name).filter(Boolean) || []
 
   return (
     <div className="flex items-center gap-2">
@@ -33,22 +34,22 @@ export function NamespaceSwitcher() {
           <SelectItem value="_all">
             <div className="flex items-center gap-2">
               All Namespaces
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="default" className="text-xs">
                 All
               </Badge>
             </div>
           </SelectItem>
-          {namespaces.map((ns) => (
+          {namespaces.map((ns: any) => (
             <SelectItem key={ns} value={ns!}>
               <div className="flex items-center gap-2">
                 {ns}
                 {ns === 'default' && (
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="default" className="text-xs">
                     Default
                   </Badge>
                 )}
                 {(ns === 'kube-system' || ns === 'kube-public') && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="default" className="text-xs">
                     System
                   </Badge>
                 )}
