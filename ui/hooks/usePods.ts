@@ -1,103 +1,58 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  useListPodsQuery,
+  useListCoreV1NamespacedPodQuery,
+  useReadCoreV1NamespacedPodQuery,
+  useReadCoreV1NamespacedPodLogQuery,
+  useDeleteCoreV1NamespacedPod
+} from '@kubernetesjs/react'
 import { useKubernetes } from '../contexts/KubernetesContext'
-import type { Pod, PodList } from 'kubernetesjs'
-
-// Query keys
-const PODS_KEY = ['pods'] as const
+import type { Pod } from 'kubernetesjs'
 
 export function usePods(namespace?: string) {
-  const { client, namespace: defaultNamespace } = useKubernetes()
+  const { namespace: defaultNamespace } = useKubernetes()
   const ns = namespace || defaultNamespace
 
-  return useQuery<PodList, Error>({
-    queryKey: [...PODS_KEY, ns],
-    queryFn: async () => {
-      if (ns === '_all') {
-        const result = await client.listPods({
-          query: {},
-        })
-        return result
-      } else {
-        const result = await client.listCoreV1NamespacedPod({
-          path: { namespace: ns },
-          query: {},
-        })
-        return result
-      }
-    },
-    refetchOnMount: 'always',
-    staleTime: 0,
-  })
+  if (ns === '_all') {
+    return useListPodsQuery({ query: {} })
+  }
+  return useListCoreV1NamespacedPodQuery({ path: { namespace: ns }, query: {} })
 }
 
 export function usePod(name: string, namespace?: string) {
-  const { client, namespace: defaultNamespace } = useKubernetes()
+  const { namespace: defaultNamespace } = useKubernetes()
   const ns = namespace || defaultNamespace
-
-  return useQuery<Pod, Error>({
-    queryKey: [...PODS_KEY, ns, name],
-    queryFn: async () => {
-      const result = await client.readCoreV1NamespacedPod({
-        path: { namespace: ns, name },
-        query: {},
-      })
-      return result
-    },
-    enabled: !!name,
-  })
+  return useReadCoreV1NamespacedPodQuery({ path: { namespace: ns, name }, query: {} })
 }
 
 export function usePodLogs(name: string, namespace?: string, container?: string) {
-  const { client, namespace: defaultNamespace } = useKubernetes()
+  const { namespace: defaultNamespace } = useKubernetes()
   const ns = namespace || defaultNamespace
-
-  return useQuery<string, Error>({
-    queryKey: [...PODS_KEY, ns, name, 'logs', container],
-    queryFn: async () => {
-      const result = await client.readCoreV1NamespacedPodLog({
-        path: { namespace: ns, name },
-        query: container ? { container } : {},
-      })
-      return result as string
-    },
-    enabled: !!name,
+  return useReadCoreV1NamespacedPodLogQuery({
+    path: { namespace: ns, name },
+    query: container ? { container } : {},
   })
 }
 
 export function useDeletePod() {
-  const { client, namespace: defaultNamespace } = useKubernetes()
-  const queryClient = useQueryClient()
-
-  return useMutation<void, Error, { name: string; namespace?: string }>({
-    mutationFn: async ({ name, namespace }) => {
-      const ns = namespace || defaultNamespace
-      await client.deleteCoreV1NamespacedPod({
-        path: { namespace: ns, name },
-        query: {},
-      })
-    },
-    onSuccess: (_, variables) => {
-      const ns = variables.namespace || defaultNamespace
-      queryClient.invalidateQueries({ queryKey: [...PODS_KEY, ns] })
-    },
-  })
+  const { namespace: defaultNamespace } = useKubernetes()
+  const mutation = useDeleteCoreV1NamespacedPod()
+  return {
+    ...mutation,
+    mutate: ({ name, namespace }) =>
+      mutation.mutate({ path: { namespace: namespace || defaultNamespace, name }, query: {} }),
+    mutateAsync: ({ name, namespace }) =>
+      mutation.mutateAsync({ path: { namespace: namespace || defaultNamespace, name }, query: {} }),
+  }
 }
 
 export function usePodsForDeployment(deploymentName: string, namespace?: string) {
-  const { client, namespace: defaultNamespace } = useKubernetes()
+  const { namespace: defaultNamespace } = useKubernetes()
   const ns = namespace || defaultNamespace
 
-  return useQuery<PodList, Error>({
-    queryKey: [...PODS_KEY, ns, 'deployment', deploymentName],
-    queryFn: async () => {
-      const result = await client.listCoreV1NamespacedPod({
-        path: { namespace: ns },
-        query: {
-          labelSelector: `app=${deploymentName}`,
-        },
-      })
-      return result
+  return useListCoreV1NamespacedPodQuery({
+    path: { namespace: ns },
+    query: {
+      labelSelector: `app=${deploymentName}`,
     },
-    enabled: !!deploymentName,
   })
 }

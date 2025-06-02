@@ -1,8 +1,12 @@
 'use client'
 
-import React, { createContext, useContext, useMemo, useState } from 'react'
+import React, { createContext, useContext, useState } from 'react'
+import {
+  KubernetesProvider as BaseKubernetesProvider,
+  useKubernetes as useBaseKubernetes,
+  queryClient
+} from '@kubernetesjs/react'
 import { KubernetesClient } from 'kubernetesjs'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Configuration types
 export interface KubernetesConfig {
@@ -23,17 +27,7 @@ interface KubernetesContextValue {
 // Create context
 const KubernetesContext = createContext<KubernetesContextValue | undefined>(undefined)
 
-// Query client for TanStack Query
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 3,
-      staleTime: 30 * 1000, // 30 seconds
-      gcTime: 5 * 60 * 1000, // 5 minutes
-    },
-  },
-})
+
 
 // Provider props
 interface KubernetesProviderProps {
@@ -42,48 +36,46 @@ interface KubernetesProviderProps {
 }
 
 // Provider component
-export function KubernetesProvider({ 
-  children, 
-  initialConfig 
-}: KubernetesProviderProps) {
-  const [config, setConfig] = useState<KubernetesConfig>({
-    restEndpoint: initialConfig?.restEndpoint || process.env.NEXT_PUBLIC_K8S_API_URL || '/api/k8s',
-    namespace: initialConfig?.namespace || 'default',
-    headers: initialConfig?.headers || {},
-  })
+export function KubernetesProvider({ children, initialConfig }: KubernetesProviderProps) {
+  const [namespace, setNamespace] = useState(initialConfig?.namespace || 'default')
 
-  const [namespace, setNamespace] = useState(config.namespace || 'default')
+  return (
+    <BaseKubernetesProvider
+      initialConfig={{
+        restEndpoint: initialConfig?.restEndpoint || process.env.NEXT_PUBLIC_K8S_API_URL || '/api/k8s',
+        headers: initialConfig?.headers || {}
+      }}
+    >
+      <InnerProvider namespace={namespace} setNamespace={setNamespace}>{children}</InnerProvider>
+    </BaseKubernetesProvider>
+  )
+}
 
-  // Create client instance
-  const client = useMemo(() => {
-    return new KubernetesClient({
-      restEndpoint: config.restEndpoint,
-    })
-  }, [config.restEndpoint])
+interface InnerProviderProps {
+  children: React.ReactNode
+  namespace: string
+  setNamespace: (namespace: string) => void
+}
 
-  // Update config function
-  const updateConfig = (newConfig: Partial<KubernetesConfig>) => {
-    setConfig(prev => ({ ...prev, ...newConfig }))
-    if (newConfig.namespace) {
-      setNamespace(newConfig.namespace)
+function InnerProvider({ children, namespace, setNamespace }: InnerProviderProps) {
+  const base = useBaseKubernetes()
+
+  const updateConfig = (config: Partial<KubernetesConfig>) => {
+    base.updateConfig(config)
+    if (config.namespace) {
+      setNamespace(config.namespace)
     }
   }
 
   const contextValue: KubernetesContextValue = {
-    client,
-    config,
+    client: base.client as KubernetesClient,
+    config: { ...base.config, namespace },
     namespace,
     setNamespace,
     updateConfig,
   }
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <KubernetesContext.Provider value={contextValue}>
-        {children}
-      </KubernetesContext.Provider>
-    </QueryClientProvider>
-  )
+  return <KubernetesContext.Provider value={contextValue}>{children}</KubernetesContext.Provider>
 }
 
 // Hook to use Kubernetes context
