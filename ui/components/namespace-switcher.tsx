@@ -1,6 +1,7 @@
 'use client'
 
-import { useKubernetes, useNamespaces } from '@/hooks'
+import { useNamespaces } from '@/hooks'
+import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 import {
   Select,
   SelectContent,
@@ -13,7 +14,7 @@ import { RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export function NamespaceSwitcher() {
-  const { namespace, setNamespace } = useKubernetes()
+  const { namespace, setNamespace } = usePreferredNamespace()
   const { data, isLoading, error, refetch } = useNamespaces()
 
   const namespaces = data?.items?.map(item => item.metadata?.name).filter(Boolean) || []

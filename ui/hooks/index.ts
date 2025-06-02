@@ -9,4 +9,4 @@ export * from './useDaemonSets'
 export * from './useReplicaSets'
 
 // Re-export context hook
-export { useKubernetes } from '../contexts/KubernetesContext'
+export { useKubernetes } from '@kubernetesjs/react/context'
