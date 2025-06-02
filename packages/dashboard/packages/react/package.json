@@ -52,11 +52,11 @@
   "dependencies": {
     "react": "^18.2.0",
     "@tanstack/react-query": "^5.56.1",
-    "kubernetesjs": "^0.11.1"
+    "kubernetesjs": "^0.6.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.77",
-    "schema-sdk": "^0.11.1",
+    "schema-sdk": "^0.11.3",
     "react": "^18.2.0"
   }
 }
