@@ -7641,10 +7641,10 @@ scheduler@^0.23.2:
   dependencies:
     loose-envify "^1.1.0"
 
-schema-sdk@^0.11.1:
-  version "0.11.1"
-  resolved "https://registry.yarnpkg.com/schema-sdk/-/schema-sdk-0.11.1.tgz#d237e4a32f66ebaeb611f81f0e2cfe9eb2d791dc"
-  integrity sha512-kuZGUyd2andleYpsWvpv1yC4lI5w2ZumVFDx7SPVbjXLW4hUXmm7OVmjbaaV6zm5HAG1lpxMvB+kpwp77r+BZw==
+schema-sdk@^0.11.3:
+  version "0.11.3"
+  resolved "https://registry.yarnpkg.com/schema-sdk/-/schema-sdk-0.11.3.tgz#cea5d1bf747e04824a8a848af8d2c51990b16b2f"
+  integrity sha512-clsw2kq2jkXAEhVw7qc1vV1xVBNUSbDc9OqhxU69XlKtiZaOfjz1viPB1FAFW4vFBM98YTzKNDDPA/jEh5Rr8A==
   dependencies:
     "@babel/generator" "^7.24.4"
     "@babel/types" "^7.24.0"

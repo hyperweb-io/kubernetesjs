@@ -75,7 +75,7 @@ export function KubernetesProvider({
 }
 
 // Hook to use Kubernetes context
-export function useKubernetes() {
+export function useKubernetes(): KubernetesContextValue {
   const context = useContext(KubernetesContext)
   if (!context) {
     throw new Error('useKubernetes must be used within a KubernetesProvider')
