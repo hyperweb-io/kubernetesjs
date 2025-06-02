@@ -1,6 +1,7 @@
 'use client'
 
-import { KubernetesProvider } from '@/contexts/KubernetesContext'
+import { KubernetesProvider } from '@kubernetesjs/react'
+import { NamespaceProvider } from '@/contexts/NamespaceContext'
 
 interface ProvidersProps {
   children: React.ReactNode
@@ -9,7 +10,7 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   return (
     <KubernetesProvider>
-      {children}
+      <NamespaceProvider>{children}</NamespaceProvider>
     </KubernetesProvider>
   )
 }

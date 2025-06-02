@@ -17,7 +17,7 @@ import {
   XCircle
 } from 'lucide-react'
 import { type Pod as K8sPod } from 'kubernetesjs'
-import { usePods, useDeletePod, usePodLogs, useKubernetes } from '@/hooks'
+import { usePods, useDeletePod, usePodLogs, usePreferredNamespace } from '@/hooks'
 
 interface Pod {
   name: string
@@ -34,7 +34,7 @@ export function PodsView() {
   const [selectedPod, setSelectedPod] = useState<Pod | null>(null)
   
   // Use TanStack Query hooks
-  const { namespace } = useKubernetes()
+  const { namespace } = usePreferredNamespace()
   const { data, isLoading, error, refetch } = usePods()
   const deletePodMutation = useDeletePod()
   

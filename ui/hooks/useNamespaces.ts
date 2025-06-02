@@ -1,80 +1,52 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useKubernetes } from '../contexts/KubernetesContext'
-import type { Namespace, NamespaceList } from 'kubernetesjs'
-
-// Query keys
-const NAMESPACES_KEY = ['namespaces'] as const
+import {
+  useListCoreV1NamespaceQuery,
+  useReadCoreV1NamespaceQuery,
+  useCreateCoreV1Namespace,
+  useDeleteCoreV1Namespace
+} from '@kubernetesjs/react'
 
 export function useNamespaces() {
-  const { client } = useKubernetes()
-
-  return useQuery<NamespaceList, Error>({
-    queryKey: NAMESPACES_KEY,
-    queryFn: async () => {
-      const result = await client.listCoreV1Namespace({
-        path: {},
-        query: {},
-      })
-      return result
-    },
-  })
+  return useListCoreV1NamespaceQuery({ path: {}, query: {} })
 }
 
 export function useNamespace(name: string) {
-  const { client } = useKubernetes()
-
-  return useQuery<Namespace, Error>({
-    queryKey: [...NAMESPACES_KEY, name],
-    queryFn: async () => {
-      const result = await client.readCoreV1Namespace({
-        path: { name },
-        query: {},
-      })
-      return result
-    },
-    enabled: !!name,
-  })
+  return useReadCoreV1NamespaceQuery({ path: { name }, query: {} })
 }
 
 export function useCreateNamespace() {
-  const { client } = useKubernetes()
-  const queryClient = useQueryClient()
-
-  return useMutation<Namespace, Error, { name: string; labels?: Record<string, string> }>({
-    mutationFn: async ({ name, labels }) => {
-      const result = await client.createCoreV1Namespace({
+  const mutation = useCreateCoreV1Namespace()
+  return {
+    ...mutation,
+    mutate: ({ name, labels }) =>
+      mutation.mutate({
         path: {},
         query: {},
         body: {
           apiVersion: 'v1',
           kind: 'Namespace',
-          metadata: {
-            name,
-            labels,
-          },
+          metadata: { name, labels },
         },
-      })
-      return result
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: NAMESPACES_KEY })
-    },
-  })
+      }),
+    mutateAsync: ({ name, labels }) =>
+      mutation.mutateAsync({
+        path: {},
+        query: {},
+        body: {
+          apiVersion: 'v1',
+          kind: 'Namespace',
+          metadata: { name, labels },
+        },
+      }),
+  }
 }
 
 export function useDeleteNamespace() {
-  const { client } = useKubernetes()
-  const queryClient = useQueryClient()
-
-  return useMutation<void, Error, string>({
-    mutationFn: async (name) => {
-      await client.deleteCoreV1Namespace({
-        path: { name },
-        query: {},
-      })
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: NAMESPACES_KEY })
-    },
-  })
+  const mutation = useDeleteCoreV1Namespace()
+  return {
+    ...mutation,
+    mutate: (name: string) =>
+      mutation.mutate({ path: { name }, query: {} }),
+    mutateAsync: (name: string) =>
+      mutation.mutateAsync({ path: { name }, query: {} }),
+  }
 }
