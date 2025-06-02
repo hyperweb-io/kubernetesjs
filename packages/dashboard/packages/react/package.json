@@ -1,8 +1,8 @@
 {
-  "name": "kubernetesjs",
+  "name": "@kubernetesjs/react",
   "version": "0.6.0",
   "author": "Dan Lynch <pyramation@gmail.com>",
-  "description": "Fully Typed Kubernetes",
+  "description": "Fully Typed Kubernetes React Hooks",
   "keywords": [
     "kubernetes",
     "k8s",
@@ -49,7 +49,14 @@
     "test:list": "ts-node scripts/list.ts",
     "test:deploy": "ts-node scripts/deploy.ts"
   },
+  "dependencies": {
+    "react": "^18.2.0",
+    "@tanstack/react-query": "^5.56.1",
+    "kubernetesjs": "^0.11.1"
+  },
   "devDependencies": {
-    "schema-sdk": "^0.11.1"
+    "@types/react": "^18.2.77",
+    "schema-sdk": "^0.11.1",
+    "react": "^18.2.0"
   }
 }

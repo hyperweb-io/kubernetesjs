@@ -400,12 +400,18 @@
   resolved "https://registry.yarnpkg.com/@interweb-utils/casing/-/casing-0.2.0.tgz#dbe9aa742cadf60805511093c9afa66290a50e28"
   integrity sha512-ORQySrHzMYmtVRkYvtE1HGa8QnoqYPhu5UWQyv9302D/ZZe0Ae6cpk4NH1xEXgHeFq/CraiOcnLhmc3h7wdNHg==
 
-"@interweb/fetch-api-client@^0.5.1":
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/@interweb/fetch-api-client/-/fetch-api-client-0.5.1.tgz#47fb609d08acf40510a4c9689e62fde8459182a8"
-  integrity sha512-3LSUE+/QnKH+u3yvYy+qH8BlGi9Zaxx4iKdjD3lDcI14jVrb/Nsos8OXaFzCUHeDS9a3ByfH42tTNnmEI+SjPA==
+"@interweb/fetch-api-client@^0.6.1":
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/@interweb/fetch-api-client/-/fetch-api-client-0.6.1.tgz#8f50e7651aeca0513daae649be4cdd6d4f440ebd"
+  integrity sha512-+QfJrK8c+uGhnIkGaoLeyuL7NuLbNgH8AeZwVkGqtOr9/hkrYMJQN+Jnw06TJeeuM12R8QZgM/0M8bpdG8KnlQ==
   dependencies:
+    "@interweb/http-errors" "^0.1.1"
     isomorphic-fetch "^3.0.0"
+
+"@interweb/http-errors@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@interweb/http-errors/-/http-errors-0.1.1.tgz#f38c5337bec03fb20397a8e8d8cb5c76c2eaa973"
+  integrity sha512-JEwL0a8ixMT1WQwx4YNEHLiFrB/7QKxMU2j/HxycdS1BIfZxWVLggdmONHENdmsVPOuaxUJduGmhzFVidOL0IA==
 
 "@isaacs/cliui@^8.0.2":
   version "8.0.2"
@@ -1623,7 +1629,7 @@
   resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.79.0.tgz#947e13c409555a8ca0a17abdf3dff9eb77af45e6"
   integrity sha512-s+epTqqLM0/TbJzMAK7OEhZIzh63P9sWz5HEFc5XHL4FvKQXQkcjI8F3nee+H/xVVn7mrP610nVXwOytTSYd0w==
 
-"@tanstack/react-query@^5.29.0":
+"@tanstack/react-query@^5.29.0", "@tanstack/react-query@^5.56.1":
   version "5.79.0"
   resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.79.0.tgz#91a41d92dcd92b2cd544bafdcc2c2bd7d06396c6"
   integrity sha512-DjC4JIYZnYzxaTzbg3osOU63VNLP67dOrWet2cZvXgmgwAXNxfS52AMq86M5++ILuzW+BqTUEVMTjhrZ7/XBuA==
@@ -1803,7 +1809,7 @@
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-18.3.7.tgz#b89ddf2cd83b4feafcc4e2ea41afdfb95a0d194f"
   integrity sha512-MEe3UeoENYVFXzoXEWsvcpg6ZvlrFNlOQ7EOsvhI3CfAXwzPfO8Qwuxd40nepsYKqyyVQnTdEfv68q91yLcKrQ==
 
-"@types/react@^18.2.48":
+"@types/react@^18.2.48", "@types/react@^18.2.77":
   version "18.3.23"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.3.23.tgz#86ae6f6b95a48c418fecdaccc8069e0fbb63696a"
   integrity sha512-/LDXMQh55EzZQ0uVAZmKKhfENivEvWz6E+EYzh+/MCjMhNsotd+ZHhBGIjFDTi6+fz0OhQQQLbTgdQIxxCsC0w==
@@ -7635,22 +7641,22 @@ scheduler@^0.23.2:
   dependencies:
     loose-envify "^1.1.0"
 
-schema-sdk@^0.7.0:
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/schema-sdk/-/schema-sdk-0.7.1.tgz#883a72eaed88b068f0125073a2903ccbda7b7536"
-  integrity sha512-uXQofRZ0GZ1nKiwhFP4qjU6KMQfBlr7L9naaCxJb/ygFWgkIejHouSDl9tTwtkHwbX9nSXV6WgPfbU9nqmukLw==
+schema-sdk@^0.11.1:
+  version "0.11.1"
+  resolved "https://registry.yarnpkg.com/schema-sdk/-/schema-sdk-0.11.1.tgz#d237e4a32f66ebaeb611f81f0e2cfe9eb2d791dc"
+  integrity sha512-kuZGUyd2andleYpsWvpv1yC4lI5w2ZumVFDx7SPVbjXLW4hUXmm7OVmjbaaV6zm5HAG1lpxMvB+kpwp77r+BZw==
   dependencies:
     "@babel/generator" "^7.24.4"
     "@babel/types" "^7.24.0"
     "@interweb-utils/casing" "^0.2.0"
-    "@interweb/fetch-api-client" "^0.5.1"
+    "@interweb/fetch-api-client" "^0.6.1"
     deepmerge "^4.3.1"
-    schema-typescript "^0.10.0"
+    schema-typescript "^0.12.1"
 
-schema-typescript@^0.10.0:
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/schema-typescript/-/schema-typescript-0.10.0.tgz#6b43c91b57f0a51bb62b4945ccca9c96f316f246"
-  integrity sha512-KmZLpqPcci1d080AwrzR9OVUwg4aixcxv2WeJMtxe+M5q7giYhfQN6HFPX2NyktjEeqYQS2ASnF8e9RMtkVAGw==
+schema-typescript@^0.12.1:
+  version "0.12.1"
+  resolved "https://registry.yarnpkg.com/schema-typescript/-/schema-typescript-0.12.1.tgz#38340e18f23d72f5beb5e4b49387d8be3c27bcde"
+  integrity sha512-dgfQrLjqsXEAC7vZ3fJDBsIPpUDJ2SrzuQFvXslrEjVjOSQyVykBua2tNmM4uFn4uIL7K3Ux64pXbaUnngkhhw==
   dependencies:
     "@babel/generator" "^7.24.4"
     "@babel/types" "^7.24.0"
