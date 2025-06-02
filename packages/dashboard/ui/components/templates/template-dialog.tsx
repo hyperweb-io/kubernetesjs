@@ -15,7 +15,8 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
 import { type Deployment, type Service } from 'kubernetesjs'
-import { useKubernetes } from '@/hooks'
+import { useKubernetes } from '@kubernetesjs/react/context'
+import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 
 interface Template {
   id: string
@@ -36,7 +37,8 @@ interface TemplateDialogProps {
 }
 
 export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogProps) {
-  const { client: k8sClient, namespace: contextNamespace } = useKubernetes()
+  const { client: k8sClient } = useKubernetes()
+  const { namespace: contextNamespace } = usePreferredNamespace()
 
   // Deploy template function
   const deployTemplate = async (params: {

@@ -1,145 +1,143 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useKubernetes } from '../contexts/KubernetesContext'
-import type { Deployment, DeploymentList } from 'kubernetesjs'
+import {
+  useListAppsV1DeploymentForAllNamespacesQuery,
+  useListAppsV1NamespacedDeploymentQuery,
+  useReadAppsV1NamespacedDeploymentQuery,
+  useCreateAppsV1NamespacedDeployment,
+  useReplaceAppsV1NamespacedDeployment,
+  useDeleteAppsV1NamespacedDeployment,
+  useReplaceAppsV1NamespacedDeploymentScale,
+} from '@kubernetesjs/react'
+import { usePreferredNamespace } from '../contexts/NamespaceContext'
+import type { Deployment, DeploymentList, Scale } from 'kubernetesjs'
 
 // Query keys
 const DEPLOYMENTS_KEY = ['deployments'] as const
 
 export function useDeployments(namespace?: string) {
-  const { client, namespace: defaultNamespace } = useKubernetes()
+  const { namespace: defaultNamespace } = usePreferredNamespace()
   const ns = namespace || defaultNamespace
 
-  return useQuery<DeploymentList, Error>({
-    queryKey: [...DEPLOYMENTS_KEY, ns],
-    queryFn: async () => {
-      if (ns === '_all') {
-        // Fetch from all namespaces
-        const result = await client.listAppsV1DeploymentForAllNamespaces({
-          query: {},
-        })
-        return result
-      } else {
-        // Fetch from specific namespace
-        const result = await client.listAppsV1NamespacedDeployment({
-          path: { namespace: ns },
-          query: {},
-        })
-        return result
-      }
-    },
-    refetchOnMount: 'always',
-    staleTime: 0,
-  })
+  if (ns === '_all') {
+    return useListAppsV1DeploymentForAllNamespacesQuery({ path: {}, query: {} })
+  }
+  return useListAppsV1NamespacedDeploymentQuery({ path: { namespace: ns }, query: {} })
 }
 
 export function useDeployment(name: string, namespace?: string) {
-  const { client, namespace: defaultNamespace } = useKubernetes()
+  const { namespace: defaultNamespace } = usePreferredNamespace()
   const ns = namespace || defaultNamespace
 
-  return useQuery<Deployment, Error>({
-    queryKey: [...DEPLOYMENTS_KEY, ns, name],
-    queryFn: async () => {
-      const result = await client.readAppsV1NamespacedDeployment({
-        path: { namespace: ns, name },
-        query: {},
-      })
-      return result
-    },
-    enabled: !!name,
-  })
+  return useReadAppsV1NamespacedDeploymentQuery({ path: { namespace: ns, name }, query: {} })
 }
 
 export function useCreateDeployment() {
-  const { client, namespace: defaultNamespace } = useKubernetes()
-  const queryClient = useQueryClient()
-
-  return useMutation<Deployment, Error, { deployment: Deployment; namespace?: string }>({
-    mutationFn: async ({ deployment, namespace }) => {
-      const ns = namespace || defaultNamespace
-      const result = await client.createAppsV1NamespacedDeployment({
-        path: { namespace: ns },
-        query: {},
-        body: deployment,
-      })
-      return result
-    },
-    onSuccess: (_, variables) => {
-      const ns = variables.namespace || defaultNamespace
-      queryClient.invalidateQueries({ queryKey: [...DEPLOYMENTS_KEY, ns] })
-    },
-  })
+  const { namespace: defaultNamespace } = usePreferredNamespace()
+  const base = useCreateAppsV1NamespacedDeployment()
+  return {
+    ...base,
+    mutate: (
+      { deployment, namespace }: { deployment: Deployment; namespace?: string },
+      opts?: Parameters<typeof base.mutate>[1]
+    ) =>
+      base.mutate(
+        { path: { namespace: namespace || defaultNamespace }, query: {}, body: deployment },
+        opts
+      ),
+    mutateAsync: (
+      { deployment, namespace }: { deployment: Deployment; namespace?: string },
+      opts?: Parameters<typeof base.mutateAsync>[1]
+    ) =>
+      base.mutateAsync(
+        { path: { namespace: namespace || defaultNamespace }, query: {}, body: deployment },
+        opts
+      ),
+  }
 }
 
 export function useUpdateDeployment() {
-  const { client, namespace: defaultNamespace } = useKubernetes()
-  const queryClient = useQueryClient()
-
-  return useMutation<Deployment, Error, { name: string; deployment: Deployment; namespace?: string }>({
-    mutationFn: async ({ name, deployment, namespace }) => {
-      const ns = namespace || defaultNamespace
-      const result = await client.replaceAppsV1NamespacedDeployment({
-        path: { namespace: ns, name },
-        query: {},
-        body: deployment,
-      })
-      return result
-    },
-    onSuccess: (_, variables) => {
-      const ns = variables.namespace || defaultNamespace
-      queryClient.invalidateQueries({ queryKey: [...DEPLOYMENTS_KEY, ns] })
-    },
-  })
+  const { namespace: defaultNamespace } = usePreferredNamespace()
+  const base = useReplaceAppsV1NamespacedDeployment()
+  return {
+    ...base,
+    mutate: (
+      { name, deployment, namespace }: { name: string; deployment: Deployment; namespace?: string },
+      opts?: Parameters<typeof base.mutate>[1]
+    ) =>
+      base.mutate(
+        { path: { namespace: namespace || defaultNamespace, name }, query: {}, body: deployment },
+        opts
+      ),
+    mutateAsync: (
+      { name, deployment, namespace }: { name: string; deployment: Deployment; namespace?: string },
+      opts?: Parameters<typeof base.mutateAsync>[1]
+    ) =>
+      base.mutateAsync(
+        { path: { namespace: namespace || defaultNamespace, name }, query: {}, body: deployment },
+        opts
+      ),
+  }
 }
 
 export function useDeleteDeployment() {
-  const { client, namespace: defaultNamespace } = useKubernetes()
-  const queryClient = useQueryClient()
-
-  return useMutation<void, Error, { name: string; namespace?: string }>({
-    mutationFn: async ({ name, namespace }) => {
-      const ns = namespace || defaultNamespace
-      await client.deleteAppsV1NamespacedDeployment({
-        path: { namespace: ns, name },
-        query: {},
-      })
-    },
-    onSuccess: (_, variables) => {
-      const ns = variables.namespace || defaultNamespace
-      queryClient.invalidateQueries({ queryKey: [...DEPLOYMENTS_KEY, ns] })
-    },
-  })
+  const { namespace: defaultNamespace } = usePreferredNamespace()
+  const base = useDeleteAppsV1NamespacedDeployment()
+  return {
+    ...base,
+    mutate: (
+      { name, namespace }: { name: string; namespace?: string },
+      opts?: Parameters<typeof base.mutate>[1]
+    ) =>
+      base.mutate(
+        { path: { namespace: namespace || defaultNamespace, name }, query: {} },
+        opts
+      ),
+    mutateAsync: (
+      { name, namespace }: { name: string; namespace?: string },
+      opts?: Parameters<typeof base.mutateAsync>[1]
+    ) =>
+      base.mutateAsync(
+        { path: { namespace: namespace || defaultNamespace, name }, query: {} },
+        opts
+      ),
+  }
 }
 
 export function useScaleDeployment() {
-  const { client, namespace: defaultNamespace } = useKubernetes()
-  const queryClient = useQueryClient()
-
-  return useMutation<Deployment, Error, { name: string; replicas: number; namespace?: string }>({
-    mutationFn: async ({ name, replicas, namespace }) => {
-      const ns = namespace || defaultNamespace
-      
-      // First, get the current deployment
-      const deployment = await client.readAppsV1NamespacedDeployment({
-        path: { namespace: ns, name },
-        query: {},
-      })
-      
-      // Update the replicas
-      if (deployment.spec) {
-        deployment.spec.replicas = replicas
-      }
-      
-      // Update the deployment
-      const result = await client.replaceAppsV1NamespacedDeployment({
-        path: { namespace: ns, name },
-        query: {},
-        body: deployment,
-      })
-      return result
-    },
-    onSuccess: (_, variables) => {
-      const ns = variables.namespace || defaultNamespace
-      queryClient.invalidateQueries({ queryKey: [...DEPLOYMENTS_KEY, ns] })
-    },
-  })
+  const { namespace: defaultNamespace } = usePreferredNamespace()
+  const base = useReplaceAppsV1NamespacedDeploymentScale()
+  return {
+    ...base,
+    mutate: (
+      { name, replicas, namespace }: { name: string; replicas: number; namespace?: string },
+      opts?: Parameters<typeof base.mutate>[1]
+    ) =>
+      base.mutate(
+        {
+          path: { namespace: namespace || defaultNamespace, name },
+          body: {
+            apiVersion: 'autoscaling/v1',
+            kind: 'Scale',
+            metadata: { name, namespace: namespace || defaultNamespace },
+            spec: { replicas },
+          } as Scale,
+        },
+        opts
+      ),
+    mutateAsync: (
+      { name, replicas, namespace }: { name: string; replicas: number; namespace?: string },
+      opts?: Parameters<typeof base.mutateAsync>[1]
+    ) =>
+      base.mutateAsync(
+        {
+          path: { namespace: namespace || defaultNamespace, name },
+          body: {
+            apiVersion: 'autoscaling/v1',
+            kind: 'Scale',
+            metadata: { name, namespace: namespace || defaultNamespace },
+            spec: { replicas },
+          } as Scale,
+        },
+        opts
+      ),
+  }
 }

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { NamespaceSwitcher } from '@/components/namespace-switcher'
-import { useKubernetes } from '@/hooks'
+import { useKubernetes } from '@kubernetesjs/react/context'
 import {
   Package,
   Server,
