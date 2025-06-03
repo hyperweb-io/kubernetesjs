@@ -81,6 +81,7 @@ export function DeploymentsView() {
           replicas: Number(newReplicas),
           namespace: deployment.namespace
         })
+        refetch()
       } catch (err) {
         console.error('Failed to scale deployment:', err)
         alert(`Failed to scale deployment: ${err instanceof Error ? err.message : 'Unknown error'}`)
@@ -95,6 +96,7 @@ export function DeploymentsView() {
           name: deployment.name,
           namespace: deployment.namespace
         })
+        refetch()
       } catch (err) {
         console.error('Failed to delete deployment:', err)
         alert(`Failed to delete deployment: ${err instanceof Error ? err.message : 'Unknown error'}`)

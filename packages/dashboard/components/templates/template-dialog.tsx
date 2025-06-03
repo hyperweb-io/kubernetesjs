@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, CheckCircle, XCircle } from 'lucide-react'
 import { type Deployment, type Service } from 'kubernetesjs'
-import { useKubernetes } from '../../k8s/context'
+import { useCreateAppsV1NamespacedDeployment, useCreateCoreV1NamespacedService } from '../../k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 
 interface Template {
@@ -37,7 +37,8 @@ interface TemplateDialogProps {
 }
 
 export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogProps) {
-  const { client: k8sClient } = useKubernetes()
+  const { mutateAsync: createDeployment } = useCreateAppsV1NamespacedDeployment()
+  const { mutateAsync: createService } = useCreateCoreV1NamespacedService()
   const { namespace: contextNamespace } = usePreferredNamespace()
 
   // Deploy template function
@@ -119,14 +120,14 @@ export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogP
     }
 
     // Create deployment first using typed client
-    await k8sClient.createAppsV1NamespacedDeployment({
+    await createDeployment({
       path: { namespace },
       query: {},
       body: deployment,
     })
 
     // Then create service using typed client
-    await k8sClient.createCoreV1NamespacedService({
+    await createService({
       path: { namespace },
       query: {},
       body: service,

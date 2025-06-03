@@ -73,6 +73,7 @@ export function ServicesView() {
           name: service.name,
           namespace: service.namespace
         })
+        refetch();
       } catch (err) {
         console.error('Failed to delete service:', err)
         alert(`Failed to delete service: ${err instanceof Error ? err.message : 'Unknown error'}`)
