@@ -7,7 +7,7 @@
 A modern, React-based dashboard for interacting with Kubernetes clusters, powered by Hyperweb. Provides an intuitive UI to view and manage resources like pods, deployments, services, and more.
 
 <p align="center" width="100%">
-   <img src="https://raw.githubusercontent.com/hyperweb-io/dashboard/refs/heads/main/assets/screenshot.png" alt="hyperweb dashboard" width="500">
+   <img src="assets/screenshot.png" alt="hyperweb dashboard" width="500">
 </p>
 
 ## Table of Contents
