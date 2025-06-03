@@ -14,7 +14,7 @@ import {
   CheckCircle,
   HardDrive,
   Link,
-  LinkOff
+  Link2Off
 } from 'lucide-react'
 import { 
   useListCoreV1PersistentVolumeQuery,
@@ -67,7 +67,7 @@ export function PVsView() {
         </Badge>
       case 'Released':
         return <Badge variant="warning" className="flex items-center gap-1">
-          <LinkOff className="w-3 h-3" />
+          <Link2Off className="w-3 h-3" />
           {phase}
         </Badge>
       case 'Failed':

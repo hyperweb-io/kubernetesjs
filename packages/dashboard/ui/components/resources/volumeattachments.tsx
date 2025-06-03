@@ -13,7 +13,7 @@ import {
   AlertCircle,
   CheckCircle,
   Link,
-  LinkOff,
+  Link2Off,
   Server
 } from 'lucide-react'
 import { 
@@ -62,7 +62,7 @@ export function VolumeAttachmentsView() {
         </Badge>
       case 'Detached':
         return <Badge variant="secondary" className="flex items-center gap-1">
-          <LinkOff className="w-3 h-3" />
+          <Link2Off className="w-3 h-3" />
           {status}
         </Badge>
       default:
