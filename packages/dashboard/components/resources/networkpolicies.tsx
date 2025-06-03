@@ -24,6 +24,8 @@ import {
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 import type { NetworkPolicy } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function NetworkPoliciesView() {
   const [selectedPolicy, setSelectedPolicy] = useState<NetworkPolicy | null>(null)
   const { namespace } = usePreferredNamespace()
@@ -43,7 +45,14 @@ export function NetworkPoliciesView() {
     const name = policy.metadata!.name!
     const namespace = policy.metadata!.namespace!
     
-    if (confirm(`Are you sure you want to delete ${name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Network Policy',
+      description: `Are you sure you want to delete ${name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deletePolicy.mutateAsync({
           path: { namespace, name },

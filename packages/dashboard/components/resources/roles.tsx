@@ -25,6 +25,8 @@ import {
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 import type { Role, ClusterRole } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function RolesView() {
   const [selectedRole, setSelectedRole] = useState<Role | ClusterRole | null>(null)
   const [showClusterRoles, setShowClusterRoles] = useState(false)
@@ -51,7 +53,14 @@ export function RolesView() {
   const handleDelete = async (role: Role | ClusterRole) => {
     const name = role.metadata!.name!
     
-    if (confirm(`Are you sure you want to delete ${name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Role',
+      description: `Are you sure you want to delete ${name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         if (showClusterRoles) {
           await deleteClusterRole.mutateAsync({

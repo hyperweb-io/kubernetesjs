@@ -22,6 +22,8 @@ import {
 } from '@/k8s'
 import type { PersistentVolume } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function PVsView() {
   const [selectedPV, setSelectedPV] = useState<PersistentVolume | null>(null)
   
@@ -35,7 +37,14 @@ export function PVsView() {
   const handleDelete = async (pv: PersistentVolume) => {
     const name = pv.metadata!.name!
     
-    if (confirm(`Are you sure you want to delete ${name}? This may cause data loss.`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Persistent Volume',
+      description: `Are you sure you want to delete ${name}? This may cause data loss.`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deletePV.mutateAsync({
           path: { name },

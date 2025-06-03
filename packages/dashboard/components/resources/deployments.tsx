@@ -18,6 +18,8 @@ import {
 import { type Deployment as K8sDeployment } from 'kubernetesjs'
 import { useDeployments, useDeleteDeployment, useScaleDeployment } from '@/hooks'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 interface Deployment {
   name: string
   namespace: string
@@ -90,7 +92,14 @@ export function DeploymentsView() {
   }
 
   const handleDelete = async (deployment: Deployment) => {
-    if (confirm(`Are you sure you want to delete ${deployment.name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Deployment',
+      description: `Are you sure you want to delete ${deployment.name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteDeploymentMutation.mutateAsync({
           name: deployment.name,

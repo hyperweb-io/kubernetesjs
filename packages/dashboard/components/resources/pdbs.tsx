@@ -23,6 +23,8 @@ import {
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 import type { PodDisruptionBudget } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function PDBsView() {
   const [selectedPDB, setSelectedPDB] = useState<PodDisruptionBudget | null>(null)
   const { namespace } = usePreferredNamespace()
@@ -42,7 +44,14 @@ export function PDBsView() {
     const name = pdb.metadata!.name!
     const namespace = pdb.metadata!.namespace!
     
-    if (confirm(`Are you sure you want to delete ${name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Pod Disruption Budget',
+      description: `Are you sure you want to delete ${name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deletePDB.mutateAsync({
           path: { namespace, name },

@@ -24,6 +24,8 @@ import {
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 import type { Ingress } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function IngressesView() {
   const [selectedIngress, setSelectedIngress] = useState<Ingress | null>(null)
   const { namespace } = usePreferredNamespace()
@@ -43,7 +45,14 @@ export function IngressesView() {
     const name = ingress.metadata!.name!
     const namespace = ingress.metadata!.namespace!
     
-    if (confirm(`Are you sure you want to delete ${name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Ingress',
+      description: `Are you sure you want to delete ${name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteIngress.mutateAsync({
           path: { namespace, name },

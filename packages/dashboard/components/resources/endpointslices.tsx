@@ -23,6 +23,8 @@ import {
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 import type { EndpointSlice } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function EndpointSlicesView() {
   const [selectedSlice, setSelectedSlice] = useState<EndpointSlice | null>(null)
   const { namespace } = usePreferredNamespace()
@@ -42,7 +44,14 @@ export function EndpointSlicesView() {
     const name = slice.metadata!.name!
     const namespace = slice.metadata!.namespace!
     
-    if (confirm(`Are you sure you want to delete ${name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Endpoint Slice',
+      description: `Are you sure you want to delete ${name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteSlice.mutateAsync({
           path: { namespace, name },

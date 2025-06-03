@@ -24,6 +24,8 @@ import {
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 import type { HorizontalPodAutoscaler } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function HPAsView() {
   const [selectedHPA, setSelectedHPA] = useState<HorizontalPodAutoscaler | null>(null)
   const { namespace } = usePreferredNamespace()
@@ -43,7 +45,14 @@ export function HPAsView() {
     const name = hpa.metadata!.name!
     const namespace = hpa.metadata!.namespace!
     
-    if (confirm(`Are you sure you want to delete ${name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Horizontal Pod Autoscaler',
+      description: `Are you sure you want to delete ${name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteHPA.mutateAsync({
           path: { namespace, name },

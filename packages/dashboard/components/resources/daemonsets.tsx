@@ -17,6 +17,8 @@ import {
 import { type DaemonSet as K8sDaemonSet } from 'kubernetesjs'
 import { useDaemonSets, useDeleteDaemonSet } from '@/hooks/useDaemonSets'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 interface DaemonSet {
   name: string
   namespace: string
@@ -72,7 +74,14 @@ export function DaemonSetsView() {
   }
 
   const handleDelete = async (daemonSet: DaemonSet) => {
-    if (confirm(`Are you sure you want to delete ${daemonSet.name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete DaemonSet',
+      description: `Are you sure you want to delete ${daemonSet.name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteDaemonSetMutation.mutateAsync({
           name: daemonSet.name,

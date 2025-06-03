@@ -22,6 +22,8 @@ import {
 } from '@/k8s'
 import type { VolumeAttachment } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function VolumeAttachmentsView() {
   const [selectedAttachment, setSelectedAttachment] = useState<VolumeAttachment | null>(null)
   
@@ -35,7 +37,14 @@ export function VolumeAttachmentsView() {
   const handleDelete = async (va: VolumeAttachment) => {
     const name = va.metadata!.name!
     
-    if (confirm(`Are you sure you want to delete ${name}? This may disrupt attached volumes.`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Volume Attachment',
+      description: `Are you sure you want to delete ${name}? This may disrupt attached volumes.`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteAttachment.mutateAsync({
           path: { name },

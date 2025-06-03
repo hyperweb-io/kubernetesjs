@@ -25,6 +25,8 @@ import {
 import { type Secret as K8sSecret } from 'kubernetesjs'
 import { useSecrets, useDeleteSecret, useCreateSecret } from '@/hooks'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 interface Secret {
   name: string
   namespace: string
@@ -67,7 +69,14 @@ export function SecretsView() {
   }
 
   const handleDelete = async (secret: Secret) => {
-    if (confirm(`Are you sure you want to delete ${secret.name}? This action cannot be undone.`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Secret',
+      description: `Are you sure you want to delete ${secret.name}? This action cannot be undone.`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteSecretMutation.mutateAsync({
           name: secret.name,

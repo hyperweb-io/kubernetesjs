@@ -18,6 +18,8 @@ import {
 } from 'lucide-react'
 import { type Pod as K8sPod } from 'kubernetesjs'
 import { usePods, useDeletePod, usePodLogs } from '@/hooks'
+
+import { confirmDialog } from '@/hooks/useConfirm'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 
 interface Pod {
@@ -73,7 +75,14 @@ export function PodsView() {
   }
 
   const handleDelete = async (pod: Pod) => {
-    if (confirm(`Are you sure you want to delete pod ${pod.name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Pod',
+      description: `Are you sure you want to delete pod ${pod.name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deletePodMutation.mutateAsync({
           name: pod.name,

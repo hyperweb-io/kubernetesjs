@@ -23,6 +23,8 @@ import {
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 import type { PersistentVolumeClaim } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function PVCsView() {
   const [selectedPVC, setSelectedPVC] = useState<PersistentVolumeClaim | null>(null)
   const { namespace } = usePreferredNamespace()
@@ -42,7 +44,14 @@ export function PVCsView() {
     const name = pvc.metadata!.name!
     const namespace = pvc.metadata!.namespace!
     
-    if (confirm(`Are you sure you want to delete ${name}? This may cause data loss.`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Persistent Volume Claim',
+      description: `Are you sure you want to delete ${name}? This may cause data loss.`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deletePVC.mutateAsync({
           path: { namespace, name },

@@ -20,6 +20,8 @@ import {
 } from '@/k8s'
 import type { PriorityClass } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function PriorityClassesView() {
   const [selectedPriorityClass, setSelectedPriorityClass] = useState<PriorityClass | null>(null)
   
@@ -33,7 +35,14 @@ export function PriorityClassesView() {
   const handleDelete = async (pc: PriorityClass) => {
     const name = pc.metadata!.name!
     
-    if (confirm(`Are you sure you want to delete ${name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Priority Class',
+      description: `Are you sure you want to delete ${name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deletePriorityClass.mutateAsync({
           path: { name },

@@ -22,6 +22,8 @@ import {
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 import type { ResourceQuota } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function ResourceQuotasView() {
   const [selectedQuota, setSelectedQuota] = useState<ResourceQuota | null>(null)
   const { namespace } = usePreferredNamespace()
@@ -41,7 +43,14 @@ export function ResourceQuotasView() {
     const name = quota.metadata!.name!
     const namespace = quota.metadata!.namespace!
     
-    if (confirm(`Are you sure you want to delete ${name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Resource Quota',
+      description: `Are you sure you want to delete ${name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteQuota.mutateAsync({
           path: { namespace, name },

@@ -23,6 +23,8 @@ import {
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 import type { Endpoints } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function EndpointsView() {
   const [selectedEndpoint, setSelectedEndpoint] = useState<Endpoints | null>(null)
   const { namespace } = usePreferredNamespace()
@@ -42,7 +44,14 @@ export function EndpointsView() {
     const name = endpoint.metadata!.name!
     const namespace = endpoint.metadata!.namespace!
     
-    if (confirm(`Are you sure you want to delete ${name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Endpoint',
+      description: `Are you sure you want to delete ${name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteEndpoint.mutateAsync({
           path: { namespace, name },

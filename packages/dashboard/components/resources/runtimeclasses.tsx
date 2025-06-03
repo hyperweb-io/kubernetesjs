@@ -20,6 +20,8 @@ import {
 } from '@/k8s'
 import type { RuntimeClass } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function RuntimeClassesView() {
   const [selectedRuntimeClass, setSelectedRuntimeClass] = useState<RuntimeClass | null>(null)
   
@@ -33,7 +35,14 @@ export function RuntimeClassesView() {
   const handleDelete = async (rc: RuntimeClass) => {
     const name = rc.metadata!.name!
     
-    if (confirm(`Are you sure you want to delete ${name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Runtime Class',
+      description: `Are you sure you want to delete ${name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteRuntimeClass.mutateAsync({
           path: { name },

@@ -21,6 +21,8 @@ import {
 } from '@/k8s'
 import type { StorageClass } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function StorageClassesView() {
   const [selectedClass, setSelectedClass] = useState<StorageClass | null>(null)
   
@@ -34,7 +36,14 @@ export function StorageClassesView() {
   const handleDelete = async (sc: StorageClass) => {
     const name = sc.metadata!.name!
     
-    if (confirm(`Are you sure you want to delete ${name}? PVs using this class won't be affected.`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Storage Class',
+      description: `Are you sure you want to delete ${name}? PVs using this class won't be affected.`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteClass.mutateAsync({
           path: { name },

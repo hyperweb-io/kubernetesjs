@@ -26,6 +26,8 @@ import {
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 import type { RoleBinding, ClusterRoleBinding } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function RoleBindingsView() {
   const [selectedBinding, setSelectedBinding] = useState<RoleBinding | ClusterRoleBinding | null>(null)
   const [showClusterBindings, setShowClusterBindings] = useState(false)
@@ -52,7 +54,14 @@ export function RoleBindingsView() {
   const handleDelete = async (binding: RoleBinding | ClusterRoleBinding) => {
     const name = binding.metadata!.name!
     
-    if (confirm(`Are you sure you want to delete ${name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Role Binding',
+      description: `Are you sure you want to delete ${name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         if (showClusterBindings) {
           await deleteClusterBinding.mutateAsync({

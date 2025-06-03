@@ -25,6 +25,8 @@ import {
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 import type { CronJob } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function CronJobsView() {
   const [selectedCronJob, setSelectedCronJob] = useState<CronJob | null>(null)
   const { namespace } = usePreferredNamespace()
@@ -46,7 +48,14 @@ export function CronJobsView() {
     const name = cronjob.metadata!.name!
     const namespace = cronjob.metadata!.namespace!
     
-    if (confirm(`Are you sure you want to delete ${name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete CronJob',
+      description: `Are you sure you want to delete ${name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteCronJob.mutateAsync({
           path: { namespace, name },

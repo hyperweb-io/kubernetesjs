@@ -23,6 +23,8 @@ import {
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 import type { Job } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function JobsView() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null)
   const { namespace } = usePreferredNamespace()
@@ -43,7 +45,14 @@ export function JobsView() {
     const name = job.metadata!.name!
     const namespace = job.metadata!.namespace!
     
-    if (confirm(`Are you sure you want to delete ${name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Job',
+      description: `Are you sure you want to delete ${name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteJob.mutateAsync({
           path: { namespace, name },

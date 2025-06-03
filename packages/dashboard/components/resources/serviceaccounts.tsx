@@ -24,6 +24,8 @@ import {
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 import type { ServiceAccount } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function ServiceAccountsView() {
   const [selectedAccount, setSelectedAccount] = useState<ServiceAccount | null>(null)
   const { namespace } = usePreferredNamespace()
@@ -43,7 +45,14 @@ export function ServiceAccountsView() {
     const name = account.metadata!.name!
     const namespace = account.metadata!.namespace!
     
-    if (confirm(`Are you sure you want to delete ${name}? This may affect pods using this service account.`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Service Account',
+      description: `Are you sure you want to delete ${name}? This may affect pods using this service account.`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteAccount.mutateAsync({
           path: { namespace, name },

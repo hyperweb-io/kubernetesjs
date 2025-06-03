@@ -25,6 +25,8 @@ import {
 import { type ConfigMap as K8sConfigMap } from 'kubernetesjs'
 import { useConfigMaps, useDeleteConfigMap, useUpdateConfigMap } from '@/hooks'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 interface ConfigMap {
   name: string
   namespace: string
@@ -65,7 +67,14 @@ export function ConfigMapsView() {
   }
 
   const handleDelete = async (configMap: ConfigMap) => {
-    if (confirm(`Are you sure you want to delete ${configMap.name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete ConfigMap',
+      description: `Are you sure you want to delete ${configMap.name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteConfigMapMutation.mutateAsync({
           name: configMap.name,

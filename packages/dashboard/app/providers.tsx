@@ -2,6 +2,7 @@
 
 import { KubernetesProvider } from '../k8s/context'
 import { NamespaceProvider } from '@/contexts/NamespaceContext'
+import { ConfirmProvider } from '@/hooks/useConfirm'
 
 interface ProvidersProps {
   children: React.ReactNode
@@ -13,7 +14,9 @@ export function Providers({ children }: ProvidersProps) {
       restEndpoint: '/api/k8s'
     }}>
       <NamespaceProvider>
-        {children}
+        <ConfirmProvider>
+          {children}
+        </ConfirmProvider>
       </NamespaceProvider>
     </KubernetesProvider>
   )

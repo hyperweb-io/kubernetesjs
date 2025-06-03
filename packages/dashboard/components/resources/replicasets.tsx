@@ -19,6 +19,8 @@ import {
 import { type ReplicaSet as K8sReplicaSet } from 'kubernetesjs'
 import { useReplicaSets, useDeleteReplicaSet, useScaleReplicaSet } from '@/hooks/useReplicaSets'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 interface ReplicaSet {
   name: string
   namespace: string
@@ -101,7 +103,14 @@ export function ReplicaSetsView() {
   }
 
   const handleDelete = async (replicaSet: ReplicaSet) => {
-    if (confirm(`Are you sure you want to delete ${replicaSet.name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete ReplicaSet',
+      description: `Are you sure you want to delete ${replicaSet.name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteReplicaSetMutation.mutateAsync({
           name: replicaSet.name,

@@ -19,6 +19,8 @@ import {
 import { type Service as K8sService } from 'kubernetesjs'
 import { useServices, useDeleteService } from '@/hooks'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 interface Service {
   name: string
   namespace: string
@@ -67,7 +69,14 @@ export function ServicesView() {
   }
 
   const handleDelete = async (service: Service) => {
-    if (confirm(`Are you sure you want to delete ${service.name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete Service',
+      description: `Are you sure you want to delete ${service.name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteServiceMutation.mutateAsync({
           name: service.name,

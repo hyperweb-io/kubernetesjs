@@ -24,6 +24,8 @@ import {
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 import type { StatefulSet } from 'kubernetesjs'
 
+import { confirmDialog } from '@/hooks/useConfirm'
+
 export function StatefulSetsView() {
   const [selectedStatefulSet, setSelectedStatefulSet] = useState<StatefulSet | null>(null)
   const { namespace } = usePreferredNamespace()
@@ -70,7 +72,14 @@ export function StatefulSetsView() {
     const name = ss.metadata!.name!
     const namespace = ss.metadata!.namespace!
     
-    if (confirm(`Are you sure you want to delete ${name}?`)) {
+    const confirmed = await confirmDialog({
+      title: 'Delete StatefulSet',
+      description: `Are you sure you want to delete ${name}?`,
+      confirmText: 'Delete',
+      confirmVariant: 'destructive'
+    })
+    
+    if (confirmed) {
       try {
         await deleteStatefulSet.mutateAsync({
           path: { namespace, name },
