@@ -5,6 +5,7 @@ import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { NamespaceSwitcher } from '@/components/namespace-switcher'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { useKubernetes } from '../k8s/context'
 import {
   Package,
@@ -38,7 +39,8 @@ import {
   BarChart,
   Grid3x3,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Heart
 } from 'lucide-react'
 
 const navigationItems = [
@@ -117,11 +119,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 overflow-hidden bg-card border-r`}>
-        <div className="p-4">
+      <div className={`${sidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 overflow-hidden bg-card border-r flex flex-col h-screen`}>
+        <div className="p-4 flex items-center gap-3">
+          {/* Kubernetes Logo SVG */}
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+            <path d="M15.9998 1.04004L15.6998 1.17004C15.0398 1.43004 14.5298 2.04004 14.3798 2.73004L13.0798 8.93004C11.5798 9.24004 10.1598 9.78004 8.84976 10.51L3.44976 8.05004C2.78976 7.74004 1.99976 7.82004 1.42976 8.25004C0.859756 8.68004 0.579756 9.39004 0.709756 10.09L1.85976 15.81C0.809756 17.46 0.809756 19.54 1.85976 21.19L0.709756 26.91C0.579756 27.61 0.859756 28.32 1.42976 28.75C1.99976 29.18 2.78976 29.26 3.44976 28.95L8.84976 26.49C10.1598 27.22 11.5798 27.76 13.0798 28.07L14.3798 31.27C14.5298 31.96 15.0398 32.57 15.6998 32.83L15.9998 32.96L16.2998 32.83C16.9598 32.57 17.4698 31.96 17.6198 31.27L18.9198 28.07C20.4198 27.76 21.8398 27.22 23.1498 26.49L28.5498 28.95C29.2098 29.26 29.9998 29.18 30.5698 28.75C31.1398 28.32 31.4198 27.61 31.2898 26.91L30.1398 21.19C31.1898 19.54 31.1898 17.46 30.1398 15.81L31.2898 10.09C31.4198 9.39004 31.1398 8.68004 30.5698 8.25004C29.9998 7.82004 29.2098 7.74004 28.5498 8.05004L23.1498 10.51C21.8398 9.78004 20.4198 9.24004 18.9198 8.93004L17.6198 2.73004C17.4698 2.04004 16.9598 1.43004 16.2998 1.17004L15.9998 1.04004Z" fill="#326CE5"/>
+            <path d="M15.9998 11C13.2398 11 10.9998 13.24 10.9998 16C10.9998 18.76 13.2398 21 15.9998 21C18.7598 21 20.9998 18.76 20.9998 16C20.9998 13.24 18.7598 11 15.9998 11Z" fill="white"/>
+          </svg>
           <h1 className="text-2xl font-bold text-primary">K8s Dashboard</h1>
         </div>
-        <nav className="mt-8 pb-4 overflow-y-auto">
+        <nav className="flex-1 mt-8 pb-4 overflow-y-auto">
           {navigationItems.map((item) => {
             // Headers (collapsible sections)
             if (item.isHeader) {
@@ -166,6 +173,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             )
           })}
         </nav>
+        {/* Footer */}
+        <div className="p-4 border-t border-border text-center text-xs text-muted-foreground">
+          Built with <Heart className="inline-block w-3 h-3 mx-1 text-red-500 fill-red-500" /> by Hyperweb
+        </div>
       </div>
 
       {/* Main Content */}
@@ -187,6 +198,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex items-center space-x-4">
             <span className="text-sm text-muted-foreground">Cluster: {config.restEndpoint}</span>
             <NamespaceSwitcher />
+            <ThemeToggle />
           </div>
         </header>
 
