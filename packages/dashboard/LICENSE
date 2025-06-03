@@ -1,21 +1,17 @@
-The MIT License (MIT)
+Polyform Noncommercial License 1.0.0
 
-Copyright (c) 2024 Dan Lynch <pyramation@gmail.com>
+Copyright (c) 2025 Interweb, Inc. <developers@hyperweb.io>
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to use, copy, modify, and distribute the Software, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. **Noncommercial Use Only**: The Software may be used only for noncommercial purposes. “Noncommercial” means not primarily intended for or directed towards commercial advantage or monetary compensation.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. **No Warranty**: The Software is provided “as is”, without warranty of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, and noninfringement.
+
+3. **No Trademark Rights**: This license does not grant you rights to use the Licensor’s name, logo, or trademarks.
+
+4. **No Patent License**: No patent rights are granted under this license.
+
+5. **Commercial Licensing**: If you wish to use the Software for commercial purposes, you must contact the Licensor to obtain a separate commercial license: developers@hyperweb.io
+
+For full terms, see: https://polyformproject.org/licenses/noncommercial/1.0.0/
