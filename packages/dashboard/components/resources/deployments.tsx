@@ -16,9 +16,12 @@ import {
   CheckCircle
 } from 'lucide-react'
 import { type Deployment as K8sDeployment } from 'kubernetesjs'
-import { useDeployments, useDeleteDeployment, useScaleDeployment } from '@/hooks'
+import { useDeployments, useDeleteDeployment, useScaleDeployment, useCreateDeployment } from '@/hooks'
 
 import { confirmDialog } from '@/hooks/useConfirm'
+
+import { CreateDeploymentDialog } from '@/components/create-deployment-dialog'
+import { load } from 'js-yaml'
 
 interface Deployment {
   name: string
@@ -33,11 +36,14 @@ interface Deployment {
 
 export function DeploymentsView() {
   const [selectedDeployment, setSelectedDeployment] = useState<Deployment | null>(null)
+
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
   
   // Use TanStack Query hooks
   const { data, isLoading, error, refetch } = useDeployments()
   const deleteDeploymentMutation = useDeleteDeployment()
   const scaleDeploymentMutation = useScaleDeployment()
+  const createDeploymentMutation = useCreateDeployment()
   // Helper function to determine deployment status
   function determineStatus(deployment: K8sDeployment): 'Running' | 'Pending' | 'Failed' {
     const conditions = deployment.status!.conditions || []
@@ -154,7 +160,7 @@ export function DeploymentsView() {
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           </Button>
-          <Button onClick={() => alert('Create Deployment functionality not yet implemented.\n\nTo create a deployment, use kubectl:\nkubectl create deployment <name> --image=<image>')}>
+          <Button onClick={() => setShowCreateDialog(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Create Deployment
           </Button>
@@ -295,6 +301,45 @@ export function DeploymentsView() {
           )}
         </CardContent>
       </Card>
+
+      {/* Create Deployment Dialog */}
+      <CreateDeploymentDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onSubmit={async (yaml) => {
+          try {
+            // Parse YAML to extract namespace if provided
+            const yamlLines = yaml.split('\n')
+            let namespace = 'default'
+            
+            // Look for namespace in metadata
+            const metadataIndex = yamlLines.findIndex(line => line.trim() === 'metadata:')
+            if (metadataIndex !== -1) {
+              for (let i = metadataIndex + 1; i < yamlLines.length; i++) {
+                const line = yamlLines[i].trim()
+                if (line.startsWith('namespace:')) {
+                  namespace = line.split(':')[1].trim()
+                  break
+                }
+                // Stop if we hit another top-level key
+                if (!line.startsWith(' ') && !line.startsWith('\t') && line.includes(':')) {
+                  break
+                }
+              }
+            }
+            
+            // Convert YAML string to JSON object
+            const deploymentObj = load(yaml) as any
+            // Create deployment using hook
+            await createDeploymentMutation.mutateAsync({ deployment: deploymentObj, namespace })
+            // Refresh the deployments list
+            refetch()
+          } catch (error) {
+            console.error('Failed to create deployment:', error)
+            throw error
+          }
+        }}
+      />
     </div>
   )
 }
