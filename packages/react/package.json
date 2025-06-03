@@ -50,7 +50,7 @@
     "test:deploy": "ts-node scripts/deploy.ts"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.56.1",
+    "@tanstack/react-query": "5.79.2",
     "kubernetesjs": "^0.6.1",
     "react": "^18.2.0"
   },
@@ -58,5 +58,9 @@
     "@types/react": "^18.2.77",
     "react": "^18.2.0",
     "schema-sdk": "^0.11.3"
+  },
+  "peerDependencies": {
+   "@tanstack/react-query": "5.79.2",
+   "react": "^18.2.0"
   }
 }
