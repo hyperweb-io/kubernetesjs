@@ -1,0 +1,223 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
+import { Button } from '@/components/ui/button'
+import { FileExplorer } from '@/components/ide/file-explorer'
+import { Terminal } from '@/components/ide/terminal'
+import { fs } from '@zenfs/core'
+import { 
+  Play, 
+  GitBranch, 
+  GitCommit, 
+  Upload, 
+  Download,
+  Save,
+  Terminal as TerminalIcon,
+  Code
+} from 'lucide-react'
+
+// Dynamic imports to avoid SSR issues
+const MonacoEditor = dynamic(() => import('@monaco-editor/react'), { ssr: false })
+
+export default function IDEPage() {
+  const [activeFile, setActiveFile] = useState<string | null>(null)
+  const [fileContent, setFileContent] = useState<string>('')
+  const [terminalVisible, setTerminalVisible] = useState(true)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [fileLanguage, setFileLanguage] = useState('javascript')
+
+  // Handle file selection from FileExplorer
+  const handleFileSelect = (path: string, content: string) => {
+    setActiveFile(path)
+    setFileContent(content)
+    setHasUnsavedChanges(false)
+    
+    // Detect language from file extension
+    const ext = path.split('.').pop()?.toLowerCase()
+    switch (ext) {
+      case 'js':
+      case 'jsx':
+        setFileLanguage('javascript')
+        break
+      case 'ts':
+      case 'tsx':
+        setFileLanguage('typescript')
+        break
+      case 'html':
+        setFileLanguage('html')
+        break
+      case 'css':
+        setFileLanguage('css')
+        break
+      case 'json':
+        setFileLanguage('json')
+        break
+      case 'md':
+        setFileLanguage('markdown')
+        break
+      case 'yaml':
+      case 'yml':
+        setFileLanguage('yaml')
+        break
+      default:
+        setFileLanguage('plaintext')
+    }
+  }
+
+  // Handle file content changes
+  const handleContentChange = (value: string | undefined) => {
+    setFileContent(value || '')
+    setHasUnsavedChanges(true)
+  }
+
+  // Save file
+  const saveFile = async () => {
+    if (activeFile && hasUnsavedChanges) {
+      try {
+        await fs.promises.writeFile(activeFile, fileContent)
+        setHasUnsavedChanges(false)
+      } catch (error) {
+        console.error('Failed to save file:', error)
+      }
+    }
+  }
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault()
+        saveFile()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [activeFile, fileContent])
+
+  return (
+    <div className="flex flex-col h-full bg-background">
+      {/* Top Bar */}
+      <div className="flex items-center justify-between px-4 py-2 bg-card border-b">
+        <div className="flex items-center space-x-4">
+          <h1 className="text-lg font-semibold">Web IDE</h1>
+          <span className="text-sm text-muted-foreground">
+            {activeFile ? activeFile.split('/').pop() : 'No file selected'}
+            {hasUnsavedChanges && ' •'}
+          </span>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          {/* Run Button */}
+          <Button variant="default" size="sm" disabled>
+            <Play className="w-4 h-4 mr-2" />
+            Run
+          </Button>
+          
+          {/* Git Controls */}
+          <Button variant="outline" size="sm">
+            <GitBranch className="w-4 h-4 mr-2" />
+            main
+          </Button>
+          <Button variant="outline" size="sm">
+            <GitCommit className="w-4 h-4" />
+          </Button>
+          <Button variant="outline" size="sm">
+            <Upload className="w-4 h-4" />
+          </Button>
+          <Button variant="outline" size="sm">
+            <Download className="w-4 h-4" />
+          </Button>
+          
+          {/* Save Button */}
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={saveFile}
+            disabled={!hasUnsavedChanges}
+          >
+            <Save className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* File Explorer (Left Sidebar) */}
+        <div className="w-64 bg-card border-r">
+          <FileExplorer onFileSelect={handleFileSelect} />
+        </div>
+
+        {/* Editor and Terminal Container */}
+        <div className="flex-1 flex flex-col">
+          {/* Code Editor */}
+          <div className="flex-1 bg-[#1e1e1e]">
+            {activeFile ? (
+              <MonacoEditor
+                height="100%"
+                language={fileLanguage}
+                theme="vs-dark"
+                value={fileContent}
+                onChange={handleContentChange}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  wordWrap: 'on',
+                  automaticLayout: true,
+                }}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                <div className="text-center">
+                  <Code className="w-12 h-12 mx-auto mb-4" />
+                  <p>Select a file to start editing</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Terminal */}
+          {terminalVisible && (
+            <div className="h-64 bg-card border-t">
+              <div className="flex items-center justify-between px-2 py-1 bg-background border-b">
+                <div className="flex items-center">
+                  <TerminalIcon className="w-4 h-4 mr-2" />
+                  <span className="text-sm font-medium">Terminal</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setTerminalVisible(false)}
+                >
+                  ×
+                </Button>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <Terminal className="h-full" />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Status Bar */}
+      <div className="flex items-center justify-between px-4 py-1 bg-card border-t text-xs text-muted-foreground">
+        <div className="flex items-center space-x-4">
+          <span>UTF-8</span>
+          <span>{fileLanguage}</span>
+          <span>Ln 1, Col 1</span>
+        </div>
+        <div className="flex items-center space-x-4">
+          <button 
+            onClick={() => setTerminalVisible(!terminalVisible)}
+            className="hover:text-foreground"
+          >
+            Terminal
+          </button>
+          <span>{hasUnsavedChanges ? 'Modified' : 'Ready'}</span>
+        </div>
+      </div>
+    </div>
+  )
+}

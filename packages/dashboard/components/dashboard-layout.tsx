@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { NamespaceSwitcher } from '@/components/namespace-switcher'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { AIChat } from '@/components/ide/ai-chat'
 import { useKubernetes } from '../k8s/context'
 import {
   Package,
@@ -40,7 +41,9 @@ import {
   Grid3x3,
   ChevronDown,
   ChevronRight,
-  Heart
+  Heart,
+  Code,
+  MessageSquare
 } from 'lucide-react'
 
 const navigationItems = [
@@ -48,6 +51,7 @@ const navigationItems = [
   { id: 'overview', label: 'Overview', icon: Home, href: '/' },
   { id: 'all', label: 'All Resources', icon: Grid3x3, href: '/all' },
   { id: 'templates', label: 'Templates', icon: FileCode2, href: '/templates' },
+  { id: 'ide', label: 'IDE', icon: Code, href: '/ide' },
   
   // Workloads
   { id: 'workloads-header', label: 'Workloads', isHeader: true, section: 'workloads' },
@@ -99,6 +103,8 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['workloads', 'config', 'network', 'rbac', 'cluster']))
+  const [chatVisible, setChatVisible] = useState(false)
+  const [chatWidth, setChatWidth] = useState(400)
   const pathname = usePathname()
   const { config } = useKubernetes()
   
@@ -227,6 +233,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex items-center space-x-4">
             <span className="text-sm text-muted-foreground">Cluster: {config.restEndpoint}</span>
             <NamespaceSwitcher />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setChatVisible(!chatVisible)}
+              className={chatVisible ? 'bg-accent' : ''}
+            >
+              <MessageSquare className="h-5 w-5" />
+            </Button>
             <ThemeToggle />
           </div>
         </header>
@@ -236,6 +250,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {children}
         </main>
       </div>
+
+      {/* Global AI Chat Sidebar */}
+      <AIChat
+        isOpen={chatVisible}
+        onToggle={() => setChatVisible(!chatVisible)}
+        width={chatWidth}
+        onWidthChange={setChatWidth}
+      />
     </div>
   )
 }
