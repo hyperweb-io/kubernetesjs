@@ -17,7 +17,9 @@ import {
   ChevronRight,
   MessageSquare,
   Trash2,
-  Plus
+  Plus,
+  Pin,
+  PinOff
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -38,9 +40,11 @@ interface AIChatProps {
   onToggle: () => void
   width: number
   onWidthChange: (width: number) => void
+  layoutMode: 'floating' | 'snapped'
+  onLayoutModeChange: (mode: 'floating' | 'snapped') => void
 }
 
-export function AIChat({ isOpen, onToggle, width, onWidthChange }: AIChatProps) {
+export function AIChat({ isOpen, onToggle, width, onWidthChange, layoutMode, onLayoutModeChange }: AIChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -139,7 +143,7 @@ export function AIChat({ isOpen, onToggle, width, onWidthChange }: AIChatProps) 
 
   return (
     <div 
-      className={`fixed top-0 right-0 h-full bg-card border-l transition-all duration-300 flex ${isOpen ? '' : 'translate-x-full'}`}
+      className={`${layoutMode === 'floating' ? 'fixed' : 'relative'} top-0 right-0 h-full bg-card border-l transition-all duration-300 flex ${isOpen ? '' : 'translate-x-full'}`}
       style={{ width: isOpen ? width : 0 }}
     >
       {/* Resize Handle */}
@@ -172,6 +176,21 @@ export function AIChat({ isOpen, onToggle, width, onWidthChange }: AIChatProps) 
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem 
+                onClick={() => onLayoutModeChange(layoutMode === 'floating' ? 'snapped' : 'floating')}
+              >
+                {layoutMode === 'floating' ? (
+                  <>
+                    <Pin className="w-4 h-4 mr-2" />
+                    Snap to Layout
+                  </>
+                ) : (
+                  <>
+                    <PinOff className="w-4 h-4 mr-2" />
+                    Float Above
+                  </>
+                )}
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setShowTimestamps(!showTimestamps)}>
                 {showTimestamps ? 'Hide' : 'Show'} Timestamps
               </DropdownMenuItem>

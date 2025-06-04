@@ -105,6 +105,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['workloads', 'config', 'network', 'rbac', 'cluster']))
   const [chatVisible, setChatVisible] = useState(false)
   const [chatWidth, setChatWidth] = useState(400)
+  const [chatLayoutMode, setChatLayoutMode] = useState<'floating' | 'snapped'>('floating')
   const pathname = usePathname()
   const { config } = useKubernetes()
   
@@ -121,6 +122,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
     setExpandedSections(newExpanded)
   }
+
+  // Calculate if we need to adjust layout for snapped chat
+  const isSnappedAndOpen = chatVisible && chatLayoutMode === 'snapped'
 
   return (
     <div className="flex h-screen bg-background">
@@ -215,7 +219,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${isSnappedAndOpen ? `mr-[${chatWidth}px]` : ''}`}
+        style={isSnappedAndOpen ? { marginRight: `${chatWidth}px` } : {}}
+      >
         {/* Header */}
         <header className="bg-card border-b px-6 py-4 flex items-center justify-between">
           <div className="flex items-center">
@@ -252,12 +258,31 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Global AI Chat Sidebar */}
-      <AIChat
-        isOpen={chatVisible}
-        onToggle={() => setChatVisible(!chatVisible)}
-        width={chatWidth}
-        onWidthChange={setChatWidth}
-      />
+      {chatLayoutMode === 'snapped' && chatVisible && (
+        <div 
+          className="fixed top-0 right-0 h-full transition-all duration-300"
+          style={{ width: chatWidth }}
+        >
+          <AIChat
+            isOpen={chatVisible}
+            onToggle={() => setChatVisible(!chatVisible)}
+            width={chatWidth}
+            onWidthChange={setChatWidth}
+            layoutMode={chatLayoutMode}
+            onLayoutModeChange={setChatLayoutMode}
+          />
+        </div>
+      )}
+      {chatLayoutMode === 'floating' && (
+        <AIChat
+          isOpen={chatVisible}
+          onToggle={() => setChatVisible(!chatVisible)}
+          width={chatWidth}
+          onWidthChange={setChatWidth}
+          layoutMode={chatLayoutMode}
+          onLayoutModeChange={setChatLayoutMode}
+        />
+      )}
     </div>
   )
 }
