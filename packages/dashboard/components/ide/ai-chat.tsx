@@ -7,6 +7,8 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { AgentManager, AgentConfig } from './agent-manager'
+import OllamaClient from '@/lib/agent/ollama'
 import {
   MoreVertical,
   Send,
@@ -19,7 +21,10 @@ import {
   Trash2,
   Plus,
   Pin,
-  PinOff
+  PinOff,
+  Loader2,
+  AlertCircle,
+  Settings2
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -30,7 +35,7 @@ import {
 
 interface Message {
   id: string
-  role: 'user' | 'assistant'
+  role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: Date
 }
@@ -45,20 +50,47 @@ interface AIChatProps {
 }
 
 export function AIChat({ isOpen, onToggle, width, onWidthChange, layoutMode, onLayoutModeChange }: AIChatProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content: "Hello! I'm your AI coding assistant. I can help you with:\n\n- Code explanations\n- Debugging assistance\n- Best practices\n- Code generation\n\nFeel free to ask me anything about your code!",
-      timestamp: new Date()
-    }
-  ])
+  const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [showTimestamps, setShowTimestamps] = useState(false)
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
   const [isResizing, setIsResizing] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  
+  const [showAgentManager, setShowAgentManager] = useState(false)
+  const [agentConfig, setAgentConfig] = useState<AgentConfig>(() => {
+    // Load saved agent config from localStorage
+    if (typeof window !== 'undefined') {
+      const savedConfig = localStorage.getItem('ai-chat-agent-config')
+      if (savedConfig) {
+        try {
+          const parsed = JSON.parse(savedConfig)
+          // Reconstruct session dates
+          if (parsed.session) {
+            parsed.session.createdAt = new Date(parsed.session.createdAt)
+          }
+          return parsed
+        } catch (err) {
+          console.error('Failed to parse saved agent config:', err)
+        }
+      }
+    }
+    return {
+      endpoint: 'http://localhost:11434',
+      model: 'llama2',
+      session: null
+    }
+  })
+
   const resizeRef = useRef<HTMLDivElement>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const ollamaClientRef = useRef<OllamaClient>()
+
+  // Initialize Ollama client when config changes
+  useEffect(() => {
+    ollamaClientRef.current = new OllamaClient(agentConfig.endpoint)
+  }, [agentConfig.endpoint])
 
   // Auto scroll to bottom on new messages
   useEffect(() => {
@@ -90,29 +122,59 @@ export function AIChat({ isOpen, onToggle, width, onWidthChange, layoutMode, onL
     }
   }, [isResizing, onWidthChange])
 
-  const handleSend = () => {
-    if (!input.trim()) return
-
-    const newMessage: Message = {
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return
+    
+    const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: input.trim(),
       timestamp: new Date()
     }
 
-    setMessages([...messages, newMessage])
+    setMessages(prev => [...prev, userMessage])
     setInput('')
+    setError(null)
+    setIsLoading(true)
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse: Message = {
+    try {
+      if (!ollamaClientRef.current) {
+        throw new Error('Ollama client not initialized')
+      }
+
+      if (!agentConfig.model) {
+        throw new Error('No model selected. Please configure an agent model.')
+      }
+
+      // Generate response using Ollama
+      const response = await ollamaClientRef.current.generate({
+        model: agentConfig.model,
+        prompt: userMessage.content
+      })
+
+      const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: "I'm a UI mock-up and don't have AI capabilities yet. However, I can render **markdown** content!\n\n```javascript\n// Example code block\nfunction hello() {\n  console.log('Hello, World!');\n}\n```\n\nI support:\n- **Bold** and *italic* text\n- Lists\n- Code blocks with syntax highlighting\n- And more!",
+        content: response,
         timestamp: new Date()
       }
-      setMessages(prev => [...prev, aiResponse])
-    }, 1000)
+
+      setMessages(prev => [...prev, assistantMessage])
+    } catch (err) {
+      console.error('Failed to generate response:', err)
+      setError(err instanceof Error ? err.message : 'Failed to generate response')
+      
+      // Add error message to chat
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'system',
+        content: `Error: ${err instanceof Error ? err.message : 'Failed to generate response'}\n\nPlease check that Ollama is running and the model '${agentConfig.model}' is installed.`,
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, errorMessage])
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -129,16 +191,13 @@ export function AIChat({ isOpen, onToggle, width, onWidthChange, layoutMode, onL
   }
 
   const clearChat = () => {
-    setMessages([{
-      id: '1',
-      role: 'assistant',
-      content: "Chat cleared. How can I help you?",
-      timestamp: new Date()
-    }])
+    setMessages([])
+    setError(null)
   }
 
   const newChat = () => {
-    clearChat()
+    setMessages([])
+    setError(null)
   }
 
   return (
@@ -168,6 +227,9 @@ export function AIChat({ isOpen, onToggle, width, onWidthChange, layoutMode, onL
           <div className="flex items-center space-x-2">
             <MessageSquare className="w-5 h-5" />
             <h2 className="font-semibold">AI Assistant</h2>
+            {agentConfig.model && (
+              <span className="text-xs text-muted-foreground">({agentConfig.model})</span>
+            )}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -176,6 +238,11 @@ export function AIChat({ isOpen, onToggle, width, onWidthChange, layoutMode, onL
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShowAgentManager(true)}>
+                <Settings2 className="w-4 h-4 mr-2" />
+                Manage Agent
+              </DropdownMenuItem>
+
               <DropdownMenuItem 
                 onClick={() => onLayoutModeChange(layoutMode === 'floating' ? 'snapped' : 'floating')}
               >
@@ -191,16 +258,19 @@ export function AIChat({ isOpen, onToggle, width, onWidthChange, layoutMode, onL
                   </>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowTimestamps(!showTimestamps)}>
-                {showTimestamps ? 'Hide' : 'Show'} Timestamps
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={newChat}>
-                <Plus className="w-4 h-4 mr-2" />
-                New Chat
-              </DropdownMenuItem>
+
               <DropdownMenuItem onClick={clearChat}>
                 <Trash2 className="w-4 h-4 mr-2" />
                 Clear Chat
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={() => setShowTimestamps(!showTimestamps)}>
+                {showTimestamps ? 'Hide' : 'Show'} Timestamps
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={newChat}>
+                <Plus className="w-4 h-4 mr-2" />
+                New Chat
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -208,6 +278,24 @@ export function AIChat({ isOpen, onToggle, width, onWidthChange, layoutMode, onL
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.length === 0 && (
+            <div className="text-center text-muted-foreground py-8">
+              {agentConfig.model ? (
+                <>
+                  <Bot className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>Start a conversation with {agentConfig.model}</p>
+                  <p className="text-sm mt-2">Type a message below to begin</p>
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No model configured</p>
+                  <p className="text-sm mt-2">Click "Manage Agent" to set up a model</p>
+                </>
+              )}
+            </div>
+          )}
+          
           {messages.map((message) => (
             <div
               key={message.id}
@@ -217,9 +305,12 @@ export function AIChat({ isOpen, onToggle, width, onWidthChange, layoutMode, onL
                 {/* Avatar */}
                 <div className={`flex-shrink-0 ${message.role === 'user' ? 'ml-2' : 'mr-2'}`}>
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                    message.role === 'user' ? 'bg-primary text-primary-foreground' : 
+                    message.role === 'system' ? 'bg-yellow-500 text-white' : 'bg-muted'
                   }`}>
-                    {message.role === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                    {message.role === 'user' ? <User className="w-4 h-4" /> : 
+                     message.role === 'system' ? <AlertCircle className="w-4 h-4" /> : 
+                     <Bot className="w-4 h-4" />}
                   </div>
                 </div>
 
@@ -228,6 +319,8 @@ export function AIChat({ isOpen, onToggle, width, onWidthChange, layoutMode, onL
                   <div className={`rounded-lg px-3 py-2 ${
                     message.role === 'user' 
                       ? 'bg-primary text-primary-foreground' 
+                      : message.role === 'system'
+                      ? 'bg-yellow-500/10 border border-yellow-500/20 text-yellow-700 dark:text-yellow-400'
                       : 'bg-muted'
                   }`}>
                     {message.role === 'assistant' ? (
@@ -289,29 +382,60 @@ export function AIChat({ isOpen, onToggle, width, onWidthChange, layoutMode, onL
               </div>
             </div>
           ))}
+          
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="flex items-center space-x-2 bg-muted rounded-lg px-3 py-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-sm">Generating response...</span>
+              </div>
+            </div>
+          )}
+          
           <div ref={chatEndRef} />
         </div>
 
         {/* Input Area */}
         <div className="border-t p-4">
+          {error && (
+            <div className="mb-2 p-2 bg-red-500/10 border border-red-500/20 rounded text-sm text-red-600 dark:text-red-400">
+              {error}
+            </div>
+          )}
           <div className="flex space-x-2">
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type your message... (Enter to send, Shift+Enter for new line)"
+              placeholder={agentConfig.model ? "Type your message... (Enter to send, Shift+Enter for new line)" : "Please configure a model first"}
               className="flex-1 min-h-[60px] max-h-[120px] resize-none"
+              disabled={isLoading || !agentConfig.model}
             />
             <Button 
               onClick={handleSend}
-              disabled={!input.trim()}
+              disabled={!input.trim() || isLoading || !agentConfig.model}
               size="icon"
             >
-              <Send className="w-4 h-4" />
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
             </Button>
           </div>
         </div>
       </div>
+
+      {/* Agent Manager Dialog */}
+      <AgentManager
+        isOpen={showAgentManager}
+        onClose={() => setShowAgentManager(false)}
+        currentConfig={agentConfig}
+        onConfigChange={(config) => {
+          setAgentConfig(config)
+          localStorage.setItem('ai-chat-agent-config', JSON.stringify(config))
+        }}
+      />
     </div>
   )
 }
