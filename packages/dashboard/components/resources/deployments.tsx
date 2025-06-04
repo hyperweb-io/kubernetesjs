@@ -21,6 +21,10 @@ import { useDeployments, useDeleteDeployment, useScaleDeployment, useCreateDeplo
 import { confirmDialog } from '@/hooks/useConfirm'
 
 import { CreateDeploymentDialog } from '@/components/create-deployment-dialog'
+
+import { ViewEditDeploymentDialog } from '@/components/view-edit-deployment-dialog'
+import { ScaleDeploymentDialog } from '@/components/scale-deployment-dialog'
+import yaml from 'js-yaml'
 import { load } from 'js-yaml'
 
 interface Deployment {
@@ -38,6 +42,10 @@ export function DeploymentsView() {
   const [selectedDeployment, setSelectedDeployment] = useState<Deployment | null>(null)
 
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+
+  const [showViewEditDialog, setShowViewEditDialog] = useState(false)
+  const [viewEditMode, setViewEditMode] = useState<'view' | 'edit'>('view')
+  const [showScaleDialog, setShowScaleDialog] = useState(false)
   
   // Use TanStack Query hooks
   const { data, isLoading, error, refetch } = useDeployments()
@@ -80,21 +88,21 @@ export function DeploymentsView() {
     refetch()
   }
 
-  const handleScale = async (deployment: Deployment) => {
-    const newReplicas = prompt(`Scale ${deployment.name} to how many replicas?`, deployment.replicas.toString())
-    if (newReplicas && !isNaN(Number(newReplicas))) {
-      try {
-        await scaleDeploymentMutation.mutateAsync({
-          name: deployment.name,
-          replicas: Number(newReplicas),
-          namespace: deployment.namespace
-        })
-        refetch()
-      } catch (err) {
-        console.error('Failed to scale deployment:', err)
-        alert(`Failed to scale deployment: ${err instanceof Error ? err.message : 'Unknown error'}`)
-      }
-    }
+  const handleScale = (deployment: Deployment) => {
+    setSelectedDeployment(deployment)
+    setShowScaleDialog(true)
+  }
+
+  const handleView = (deployment: Deployment) => {
+    setSelectedDeployment(deployment)
+    setViewEditMode('view')
+    setShowViewEditDialog(true)
+  }
+
+  const handleEdit = (deployment: Deployment) => {
+    setSelectedDeployment(deployment)
+    setViewEditMode('edit')
+    setShowViewEditDialog(true)
   }
 
   const handleDelete = async (deployment: Deployment) => {
@@ -266,7 +274,8 @@ export function DeploymentsView() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => setSelectedDeployment(deployment)}
+                          onClick={() => handleView(deployment)}
+                          title="View deployment"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -274,13 +283,15 @@ export function DeploymentsView() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleScale(deployment)}
+                          title="Scale deployment"
                         >
                           <Scale className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => console.log('Edit', deployment.name)}
+                          onClick={() => handleEdit(deployment)}
+                          title="Edit deployment"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -337,6 +348,65 @@ export function DeploymentsView() {
           } catch (error) {
             console.error('Failed to create deployment:', error)
             throw error
+          }
+        }}
+      />
+
+
+      {/* View/Edit Deployment Dialog */}
+      <ViewEditDeploymentDialog
+        deployment={selectedDeployment?.k8sData || null}
+        open={showViewEditDialog}
+        onOpenChange={setShowViewEditDialog}
+        mode={viewEditMode}
+        onSubmit={async (yamlContent) => {
+          if (!selectedDeployment) return
+          
+          try {
+            // Parse the YAML to get the deployment object
+            const deploymentObj = yaml.load(yamlContent) as any
+            
+            // Update deployment using PUT request
+            const response = await fetch(`/api/k8s/apis/apps/v1/namespaces/${selectedDeployment.namespace}/deployments/${selectedDeployment.name}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(deploymentObj),
+            })
+            
+            if (!response.ok) {
+              const error = await response.text()
+              throw new Error(error || 'Failed to update deployment')
+            }
+            
+            // Refresh the deployments list
+            refetch()
+          } catch (error) {
+            console.error('Failed to update deployment:', error)
+            throw error
+          }
+        }}
+      />
+
+      {/* Scale Deployment Dialog */}
+      <ScaleDeploymentDialog
+        deployment={selectedDeployment?.k8sData || null}
+        open={showScaleDialog}
+        onOpenChange={setShowScaleDialog}
+        onScale={async (replicas) => {
+          if (!selectedDeployment) return
+          
+          try {
+            await scaleDeploymentMutation.mutateAsync({
+              name: selectedDeployment.name,
+              replicas: replicas,
+              namespace: selectedDeployment.namespace
+            })
+            refetch()
+          } catch (err) {
+            console.error('Failed to scale deployment:', err)
+            throw err
           }
         }}
       />
