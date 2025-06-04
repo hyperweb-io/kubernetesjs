@@ -196,6 +196,30 @@ export default function IDEPage() {
           >
             <Save className="w-4 h-4" />
           </Button>
+          
+          {/* Sync Button */}
+          <Button 
+            variant={syncStatus === 'success' ? 'default' : syncStatus === 'error' ? 'destructive' : 'outline'} 
+            size="sm"
+            onClick={syncFiles}
+            disabled={modifiedFiles.size === 0 || syncStatus === 'syncing'}
+          >
+            {syncStatus === 'syncing' ? (
+              <RefreshCw className="w-4 h-4 animate-spin" />
+            ) : syncStatus === 'success' ? (
+              <Check className="w-4 h-4" />
+            ) : syncStatus === 'error' ? (
+              <X className="w-4 h-4" />
+            ) : (
+              <RefreshCw className="w-4 h-4" />
+            )}
+            <span className="ml-2">
+              {syncStatus === 'syncing' ? 'Syncing...' : 
+               syncStatus === 'success' ? 'Synced' :
+               syncStatus === 'error' ? 'Error' :
+               `Sync (${modifiedFiles.size})`}
+            </span>
+          </Button>
         </div>
       </div>
 
