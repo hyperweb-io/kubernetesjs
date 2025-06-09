@@ -61,3 +61,9 @@ The sidebar navigation is organized into collapsible sections:
 - `@tanstack/react-query` - Data fetching and state management
 - `@monaco-editor/react` - Code editor for YAML editing
 - `xterm` - Terminal emulator for IDE functionality
+
+### new items
+use agentic-kit to switch between providers, these files have the info you need:
+- CLAUDE-agentic-kit.md
+- CLAUDE-bradie.md
+- CLAUDE-ollama.md

@@ -2,6 +2,20 @@
 # yarn lockfile v1
 
 
+"@agentic-kit/bradie@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@agentic-kit/bradie/-/bradie-0.1.1.tgz#394e485b21fae64502317c7e117c256f1999c854"
+  integrity sha512-sVwfqwudoJ3F+ZZpucvSym1D5hffT5X0o32pSHoOXDWDDCS/F7iP3nNe+wV42BL1p/G59HfwAMu1ZGCtCoSLtA==
+  dependencies:
+    cross-fetch "^4.1.0"
+
+"@agentic-kit/ollama@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@agentic-kit/ollama/-/ollama-0.1.1.tgz#2b53a16c5e3ab58d21429e88bf5d5945b61a9324"
+  integrity sha512-awWr4QvS5+LXo09/btD+OCK2cl85f/sz/ikahf9Ad7DZKOvO5rElV3LTxh4P/NoTDgaJxNVtSQnQryERUOw1dQ==
+  dependencies:
+    cross-fetch "^4.1.0"
+
 "@alloc/quick-lru@^5.2.0":
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/@alloc/quick-lru/-/quick-lru-5.2.0.tgz#7bf68b20c0a350f936915fcae06f58e32007ce30"
@@ -1018,6 +1032,14 @@ acorn@^8.11.0, acorn@^8.4.1, acorn@^8.9.0:
   version "8.14.1"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.14.1.tgz#721d5dc10f7d5b5609a891773d47731796935dfb"
   integrity sha512-OvQ/2pUDKmgfCg++xsTX1wGxfTaszcHVcTctW4UJB4hibJx2HXxxO5UmVgyjMa+ZDsiaf5wWLXYpRWMmBI0QHg==
+
+agentic-kit@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/agentic-kit/-/agentic-kit-0.1.1.tgz#2986889888fdbb3ba82428bc439f81cf9594123a"
+  integrity sha512-h0UhGLpBmn7/Qis/Fq4l0bf379XPOJBmgy7azJDFta3K0Ft8j8fqjxJ12jKNda6s0qHWJAb7hNV/q0TWo/xVBw==
+  dependencies:
+    "@agentic-kit/bradie" "^0.1.1"
+    "@agentic-kit/ollama" "^0.1.1"
 
 ajv@^6.12.4:
   version "6.12.6"

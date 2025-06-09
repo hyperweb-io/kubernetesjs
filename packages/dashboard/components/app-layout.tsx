@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { DashboardLayout } from '@/components/dashboard-layout'
-import { AIChatGlobal } from '@/components/ai-chat-global'
+import { AIChatAgentic } from '@/components/ai-chat-agentic'
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   // Chat state management
@@ -25,7 +25,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         {children}
       </DashboardLayout>
       
-      <AIChatGlobal
+      <AIChatAgentic
         isOpen={chatOpen}
         onToggle={handleChatToggle}
         width={chatWidth}
