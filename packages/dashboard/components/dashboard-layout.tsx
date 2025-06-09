@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { NamespaceSwitcher } from '@/components/namespace-switcher'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { AIChat } from '@/components/ide/ai-chat'
 import { useKubernetes } from '../k8s/context'
 import {
   Package,
@@ -98,14 +97,15 @@ const navigationItems = [
 
 interface DashboardLayoutProps {
   children: React.ReactNode
+  onChatToggle: () => void
+  chatVisible: boolean
+  chatLayoutMode: 'floating' | 'snapped'
+  chatWidth: number
 }
 
-export function DashboardLayout({ children }: DashboardLayoutProps) {
+export function DashboardLayout({ children, onChatToggle, chatVisible, chatLayoutMode, chatWidth }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['workloads', 'config', 'network', 'rbac', 'cluster']))
-  const [chatVisible, setChatVisible] = useState(false)
-  const [chatWidth, setChatWidth] = useState(400)
-  const [chatLayoutMode, setChatLayoutMode] = useState<'floating' | 'snapped'>('floating')
   const pathname = usePathname()
   const { config } = useKubernetes()
   
@@ -125,6 +125,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // Calculate if we need to adjust layout for snapped chat
   const isSnappedAndOpen = chatVisible && chatLayoutMode === 'snapped'
+
 
   return (
     <div className="flex h-screen bg-background">
@@ -242,7 +243,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setChatVisible(!chatVisible)}
+              onClick={onChatToggle}
               className={chatVisible ? 'bg-accent' : ''}
             >
               <MessageSquare className="h-5 w-5" />
@@ -257,32 +258,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </main>
       </div>
 
-      {/* Global AI Chat Sidebar */}
-      {chatLayoutMode === 'snapped' && chatVisible && (
-        <div 
-          className="fixed top-0 right-0 h-full transition-all duration-300"
-          style={{ width: chatWidth }}
-        >
-          <AIChat
-            isOpen={chatVisible}
-            onToggle={() => setChatVisible(!chatVisible)}
-            width={chatWidth}
-            onWidthChange={setChatWidth}
-            layoutMode={chatLayoutMode}
-            onLayoutModeChange={setChatLayoutMode}
-          />
-        </div>
-      )}
-      {chatLayoutMode === 'floating' && (
-        <AIChat
-          isOpen={chatVisible}
-          onToggle={() => setChatVisible(!chatVisible)}
-          width={chatWidth}
-          onWidthChange={setChatWidth}
-          layoutMode={chatLayoutMode}
-          onLayoutModeChange={setChatLayoutMode}
-        />
-      )}
     </div>
   )
 }
