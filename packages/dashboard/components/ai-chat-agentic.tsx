@@ -8,12 +8,22 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { AgentManagerAgentic } from './agent-manager-agentic'
-import { 
-  getAgenticKitService, 
-  updateAgenticKitConfig,
-  type AgentProvider,
-  type ChatMessage 
-} from '@/lib/agentic-kit'
+import {
+  AgentKit,
+  OllamaAdapter,
+  BradieAdapter,
+  createMultiProviderKit
+} from 'agentic-kit'
+
+export type AgentProvider = 'ollama' | 'bradie'
+
+export interface ChatMessage {
+  id: string
+  role: 'user' | 'assistant' | 'system'
+  content: string
+  timestamp: Date
+  provider?: AgentProvider
+}
 import {
   MoreVertical,
   Send,
@@ -69,14 +79,21 @@ export function AIChatAgentic({
   const [streamingMessage, setStreamingMessage] = useState('')
   
   // Agent state
-  const [currentProvider, setCurrentProvider] = useState<AgentProvider>(() => {
-    const service = getAgenticKitService()
-    return service.getCurrentProvider()
+  const [currentProvider, setCurrentProvider] = useState<AgentProvider>('ollama')
+  const [agentKit] = useState(() => {
+    const kit = createMultiProviderKit()
+    kit.addProvider(new OllamaAdapter('http://localhost:11434'))
+    kit.addProvider(new BradieAdapter({
+      domain: 'http://localhost:3001',
+      onSystemMessage: () => {},
+      onAssistantReply: () => {}
+    }))
+    kit.setProvider('ollama')
+    return kit
   })
 
   const resizeRef = useRef<HTMLDivElement>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
-  const agenticService = useRef(getAgenticKitService())
 
   // Auto scroll to bottom on new messages
   useEffect(() => {
@@ -109,8 +126,7 @@ export function AIChatAgentic({
   // Handle provider change
   const handleProviderChange = (provider: AgentProvider) => {
     setCurrentProvider(provider)
-    agenticService.current.setProvider(provider)
-    updateAgenticKitConfig({ provider })
+    agentKit.setProvider(provider)
   }
 
   // Handle send message
@@ -166,16 +182,16 @@ export function AIChatAgentic({
       }
 
       // Generate response
-      await agenticService.current.generateResponse(
-        userMessage.content,
-        true, // Enable streaming
+      await agentKit.generate(
+        {
+          model: 'mistral',
+          prompt: userMessage.content,
+          stream: true
+        },
         { 
           onChunk, 
           onComplete, 
-          onError,
-          onSystemMessage: (msg) => {
-            console.log('[System]', msg)
-          }
+          onError
         }
       )
 
@@ -438,10 +454,9 @@ export function AIChatAgentic({
         <AgentManagerAgentic
           isOpen={showAgentManager}
           onClose={() => setShowAgentManager(false)}
-          onConfigChange={(config) => {
-            updateAgenticKitConfig(config)
-            setCurrentProvider(config.provider || currentProvider)
-          }}
+          agentKit={agentKit}
+          currentProvider={currentProvider}
+          onProviderChange={handleProviderChange}
         />
       )}
     </>

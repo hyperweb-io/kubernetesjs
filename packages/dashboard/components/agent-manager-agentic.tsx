@@ -34,24 +34,25 @@ import {
   Brain,
   Sparkles
 } from 'lucide-react'
-import { 
-  getAgenticKitService, 
-  updateAgenticKitConfig,
-  type AgentProvider,
-  type AgentConfig 
-} from '@/lib/agentic-kit'
+import { AgentKit } from 'agentic-kit'
+import OllamaClient from '@agentic-kit/ollama'
+import type { AgentProvider } from './ai-chat-agentic'
 
 interface AgentManagerAgenticProps {
   isOpen: boolean
   onClose: () => void
-  onConfigChange: (config: Partial<AgentConfig>) => void
+  agentKit: AgentKit
+  currentProvider: AgentProvider
+  onProviderChange: (provider: AgentProvider) => void
 }
 
-export function AgentManagerAgentic({ isOpen, onClose, onConfigChange }: AgentManagerAgenticProps) {
-  const [config, setConfig] = useState<AgentConfig>(() => {
-    return getAgenticKitService().getConfig()
-  })
-  
+export function AgentManagerAgentic({ 
+  isOpen, 
+  onClose, 
+  agentKit, 
+  currentProvider, 
+  onProviderChange 
+}: AgentManagerAgenticProps) {
   // Connection states
   const [ollamaStatus, setOllamaStatus] = useState<'checking' | 'online' | 'offline'>('checking')
   const [bradieStatus, setBradieStatus] = useState<'checking' | 'online' | 'offline'>('checking')
@@ -63,6 +64,10 @@ export function AgentManagerAgentic({ isOpen, onClose, onConfigChange }: AgentMa
   const [isDeleting, setIsDeleting] = useState(false)
   const [pullModel, setPullModel] = useState('')
   
+  // Endpoints
+  const [ollamaEndpoint, setOllamaEndpoint] = useState('http://localhost:11434')
+  const [bradieEndpoint, setBradieEndpoint] = useState('http://localhost:3001')
+  
   // Bradie project management
   const [projectName, setProjectName] = useState('')
   const [projectPath, setProjectPath] = useState('')
@@ -72,8 +77,11 @@ export function AgentManagerAgentic({ isOpen, onClose, onConfigChange }: AgentMa
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [isTestingConnection, setIsTestingConnection] = useState(false)
+  const [selectedModel, setSelectedModel] = useState<string>('')
+  const [sessionId, setSessionId] = useState<string | null>(null)
+  const [projectId, setProjectId] = useState<string | null>(null)
 
-  const agenticService = getAgenticKitService()
+  const ollamaClient = new OllamaClient(ollamaEndpoint)
 
   // Test connections when dialog opens
   useEffect(() => {
@@ -88,15 +96,15 @@ export function AgentManagerAgentic({ isOpen, onClose, onConfigChange }: AgentMa
     setBradieStatus('checking')
     
     try {
-      const ollamaResult = await agenticService.testConnection('ollama', config.ollamaEndpoint || 'http://localhost:11434')
-      setOllamaStatus(ollamaResult ? 'online' : 'offline')
+      await ollamaClient.listModels()
+      setOllamaStatus('online')
     } catch {
       setOllamaStatus('offline')
     }
 
     try {
-      const bradieResult = await agenticService.testConnection('bradie', config.bradieEndpoint || 'http://localhost:3001')
-      setBradieStatus(bradieResult ? 'online' : 'offline')
+      const response = await fetch(`${bradieEndpoint}/api/health`)
+      setBradieStatus(response.ok ? 'online' : 'offline')
     } catch {
       setBradieStatus('offline')
     }
@@ -110,7 +118,7 @@ export function AgentManagerAgentic({ isOpen, onClose, onConfigChange }: AgentMa
     
     setIsLoadingModels(true)
     try {
-      const models = await agenticService.listOllamaModels()
+      const models = await ollamaClient.listModels()
       setOllamaModels(models || [])
     } catch (err) {
       console.error('Failed to load Ollama models:', err)
@@ -128,7 +136,7 @@ export function AgentManagerAgentic({ isOpen, onClose, onConfigChange }: AgentMa
     setSuccess(null)
 
     try {
-      await agenticService.pullOllamaModel(pullModel.trim())
+      await ollamaClient.pullModel(pullModel.trim())
       setSuccess(`Successfully pulled model: ${pullModel}`)
       setPullModel('')
       await loadOllamaModels()
@@ -147,7 +155,7 @@ export function AgentManagerAgentic({ isOpen, onClose, onConfigChange }: AgentMa
     setSuccess(null)
 
     try {
-      await agenticService.deleteOllamaModel(model)
+      await ollamaClient.deleteModel(model)
       setSuccess(`Successfully deleted model: ${model}`)
       await loadOllamaModels()
     } catch (err) {
@@ -160,14 +168,24 @@ export function AgentManagerAgentic({ isOpen, onClose, onConfigChange }: AgentMa
   const handleTestConnection = async (provider: AgentProvider, endpoint: string) => {
     setIsTestingConnection(true)
     try {
-      const isOnline = await agenticService.testConnection(provider, endpoint)
+      let isOnline = false
       if (provider === 'ollama') {
-        setOllamaStatus(isOnline ? 'online' : 'offline')
+        const testClient = new OllamaClient(endpoint)
+        await testClient.listModels()
+        isOnline = true
+        setOllamaStatus('online')
       } else {
+        const response = await fetch(`${endpoint}/api/health`)
+        isOnline = response.ok
         setBradieStatus(isOnline ? 'online' : 'offline')
       }
       setSuccess(`${provider} connection ${isOnline ? 'successful' : 'failed'}`)
     } catch (err) {
+      if (provider === 'ollama') {
+        setOllamaStatus('offline')
+      } else {
+        setBradieStatus('offline')
+      }
       setError(`Failed to test ${provider} connection: ${err}`)
     } finally {
       setIsTestingConnection(false)
@@ -184,19 +202,8 @@ export function AgentManagerAgentic({ isOpen, onClose, onConfigChange }: AgentMa
     setError(null)
 
     try {
-      const { sessionId, projectId } = await agenticService.initBradieProject(projectName.trim(), projectPath.trim())
-      
-      const newConfig = {
-        ...config,
-        sessionId,
-        projectId
-      }
-      
-      setConfig(newConfig)
-      updateAgenticKitConfig(newConfig)
-      onConfigChange(newConfig)
-      
-      setSuccess(`Project created successfully! Session: ${sessionId}`)
+      // This would need Bradie client implementation
+      setSuccess(`Project creation not yet implemented`)
       setProjectName('')
       setProjectPath('')
     } catch (err) {
@@ -204,13 +211,6 @@ export function AgentManagerAgentic({ isOpen, onClose, onConfigChange }: AgentMa
     } finally {
       setIsCreatingProject(false)
     }
-  }
-
-  const handleConfigUpdate = (updates: Partial<AgentConfig>) => {
-    const newConfig = { ...config, ...updates }
-    setConfig(newConfig)
-    updateAgenticKitConfig(newConfig)
-    onConfigChange(newConfig)
   }
 
   return (
@@ -249,8 +249,8 @@ export function AgentManagerAgentic({ isOpen, onClose, onConfigChange }: AgentMa
             <div className="space-y-2">
               <Label>Current Provider</Label>
               <Select
-                value={config.provider}
-                onValueChange={(value: AgentProvider) => handleConfigUpdate({ provider: value })}
+                value={currentProvider}
+                onValueChange={(value: AgentProvider) => onProviderChange(value)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -293,13 +293,13 @@ export function AgentManagerAgentic({ isOpen, onClose, onConfigChange }: AgentMa
               </div>
               <div className="flex gap-2">
                 <Input
-                  value={config.ollamaEndpoint || ''}
-                  onChange={(e) => handleConfigUpdate({ ollamaEndpoint: e.target.value })}
+                  value={ollamaEndpoint}
+                  onChange={(e) => setOllamaEndpoint(e.target.value)}
                   placeholder="http://localhost:11434"
                 />
                 <Button
                   variant="outline"
-                  onClick={() => handleTestConnection('ollama', config.ollamaEndpoint || 'http://localhost:11434')}
+                  onClick={() => handleTestConnection('ollama', ollamaEndpoint)}
                   disabled={isTestingConnection}
                 >
                   {isTestingConnection ? (
@@ -332,13 +332,13 @@ export function AgentManagerAgentic({ isOpen, onClose, onConfigChange }: AgentMa
               </div>
               <div className="flex gap-2">
                 <Input
-                  value={config.bradieEndpoint || ''}
-                  onChange={(e) => handleConfigUpdate({ bradieEndpoint: e.target.value })}
+                  value={bradieEndpoint}
+                  onChange={(e) => setBradieEndpoint(e.target.value)}
                   placeholder="http://localhost:3001"
                 />
                 <Button
                   variant="outline"
-                  onClick={() => handleTestConnection('bradie', config.bradieEndpoint || 'http://localhost:3001')}
+                  onClick={() => handleTestConnection('bradie', bradieEndpoint)}
                   disabled={isTestingConnection}
                 >
                   {isTestingConnection ? (
@@ -354,8 +354,8 @@ export function AgentManagerAgentic({ isOpen, onClose, onConfigChange }: AgentMa
             <div className="space-y-2">
               <Label>Model</Label>
               <Input
-                value={config.model || ''}
-                onChange={(e) => handleConfigUpdate({ model: e.target.value })}
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
                 placeholder="mistral"
               />
               <p className="text-xs text-muted-foreground">
@@ -402,21 +402,21 @@ export function AgentManagerAgentic({ isOpen, onClose, onConfigChange }: AgentMa
                     <div
                       key={model}
                       className={`flex items-center justify-between p-3 border rounded-lg ${
-                        model === config.model ? 'bg-accent border-primary' : ''
+                        model === selectedModel ? 'bg-accent border-primary' : ''
                       }`}
                     >
                       <div className="flex-1">
                         <div className="font-medium">{model}</div>
-                        {model === config.model && (
+                        {model === selectedModel && (
                           <div className="text-xs text-muted-foreground">Currently selected</div>
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        {model !== config.model && (
+                        {model !== selectedModel && (
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleConfigUpdate({ model })}
+                            onClick={() => setSelectedModel(model)}
                           >
                             Select
                           </Button>
@@ -483,11 +483,11 @@ export function AgentManagerAgentic({ isOpen, onClose, onConfigChange }: AgentMa
                 <div className="p-3 bg-muted rounded-lg space-y-1 text-sm mt-2">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Session ID:</span>
-                    <span className="font-mono">{config.sessionId || 'None'}</span>
+                    <span className="font-mono">{sessionId || 'None'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Project ID:</span>
-                    <span className="font-mono">{config.projectId || 'None'}</span>
+                    <span className="font-mono">{projectId || 'None'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Status:</span>
