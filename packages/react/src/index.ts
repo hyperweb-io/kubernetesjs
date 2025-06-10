@@ -2650,12 +2650,12 @@ export function usePatchCoreV1PersistentVolumeStatus() {
     }
   });
 }
-export function useListPodsQuery(params: ListCoreV1PodForAllNamespacesRequest) {
+export function useListCoreV1PodForAllNamespacesQuery(params: ListCoreV1PodForAllNamespacesRequest) {
   const client = useKubernetes().client;
   return useQuery<PodList, Error>({
     queryKey: [...API_V1_PODS_KEY],
     queryFn: async () => {
-      return await client.listPods(params);
+      return await client.listCoreV1PodForAllNamespaces(params);
     },
     enabled: true
   });
