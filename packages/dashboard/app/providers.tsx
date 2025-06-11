@@ -2,6 +2,7 @@
 
 import { KubernetesProvider } from '../k8s/context'
 import { NamespaceProvider } from '@/contexts/NamespaceContext'
+import { AppProvider } from '@/contexts/AppContext'
 import { ConfirmProvider } from '@/hooks/useConfirm'
 
 interface ProvidersProps {
@@ -10,14 +11,16 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <KubernetesProvider initialConfig={{
-      restEndpoint: '/api/k8s'
-    }}>
-      <NamespaceProvider>
-        <ConfirmProvider>
-          {children}
-        </ConfirmProvider>
-      </NamespaceProvider>
-    </KubernetesProvider>
+    <AppProvider>
+      <KubernetesProvider initialConfig={{
+        restEndpoint: '/api/k8s'
+      }}>
+        <NamespaceProvider>
+          <ConfirmProvider>
+            {children}
+          </ConfirmProvider>
+        </NamespaceProvider>
+      </KubernetesProvider>
+    </AppProvider>
   )
 }

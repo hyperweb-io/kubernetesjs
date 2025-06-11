@@ -4,7 +4,9 @@
       "Bash(rm:*)",
       "Bash(yarn build)",
       "Bash(grep:*)",
-      "Bash(yarn run:*)"
+      "Bash(yarn run:*)",
+      "Bash(mv:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   }

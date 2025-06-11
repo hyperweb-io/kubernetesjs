@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useDeferredValue } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -79,7 +79,7 @@ function ResourceSection({ title, icon: Icon, color, count, loading, error, chil
 }
 
 export function AllResourcesView() {
-  // Fetch all resources
+  // Always call all hooks, but control their enabled state
   const deployments = useDeployments()
   const services = useServices()
   const pods = usePods()

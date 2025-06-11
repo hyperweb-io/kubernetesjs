@@ -27,6 +27,9 @@ const queryClient = new QueryClient({
       retry: 3,
       staleTime: 30 * 1000, // 30 seconds
       gcTime: 5 * 60 * 1000, // 5 minutes
+      // Use background fetching to prevent UI blocking
+      refetchOnMount: 'always',
+      keepPreviousData: true,
     },
   },
 })

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { DashboardLayout } from '@/components/dashboard-layout'
+import { AdaptiveLayout } from '@/components/adaptive-layout'
 import { AIChatAgentic } from '@/components/ai-chat-agentic'
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -16,14 +16,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <DashboardLayout 
+      <AdaptiveLayout 
         onChatToggle={handleChatToggle} 
         chatVisible={chatOpen}
         chatLayoutMode={chatLayoutMode}
         chatWidth={chatWidth}
       >
         {children}
-      </DashboardLayout>
+      </AdaptiveLayout>
       
       <AIChatAgentic
         isOpen={chatOpen}
