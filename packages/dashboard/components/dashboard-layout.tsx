@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -108,6 +108,11 @@ export function DashboardLayout({ children, onChatToggle, chatVisible, chatLayou
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['workloads', 'config', 'network', 'rbac', 'cluster']))
   const pathname = usePathname()
   const { config } = useKubernetes()
+  
+  // Robust toggle function to prevent race conditions
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen(prev => !prev)
+  }, [])
   
   // Find active section based on pathname
   const activeSection = navigationItems.find(item => !item.isHeader && item.href === pathname)?.label || 'Overview'
@@ -233,7 +238,9 @@ export function DashboardLayout({ children, onChatToggle, chatVisible, chatLayou
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={toggleSidebar}
+              type="button"
+              aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
             >
               {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>

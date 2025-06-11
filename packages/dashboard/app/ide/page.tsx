@@ -26,7 +26,7 @@ const MonacoEditor = dynamic(() => import('@monaco-editor/react'), { ssr: false 
 export default function IDEPage() {
   const [activeFile, setActiveFile] = useState<string | null>(null)
   const [fileContent, setFileContent] = useState<string>('')
-  const [terminalVisible, setTerminalVisible] = useState(true)
+  const [terminalVisible, setTerminalVisible] = useState(false)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [fileLanguage, setFileLanguage] = useState('javascript')
   const [fileSource, setFileSource] = useState<'local' | 'zenfs'>('local')
@@ -275,7 +275,7 @@ export default function IDEPage() {
                 </Button>
               </div>
               <div className="flex-1 overflow-hidden">
-                <Terminal className="h-full" />
+                <Terminal className="h-full" visible={terminalVisible} />
               </div>
             </div>
           )}

@@ -8,9 +8,10 @@ import 'xterm/css/xterm.css'
 
 interface TerminalProps {
   className?: string
+  visible?: boolean
 }
 
-export function Terminal({ className }: TerminalProps) {
+export function Terminal({ className, visible = true }: TerminalProps) {
   const terminalRef = useRef<HTMLDivElement>(null)
   const xtermRef = useRef<XTerm | null>(null)
   const fitAddonRef = useRef<FitAddon | null>(null)
@@ -56,7 +57,17 @@ export function Terminal({ className }: TerminalProps) {
     term.loadAddon(fitAddon)
 
     term.open(terminalRef.current)
-    fitAddon.fit()
+    
+    // Delay fit to ensure terminal has proper dimensions
+    setTimeout(() => {
+      try {
+        if (visible && terminalRef.current?.offsetWidth && terminalRef.current?.offsetHeight) {
+          fitAddon.fit()
+        }
+      } catch (error) {
+        console.warn('Terminal fit failed:', error)
+      }
+    }, 100)
 
     xtermRef.current = term
     fitAddonRef.current = fitAddon
@@ -74,7 +85,13 @@ export function Terminal({ className }: TerminalProps) {
 
     // Handle resize
     const handleResize = () => {
-      fitAddon.fit()
+      try {
+        if (fitAddon && terminalRef.current && visible && terminalRef.current.offsetWidth && terminalRef.current.offsetHeight) {
+          fitAddon.fit()
+        }
+      } catch (error) {
+        console.warn('Terminal resize failed:', error)
+      }
     }
     window.addEventListener('resize', handleResize)
 
@@ -83,6 +100,19 @@ export function Terminal({ className }: TerminalProps) {
       term.dispose()
     }
   }, [])
+
+  // Handle visibility changes
+  useEffect(() => {
+    if (visible && fitAddonRef.current && terminalRef.current?.offsetWidth && terminalRef.current?.offsetHeight) {
+      setTimeout(() => {
+        try {
+          fitAddonRef.current?.fit()
+        } catch (error) {
+          console.warn('Terminal visibility fit failed:', error)
+        }
+      }, 100)
+    }
+  }, [visible])
 
   const promptUser = () => {
     if (xtermRef.current) {
