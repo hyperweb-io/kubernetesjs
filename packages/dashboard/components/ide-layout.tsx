@@ -1,9 +1,6 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { ContextSwitcher } from '@/components/context-switcher'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { MessageSquare } from 'lucide-react'
+import { IDEHeader } from '@/components/headers/ide-header'
 
 interface IDELayoutProps {
   children: React.ReactNode
@@ -11,9 +8,28 @@ interface IDELayoutProps {
   chatVisible: boolean
   chatLayoutMode: 'floating' | 'snapped'
   chatWidth: number
+  // IDE specific props
+  activeFile?: string | null
+  hasUnsavedChanges?: boolean
+  onSaveFile?: () => void
+  onSyncFiles?: () => void
+  syncStatus?: 'idle' | 'syncing' | 'success' | 'error'
+  modifiedFilesCount?: number
 }
 
-export function IDELayout({ children, onChatToggle, chatVisible, chatLayoutMode, chatWidth }: IDELayoutProps) {
+export function IDELayout({ 
+  children, 
+  onChatToggle, 
+  chatVisible, 
+  chatLayoutMode, 
+  chatWidth,
+  activeFile = null,
+  hasUnsavedChanges = false,
+  onSaveFile = () => {},
+  onSyncFiles = () => {},
+  syncStatus = 'idle',
+  modifiedFilesCount = 0
+}: IDELayoutProps) {
   const isSnappedAndOpen = chatVisible && chatLayoutMode === 'snapped'
 
   return (
@@ -22,26 +38,16 @@ export function IDELayout({ children, onChatToggle, chatVisible, chatLayoutMode,
         className="flex-1 flex flex-col overflow-hidden"
         style={isSnappedAndOpen ? { marginRight: `${chatWidth}px` } : {}}
       >
-        {/* Minimal IDE Header */}
-        <header className="bg-card border-b px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <h2 className="text-xl font-semibold">Development Environment</h2>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="border-r pr-4">
-              <ContextSwitcher variant="header" />
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onChatToggle}
-              className={chatVisible ? 'bg-accent' : ''}
-            >
-              <MessageSquare className="h-5 w-5" />
-            </Button>
-            <ThemeToggle />
-          </div>
-        </header>
+        <IDEHeader
+          activeFile={activeFile}
+          hasUnsavedChanges={hasUnsavedChanges}
+          onSaveFile={onSaveFile}
+          onSyncFiles={onSyncFiles}
+          syncStatus={syncStatus}
+          modifiedFilesCount={modifiedFilesCount}
+          onChatToggle={onChatToggle}
+          chatVisible={chatVisible}
+        />
         <main className="flex-1 overflow-hidden">
           {children}
         </main>

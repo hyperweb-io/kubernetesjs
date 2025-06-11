@@ -10,6 +10,15 @@ interface AdaptiveLayoutProps {
   chatVisible: boolean
   chatLayoutMode: 'floating' | 'snapped'
   chatWidth: number
+  // IDE specific props (passed through when in editor mode)
+  ideProps?: {
+    activeFile?: string | null
+    hasUnsavedChanges?: boolean
+    onSaveFile?: () => void
+    onSyncFiles?: () => void
+    syncStatus?: 'idle' | 'syncing' | 'success' | 'error'
+    modifiedFilesCount?: number
+  }
 }
 
 // Determine layout mode purely from route
@@ -27,13 +36,13 @@ function getModeFromRoute(pathname: string): 'smart-objects' | 'infra' | 'editor
   return 'infra'
 }
 
-export function AdaptiveLayout(props: AdaptiveLayoutProps) {
+export function AdaptiveLayout({ ideProps, ...props }: AdaptiveLayoutProps) {
   const pathname = usePathname()
   const mode = getModeFromRoute(pathname)
 
   // Use IDE layout for /editor route
   if (mode === 'editor') {
-    return <IDELayout {...props} />
+    return <IDELayout {...props} {...ideProps} />
   }
 
   // Use dashboard layout with mode for everything else

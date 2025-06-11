@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { NamespaceSwitcher } from '@/components/namespace-switcher'
 import { ContextSwitcher } from '@/components/context-switcher'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { InfraHeader } from '@/components/headers/infra-header'
+import { SmartObjectsHeader } from '@/components/headers/smart-objects-header'
 import { useKubernetes } from '../k8s/context'
 import {
   Package,
@@ -370,40 +372,24 @@ export function DashboardLayout({ children, onChatToggle, chatVisible, chatLayou
       <div className={`flex-1 flex flex-col transition-all duration-300 ${isSnappedAndOpen ? `mr-[${chatWidth}px]` : ''}`}
         style={isSnappedAndOpen ? { marginRight: `${chatWidth}px` } : {}}
       >
-        {/* Header */}
-        <header className="bg-card border-b px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleSidebar}
-              type="button"
-              aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-            >
-              {sidebarOpen ? <PanelLeftClose className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-            <h2 className="ml-4 text-xl font-semibold">
-              {activeSection}
-            </h2>
-          </div>
-          <div className="flex items-center space-x-4">
-            {mode === 'infra' && (
-              <>
-                <span className="text-sm text-muted-foreground">Cluster: {config.restEndpoint}</span>
-                <NamespaceSwitcher />
-              </>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onChatToggle}
-              className={chatVisible ? 'bg-accent' : ''}
-            >
-              <MessageSquare className="h-5 w-5" />
-            </Button>
-            <ThemeToggle />
-          </div>
-        </header>
+        {/* Header - Context Specific */}
+        {mode === 'infra' ? (
+          <InfraHeader
+            sidebarOpen={sidebarOpen}
+            onSidebarToggle={toggleSidebar}
+            activeSection={activeSection}
+            onChatToggle={onChatToggle}
+            chatVisible={chatVisible}
+          />
+        ) : (
+          <SmartObjectsHeader
+            sidebarOpen={sidebarOpen}
+            onSidebarToggle={toggleSidebar}
+            activeSection={activeSection}
+            onChatToggle={onChatToggle}
+            chatVisible={chatVisible}
+          />
+        )}
 
         {/* Content Area */}
         <main className="flex-1 p-6 overflow-auto">
