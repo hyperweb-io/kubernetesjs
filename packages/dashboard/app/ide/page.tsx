@@ -101,7 +101,7 @@ export default function IDEPage() {
       let successCount = 0
       let errorCount = 0
       
-      for (const filePath of modifiedFiles) {
+      for (const filePath of Array.from(modifiedFiles)) {
         try {
           // Read content from ZenFS
           const content = await fs.promises.readFile(`/project/${filePath}`, 'utf8')

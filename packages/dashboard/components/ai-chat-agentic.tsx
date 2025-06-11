@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, KeyboardEvent } from 'react'
+import React, { useState, useRef, useEffect, KeyboardEvent } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
@@ -100,9 +100,9 @@ export function AIChatAgentic({
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, streamingMessage])
 
-  // Load chat history from localStorage
+  // Load chat history from localStorage (use same key as global chat)
   useEffect(() => {
-    const savedMessages = localStorage.getItem('agentic-chat-messages')
+    const savedMessages = localStorage.getItem('ai-chat-messages')
     if (savedMessages) {
       try {
         const parsed = JSON.parse(savedMessages)
@@ -116,10 +116,10 @@ export function AIChatAgentic({
     }
   }, [])
 
-  // Save messages to localStorage
+  // Save messages to localStorage (use same key as global chat)
   useEffect(() => {
     if (messages.length > 0) {
-      localStorage.setItem('agentic-chat-messages', JSON.stringify(messages))
+      localStorage.setItem('ai-chat-messages', JSON.stringify(messages))
     }
   }, [messages])
 
@@ -148,37 +148,12 @@ export function AIChatAgentic({
     setStreamingMessage('')
 
     try {
-      // Reset streaming state
-      setStreamingMessage('')
+      let fullResponse = ''
       
       // Handle streaming
       const onChunk = (chunk: string) => {
-        setStreamingMessage(prev => prev + chunk)
-      }
-
-      const onComplete = () => {
-        console.log('onComplete called') // Debug log
-        // Use the current streamingMessage state to create the final message
-        setStreamingMessage(currentStreaming => {
-          console.log('Final streaming content:', currentStreaming) // Debug log
-          if (currentStreaming.trim()) {
-            const assistantMessage: ChatMessage = {
-              id: (Date.now() + 1).toString(),
-              role: 'assistant',
-              content: currentStreaming,
-              timestamp: new Date(),
-              provider: currentProvider
-            }
-            setMessages(prev => [...prev, assistantMessage])
-          }
-          return '' // Clear streaming message
-        })
-      }
-
-      const onError = (err: Error) => {
-        console.error('Error generating response:', err)
-        setError(err.message)
-        setStreamingMessage('')
+        fullResponse += chunk
+        setStreamingMessage(fullResponse)
       }
 
       // Generate response
@@ -189,15 +164,29 @@ export function AIChatAgentic({
           stream: true
         },
         { 
-          onChunk, 
-          onComplete, 
-          onError
+          onChunk
         }
       )
+
+      // After streaming completes, create the final message
+      if (fullResponse.trim()) {
+        const assistantMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: fullResponse,
+          timestamp: new Date(),
+          provider: currentProvider
+        }
+        setMessages(prev => [...prev, assistantMessage])
+      }
+      
+      // Clear streaming message
+      setStreamingMessage('')
 
     } catch (err) {
       console.error('Error generating response:', err)
       setError('An error occurred. Please try again.')
+      setStreamingMessage('')
     } finally {
       setIsLoading(false)
     }
@@ -206,7 +195,9 @@ export function AIChatAgentic({
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      handleSend()
+      if (!isLoading) {
+        handleSend()
+      }
     }
   }
 
@@ -222,7 +213,7 @@ export function AIChatAgentic({
 
   const clearHistory = () => {
     setMessages([])
-    localStorage.removeItem('agentic-chat-messages')
+    localStorage.removeItem('ai-chat-messages')
   }
 
   // Handle resize
@@ -339,18 +330,16 @@ export function AIChatAgentic({
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       components={{
-                        code({ node, inline, className, children, ...props }) {
+                        code({ node, inline, className, children, ...props }: any) {
                           const match = /language-(\w+)/.exec(className || '')
                           return !inline && match ? (
                             <div className="relative my-2">
-                              <SyntaxHighlighter
-                                style={vscDarkPlus}
-                                language={match[1]}
-                                PreTag="div"
-                                {...props}
-                              >
-                                {String(children).replace(/\n$/, '')}
-                              </SyntaxHighlighter>
+                              {React.createElement(SyntaxHighlighter as any, {
+                                style: vscDarkPlus,
+                                language: match[1],
+                                PreTag: "div",
+                                ...props
+                              }, String(children).replace(/\n$/, ''))}
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -436,7 +425,6 @@ export function AIChatAgentic({
               onKeyDown={handleKeyDown}
               placeholder={`Message ${currentProvider}...`}
               className="min-h-[60px] resize-none"
-              disabled={isLoading}
             />
             <Button 
               onClick={handleSend} 

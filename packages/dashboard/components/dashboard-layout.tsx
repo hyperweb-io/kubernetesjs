@@ -199,6 +199,10 @@ export function DashboardLayout({ children, onChatToggle, chatVisible, chatLayou
             const isActive = pathname === item.href
             const marginLeft = item.section ? 'ml-4' : '' // Indent items in sections
             
+            if (!item.href || !Icon) {
+              return null // Skip items without href or icon
+            }
+            
             return (
               <NextLink
                 key={item.id}

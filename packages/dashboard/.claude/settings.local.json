@@ -3,7 +3,8 @@
     "allow": [
       "Bash(rm:*)",
       "Bash(yarn build)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(yarn run:*)"
     ],
     "deny": []
   }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, KeyboardEvent } from 'react'
+import React, { useState, useRef, useEffect, KeyboardEvent } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
@@ -204,7 +204,9 @@ export function AIChatGlobal({ isOpen, onToggle, width, onWidthChange, layoutMod
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      handleSend()
+      if (!isLoading) {
+        handleSend()
+      }
     }
   }
 
@@ -336,18 +338,16 @@ export function AIChatGlobal({ isOpen, onToggle, width, onWidthChange, layoutMod
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       components={{
-                        code({ node, inline, className, children, ...props }) {
+                        code({ node, inline, className, children, ...props }: any) {
                           const match = /language-(\w+)/.exec(className || '')
                           return !inline && match ? (
                             <div className="relative my-2">
-                              <SyntaxHighlighter
-                                style={vscDarkPlus}
-                                language={match[1]}
-                                PreTag="div"
-                                {...props}
-                              >
-                                {String(children).replace(/\n$/, '')}
-                              </SyntaxHighlighter>
+                              {React.createElement(SyntaxHighlighter as any, {
+                                style: vscDarkPlus,
+                                language: match[1],
+                                PreTag: "div",
+                                ...props
+                              }, String(children).replace(/\n$/, ''))}
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -416,7 +416,6 @@ export function AIChatGlobal({ isOpen, onToggle, width, onWidthChange, layoutMod
               onKeyDown={handleKeyDown}
               placeholder={`Message ${currentAgent}...`}
               className="min-h-[60px] resize-none"
-              disabled={isLoading}
             />
             <Button 
               onClick={handleSend} 
