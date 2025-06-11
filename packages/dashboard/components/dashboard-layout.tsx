@@ -17,7 +17,7 @@ import {
   Activity,
   Home,
   Menu,
-  X,
+  PanelLeftClose,
   FileCode2,
   Layers,
   Calendar,
@@ -242,7 +242,7 @@ export function DashboardLayout({ children, onChatToggle, chatVisible, chatLayou
               type="button"
               aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
             >
-              {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {sidebarOpen ? <PanelLeftClose className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
             <h2 className="ml-4 text-xl font-semibold">
               {activeSection}
