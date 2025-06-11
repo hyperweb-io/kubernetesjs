@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext, useState, startTransition } from 'react'
 
 interface NamespaceContextValue {
   namespace: string
@@ -17,8 +17,15 @@ interface NamespaceProviderProps {
 export function NamespaceProvider({ children, initialNamespace = 'default' }: NamespaceProviderProps) {
   const [namespace, setNamespace] = useState<string>(initialNamespace)
 
+  // Wrap namespace changes in startTransition to prevent blocking UI
+  const setNamespaceNonBlocking = (ns: string) => {
+    startTransition(() => {
+      setNamespace(ns)
+    })
+  }
+
   return (
-    <NamespaceContext.Provider value={{ namespace, setNamespace }}>
+    <NamespaceContext.Provider value={{ namespace, setNamespace: setNamespaceNonBlocking }}>
       {children}
     </NamespaceContext.Provider>
   )
