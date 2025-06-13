@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 
 import { logger } from '@/lib/logger';
-import { useRuntimeConfig } from '@/contexts/runtime-config';
+import { getHyperwebConfig } from '@/hooks/contract/use-hyperweb-config';
 import { workspaceEventEmitter } from '@/components/contract/editor/services/events';
 import { registerTasksRunner } from '@/components/contract/editor/tasks/tasks.runner';
 
@@ -19,43 +19,43 @@ registerTasksRunner();
  * @returns The current initialization status from the store.
  */
 export function useInitWorkspace({
-	fallbackProjectItems,
+  fallbackProjectItems,
 }: {
-	fallbackProjectItems?: Record<string, ProjectItem>;
+  fallbackProjectItems?: Record<string, ProjectItem>;
 }): InitializationStatus {
-	const { config } = useRuntimeConfig();
-	// Select necessary state and actions
-	const store = useContractProject();
-	const { initializationStatus, initializeProject } = store;
-	const [initTasksRun, setInitTasksRun] = useState(false);
+  const config = getHyperwebConfig();
+  // Select necessary state and actions
+  const store = useContractProject();
+  const { initializationStatus, initializeProject } = store;
+  const [initTasksRun, setInitTasksRun] = useState(false);
 
-	// Keep track of the previous status to detect the transition
-	const prevStatusRef = useRef<InitializationStatus>();
+  // Keep track of the previous status to detect the transition
+  const prevStatusRef = useRef<InitializationStatus>();
 
-	useEffect(() => {
-		if (!config) return;
+  useEffect(() => {
+    if (!config) return;
 
-		// Trigger initialization only if the status is 'idle'
-		if (initializationStatus === 'idle' && prevStatusRef.current !== 'idle') {
-			logger.info('[useInitWorkspace] Status is idle, triggering initialization...');
-			setInitTasksRun(false); // Reset task flag on new initialization attempt
-			initializeProject({ fallbackItems: fallbackProjectItems, config });
-		}
+    // Trigger initialization only if the status is 'idle'
+    if (initializationStatus === 'idle' && prevStatusRef.current !== 'idle') {
+      logger.info('[useInitWorkspace] Status is idle, triggering initialization...');
+      setInitTasksRun(false); // Reset task flag on new initialization attempt
+      initializeProject({ fallbackItems: fallbackProjectItems, config });
+    }
 
-		// Run INIT tasks when initialization completes successfully
-		if (initializationStatus === 'initialized' && prevStatusRef.current === 'initializing' && !initTasksRun) {
-			logger.info('[useInitWorkspace] Initialization complete, emitting INIT event...');
-			setInitTasksRun(true); // Set flag immediately to prevent re-emission
+    // Run INIT tasks when initialization completes successfully
+    if (initializationStatus === 'initialized' && prevStatusRef.current === 'initializing' && !initTasksRun) {
+      logger.info('[useInitWorkspace] Initialization complete, emitting INIT event...');
+      setInitTasksRun(true); // Set flag immediately to prevent re-emission
 
-			workspaceEventEmitter.emit('INIT', { store }).catch((error) => {
-				logger.error('[useInitWorkspace] Error emitting INIT event:', error);
-			});
-		}
+      workspaceEventEmitter.emit('INIT', { store }).catch((error) => {
+        logger.error('[useInitWorkspace] Error emitting INIT event:', error);
+      });
+    }
 
-		// Update previous status ref *after* checks
-		prevStatusRef.current = initializationStatus;
-	}, [initializationStatus, initializeProject, fallbackProjectItems, config, initTasksRun, store]);
+    // Update previous status ref *after* checks
+    prevStatusRef.current = initializationStatus;
+  }, [initializationStatus, initializeProject, fallbackProjectItems, config, initTasksRun, store]);
 
-	// Return the current status directly from the store
-	return initializationStatus;
+  // Return the current status directly from the store
+  return initializationStatus;
 }

@@ -1,21 +1,39 @@
-import { useRuntimeConfig } from '@/contexts/runtime-config';
+import { appBuildTimeConfig } from '@/configs/app-config';
+
+type ContractConfig = {
+  rpcUrl: string;
+  faucetUrl: string;
+  registryUrl: string;
+  s3BucketUrl: string;
+  s3TarballName: string;
+};
+
+function getStaticConfig(): ContractConfig {
+  return {
+    rpcUrl: appBuildTimeConfig.rpcUrl!,
+    faucetUrl: appBuildTimeConfig.faucetUrl!,
+    registryUrl: appBuildTimeConfig.registryUrl!,
+    s3BucketUrl: appBuildTimeConfig.s3BucketUrl!,
+    s3TarballName: appBuildTimeConfig.s3TarballName!,
+  };
+}
 
 /**
  * Defines the expected structure for Hyperweb endpoint configuration.
  */
 export interface HyperwebConfigShape {
-	chain: {
-		rpc: string | undefined;
-		faucet: string | undefined;
-	};
-	registry: {
-		rest: string | undefined;
-	};
-	s3?: {
-		bucketUrl: string | undefined;
-		tarballName: string | undefined;
-	};
-	// Add other config groups if needed
+  chain: {
+    rpc: string | undefined;
+    faucet: string | undefined;
+  };
+  registry: {
+    rest: string | undefined;
+  };
+  s3?: {
+    bucketUrl: string | undefined;
+    tarballName: string | undefined;
+  };
+  // Add other config groups if needed
 }
 
 /**
@@ -28,30 +46,21 @@ export interface HyperwebConfigShape {
  *
  * @returns {Object} { config: HyperwebConfigShape | null, isLoading: boolean, error: Error | null }
  */
-export function useHyperwebConfig() {
-	// Fetch the raw config, loading, and error states from the context
-	const { config: rawConfig, isLoading, error } = useRuntimeConfig();
+export function getHyperwebConfig(): HyperwebConfigShape {
+  // Transform the raw config into the desired nested structure
+  const contractConfig = getStaticConfig();
 
-	// Transform the raw config into the desired nested structure only if it exists
-	const hyperwebConfig: HyperwebConfigShape | null = rawConfig
-		? {
-				chain: {
-					rpc: rawConfig.rpcUrl,
-					faucet: rawConfig.faucetUrl,
-				},
-				registry: {
-					rest: rawConfig.registryUrl,
-				},
-				s3: {
-					bucketUrl: rawConfig.s3BucketUrl,
-					tarballName: rawConfig.s3TarballName,
-				},
-			}
-		: null; // Return null if the raw config isn't loaded yet or failed
-
-	return {
-		config: hyperwebConfig,
-		isLoading,
-		error,
-	};
+  return {
+    chain: {
+      rpc: contractConfig.rpcUrl,
+      faucet: contractConfig.faucetUrl,
+    },
+    registry: {
+      rest: contractConfig.registryUrl,
+    },
+    s3: {
+      bucketUrl: contractConfig.s3BucketUrl,
+      tarballName: contractConfig.s3TarballName,
+    },
+  };
 }

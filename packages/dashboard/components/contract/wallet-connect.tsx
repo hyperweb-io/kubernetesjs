@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import { Wallet } from 'lucide-react';
 
@@ -5,39 +7,39 @@ import { useHyperwebChain } from '@/hooks/contract/use-hyperweb-chain';
 import { cn } from '@/lib/utils';
 
 interface WalletConnectProps {
-	className?: string;
+  className?: string;
 }
 
 export const WalletConnect = ({ className }: WalletConnectProps) => {
-	const { connect, wallet, address, openView } = useHyperwebChain();
-	const walletLogo = wallet?.info?.logo ?? '';
+  const { connect, wallet, address, openView } = useHyperwebChain();
+  const walletLogo = wallet?.info?.logo ?? '';
 
-	return (
-		<div
-			className={cn(
-				'flex h-9 flex-shrink-0 items-center gap-2 rounded-lg border border-border px-3 dark:border-foreground/20',
-				className,
-			)}
-		>
-			<div className='flex items-center gap-2 text-sm font-medium text-body-text'>
-				<div className='size-2 rounded-full bg-blue-500'></div>
-				Hyperweb Devnet
-			</div>
+  return (
+    <div
+      className={cn(
+        'flex h-9 flex-shrink-0 items-center gap-2 rounded-lg border border-border px-3 dark:border-foreground/20',
+        className
+      )}
+    >
+      <div className="flex items-center gap-2 text-sm font-medium text-body-text">
+        <div className="size-2 rounded-full bg-blue-500"></div>
+        Hyperweb Devnet
+      </div>
 
-			{address ? (
-				<Image
-					src={typeof walletLogo === 'string' ? walletLogo : walletLogo.major || walletLogo.minor}
-					alt={wallet?.info?.prettyName ?? 'Wallet logo'}
-					width='0'
-					height='0'
-					onClick={openView}
-					className='size-4 cursor-pointer'
-				/>
-			) : (
-				<Wallet className='size-[18px] cursor-pointer' onClick={connect} />
-			)}
-		</div>
-	);
+      {address ? (
+        <Image
+          src={typeof walletLogo === 'string' ? walletLogo : walletLogo.major || walletLogo.minor}
+          alt={wallet?.info?.prettyName ?? 'Wallet logo'}
+          width="0"
+          height="0"
+          onClick={openView}
+          className="size-4 cursor-pointer"
+        />
+      ) : (
+        <Wallet className="size-[18px] cursor-pointer" onClick={connect} />
+      )}
+    </div>
+  );
 };
 
 // const WalletConnectSkeleton = ({ className }: { className?: string }) => (

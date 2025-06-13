@@ -3,15 +3,13 @@ import { Asset } from '@chain-registry/v2-types';
 import { BigNumber } from 'bignumber.js';
 
 function toCamelCase(key: string) {
-	return (
-		key
-			// First, remove all leading non-alphabet characters except $
-			.replace(/^[^a-zA-Z$]+/, '')
-			// Convert what follows a separator into upper case
-			.replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
-			// Ensure the first character of the result is always lowercase
-			.replace(/^./, (c) => c.toLowerCase())
-	);
+	return (key
+        // First, remove all leading non-alphabet characters except $
+        .replace(/^[^a-zA-Z$]+/, '')
+        // Convert what follows a separator into upper case
+        .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
+        // Ensure the first character of the result is always lowercase
+        .replace(/^./, (c) => c.toLowerCase()));
 }
 
 export function convertKeysToCamelCase(obj: any): any {

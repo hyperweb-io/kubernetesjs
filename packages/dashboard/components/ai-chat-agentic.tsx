@@ -357,7 +357,7 @@ export function AIChatAgentic({
                             <code className={className} {...props}>
                               {children}
                             </code>
-                          )
+                          );
                         }
                       }}
                     >
@@ -436,7 +436,6 @@ export function AIChatAgentic({
           </div>
         </div>
       </div>
-
       {/* Agent Manager Modal */}
       {showAgentManager && (
         <AgentManagerAgentic
@@ -448,5 +447,5 @@ export function AIChatAgentic({
         />
       )}
     </>
-  )
+  );
 }

@@ -93,12 +93,11 @@ export default function InfrastructureOverviewPage() {
           Select a resource type below to get started.
         </p>
       </div>
-
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {resources.map((resource) => {
           const Icon = resource.icon
           return (
-            <Link key={resource.id} href={resource.href}>
+            <Link key={resource.id} href={resource.href} legacyBehavior>
               <Card className="hover:shadow-md transition-shadow cursor-pointer">
                 <CardHeader className="flex flex-row items-center space-y-0 gap-4">
                   <div className={`p-3 rounded-lg bg-secondary ${resource.color}`}>
@@ -114,10 +113,9 @@ export default function InfrastructureOverviewPage() {
                 </CardHeader>
               </Card>
             </Link>
-          )
+          );
         })}
       </div>
-
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
@@ -151,5 +149,5 @@ export default function InfrastructureOverviewPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

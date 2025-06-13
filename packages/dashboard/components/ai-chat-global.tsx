@@ -365,7 +365,7 @@ export function AIChatGlobal({ isOpen, onToggle, width, onWidthChange, layoutMod
                             <code className={className} {...props}>
                               {children}
                             </code>
-                          )
+                          );
                         }
                       }}
                     >
@@ -427,7 +427,6 @@ export function AIChatGlobal({ isOpen, onToggle, width, onWidthChange, layoutMod
           </div>
         </div>
       </div>
-
       {/* Agent Manager Modal */}
       {showAgentManager && (
         <AgentManagerGlobal
@@ -445,5 +444,5 @@ export function AIChatGlobal({ isOpen, onToggle, width, onWidthChange, layoutMod
         />
       )}
     </>
-  )
+  );
 }

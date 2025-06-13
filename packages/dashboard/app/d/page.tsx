@@ -81,7 +81,6 @@ export default function SmartObjectsDashboard() {
           High-level management interface for your distributed applications, databases, and blockchain infrastructure.
         </p>
       </div>
-
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
@@ -125,7 +124,6 @@ export default function SmartObjectsDashboard() {
           </CardContent>
         </Card>
       </div>
-
       {/* Smart Objects Grid */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Cloud Services</h2>
@@ -133,7 +131,7 @@ export default function SmartObjectsDashboard() {
           {smartObjects.slice(0, 2).map((object) => {
             const Icon = object.icon
             return (
-              <Link key={object.id} href={object.href}>
+              <Link key={object.id} href={object.href} legacyBehavior>
                 <Card className="hover:shadow-md transition-shadow cursor-pointer">
                   <CardHeader className="flex flex-row items-center space-y-0 gap-4">
                     <div className={`p-3 rounded-lg bg-secondary ${object.color}`}>
@@ -149,11 +147,10 @@ export default function SmartObjectsDashboard() {
                   </CardHeader>
                 </Card>
               </Link>
-            )
+            );
           })}
         </div>
       </div>
-
       {/* Blockchain Section */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Blockchain Infrastructure</h2>
@@ -161,7 +158,7 @@ export default function SmartObjectsDashboard() {
           {smartObjects.slice(2).map((object) => {
             const Icon = object.icon
             return (
-              <Link key={object.id} href={object.href}>
+              <Link key={object.id} href={object.href} legacyBehavior>
                 <Card className="hover:shadow-md transition-shadow cursor-pointer">
                   <CardHeader className="flex flex-row items-center space-y-0 gap-4">
                     <div className={`p-3 rounded-lg bg-secondary ${object.color}`}>
@@ -177,11 +174,10 @@ export default function SmartObjectsDashboard() {
                   </CardHeader>
                 </Card>
               </Link>
-            )
+            );
           })}
         </div>
       </div>
-
       {/* Quick Actions */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
@@ -209,5 +205,5 @@ export default function SmartObjectsDashboard() {
         </div>
       </div>
     </div>
-  )
+  );
 }

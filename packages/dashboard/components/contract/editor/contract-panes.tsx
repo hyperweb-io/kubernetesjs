@@ -1,3 +1,5 @@
+'use client';
+
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
@@ -19,108 +21,108 @@ import { SourceViewer } from './panels/source-viewer-panel';
 import { workspaceEventEmitter } from './services/events';
 
 export interface ContractPanesProps {
-	toolbar?: React.ReactNode;
-	editorPanel?: React.ReactNode;
-	errorPanel?: React.ReactNode;
-	fallbackProjectItems?: Record<string, ProjectItem>;
+  toolbar?: React.ReactNode;
+  editorPanel?: React.ReactNode;
+  errorPanel?: React.ReactNode;
+  fallbackProjectItems?: Record<string, ProjectItem>;
 }
 
 export function ContractPanes({ toolbar, fallbackProjectItems }: ContractPanesProps) {
-	const [buildErrors, setBuildErrors] = useState<BuildErrors[]>([]);
-	const [isFullscreen, setIsFullscreen] = useState(false);
-	const containerRef = useRef<HTMLDivElement>(null);
+  const [buildErrors, setBuildErrors] = useState<BuildErrors[]>([]);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-	// Register workspace shortcuts
-	useShortcuts();
+  // Register workspace shortcuts
+  useShortcuts();
 
-	const initStatus = useInitWorkspace({ fallbackProjectItems });
+  const initStatus = useInitWorkspace({ fallbackProjectItems });
 
-	const isWorkspaceReady = initStatus === 'initialized';
+  const isWorkspaceReady = initStatus === 'initialized';
 
-	useEffect(() => {
-		// hide page scrollbar when fullscreen
-		if (isFullscreen) {
-			lockPageScroll();
-		} else {
-			unlockPageScroll();
-		}
+  useEffect(() => {
+    // hide page scrollbar when fullscreen
+    if (isFullscreen) {
+      lockPageScroll();
+    } else {
+      unlockPageScroll();
+    }
 
-		return () => {
-			unlockPageScroll();
-		};
-	}, [isFullscreen]);
+    return () => {
+      unlockPageScroll();
+    };
+  }, [isFullscreen]);
 
-	useEffect(() => {
-		const handleFocusRequest = () => {
-			containerRef.current?.focus({ preventScroll: true }); // preventScroll might be useful
-		};
+  useEffect(() => {
+    const handleFocusRequest = () => {
+      containerRef.current?.focus({ preventScroll: true }); // preventScroll might be useful
+    };
 
-		workspaceEventEmitter.on('FOCUS_EDITOR', handleFocusRequest);
+    workspaceEventEmitter.on('FOCUS_EDITOR', handleFocusRequest);
 
-		return () => {
-			workspaceEventEmitter.off('FOCUS_EDITOR', handleFocusRequest);
-		};
-	}, []);
+    return () => {
+      workspaceEventEmitter.off('FOCUS_EDITOR', handleFocusRequest);
+    };
+  }, []);
 
-	const handleContainerKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
-		workspaceEventEmitter.emit('KEY_DOWN', { event: event.nativeEvent });
-	}, []);
+  const handleContainerKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    workspaceEventEmitter.emit('KEY_DOWN', { event: event.nativeEvent });
+  }, []);
 
-	return (
-		<ContractEditorProvider>
-			<TooltipProvider>
-				<div
-					ref={containerRef}
-					onKeyDown={handleContainerKeyDown}
-					tabIndex={-1}
-					className={cn(
-						'scrollbar-neutral h-full w-full overflow-auto rounded-lg border bg-background focus:outline-none',
-						isFullscreen && 'fixed inset-0 z-50 overflow-hidden rounded-none border-none',
-					)}
-				>
-					<PanelGroup direction='vertical' className='h-full min-w-[800px] rounded-lg'>
-						<ContractEditorToolbar
-							onBuildError={setBuildErrors}
-							isFullscreen={isFullscreen}
-							onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
-						>
-							{toolbar}
-						</ContractEditorToolbar>
-						<Panel defaultSize={80}>
-							<div className='relative h-full w-full'>
-								{!isWorkspaceReady && (
-									<div className='absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm'>
-										<Spinner className='size-8' />
-									</div>
-								)}
+  return (
+    <ContractEditorProvider>
+      <TooltipProvider>
+        <div
+          ref={containerRef}
+          onKeyDown={handleContainerKeyDown}
+          tabIndex={-1}
+          className={cn(
+            'scrollbar-neutral h-full w-full overflow-auto rounded-lg border bg-background focus:outline-none',
+            isFullscreen && 'fixed inset-0 z-50 overflow-hidden rounded-none border-none'
+          )}
+        >
+          <PanelGroup direction="vertical" className="h-full min-w-[800px] rounded-lg">
+            <ContractEditorToolbar
+              onBuildError={setBuildErrors}
+              isFullscreen={isFullscreen}
+              onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+            >
+              {toolbar}
+            </ContractEditorToolbar>
+            <Panel defaultSize={80}>
+              <div className="relative h-full w-full">
+                {!isWorkspaceReady && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+                    <Spinner className="size-8" />
+                  </div>
+                )}
 
-								<PanelGroup direction='horizontal' className='h-full'>
-									<Panel
-										collapsible={true}
-										collapsedSize={isFullscreen ? 15 : 20}
-										minSize={isFullscreen ? 10 : 15}
-										defaultSize={isFullscreen ? 15 : 20}
-										data-testid='source-browser'
-									>
-										<SourceBrowser isReady={isWorkspaceReady} />
-									</Panel>
-									<PanelResizeHandle className='w-[1px] bg-border transition-colors hover:bg-muted-foreground/50' />
-									<Panel minSize={30} data-testid='source-viewer'>
-										<div className='h-full w-full'>
-											<EditorTabsPanel isReady={isWorkspaceReady} />
-											<SourceViewer isReady={isWorkspaceReady} />
-										</div>
-									</Panel>
-								</PanelGroup>
-							</div>
-						</Panel>
-						<PanelResizeHandle className='h-[1px] bg-border transition-colors hover:bg-muted-foreground/50' />
-						<Panel collapsible={true} defaultSize={20} minSize={10} data-testid='error-panel'>
-							<ErrorPanel isReady={isWorkspaceReady} errors={buildErrors} />
-						</Panel>
-					</PanelGroup>
-				</div>
-			</TooltipProvider>
-		</ContractEditorProvider>
-	);
+                <PanelGroup direction="horizontal" className="h-full">
+                  <Panel
+                    collapsible={true}
+                    collapsedSize={isFullscreen ? 15 : 20}
+                    minSize={isFullscreen ? 10 : 15}
+                    defaultSize={isFullscreen ? 15 : 20}
+                    data-testid="source-browser"
+                  >
+                    <SourceBrowser isReady={isWorkspaceReady} />
+                  </Panel>
+                  <PanelResizeHandle className="w-[1px] bg-border transition-colors hover:bg-muted-foreground/50" />
+                  <Panel minSize={30} data-testid="source-viewer">
+                    <div className="h-full w-full">
+                      <EditorTabsPanel isReady={isWorkspaceReady} />
+                      <SourceViewer isReady={isWorkspaceReady} />
+                    </div>
+                  </Panel>
+                </PanelGroup>
+              </div>
+            </Panel>
+            <PanelResizeHandle className="h-[1px] bg-border transition-colors hover:bg-muted-foreground/50" />
+            <Panel collapsible={true} defaultSize={20} minSize={10} data-testid="error-panel">
+              <ErrorPanel isReady={isWorkspaceReady} errors={buildErrors} />
+            </Panel>
+          </PanelGroup>
+        </div>
+      </TooltipProvider>
+    </ContractEditorProvider>
+  );
 }

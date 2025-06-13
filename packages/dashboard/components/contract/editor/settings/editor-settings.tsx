@@ -1,3 +1,5 @@
+'use client';
+
 export function EditorSettings() {
-	return <div>EditorSettings</div>;
+  return <div>EditorSettings</div>;
 }
