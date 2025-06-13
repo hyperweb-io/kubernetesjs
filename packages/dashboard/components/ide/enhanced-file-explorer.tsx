@@ -18,7 +18,7 @@ import {
   Check,
   AlertCircle,
 } from 'lucide-react';
-import { configure, fs } from '@zenfs/core';
+import { configureSingle, fs } from '@zenfs/core';
 import { IndexedDB } from '@zenfs/dom';
 
 interface FileNode {
@@ -49,10 +49,9 @@ export function EnhancedFileExplorer({ onFileSelect, onSyncRequest }: EnhancedFi
     const initFS = async () => {
       try {
         // Configure ZenFS with IndexedDB backend
-        await configure({
-          mounts: {
-            '/': { backend: IndexedDB, store: 'ide-filesystem' },
-          },
+        await configureSingle({
+          backend: IndexedDB,
+          storeName: 'ide-filesystem',
         });
 
         setIsInitialized(true);
@@ -115,7 +114,15 @@ export function EnhancedFileExplorer({ onFileSelect, onSyncRequest }: EnhancedFi
   // Load files from ZenFS
   const loadZenFSFiles = async (dirPath: string): Promise<FileNode[]> => {
     try {
-      const exists = await fs.promises.exists(dirPath);
+      // Check if directory exists by trying to stat it
+      let exists = false;
+      try {
+        await fs.promises.stat(dirPath);
+        exists = true;
+      } catch {
+        exists = false;
+      }
+
       if (!exists) return [];
 
       const entries = await fs.promises.readdir(dirPath);

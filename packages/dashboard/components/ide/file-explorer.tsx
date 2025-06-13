@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { File, Folder, FolderOpen, Plus, Trash2, Edit, ChevronRight, ChevronDown } from 'lucide-react';
-import { configure, fs } from '@zenfs/core';
+import { configureSingle, fs } from '@zenfs/core';
 import { IndexedDB } from '@zenfs/dom';
 
 interface FileNode {
@@ -28,10 +28,9 @@ export function FileExplorer({ onFileSelect }: FileExplorerProps) {
     const initFS = async () => {
       try {
         // Configure ZenFS with IndexedDB backend
-        await configure({
-          mounts: {
-            '/': { backend: IndexedDB, store: 'ide-filesystem' },
-          },
+        await configureSingle({
+          backend: IndexedDB,
+          storeName: 'ide-filesystem',
         });
 
         // Create initial project structure
@@ -67,7 +66,15 @@ export function FileExplorer({ onFileSelect }: FileExplorerProps) {
             if (item.type === 'dir') {
               await fs.promises.mkdir(item.path);
             } else {
-              const exists = await fs.promises.exists(item.path);
+              // Check if file exists by trying to stat it
+              let exists = false;
+              try {
+                await fs.promises.stat(item.path);
+                exists = true;
+              } catch {
+                exists = false;
+              }
+
               if (!exists && item.content) {
                 await fs.promises.writeFile(item.path, item.content);
               }
