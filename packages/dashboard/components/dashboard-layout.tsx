@@ -348,8 +348,8 @@ export function DashboardLayout({
                   href={item.href}
                   className={`w-full flex items-center ${
                     sidebarCompact ? 'justify-center px-2 py-3' : 'px-4 py-2'
-                  } text-sm hover:bg-accent hover:text-primary-foreground transition-colors ${
-                    isActive ? 'bg-accent text-primary-foreground border-l-4 border-primary' : 'text-foreground'
+                  } text-sm hover:bg-accent transition-colors ${
+                    isActive ? 'bg-accent border-l-4 border-primary' : ''
                   } ${marginLeft}`}
                   title={sidebarCompact ? item.label : undefined}
                 >
