@@ -160,7 +160,73 @@ export function AIChatAgentic({
       await agentKit.generate(
         {
           model: 'mistral',
-          prompt: userMessage.content,
+          prompt: userMessage.content.toLowerCase().includes('hyperweb') 
+            ? `# Hyperweb Smart Contract Guide
+
+## Overview
+Hyperweb smart contracts are written in TypeScript and follow a specific class-based structure. Each contract must have a state interface and a main contract class.
+
+## Basic Structure
+1. Define a state interface that describes your contract's data
+2. Create a contract class that extends the state interface
+3. Implement methods to interact with the state
+
+## Example Contract
+\`\`\`typescript
+// Define the state interface
+interface HelloWorldState {
+  greeting: string;
+}
+
+// Create the contract class
+export default class HelloWorldContract {
+  // Initialize state with default values
+  state: HelloWorldState = { greeting: "Hello, world!" };
+
+  // Constructor is called when contract is deployed
+  constructor() {
+    console.log("[HelloWorldContract] Constructor called.");
+  }
+
+  // Methods can be public or private
+  // Public methods can be called by users
+  // Private methods (prefixed with _) are internal only
+
+  // Initialize contract with parameters
+  init({ greeting }: { greeting: string }): void {
+    this.state.greeting = greeting;
+  }
+
+  // Getter method to read state
+  getGreeting(): string {
+    return this.state.greeting;
+  }
+
+  // Setter method to modify state
+  setGreeting({ greeting }: { greeting: string }): string {
+    this.state.greeting = greeting;
+    return this.state.greeting;
+  }
+}
+\`\`\`
+
+## Key Concepts
+1. State Interface: Defines the shape of your contract's data
+2. Contract Class: Implements the business logic
+3. Methods: Functions that interact with the state
+4. Types: Use TypeScript types for all parameters and return values
+5. Console Logging: Use console.log for debugging
+
+## Best Practices
+1. Always define a state interface
+2. Use TypeScript types for all parameters
+3. Return values from methods when appropriate
+4. Use descriptive method names
+5. Include console.log statements for debugging
+
+## User Query
+\`${userMessage.content}\``
+            : userMessage.content,
           stream: true
         },
         { 
@@ -357,7 +423,7 @@ export function AIChatAgentic({
                             <code className={className} {...props}>
                               {children}
                             </code>
-                          );
+                          )
                         }
                       }}
                     >
@@ -436,6 +502,7 @@ export function AIChatAgentic({
           </div>
         </div>
       </div>
+
       {/* Agent Manager Modal */}
       {showAgentManager && (
         <AgentManagerAgentic
@@ -447,5 +514,5 @@ export function AIChatAgentic({
         />
       )}
     </>
-  );
+  )
 }
