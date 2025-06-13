@@ -1,6 +1,6 @@
 import { appBuildTimeConfig } from '@/configs/app-config';
 
-type ContractConfig = {
+export type ContractConfig = {
   rpcUrl: string;
   faucetUrl: string;
   registryUrl: string;
@@ -33,7 +33,11 @@ export interface HyperwebConfigShape {
     bucketUrl: string | undefined;
     tarballName: string | undefined;
   };
-  // Add other config groups if needed
+  rpcUrl: string;
+  faucetUrl: string;
+  registryUrl: string;
+  s3BucketUrl: string;
+  s3TarballName: string;
 }
 
 /**
@@ -51,6 +55,7 @@ export function getHyperwebConfig(): HyperwebConfigShape {
   const contractConfig = getStaticConfig();
 
   return {
+    ...contractConfig,
     chain: {
       rpc: contractConfig.rpcUrl,
       faucet: contractConfig.faucetUrl,

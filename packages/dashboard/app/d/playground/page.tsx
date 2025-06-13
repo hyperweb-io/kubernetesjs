@@ -117,47 +117,6 @@ function ContractPlaygroundIndex() {
         Explore the Playground
       </h1>
 
-      {/* Debug Info Panel */}
-      <div className="mb-8 rounded-lg border border-border/40 bg-card/50 p-4">
-        <h2 className="mb-4 text-lg font-semibold">🔍 Hyperweb Chain Info Debug</h2>
-        {chainInfo && (
-          <div className="mb-4 rounded bg-green-50 p-3 dark:bg-green-900/20">
-            <p className="text-sm font-medium text-green-800 dark:text-green-200">
-              Connected to: {chainInfo.chain.prettyName || chainInfo.chain.chainName} ({chainInfo.chain.chainId})
-            </p>
-            <p className="text-xs text-green-700 dark:text-green-300">Server ID: {chainInfo.chainServerId}</p>
-          </div>
-        )}
-        {isLoading && (
-          <div className="mb-4 rounded bg-blue-50 p-3 dark:bg-blue-900/20">
-            <p className="text-sm font-medium text-blue-800 dark:text-blue-200">Loading chain information...</p>
-          </div>
-        )}
-        {!!error && (
-          <div className="mb-4 rounded bg-red-50 p-3 dark:bg-red-900/20">
-            <p className="text-sm font-medium text-red-800 dark:text-red-200">
-              Error loading chain info: {error instanceof Error ? error.message : 'Unknown error'}
-            </p>
-            <button
-              onClick={() => refetch()}
-              className="mt-2 rounded bg-red-100 px-2 py-1 text-xs text-red-800 hover:bg-red-200 dark:bg-red-800 dark:text-red-100 dark:hover:bg-red-700"
-            >
-              Retry
-            </button>
-          </div>
-        )}
-        <div className="max-h-40 overflow-y-auto rounded bg-muted/50 p-3 text-xs">
-          {debugInfo.length === 0 ? (
-            <p className="text-muted-foreground">Waiting for chain data...</p>
-          ) : (
-            debugInfo.map((log, index) => (
-              <div key={index} className="mb-1 font-mono">
-                {log}
-              </div>
-            ))
-          )}
-        </div>
-      </div>
       <div className="relative rounded-xl border border-border/40 bg-card/50 p-6 shadow-sm backdrop-blur-sm">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
           {features.map((feature) => (
