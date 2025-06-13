@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import {
   Coins, // Faucet
@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useHyperwebChainInfo } from '@/hooks/contract/use-hyperweb-chain-info';
 
 const features = [
   {
@@ -66,51 +65,6 @@ const features = [
 ];
 
 function ContractPlaygroundIndex() {
-  const [debugInfo, setDebugInfo] = useState<string[]>([]);
-
-  // Use the proper hyperweb chain info hook
-  const { data: chainInfo, isLoading, error, refetch } = useHyperwebChainInfo();
-
-  useEffect(() => {
-    const logChainData = () => {
-      console.log('🔄 Chain info hook state update...');
-      setDebugInfo((prev) => [...prev, '🔄 Chain info hook state update...']);
-
-      if (isLoading) {
-        console.log('⏳ Chain info is loading...');
-        setDebugInfo((prev) => [...prev, '⏳ Chain info is loading...']);
-        return;
-      }
-
-      if (error) {
-        console.error('❌ Chain info error:', error);
-        setDebugInfo((prev) => [
-          ...prev,
-          `❌ Chain info error: ${error instanceof Error ? error.message : String(error)}`,
-        ]);
-        return;
-      }
-
-      if (chainInfo) {
-        console.log('✅ Chain Info loaded:', chainInfo);
-        setDebugInfo((prev) => [
-          ...prev,
-          `✅ Chain loaded: ${chainInfo.chain.prettyName || chainInfo.chain.chainName} (${chainInfo.chain.chainId})`,
-          `✅ RPC available: ${chainInfo.chain.apis?.rpc?.[0]?.address || 'Not configured'}`,
-          `✅ REST available: ${chainInfo.chain.apis?.rest?.[0]?.address || 'Not configured'}`,
-          `✅ Assets count: ${chainInfo.assetList.assets?.length || 0}`,
-          `✅ Chain Server ID: ${chainInfo.chainServerId}`,
-          `✅ Primary Asset: ${JSON.stringify(chainInfo.assetList.assets?.[0], null, 2)}`,
-        ]);
-      } else {
-        console.log('❌ No chain info available');
-        setDebugInfo((prev) => [...prev, '❌ No chain info available']);
-      }
-    };
-
-    logChainData();
-  }, [chainInfo, isLoading, error]);
-
   return (
     <div className="container mx-auto max-w-5xl px-4 pb-8 pt-4 md:pb-12 md:pt-8">
       <h1 className="mb-8 text-center text-3xl font-bold tracking-tight text-foreground md:mb-12 md:text-4xl">

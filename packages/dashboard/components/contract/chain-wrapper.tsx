@@ -27,9 +27,6 @@ export function ChainWrapper({ children }: ChainWrapperProps) {
       baseAssetLists.push(hyperwebChainInfo.assetList);
     }
 
-    console.log('baseChains', baseChains);
-    console.log('baseAssetLists', baseAssetLists);
-
     // Only mark as ready when we've either:
     // 1. Successfully loaded hyperweb chain info, OR
     // 2. Failed to load but can proceed with fallback chains
