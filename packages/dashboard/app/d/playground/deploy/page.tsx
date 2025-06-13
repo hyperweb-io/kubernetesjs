@@ -314,15 +314,7 @@ function Deploy() {
           />
 
           {address ? (
-            <Button
-              type="submit"
-              className="w-full"
-              size="lg"
-              isLoading={isSubmitting}
-              disabled={!isValid || isSubmitting}
-              spinner={isSubmitting && <GoGear className="size-5 animate-spin" />}
-              showContentWhileLoading
-            >
+            <Button type="submit" className="w-full" size="lg" disabled={!isValid || isSubmitting}>
               {isSubmitting ? 'Deploying' : 'Deploy'}
             </Button>
           ) : (

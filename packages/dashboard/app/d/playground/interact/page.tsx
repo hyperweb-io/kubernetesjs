@@ -153,7 +153,6 @@ function Interact() {
                       {selectedMethod && (
                         <div className={cn('space-y-2', showSignature && 'pb-2')}>
                           <Button
-                            variant="text"
                             type="button"
                             size="sm"
                             onClick={() => setShowSignature(!showSignature)}
@@ -218,7 +217,6 @@ function Interact() {
                     type="submit"
                     className="w-full"
                     size="lg"
-                    isLoading={currentForm.isLoading}
                     disabled={!currentForm.isValid || currentForm.isLoading}
                   >
                     {tab === 'query' ? 'Query' : 'Execute'}

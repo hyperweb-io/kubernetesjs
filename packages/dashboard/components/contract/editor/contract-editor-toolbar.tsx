@@ -181,14 +181,12 @@ export function ContractEditorToolbar({
           )} */}
 
           <ToolbarButton
-            variant="text"
             icon={<FilePlus className="h-4 w-4" />}
             label="New File"
             onClick={() => setActionType('createFile')}
           />
 
           <ToolbarButton
-            variant="text"
             icon={<FolderPlus className="h-4 w-4" />}
             label="New Folder"
             onClick={() => setActionType('createFolder')}
@@ -207,25 +205,17 @@ export function ContractEditorToolbar({
 
         <div className="flex items-center gap-0.5">
           <ToolbarButton
-            variant="text"
             icon={isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
             label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
             onClick={onToggleFullscreen}
           />
           <ToolbarButton
-            variant="text"
             icon={<RotateCcw className="h-4 w-4" />}
             label="Reset Project"
             onClick={() => setIsResetDialogOpen(true)}
           />
+          <ToolbarButton icon={<Download className="h-4 w-4" />} label="Export Project" onClick={handleExport} />
           <ToolbarButton
-            variant="text"
-            icon={<Download className="h-4 w-4" />}
-            label="Export Project"
-            onClick={handleExport}
-          />
-          <ToolbarButton
-            variant="text"
             icon={<Settings className="h-4 w-4" />}
             label="Open Settings"
             onClick={() => setIsSettingsOpen(true)}

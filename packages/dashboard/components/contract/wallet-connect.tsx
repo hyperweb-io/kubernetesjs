@@ -16,6 +16,12 @@ export const WalletConnect = ({ className }: WalletConnectProps) => {
 
   return (
     <div
+      id="wallet-connect"
+      role="button"
+      tabIndex={0}
+      onClick={() => {
+        openView();
+      }}
       className={cn(
         'flex h-9 flex-shrink-0 items-center gap-2 rounded-lg border border-border px-3 dark:border-foreground/20',
         className
@@ -32,8 +38,7 @@ export const WalletConnect = ({ className }: WalletConnectProps) => {
           alt={wallet?.info?.prettyName ?? 'Wallet logo'}
           width="0"
           height="0"
-          onClick={openView}
-          className="size-4 cursor-pointer"
+          className="size-4"
         />
       ) : (
         <Wallet className="size-[18px] cursor-pointer" onClick={connect} />

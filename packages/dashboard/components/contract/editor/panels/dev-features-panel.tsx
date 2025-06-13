@@ -136,12 +136,7 @@ export function DevFeaturesPanel({ onResetProject, fallbackProjectItems }: DevFe
       </TooltipProvider>
 
       <div className="flex flex-col gap-2">
-        <Button
-          variant="warning"
-          size="sm"
-          onClick={() => setIsResetDialogOpen(true)}
-          className="flex w-full items-center gap-2"
-        >
+        <Button size="sm" onClick={() => setIsResetDialogOpen(true)} className="flex w-full items-center gap-2">
           <AlertTriangle className="h-4 w-4" />
           <span>Reset Project</span>
         </Button>

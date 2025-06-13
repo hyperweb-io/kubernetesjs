@@ -102,14 +102,7 @@ function Faucet() {
               );
             }}
           />
-          <Button
-            type="submit"
-            className="w-full"
-            size="lg"
-            variant="secondary"
-            isLoading={isSubmitting}
-            disabled={!isValid || isSubmitting}
-          >
+          <Button type="submit" className="w-full" size="lg" variant="secondary">
             Request Tokens
           </Button>
         </form>
