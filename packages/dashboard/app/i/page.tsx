@@ -1,29 +1,18 @@
-'use client'
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Suspense } from 'react'
-import Link from 'next/link'
-import {
-  Package,
-  Server,
-  Key,
-  Settings,
-  FileCode2,
-  Copy,
-  Activity,
-  ArrowRight,
-  Layers
-} from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Suspense } from 'react';
+import Link from 'next/link';
+import { Package, Server, Key, Settings, FileCode2, Copy, Activity, ArrowRight, Layers } from 'lucide-react';
 
 const resources = [
-
   {
     id: 'all',
     title: 'View All',
     description: 'See all resources in one dashboard',
     icon: Layers,
     href: '/i/all',
-    color: 'text-gray-600'
+    color: 'text-gray-600',
   },
   {
     id: 'deployments',
@@ -31,15 +20,15 @@ const resources = [
     description: 'Manage and monitor your deployments',
     icon: Package,
     href: '/i/deployments',
-    color: 'text-blue-600'
+    color: 'text-blue-600',
   },
   {
     id: 'services',
-    title: 'Services', 
+    title: 'Services',
     description: 'Manage your services and networking',
     icon: Server,
     href: '/i/services',
-    color: 'text-green-600'
+    color: 'text-green-600',
   },
   {
     id: 'secrets',
@@ -47,7 +36,7 @@ const resources = [
     description: 'Manage sensitive data and credentials',
     icon: Key,
     href: '/i/secrets',
-    color: 'text-yellow-600'
+    color: 'text-yellow-600',
   },
   {
     id: 'configmaps',
@@ -55,7 +44,7 @@ const resources = [
     description: 'Manage application configuration data',
     icon: Settings,
     href: '/i/configmaps',
-    color: 'text-purple-600'
+    color: 'text-purple-600',
   },
   {
     id: 'templates',
@@ -63,7 +52,7 @@ const resources = [
     description: 'Manage and deploy resource templates',
     icon: FileCode2,
     href: '/i/templates',
-    color: 'text-indigo-600'
+    color: 'text-indigo-600',
   },
   {
     id: 'replicasets',
@@ -71,7 +60,7 @@ const resources = [
     description: 'Manage and monitor your replica sets',
     icon: Copy,
     href: '/i/replicasets',
-    color: 'text-pink-600'
+    color: 'text-pink-600',
   },
   {
     id: 'pods',
@@ -79,9 +68,9 @@ const resources = [
     description: 'Monitor and manage individual pods',
     icon: Activity,
     href: '/i/pods',
-    color: 'text-orange-600'
-  }
-]
+    color: 'text-orange-600',
+  },
+];
 
 export default function InfrastructureOverviewPage() {
   return (
@@ -89,15 +78,14 @@ export default function InfrastructureOverviewPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Infrastructure Overview</h1>
         <p className="text-muted-foreground mt-2">
-          Manage your Kubernetes infrastructure resources.
-          Select a resource type below to get started.
+          Manage your Kubernetes infrastructure resources. Select a resource type below to get started.
         </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {resources.map((resource) => {
-          const Icon = resource.icon
+          const Icon = resource.icon;
           return (
-            <Link key={resource.id} href={resource.href} legacyBehavior>
+            <Link key={resource.id} href={resource.href}>
               <Card className="hover:shadow-md transition-shadow cursor-pointer">
                 <CardHeader className="flex flex-row items-center space-y-0 gap-4">
                   <div className={`p-3 rounded-lg bg-secondary ${resource.color}`}>
@@ -105,9 +93,7 @@ export default function InfrastructureOverviewPage() {
                   </div>
                   <div className="flex-1">
                     <CardTitle className="text-lg">{resource.title}</CardTitle>
-                    <CardDescription className="mt-1">
-                      {resource.description}
-                    </CardDescription>
+                    <CardDescription className="mt-1">{resource.description}</CardDescription>
                   </div>
                   <ArrowRight className="h-5 w-5 text-muted-foreground" />
                 </CardHeader>

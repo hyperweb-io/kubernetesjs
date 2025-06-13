@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import Link from 'next/link'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from 'next/link';
 import {
   Database,
   Zap,
@@ -12,8 +12,8 @@ import {
   ArrowRight,
   Activity,
   TrendingUp,
-  Users
-} from 'lucide-react'
+  Users,
+} from 'lucide-react';
 
 const smartObjects = [
   {
@@ -23,7 +23,7 @@ const smartObjects = [
     icon: Database,
     href: '/d/databases',
     color: 'text-blue-600',
-    status: 'Available'
+    status: 'Available',
   },
   {
     id: 'functions',
@@ -32,7 +32,7 @@ const smartObjects = [
     icon: Zap,
     href: '/d/functions',
     color: 'text-yellow-600',
-    status: 'Available'
+    status: 'Available',
   },
   {
     id: 'chains',
@@ -41,7 +41,7 @@ const smartObjects = [
     icon: LinkIcon,
     href: '/d/chains',
     color: 'text-purple-600',
-    status: 'Available'
+    status: 'Available',
   },
   {
     id: 'contracts',
@@ -50,7 +50,7 @@ const smartObjects = [
     icon: FileCode2,
     href: '/d/contracts',
     color: 'text-green-600',
-    status: 'Available'
+    status: 'Available',
   },
   {
     id: 'relayers',
@@ -59,7 +59,7 @@ const smartObjects = [
     icon: Globe,
     href: '/d/relayers',
     color: 'text-indigo-600',
-    status: 'Available'
+    status: 'Available',
   },
   {
     id: 'registry',
@@ -68,9 +68,9 @@ const smartObjects = [
     icon: Database,
     href: '/d/registry',
     color: 'text-pink-600',
-    status: 'Available'
-  }
-]
+    status: 'Available',
+  },
+];
 
 export default function SmartObjectsDashboard() {
   return (
@@ -129,9 +129,9 @@ export default function SmartObjectsDashboard() {
         <h2 className="text-xl font-semibold mb-4">Cloud Services</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {smartObjects.slice(0, 2).map((object) => {
-            const Icon = object.icon
+            const Icon = object.icon;
             return (
-              <Link key={object.id} href={object.href} legacyBehavior>
+              <Link key={object.id} href={object.href}>
                 <Card className="hover:shadow-md transition-shadow cursor-pointer">
                   <CardHeader className="flex flex-row items-center space-y-0 gap-4">
                     <div className={`p-3 rounded-lg bg-secondary ${object.color}`}>
@@ -139,9 +139,7 @@ export default function SmartObjectsDashboard() {
                     </div>
                     <div className="flex-1">
                       <CardTitle className="text-lg">{object.title}</CardTitle>
-                      <CardDescription className="mt-1">
-                        {object.description}
-                      </CardDescription>
+                      <CardDescription className="mt-1">{object.description}</CardDescription>
                     </div>
                     <ArrowRight className="h-5 w-5 text-muted-foreground" />
                   </CardHeader>
@@ -156,9 +154,9 @@ export default function SmartObjectsDashboard() {
         <h2 className="text-xl font-semibold mb-4">Blockchain Infrastructure</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {smartObjects.slice(2).map((object) => {
-            const Icon = object.icon
+            const Icon = object.icon;
             return (
-              <Link key={object.id} href={object.href} legacyBehavior>
+              <Link key={object.id} href={object.href}>
                 <Card className="hover:shadow-md transition-shadow cursor-pointer">
                   <CardHeader className="flex flex-row items-center space-y-0 gap-4">
                     <div className={`p-3 rounded-lg bg-secondary ${object.color}`}>
@@ -166,9 +164,7 @@ export default function SmartObjectsDashboard() {
                     </div>
                     <div className="flex-1">
                       <CardTitle className="text-lg">{object.title}</CardTitle>
-                      <CardDescription className="mt-1">
-                        {object.description}
-                      </CardDescription>
+                      <CardDescription className="mt-1">{object.description}</CardDescription>
                     </div>
                     <ArrowRight className="h-5 w-5 text-muted-foreground" />
                   </CardHeader>

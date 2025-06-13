@@ -71,16 +71,12 @@ function Contracts() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-end gap-2">
-                      <Link
-                        href={`${routes.playground.interact}?tab=query&address=${contractAddress}`}
-                        legacyBehavior>
+                      <Link href={`${routes.playground.interact}?tab=query&address=${contractAddress}`}>
                         <Button size="sm" variant="outline">
                           Query
                         </Button>
                       </Link>
-                      <Link
-                        href={`${routes.playground.interact}?tab=execute&address=${contractAddress}`}
-                        legacyBehavior>
+                      <Link href={`${routes.playground.interact}?tab=execute&address=${contractAddress}`}>
                         <Button size="sm" variant="outline">
                           Execute
                         </Button>
