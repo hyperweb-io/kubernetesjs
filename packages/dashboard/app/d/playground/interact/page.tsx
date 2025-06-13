@@ -1,4 +1,4 @@
-import { InteractRoute } from '@/components/contract/interact/interact.route';
+import { InteractRoute } from '@/components/routes/interact.route';
 
 function InteractPage() {
   return <InteractRoute />;
