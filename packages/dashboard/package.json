@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ark-ui/react": "^5.0.1",
+    "@chain-registry/client": "^2.0.3",
     "@chain-registry/v2": "^1.71.148",
     "@cosmjs/encoding": "^0.32.4",
     "@hookform/resolvers": "^3.10.0",

@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { getHyperwebConfig } from '@/hooks/contract/use-hyperweb-config';
+import { getHyperwebConfig } from '@/configs/hyperweb-config';
 import { ProjectItem, useContractProject } from '../hooks/use-contract-project';
 
 export const ResetProjectDialog = ({

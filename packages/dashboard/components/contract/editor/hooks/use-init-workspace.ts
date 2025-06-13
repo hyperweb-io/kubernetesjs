@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 
 import { logger } from '@/lib/logger';
-import { getHyperwebConfig } from '@/hooks/contract/use-hyperweb-config';
+import { getHyperwebConfig } from '@/configs/hyperweb-config';
 import { workspaceEventEmitter } from '@/components/contract/editor/services/events';
 import { registerTasksRunner } from '@/components/contract/editor/tasks/tasks.runner';
 

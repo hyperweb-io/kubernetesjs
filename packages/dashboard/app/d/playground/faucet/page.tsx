@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 import { useHyperwebChain } from '@/hooks/contract/use-hyperweb-chain';
 import { useHyperwebChainInfo } from '@/hooks/contract/use-hyperweb-chain-info';
-import { getHyperwebConfig } from '@/hooks/contract/use-hyperweb-config';
+import { getHyperwebConfig } from '@/configs/hyperweb-config';
 import { useToast } from '@/hooks/use-toast';
 import { creditFromFaucet } from '@/lib/contract/faucet';
 import { createBech32AddressSchema } from '@/lib/validations';

@@ -167,6 +167,16 @@
     "@babel/helper-string-parser" "^7.27.1"
     "@babel/helper-validator-identifier" "^7.27.1"
 
+"@chain-registry/client@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@chain-registry/client/-/client-2.0.3.tgz#76753dc3a088843bf57b3c426a4a19801c4880c4"
+  integrity sha512-q3fKAjMzaBVH1SZZ+jaAUlGSgtK0nwdeklx5fzzkzxunEnkl7+rBrLjbUJO+cnE7LHiCWHMSXA0LUW8TjBB7Fg==
+  dependencies:
+    "@chain-registry/types" "^2.0.3"
+    "@chain-registry/utils" "^2.0.3"
+    bfs-path "^1.0.2"
+    cross-fetch "^3.1.5"
+
 "@chain-registry/keplr@^2.0.1":
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/@chain-registry/keplr/-/keplr-2.0.3.tgz#f7f1e03addac9fa91bf4981ca98705251407925f"
@@ -183,6 +193,16 @@
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/@chain-registry/types/-/types-2.0.3.tgz#191724dadc4875a2b5f64d5ef4157ba22adb2a35"
   integrity sha512-EwWjMOZMdPF7ZX8rxxnA91b1T5Yl6RiYvCya7yH5eGdXIY49sIAWTd5liZT8mi0+aYPpfK7b+o+iyXmBVFVjyw==
+
+"@chain-registry/utils@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@chain-registry/utils/-/utils-2.0.3.tgz#6a35359b7ce3c584fc3a56454d80c2a460e32ad8"
+  integrity sha512-yWR4ojf2/B6fKH/QNGltv1sR8DkX4XOeb++fE8toRCmezIJ08CovNpxv3cX9rjTP4Ch4xxTn7RbShgFPZQz2XQ==
+  dependencies:
+    "@chain-registry/types" "^2.0.3"
+    bignumber.js "9.1.2"
+    chain-registry "^2.0.3"
+    sha.js "^2.4.11"
 
 "@chain-registry/v2-types@0.53.68":
   version "0.53.68"
@@ -5033,10 +5053,20 @@ bech32@^2.0.0:
   resolved "https://registry.yarnpkg.com/bech32/-/bech32-2.0.0.tgz#078d3686535075c8c79709f054b1b226a133b355"
   integrity sha512-LcknSilhIGatDAsY1ak2I8VtGaHNhgMSYVxFrGLXv+xLHytaKZKcaUJJUE7qmBr7h33o5YQwP55pMI0xmkpJwg==
 
+bfs-path@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/bfs-path/-/bfs-path-1.0.2.tgz#9b5fa4b8c4ad226597fc4d2ee15398bdcc644a07"
+  integrity sha512-KTKx2JJtAAAT7C/rJYDXXWA2VLPycAS4kwFktKsxUo0hj4UTtw/Gm5PJuY7Uf3xSlIQNo7HRCSWei2ivncVwbQ==
+
 big-integer@^1.6.48:
   version "1.6.52"
   resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.52.tgz#60a887f3047614a8e1bffe5d7173490a97dc8c85"
   integrity sha512-QxD8cf2eVqJOOz63z6JIN9BzvVs/dlySa5HGSBH5xtR8dPteIRQnBxxKqkNTiT6jbDTF6jAfrd4oMcND9RGbQg==
+
+bignumber.js@9.1.2:
+  version "9.1.2"
+  resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-9.1.2.tgz#b7c4242259c008903b13707983b5f4bbd31eda0c"
+  integrity sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==
 
 bignumber.js@^9.1.2:
   version "9.3.0"
@@ -5499,7 +5529,7 @@ create-require@^1.1.0:
   resolved "https://registry.yarnpkg.com/create-require/-/create-require-1.1.1.tgz#c1d7e8f1e5f6cfc9ff65f9cd352d37348756c333"
   integrity sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==
 
-cross-fetch@^3.1.4:
+cross-fetch@^3.1.4, cross-fetch@^3.1.5:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.2.0.tgz#34e9192f53bc757d6614304d9e5e6fb4edb782e3"
   integrity sha512-Q+xVJLoGOeIMXZmbUK4HYk+69cQH6LudR0Vu/pRm2YlU/hDV9CiS0gKUMaWY5f2NeUH9C1nV3bsTlCo0FsTV1Q==

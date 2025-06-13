@@ -148,17 +148,3 @@ export function ContractLayoutProvider({ children, requiresHyperwebSetup = true 
     </ContractLayoutErrorBoundary>
   );
 }
-
-// Keep the HOC for backward compatibility
-export function withContractLayout<P extends object>(
-  WrappedComponent: ComponentType<P>,
-  options: { requiresHyperwebSetup?: boolean } = {}
-) {
-  return function WithContractLayoutComponent(props: P) {
-    return (
-      <ContractLayoutProvider requiresHyperwebSetup={options.requiresHyperwebSetup}>
-        <WrappedComponent {...props} />
-      </ContractLayoutProvider>
-    );
-  };
-}

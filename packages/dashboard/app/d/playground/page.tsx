@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Coins, // Faucet
@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useHyperwebChainInfo } from '@/hooks/contract/use-hyperweb-chain-info';
+
 const features = [
   {
     title: 'Create Contract',
@@ -64,11 +66,98 @@ const features = [
 ];
 
 function ContractPlaygroundIndex() {
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
+
+  // Use the proper hyperweb chain info hook
+  const { data: chainInfo, isLoading, error, refetch } = useHyperwebChainInfo();
+
+  useEffect(() => {
+    const logChainData = () => {
+      console.log('🔄 Chain info hook state update...');
+      setDebugInfo((prev) => [...prev, '🔄 Chain info hook state update...']);
+
+      if (isLoading) {
+        console.log('⏳ Chain info is loading...');
+        setDebugInfo((prev) => [...prev, '⏳ Chain info is loading...']);
+        return;
+      }
+
+      if (error) {
+        console.error('❌ Chain info error:', error);
+        setDebugInfo((prev) => [
+          ...prev,
+          `❌ Chain info error: ${error instanceof Error ? error.message : String(error)}`,
+        ]);
+        return;
+      }
+
+      if (chainInfo) {
+        console.log('✅ Chain Info loaded:', chainInfo);
+        setDebugInfo((prev) => [
+          ...prev,
+          `✅ Chain loaded: ${chainInfo.chain.prettyName || chainInfo.chain.chainName} (${chainInfo.chain.chainId})`,
+          `✅ RPC available: ${chainInfo.chain.apis?.rpc?.[0]?.address || 'Not configured'}`,
+          `✅ REST available: ${chainInfo.chain.apis?.rest?.[0]?.address || 'Not configured'}`,
+          `✅ Assets count: ${chainInfo.assetList.assets?.length || 0}`,
+          `✅ Chain Server ID: ${chainInfo.chainServerId}`,
+          `✅ Primary Asset: ${JSON.stringify(chainInfo.assetList.assets?.[0], null, 2)}`,
+        ]);
+      } else {
+        console.log('❌ No chain info available');
+        setDebugInfo((prev) => [...prev, '❌ No chain info available']);
+      }
+    };
+
+    logChainData();
+  }, [chainInfo, isLoading, error]);
+
   return (
     <div className="container mx-auto max-w-5xl px-4 pb-8 pt-4 md:pb-12 md:pt-8">
       <h1 className="mb-8 text-center text-3xl font-bold tracking-tight text-foreground md:mb-12 md:text-4xl">
         Explore the Playground
       </h1>
+
+      {/* Debug Info Panel */}
+      <div className="mb-8 rounded-lg border border-border/40 bg-card/50 p-4">
+        <h2 className="mb-4 text-lg font-semibold">🔍 Hyperweb Chain Info Debug</h2>
+        {chainInfo && (
+          <div className="mb-4 rounded bg-green-50 p-3 dark:bg-green-900/20">
+            <p className="text-sm font-medium text-green-800 dark:text-green-200">
+              Connected to: {chainInfo.chain.prettyName || chainInfo.chain.chainName} ({chainInfo.chain.chainId})
+            </p>
+            <p className="text-xs text-green-700 dark:text-green-300">Server ID: {chainInfo.chainServerId}</p>
+          </div>
+        )}
+        {isLoading && (
+          <div className="mb-4 rounded bg-blue-50 p-3 dark:bg-blue-900/20">
+            <p className="text-sm font-medium text-blue-800 dark:text-blue-200">Loading chain information...</p>
+          </div>
+        )}
+        {!!error && (
+          <div className="mb-4 rounded bg-red-50 p-3 dark:bg-red-900/20">
+            <p className="text-sm font-medium text-red-800 dark:text-red-200">
+              Error loading chain info: {error instanceof Error ? error.message : 'Unknown error'}
+            </p>
+            <button
+              onClick={() => refetch()}
+              className="mt-2 rounded bg-red-100 px-2 py-1 text-xs text-red-800 hover:bg-red-200 dark:bg-red-800 dark:text-red-100 dark:hover:bg-red-700"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+        <div className="max-h-40 overflow-y-auto rounded bg-muted/50 p-3 text-xs">
+          {debugInfo.length === 0 ? (
+            <p className="text-muted-foreground">Waiting for chain data...</p>
+          ) : (
+            debugInfo.map((log, index) => (
+              <div key={index} className="mb-1 font-mono">
+                {log}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
       <div className="relative rounded-xl border border-border/40 bg-card/50 p-6 shadow-sm backdrop-blur-sm">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
           {features.map((feature) => (
@@ -77,8 +166,8 @@ function ContractPlaygroundIndex() {
               key={feature.href}
               passHref
               className="block rounded-lg transition-all duration-200 ease-in-out hover:scale-[1.02] focus:scale-[1.02] focus:outline-none
-                                  focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background">
-
+                                  focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+            >
               <Card
                 className="flex h-full flex-col overflow-hidden border transition-colors duration-200 hover:border-primary/60
                                       dark:hover:border-primary/60"
@@ -95,7 +184,6 @@ function ContractPlaygroundIndex() {
                   <CardDescription>{feature.description}</CardDescription>
                 </CardContent>
               </Card>
-
             </Link>
           ))}
         </div>

@@ -1,9 +1,8 @@
-import osmosisChain from '@chain-registry/v2/mainnet/osmosis/chain';
-import osmosisAssets from '@chain-registry/v2/mainnet/osmosis/asset-list';
+// Chain configuration constants
 
 export const DEFAULT_CHAIN_NAME = 'hyperweb';
 
 export const TEMP_CHAIN_NAME = 'osmosis';
 
-export const initialChains = [osmosisChain];
-export const initialAssets = [osmosisAssets];
+// Note: Dynamic chain and asset list construction is now handled
+// by the ChainWrapper component using useHyperwebChainInfo hook

@@ -2,7 +2,7 @@ import { AssetList, Chain } from '@chain-registry/v2-types';
 import { useQuery } from '@tanstack/react-query';
 
 import { convertKeysToCamelCase } from '@/lib/chain';
-import { getHyperwebConfig } from '@/hooks/contract/use-hyperweb-config';
+import { getHyperwebConfig } from '@/configs/hyperweb-config';
 
 export type HyperwebChainInfo = {
   chain: Chain;

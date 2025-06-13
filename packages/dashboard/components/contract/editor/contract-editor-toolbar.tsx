@@ -16,7 +16,7 @@ import {
 import { Button, ButtonProps } from '@/components/ui/button';
 import { Shortcut } from '@/components/ui/kbd';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { getHyperwebConfig } from '@/hooks/contract/use-hyperweb-config';
+import { getHyperwebConfig } from '@/configs/hyperweb-config';
 import { routes } from '@/routes';
 
 import type { BuildErrors } from './contract-editor-errors';
