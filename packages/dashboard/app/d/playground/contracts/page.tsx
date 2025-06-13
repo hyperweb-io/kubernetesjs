@@ -60,15 +60,9 @@ function Contracts() {
             <TableBody>
               {contracts.map(({ index, creator, contractAddress }) => (
                 <TableRow key={index.toString()} className="h-[60px]">
-                  <TableCell className="font-medium" copyValue={index.toString()}>
-                    {index.toString()}
-                  </TableCell>
-                  <TableCell className="font-medium" copyValue={contractAddress}>
-                    {shortenAddress(contractAddress, 8)}
-                  </TableCell>
-                  <TableCell className="font-medium" copyValue={creator}>
-                    {shortenAddress(creator)}
-                  </TableCell>
+                  <TableCell className="font-medium">{index.toString()}</TableCell>
+                  <TableCell className="font-medium">{shortenAddress(contractAddress, 8)}</TableCell>
+                  <TableCell className="font-medium">{shortenAddress(creator)}</TableCell>
                   <TableCell>
                     <div className="flex items-center justify-end gap-2">
                       <Link href={`${routes.playground.interact}?tab=query&address=${contractAddress}`}>
