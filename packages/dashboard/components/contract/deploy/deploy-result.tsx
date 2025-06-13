@@ -68,12 +68,12 @@ export const DeployResult = ({ txResult, onBack }: { txResult: DeliverTxResponse
         ))}
       </div>
       <div className="grid w-full grid-cols-2 gap-3 sm:w-[400px]">
-        <Link href={`/d/playground/interact?tab=query&address=${contractAddress}`}>
-          <Button className="w-full">Query</Button>
-        </Link>
-        <Link href={`/d/playground/interact?tab=execute&address=${contractAddress}`}>
-          <Button className="w-full">Execute</Button>
-        </Link>
+        <Button asChild className="w-full">
+          <Link href={`/d/playground/interact?tab=query&address=${contractAddress}`}>Query</Link>
+        </Button>
+        <Button asChild className="w-full">
+          <Link href={`/d/playground/interact?tab=execute&address=${contractAddress}`}>Execute</Link>
+        </Button>
       </div>
     </div>
   );
