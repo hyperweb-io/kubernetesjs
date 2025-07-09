@@ -13,6 +13,24 @@ const options = getDefaultSchemaSDKOptions({
     'io.k8s.api.events.v1.Event',
     'io.k8s.api.flowcontrol*',
   ],
+  jsonpatch: [
+    {
+      op: 'remove',
+      path: '/definitions/io.k8s.apimachinery.pkg.util.intstr.IntOrString/type'
+    },
+    {
+      op: 'remove',
+      path: '/definitions/io.k8s.apimachinery.pkg.util.intstr.IntOrString/format'
+    },
+    {
+      op: 'add',
+      path: '/definitions/io.k8s.apimachinery.pkg.util.intstr.IntOrString/oneOf',
+      value: [
+        { type: 'string' },
+        { type: 'integer', format: 'int32' }
+      ]
+    }
+  ]
 });
 const openApiOptions = {
   ...options,
