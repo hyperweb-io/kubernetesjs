@@ -1,6 +1,6 @@
 {
   "name": "@kubernetesjs/react",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "description": "Fully Typed Kubernetes React Hooks",
   "keywords": [
@@ -51,7 +51,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "5.79.2",
-    "kubernetesjs": "^0.7.0",
+    "kubernetesjs": "^0.7.1",
     "react": "^18.2.0"
   },
   "devDependencies": {

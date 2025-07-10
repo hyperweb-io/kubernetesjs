@@ -1,6 +1,6 @@
 {
   "name": "@kubernetesjs/cli",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "description": "KubernetesJS CLI",
   "keywords": [
@@ -56,7 +56,7 @@
     "deepmerge": "^4.3.1",
     "inquirerer": "^2.0.8",
     "js-yaml": "^4.1.0",
-    "kubernetesjs": "^0.7.0",
+    "kubernetesjs": "^0.7.1",
     "minimist": "^1.2.8"
   }
 }
