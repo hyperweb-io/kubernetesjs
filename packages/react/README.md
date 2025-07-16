@@ -13,8 +13,12 @@
   </a>
 </p>
 
+KubernetesJS is a **fully-typed**, zero-dependency TypeScript client for Kubernetes.
 
-KubernetesJS is a **fully-typed**, zero-dependency TypeScript library designed to simplify interactions with Kubernetes APIs. With comprehensive TypeScript support, it provides a strongly-typed interface that makes managing Kubernetes resources clear and predictable, ideal for TypeScript developers looking to integrate Kubernetes management into their applications.
+Write infrastructure like you write apps—modular, composable, and testable. KubernetesJS gives you direct, programmatic access to the entire Kubernetes API, with the developer experience of modern JavaScript tooling.
+
+> No more brittle YAML. No more hidden chart logic. Just pure, type-safe Kubernetes from the language you already use.
+
 
 ## Features
 
@@ -22,6 +26,8 @@ KubernetesJS is a **fully-typed**, zero-dependency TypeScript library designed t
 - **🚀 Zero Dependencies**: Works out of the box without the need for additional installations.
 - **📡 Full Kubernetes API Coverage**: Supports all Kubernetes API endpoints with detailed TypeScript types.
 - **🌐 Cross-Platform**: Works with both Node.js and browser environments.
+
+With KubernetesJS, you don’t shell out to `kubectl`, grep logs, or decode YAML trees. You write real code—typed, composable, inspectable.
 
 ## Installation
 
@@ -34,9 +40,94 @@ yarn add kubernetesjs
 
 ```
 
-## Example
+## Your Infrastructure, Like a Component
 
-```js
+This is what we mean by "*React for infrastructure*":
+
+```ts
+import { KubernetesClient } from "kubernetesjs";
+
+const client = new KubernetesClient({
+  restEndpoint: process.env.KUBERNETES_API_URL || 'http://127.0.0.1:8001'
+});
+
+await client.createAppsV1NamespacedDeployment({
+  path: { namespace: 'default' },
+  body: {
+    apiVersion: 'apps/v1',
+    kind: 'Deployment',
+    metadata: { name: 'hello-world' },
+    spec: {
+      replicas: 1,
+      selector: { matchLabels: { app: 'hello-world' } },
+      template: {
+        metadata: { labels: { app: 'hello-world' } },
+        spec: {
+          containers: [
+            {
+              name: 'app',
+              image: 'node:18-alpine',
+              command: ['node', '-e', 'require("http").createServer((_,res)=>res.end("ok")).listen(3000)'],
+              ports: [{ containerPort: 3000 }]
+            }
+          ]
+        }
+      }
+    }
+  }
+});
+```
+
+## Test Your Cluster Like You Test Code
+
+Run infrastructure as part of your test suite, with assertions.
+
+```ts
+describe('PostgreSQL Deployment', () => {
+  const namespace = 'default';
+  const deploymentName = 'postgres-pgvector';
+
+  it('creates a PostgreSQL deployment + service', async () => {
+    const deployment = await client.createAppsV1NamespacedDeployment({ ... });
+    const service = await client.createCoreV1NamespacedService({ ... });
+
+    expect(deployment.metadata?.name).toBe(deploymentName);
+    expect(service.metadata?.name).toBe(deploymentName);
+
+    const status = await client.readAppsV1NamespacedDeployment({
+      path: { namespace, name: deploymentName }
+    });
+
+    expect(status.status?.readyReplicas).toBe(1);
+  });
+});
+```
+
+> Type-safe Kubernetes. With `expect()`.
+
+---
+
+## Declarative Loops, Composability, Reuse
+
+You can now treat infrastructure like reusable components or functions:
+
+```ts
+function createPostgresDeployment(name: string) {
+  return client.createAppsV1NamespacedDeployment({
+    path: { namespace: 'default' },
+    body: {
+      apiVersion: 'apps/v1',
+      kind: 'Deployment',
+      metadata: { name },
+      spec: { /* ... */ }
+    }
+  });
+}
+```
+
+## Example: Inspect Init Containers in Running Pods
+
+```ts
 import { KubernetesClient } from "kubernetesjs";
 
 const client = new KubernetesClient({

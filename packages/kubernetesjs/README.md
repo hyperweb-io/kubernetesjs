@@ -19,12 +19,15 @@ Write infrastructure like you write apps—modular, composable, and testable. Ku
 
 > No more brittle YAML. No more hidden chart logic. Just pure, type-safe Kubernetes from the language you already use.
 
+
 ## Features
 
 - **🔒 Fully Typed**: Complete TypeScript definitions for all functions and models for an enhanced development experience.
 - **🚀 Zero Dependencies**: Works out of the box without the need for additional installations.
 - **📡 Full Kubernetes API Coverage**: Supports all Kubernetes API endpoints with detailed TypeScript types.
 - **🌐 Cross-Platform**: Works with both Node.js and browser environments.
+
+With KubernetesJS, you don’t shell out to `kubectl`, grep logs, or decode YAML trees. You write real code—typed, composable, inspectable.
 
 ## Installation
 
@@ -158,10 +161,6 @@ if (result.items && result.items.length) {
   });
 }
 ```
-
-> With KubernetesJS, you don’t shell out to `kubectl`, grep logs, or decode YAML trees. You write real code—typed, composable, inspectable.
-
-This example lists all pods in the `default` namespace and cleanly inspects both regular and init containers, including their readiness and state.
 
 ## Related
 
