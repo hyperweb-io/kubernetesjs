@@ -1,9 +1,9 @@
-# KubernetesJS
+# @kubernetesjs/react
 
 <p align="center" width="100%">
   <img src="https://github.com/hyperweb-io/interweb-utils/assets/545047/89c743c4-be88-409f-9a77-4b02cd7fe9a4" width="80">
   <br/>
-  TypeScript Client for Kubernetes
+  React Hooks for Kubernetes
   <br />
    <a href="https://github.com/hyperweb-io/kubernetesjs/actions/workflows/ci.yml">
     <img height="20" src="https://github.com/hyperweb-io/kubernetesjs/actions/workflows/ci.yml/badge.svg"/>
@@ -13,166 +13,262 @@
   </a>
 </p>
 
-KubernetesJS is a **fully-typed**, zero-dependency TypeScript client for Kubernetes.
+**@kubernetesjs/react** provides **fully-typed React hooks** for the Kubernetes API, powered by [TanStack Query](https://tanstack.com/query) for intelligent caching, background refetching, and optimistic updates.
 
-Write infrastructure like you write apps—modular, composable, and testable. KubernetesJS gives you direct, programmatic access to the entire Kubernetes API, with the developer experience of modern JavaScript tooling.
+Build reactive Kubernetes dashboards, operators, and tools with the same patterns you use for your React apps—declarative, composable, and type-safe.
 
-> No more brittle YAML. No more hidden chart logic. Just pure, type-safe Kubernetes from the language you already use.
-
+> Real-time Kubernetes state management for React applications. No more polling loops or manual refreshes.
 
 ## Features
 
-- **🔒 Fully Typed**: Complete TypeScript definitions for all functions and models for an enhanced development experience.
-- **🚀 Zero Dependencies**: Works out of the box without the need for additional installations.
-- **📡 Full Kubernetes API Coverage**: Supports all Kubernetes API endpoints with detailed TypeScript types.
-- **🌐 Cross-Platform**: Works with both Node.js and browser environments.
-
-With KubernetesJS, you don’t shell out to `kubectl`, grep logs, or decode YAML trees. You write real code—typed, composable, inspectable.
+- **⚛️ React Hooks**: Ready-to-use hooks for all Kubernetes API operations
+- **🔄 Smart Caching**: Powered by TanStack Query for intelligent data synchronization
+- **🔒 Fully Typed**: Complete TypeScript support with IntelliSense for all Kubernetes resources
+- **📡 Real-time Updates**: Automatic background refetching keeps your UI in sync
+- **🎯 Optimistic Updates**: Instant UI feedback for mutations with automatic rollback on errors
+- **🚀 Zero Configuration**: Works out of the box with sensible defaults
 
 ## Installation
 
-To install KubernetesJS, you can use npm or yarn:
-
 ```bash
-npm install kubernetesjs
-# or
-yarn add kubernetesjs
-
+npm install @kubernetesjs/react
 ```
 
-## Your Infrastructure, Like a Component
+## Quick Start
 
-This is what we mean by "*React for infrastructure*":
+### 1. Wrap your app with KubernetesProvider
 
-```ts
-import { KubernetesClient } from "kubernetesjs";
+```tsx
+import { KubernetesProvider } from '@kubernetesjs/react';
 
-const client = new KubernetesClient({
-  restEndpoint: process.env.KUBERNETES_API_URL || 'http://127.0.0.1:8001'
-});
+function App() {
+  return (
+    <KubernetesProvider 
+      initialConfig={{
+        restEndpoint: process.env.REACT_APP_K8S_API_URL || 'http://127.0.0.1:8001',
+        headers: {
+          'Authorization': `Bearer ${process.env.REACT_APP_K8S_TOKEN}`
+        }
+      }}
+    >
+      <YourApp />
+    </KubernetesProvider>
+  );
+}
+```
 
-await client.createAppsV1NamespacedDeployment({
-  path: { namespace: 'default' },
-  body: {
-    apiVersion: 'apps/v1',
-    kind: 'Deployment',
-    metadata: { name: 'hello-world' },
-    spec: {
-      replicas: 1,
-      selector: { matchLabels: { app: 'hello-world' } },
-      template: {
-        metadata: { labels: { app: 'hello-world' } },
+### 2. Use hooks in your components
+
+```tsx
+import { useListCoreV1NamespacedPodQuery } from '@kubernetesjs/react';
+
+function PodList({ namespace }: { namespace: string }) {
+  const { data, isLoading, error } = useListCoreV1NamespacedPodQuery({
+    path: { namespace }
+  });
+
+  if (isLoading) return <div>Loading pods...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
+  return (
+    <ul>
+      {data?.items?.map(pod => (
+        <li key={pod.metadata?.uid}>
+          {pod.metadata?.name} - {pod.status?.phase}
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+## Usage Examples
+
+### Listing Resources
+
+```tsx
+import { useListAppsV1NamespacedDeploymentQuery } from '@kubernetesjs/react';
+
+function DeploymentDashboard() {
+  const { data: deployments } = useListAppsV1NamespacedDeploymentQuery({
+    path: { namespace: 'default' }
+  });
+
+  return (
+    <div>
+      {deployments?.items?.map(deployment => (
+        <DeploymentCard 
+          key={deployment.metadata?.uid}
+          deployment={deployment}
+        />
+      ))}
+    </div>
+  );
+}
+```
+
+### Creating Resources
+
+```tsx
+import { useCreateCoreV1NamespacedConfigMap } from '@kubernetesjs/react';
+
+function CreateConfigMapForm() {
+  const createConfigMap = useCreateCoreV1NamespacedConfigMap();
+
+  const handleSubmit = async (data: FormData) => {
+    try {
+      await createConfigMap.mutateAsync({
+        path: { namespace: 'default' },
+        body: {
+          apiVersion: 'v1',
+          kind: 'ConfigMap',
+          metadata: { name: data.name },
+          data: data.configData
+        }
+      });
+      toast.success('ConfigMap created!');
+    } catch (error) {
+      toast.error(`Failed: ${error.message}`);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* form fields */}
+      <button 
+        type="submit" 
+        disabled={createConfigMap.isPending}
+      >
+        {createConfigMap.isPending ? 'Creating...' : 'Create ConfigMap'}
+      </button>
+    </form>
+  );
+}
+```
+
+### Updating Resources
+
+```tsx
+import { 
+  useReadAppsV1NamespacedDeploymentQuery,
+  useReplaceAppsV1NamespacedDeployment 
+} from '@kubernetesjs/react';
+
+function ScaleDeployment({ namespace, name }: Props) {
+  const { data: deployment } = useReadAppsV1NamespacedDeploymentQuery({
+    path: { namespace, name }
+  });
+  
+  const updateDeployment = useReplaceAppsV1NamespacedDeployment();
+
+  const handleScale = async (replicas: number) => {
+    if (!deployment) return;
+
+    await updateDeployment.mutateAsync({
+      path: { namespace, name },
+      body: {
+        ...deployment,
         spec: {
-          containers: [
-            {
-              name: 'app',
-              image: 'node:18-alpine',
-              command: ['node', '-e', 'require("http").createServer((_,res)=>res.end("ok")).listen(3000)'],
-              ports: [{ containerPort: 3000 }]
-            }
-          ]
+          ...deployment.spec,
+          replicas
         }
       }
-    }
-  }
-});
-```
-
-## Test Your Cluster Like You Test Code
-
-Run infrastructure as part of your test suite, with assertions.
-
-```ts
-describe('PostgreSQL Deployment', () => {
-  const namespace = 'default';
-  const deploymentName = 'postgres-pgvector';
-
-  it('creates a PostgreSQL deployment + service', async () => {
-    const deployment = await client.createAppsV1NamespacedDeployment({ ... });
-    const service = await client.createCoreV1NamespacedService({ ... });
-
-    expect(deployment.metadata?.name).toBe(deploymentName);
-    expect(service.metadata?.name).toBe(deploymentName);
-
-    const status = await client.readAppsV1NamespacedDeployment({
-      path: { namespace, name: deploymentName }
     });
+  };
 
-    expect(status.status?.readyReplicas).toBe(1);
-  });
-});
+  return (
+    <div>
+      <h3>Current replicas: {deployment?.spec?.replicas || 0}</h3>
+      <button onClick={() => handleScale(3)}>Scale to 3</button>
+    </div>
+  );
+}
 ```
 
-> Type-safe Kubernetes. With `expect()`.
+### Deleting Resources
 
----
+```tsx
+import { useDeleteCoreV1NamespacedPod } from '@kubernetesjs/react';
 
-## Declarative Loops, Composability, Reuse
+function PodActions({ namespace, name }: Props) {
+  const deletePod = useDeleteCoreV1NamespacedPod();
 
-You can now treat infrastructure like reusable components or functions:
-
-```ts
-function createPostgresDeployment(name: string) {
-  return client.createAppsV1NamespacedDeployment({
-    path: { namespace: 'default' },
-    body: {
-      apiVersion: 'apps/v1',
-      kind: 'Deployment',
-      metadata: { name },
-      spec: { /* ... */ }
+  const handleDelete = async () => {
+    if (confirm('Delete this pod?')) {
+      await deletePod.mutateAsync({
+        path: { namespace, name }
+      });
     }
-  });
+  };
+
+  return (
+    <button 
+      onClick={handleDelete}
+      disabled={deletePod.isPending}
+    >
+      {deletePod.isPending ? 'Deleting...' : 'Delete Pod'}
+    </button>
+  );
 }
 ```
 
-## Example: Inspect Init Containers in Running Pods
+### Real-time Monitoring
 
-```ts
-import { KubernetesClient } from "kubernetesjs";
+```tsx
+import { useListCoreV1EventForAllNamespacesQuery } from '@kubernetesjs/react';
 
-const client = new KubernetesClient({
-  restEndpoint: 'http://127.0.0.1:8001'
-});
+function EventStream() {
+  const { data: events } = useListCoreV1EventForAllNamespacesQuery(
+    {},
+    {
+      refetchInterval: 5000, // Poll every 5 seconds
+      refetchIntervalInBackground: true
+    }
+  );
 
-const result = await client.listCoreV1NamespacedPod({
-  path: { namespace: 'default' }
-});
-
-if (result.items && result.items.length) {
-  result.items.forEach(item => {
-    console.log('NODE:', item.spec.nodeName);
-
-    const initContainers = item.status.initContainerStatuses?.map(ic => ({
-      image: ic.image,
-      name: ic.name,
-      ready: ic.ready,
-      state: ic.state
-    }));
-
-    const containers = item.status.containerStatuses?.map(c => ({
-      image: c.image,
-      name: c.name,
-      ready: c.ready,
-      state: c.state
-    }));
-
-    console.log({ containers });
-    console.log({ initContainers });
-  });
+  return (
+    <div className="event-stream">
+      {events?.items?.slice(0, 50).map(event => (
+        <EventCard key={event.metadata?.uid} event={event} />
+      ))}
+    </div>
+  );
 }
 ```
+
+## API Reference
+
+### Provider
+
+```tsx
+<KubernetesProvider initialConfig={{ restEndpoint, headers }}>
+```
+
+### Hooks
+
+All Kubernetes API operations are available as hooks following this pattern:
+
+- **Queries** (GET operations): `use{Operation}Query`
+- **Mutations** (POST/PUT/PATCH/DELETE): `use{Operation}`
+
+Examples:
+- `useListCoreV1NamespacedPodQuery` - List pods in a namespace
+- `useCreateAppsV1NamespacedDeployment` - Create a deployment
+- `useDeleteCoreV1NamespacedService` - Delete a service
+- `usePatchCoreV1NamespacedConfigMap` - Patch a ConfigMap
+
+### Context Hook
+
+```tsx
+const { client, config, updateConfig } = useKubernetes();
+```
+
+Access the underlying KubernetesClient instance and configuration.
 
 ## Related
 
-Checkout these related projects:
-
-* [`schema-typescript`](https://github.com/hyperweb-io/schema-typescript/tree/main/packages/schema-typescript)  
-  Provides robust tools for handling JSON schemas and converting them to TypeScript interfaces with ease and efficiency.
-* [`@schema-typescript/cli`](https://github.com/hyperweb-io/schema-typescript/tree/main/packages/cli)  
-  CLI is the command line utility for `schema-typescript`.
-* [`schema-sdk`](https://github.com/hyperweb-io/schema-typescript/tree/main/packages/schema-sdk)  
-  Provides robust tools for handling OpenAPI schemas and converting them to TypeScript clients with ease and efficiency.
-* [`starship`](https://github.com/hyperweb-io/starship) Unified Testing and Development for the Interchain.
+- [`kubernetesjs`](https://github.com/hyperweb-io/kubernetesjs/tree/main/packages/kubernetesjs) - The core TypeScript client for Kubernetes
+- [`@tanstack/react-query`](https://tanstack.com/query) - The powerful async state management library powering our hooks
 
 ## Credits
 
@@ -180,6 +276,6 @@ Checkout these related projects:
 
 ## Disclaimer
 
-AS DESCRIBED IN THE LICENSES, THE SOFTWARE IS PROVIDED “AS IS”, AT YOUR OWN RISK, AND WITHOUT WARRANTIES OF ANY KIND.
+AS DESCRIBED IN THE LICENSES, THE SOFTWARE IS PROVIDED "AS IS", AT YOUR OWN RISK, AND WITHOUT WARRANTIES OF ANY KIND.
 
 No developer or entity involved in creating this software will be liable for any claims or damages whatsoever associated with your use, inability to use, or your interaction with other users of the code, including any direct, indirect, incidental, special, exemplary, punitive or consequential damages, or loss of profits, cryptocurrencies, tokens, or anything else of value.

@@ -162,6 +162,14 @@ if (result.items && result.items.length) {
 }
 ```
 
+## Development
+
+Start the Kubernetes API proxy to allow local access:
+
+```bash
+kubectl proxy --port=8001 --accept-hosts='^.*$' --address='0.0.0.0'
+```
+
 ## Related
 
 Checkout these related projects:
