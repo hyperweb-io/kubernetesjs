@@ -97,4 +97,4 @@ const reactQueryHooks = generateReactQueryHooks(
   },
   schema as any
 );
-writeFileSync(__dirname + '/../src/index.ts', reactQueryHooks);
+writeFileSync(__dirname + '/../src/hooks.ts', reactQueryHooks);
