@@ -1,0 +1,24 @@
+{
+  "name": "@interweb/cli",
+  "version": "0.0.1",
+  "description": "CLI for interweb",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "module": "./esm/index.js",
+  "publishConfig": {
+    "access": "restricted",
+    "directory": "dist"
+  },
+  "scripts": {
+    "copy": "cpy ../../LICENSE README.md package.json dist --flat",
+    "clean": "rimraf dist",
+    "prepare": "npm run build",
+    "build": "npm run clean; tsc; tsc -p tsconfig.esm.json; npm run copy",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "@interweb/client": "workspace:^",
+    "@interweb/interwebjs": "workspace:^"
+  }
+}
