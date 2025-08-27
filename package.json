@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "type": "module",
   "author": "anmol1696 <anmol1696@gmail.com>",
-  "private": false,
   "repository": {
     "type": "git",
     "url": "https://github.com/hyperweb-io/interweb"
