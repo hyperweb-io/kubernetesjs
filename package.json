@@ -23,7 +23,8 @@
   "scripts": {
     "clean": "pnpm -r clean",
     "build": "pnpm -r build",
-    "lint": "pnpm -r lint"
+    "format": "pnpm eslint --fix .",
+    "lint": "pnpm eslint ."
   },
   "devDependencies": {
     "@types/jest": "^29.5.11",
