@@ -1,11 +1,11 @@
-const js = require("@eslint/js");
-const tsParser = require("@typescript-eslint/parser");
-const tsPlugin = require("@typescript-eslint/eslint-plugin");
-const simpleImportSort = require("eslint-plugin-simple-import-sort");
-const unusedImports = require("eslint-plugin-unused-imports");
-const prettier = require("eslint-config-prettier");
+import js from "@eslint/js";
+import tsPlugin from "@typescript-eslint/eslint-plugin";
+import tsParser from "@typescript-eslint/parser";
+import prettier from "eslint-config-prettier";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
+import unusedImports from "eslint-plugin-unused-imports";
 
-module.exports = [
+const esLintConfig = [
   { ignores: ["**/dist/**", "**/node_modules/**"] },
   js.configs.recommended,
   {
@@ -41,3 +41,5 @@ module.exports = [
   },
   prettier
 ];
+
+export default esLintConfig;

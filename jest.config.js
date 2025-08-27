@@ -1,4 +1,6 @@
 /** Minimal root Jest config to be extended by packages as needed */
-module.exports = {
+const jestConfig = {
   testEnvironment: "node"
 };
+
+export default jestConfig;
