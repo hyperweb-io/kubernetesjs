@@ -19,6 +19,15 @@
   },
   "dependencies": {
     "@interweb/client": "workspace:^",
-    "@interweb/interwebjs": "workspace:^"
+    "@interweb/interwebjs": "workspace:^",
+    "chalk": "^4.1.0",
+    "commander": "^11.0.0",
+    "inquirer": "^9.2.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.3"
+  },
+  "bin": {
+    "interweb": "./index.js"
   }
 }

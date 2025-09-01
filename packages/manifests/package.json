@@ -1,7 +1,7 @@
 {
-  "name": "@interweb/client",
+  "name": "@interweb/manifests",
   "version": "0.0.1",
-  "description": "Client for interweb",
+  "description": "Kubernetes manifests for interweb operators",
   "main": "./index.js",
   "types": "./index.d.ts",
   "module": "./esm/index.js",
@@ -18,12 +18,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@interweb/interwebjs": "workspace:^",
-    "@interweb/manifests": "workspace:^",
-    "js-yaml": "^4.1.0",
-    "kubernetesjs": "^0.7.2",
-    "chalk": "^4.1.0",
-    "axios": "^1.7.2"
+    "js-yaml": "^4.1.0"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.5"
