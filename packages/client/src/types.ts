@@ -5,6 +5,7 @@ export interface ClusterSetupMetadata {
 
 export interface OperatorConfig {
   name: string;
+  namespace?: string;
   version?: string;
   enabled: boolean;
   config?: Record<string, any>;
