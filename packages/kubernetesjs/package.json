@@ -47,7 +47,8 @@
     "test:watch": "jest --watch",
     "test:teardown": "ts-node scripts/teardown.ts",
     "test:list": "ts-node scripts/list.ts",
-    "test:deploy": "ts-node scripts/deploy.ts"
+    "test:deploy": "ts-node scripts/deploy.ts",
+    "openapi:fetch": "ts-node ./scripts/fetch-swagger.ts --out ./scripts/swagger.json"
   },
   "devDependencies": {
     "schema-sdk": "^0.12.0"
