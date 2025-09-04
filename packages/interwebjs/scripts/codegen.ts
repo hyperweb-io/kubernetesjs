@@ -12,7 +12,7 @@ const options = getDefaultSchemaSDKOptions({
     '*.v2beta1.*',
     'io.k8s.api.events.v1.EventSeries',
     'io.k8s.api.events.v1.Event',
-    'io.k8s.api.flowcontrol*',
+    '*autoscaling.v2*',
   ],
   jsonpatch: [
     {
@@ -46,7 +46,7 @@ const code = generateOpenApiClient(
       // },
     },
     paths: {
-      exclude: ['*flowschema*', '*v1beta1*', '*v2beta1*'],
+      exclude: ['*v1beta1*', '*v2beta1*'],
       excludeRequests: ['head', 'options'],
       excludeTags: [
         'storage_v1beta1',
@@ -54,10 +54,12 @@ const code = generateOpenApiClient(
         '*v2beta1',
         '*v1beta1*',
         '*v2beta1*',
+        '*autoscaling*'
       ],
     },
     includeTypeComments: true,
     includeMethodComments: true,
+    includePropertyComments: false,
     mergedParams: false,
     namingStrategy: {
       useLastSegment: true,
@@ -69,6 +71,18 @@ const code = generateOpenApiClient(
           'ApiExtWebhookClientConfig',
         'io.k8s.api.admissionregistration.v1.ServiceReference':
           'AdmissionServiceReference',
+        'dev.knative.internal.networking.v1alpha1.Certificate':
+          'KnativeCertificate',
+        'dev.knative.internal.networking.v1alpha1.CertificateList':
+          'KnativeCertificateList',
+        'dev.knative.internal.networking.v1alpha1.Ingress':
+          'KnativeIngress',
+        'dev.knative.internal.networking.v1alpha1.IngressList':
+          'KnativeIngressList',
+        'dev.knative.serving.v1.Service':
+          'KnativeService',
+        'dev.knative.serving.v1.ServiceList':
+          'KnativeServiceList',
       },
     },
   },
