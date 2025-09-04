@@ -81,6 +81,10 @@ importers:
     publishDirectory: dist
 
   packages/interwebjs:
+    devDependencies:
+      schema-sdk:
+        specifier: ^0.14.0
+        version: 0.14.0(encoding@0.1.13)
     publishDirectory: dist
 
 packages:
@@ -349,6 +353,15 @@ packages:
   '@isaacs/brace-expansion@5.0.0':
     resolution: {integrity: sha512-ZT55BDLV0yv0RBm2czMiZ+SqCGO7AvmOM3G/w2xhVPH+te0aKgFjmBvGlL1dH+ql2tgGO3MVrbb3jCKyvpgnxA==}
     engines: {node: 20 || >=22}
+
+  '@interweb-utils/casing@0.2.0':
+    resolution: {integrity: sha512-ORQySrHzMYmtVRkYvtE1HGa8QnoqYPhu5UWQyv9302D/ZZe0Ae6cpk4NH1xEXgHeFq/CraiOcnLhmc3h7wdNHg==}
+
+  '@interweb/fetch-api-client@0.6.1':
+    resolution: {integrity: sha512-+QfJrK8c+uGhnIkGaoLeyuL7NuLbNgH8AeZwVkGqtOr9/hkrYMJQN+Jnw06TJeeuM12R8QZgM/0M8bpdG8KnlQ==}
+
+  '@interweb/http-errors@0.1.1':
+    resolution: {integrity: sha512-JEwL0a8ixMT1WQwx4YNEHLiFrB/7QKxMU2j/HxycdS1BIfZxWVLggdmONHENdmsVPOuaxUJduGmhzFVidOL0IA==}
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -1490,6 +1503,9 @@ packages:
     resolution: {integrity: sha512-7MptL8U0cqcFdzIzwOTHoilX9x5BrNqye7Z/LuC7kCMRio1EMSyqRK3BEAUD7sXRq4iT4AzTVuZdhgQ2TCvYLg==}
     engines: {node: '>=8.6.0'}
 
+  fast-json-patch@3.1.1:
+    resolution: {integrity: sha512-vf6IHUX2SBcA+5/+4883dsIjpBTqmfBjmYiWK1savxQmFk4JfBMLa7ynTYOs1Rolp/T1betJxHiGD3g1Mn8lUQ==}
+
   fast-json-stable-stringify@2.1.0:
     resolution: {integrity: sha512-lhd/wF+Lk98HZoTCtlVraHtfh5XYijIjalXck7saUtuanSDyLMxnHhSXEDJqHxD7msR8D0uCmqlkwjCV8xvwHw==}
 
@@ -1893,6 +1909,9 @@ packages:
   isobject@3.0.1:
     resolution: {integrity: sha512-WhB9zCku7EGTj/HQQRz5aUQEUeoQZH2bWcltRErOpymJ4boYE6wL9Tbr23krRPSZ+C5zqNSrSw+Cc7sZZ4b7vg==}
     engines: {node: '>=0.10.0'}
+
+  isomorphic-fetch@3.0.0:
+    resolution: {integrity: sha512-qvUtwJ3j6qwsF3jLxkZ72qCgjMysPzDfeV240JHiGZsANBYd+EEuu35v7dfrJ9Up0Ak07D7GGSkGhCHTqg/5wA==}
 
   istanbul-lib-coverage@3.2.2:
     resolution: {integrity: sha512-O8dpsF+r0WV/8MNRKfnmrtCWhuKjxrq2w+jpzBL5UZKTi2LeVWnWOmWRxFlesJONmc+wLAGvKQZEOanko0LFTg==}
@@ -2833,6 +2852,12 @@ packages:
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
 
+  schema-sdk@0.14.0:
+    resolution: {integrity: sha512-Q0EYsO2QkuREQc48nO6H86sJ0diexiljD0ayjCLbsWxMjmJc2tQyjc9i5Uw7am3s3YcQYCK0RBr5Rcg6Y90MrQ==}
+
+  schema-typescript@0.12.1:
+    resolution: {integrity: sha512-dgfQrLjqsXEAC7vZ3fJDBsIPpUDJ2SrzuQFvXslrEjVjOSQyVykBua2tNmM4uFn4uIL7K3Ux64pXbaUnngkhhw==}
+
   semver@5.7.2:
     resolution: {integrity: sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g==}
     hasBin: true
@@ -3215,6 +3240,9 @@ packages:
 
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
+
+  whatwg-fetch@3.6.20:
+    resolution: {integrity: sha512-EqhiFU6daOA8kpjOWTL0olhVOF3i7OrFzSYiGsEMB8GcXS+RrzauAERX65xMeNWVqxA6HXH2m69Z9LaKKdisfg==}
 
   whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
@@ -3602,6 +3630,17 @@ snapshots:
   '@isaacs/brace-expansion@5.0.0':
     dependencies:
       '@isaacs/balanced-match': 4.0.1
+
+  '@interweb-utils/casing@0.2.0': {}
+
+  '@interweb/fetch-api-client@0.6.1(encoding@0.1.13)':
+    dependencies:
+      '@interweb/http-errors': 0.1.1
+      isomorphic-fetch: 3.0.0(encoding@0.1.13)
+    transitivePeerDependencies:
+      - encoding
+
+  '@interweb/http-errors@0.1.1': {}
 
   '@isaacs/cliui@8.0.2':
     dependencies:
@@ -5057,6 +5096,8 @@ snapshots:
       merge2: 1.4.1
       micromatch: 4.0.8
 
+  fast-json-patch@3.1.1: {}
+
   fast-json-stable-stringify@2.1.0: {}
 
   fast-levenshtein@2.0.6: {}
@@ -5441,6 +5482,13 @@ snapshots:
   isexe@3.1.1: {}
 
   isobject@3.0.1: {}
+
+  isomorphic-fetch@3.0.0(encoding@0.1.13):
+    dependencies:
+      node-fetch: 2.6.7(encoding@0.1.13)
+      whatwg-fetch: 3.6.20
+    transitivePeerDependencies:
+      - encoding
 
   istanbul-lib-coverage@3.2.2: {}
 
@@ -6709,6 +6757,26 @@ snapshots:
 
   safer-buffer@2.1.2: {}
 
+  schema-sdk@0.14.0(encoding@0.1.13):
+    dependencies:
+      '@babel/generator': 7.28.0
+      '@babel/types': 7.28.2
+      '@interweb-utils/casing': 0.2.0
+      '@interweb/fetch-api-client': 0.6.1(encoding@0.1.13)
+      deepmerge: 4.3.1
+      fast-json-patch: 3.1.1
+      schema-typescript: 0.12.1
+    transitivePeerDependencies:
+      - encoding
+
+  schema-typescript@0.12.1:
+    dependencies:
+      '@babel/generator': 7.28.0
+      '@babel/types': 7.28.2
+      '@interweb-utils/casing': 0.2.0
+      deepmerge: 4.3.1
+      minimatch: 9.0.5
+
   semver@5.7.2: {}
 
   semver@6.3.1: {}
@@ -7055,6 +7123,8 @@ snapshots:
       defaults: 1.0.4
 
   webidl-conversions@3.0.1: {}
+
+  whatwg-fetch@3.6.20: {}
 
   whatwg-url@5.0.0:
     dependencies:

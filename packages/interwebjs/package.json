@@ -15,6 +15,11 @@
     "prepare": "npm run build",
     "build": "npm run clean; tsc; tsc -p tsconfig.esm.json; npm run copy",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "codegen": "ts-node ./scripts/codegen.ts",
+    "openapi:fetch": "ts-node ./scripts/fetch-swagger.ts --out ./scripts/swagger.json"
+  },
+  "devDependencies": {
+    "schema-sdk": "^0.14.0"
   }
 }
