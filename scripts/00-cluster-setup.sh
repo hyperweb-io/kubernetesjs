@@ -155,10 +155,10 @@ setup_monitoring() {
         --namespace monitoring \
         --create-namespace \
         --set prometheus.prometheusSpec.retention=7d \
-        --set prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage=1Gi \
+        --set prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage=10Gi \
         --set grafana.adminPassword=admin \
         --set grafana.persistence.enabled=true \
-        --set grafana.persistence.size=1Gi \
+        --set grafana.persistence.size=5Gi \
         --wait
     
     log $GREEN "Monitoring stack installed successfully!"
