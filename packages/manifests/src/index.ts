@@ -49,22 +49,30 @@ export class ManifestLoader {
   /**
    * Load all manifests for a specific operator
    */
-  static loadOperatorManifests(operatorName: string): KubernetesResource[] {
-    // Handle composite operators that have multiple manifest files
-    if (operatorName === 'knative-serving') {
-      return this.loadKnativeServingManifests();
-    }
-    
-    const manifestPath = path.join(this.getManifestsDir(), `${operatorName}.yaml`);
-    
-    if (!fs.existsSync(manifestPath)) {
-      throw new Error(`Manifest not found for operator: ${operatorName}`);
+  static loadOperatorManifests(operatorName: string, version?: string): KubernetesResource[] {
+    // If a version is provided, prefer versioned manifest path first
+    if (version) {
+      const versionedPath = path.join(this.getManifestsDir(), operatorName, `${version}.yaml`);
+      if (fs.existsSync(versionedPath)) {
+        const content = fs.readFileSync(versionedPath, 'utf8');
+        const docs = yaml.loadAll(content) as KubernetesResource[];
+        return docs.filter((d) => d && typeof d === 'object');
+      }
+      // Fallback to unversioned below if not found
     }
 
+    // Handle composite operator (legacy unversioned layout)
+    if (!version && operatorName === 'knative-serving') {
+      return this.loadKnativeServingManifests();
+    }
+
+    const manifestPath = path.join(this.getManifestsDir(), `${operatorName}.yaml`);
+    if (!fs.existsSync(manifestPath)) {
+      throw new Error(`Manifest not found for operator: ${operatorName}${version ? `@${version}` : ''}`);
+    }
     const manifestContent = fs.readFileSync(manifestPath, 'utf8');
     const documents = yaml.loadAll(manifestContent) as KubernetesResource[];
-    
-    return documents.filter(doc => doc && typeof doc === 'object');
+    return documents.filter((doc) => doc && typeof doc === 'object');
   }
 
   /**
@@ -121,24 +129,13 @@ export class ManifestLoader {
    * Load Knative Serving manifests (composite operator with multiple files)
    */
   private static loadKnativeServingManifests(): KubernetesResource[] {
-    const manifestFiles = [
-      'knative-serving-crds.yaml',
-      'knative-serving-core.yaml',
-      'knative-kourier.yaml'
-    ];
-    
-    let allResources: KubernetesResource[] = [];
-    
-    for (const file of manifestFiles) {
-      const manifestPath = path.join(this.getManifestsDir(), file);
-      if (fs.existsSync(manifestPath)) {
-        const manifestContent = fs.readFileSync(manifestPath, 'utf8');
-        const documents = yaml.loadAll(manifestContent) as KubernetesResource[];
-        allResources = allResources.concat(documents.filter(doc => doc && typeof doc === 'object'));
-      }
+    const unifiedPath = path.join(this.getManifestsDir(), 'knative-serving.yaml');
+    if (!fs.existsSync(unifiedPath)) {
+      throw new Error('Unified knative-serving.yaml not found in operators directory');
     }
-    
-    return allResources;
+    const manifestContent = fs.readFileSync(unifiedPath, 'utf8');
+    const documents = yaml.loadAll(manifestContent) as KubernetesResource[];
+    return documents.filter((doc) => doc && typeof doc === 'object');
   }
 
   /**

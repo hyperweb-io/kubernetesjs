@@ -11,10 +11,11 @@
   },
   "scripts": {
     "copy": "cpy ../../LICENSE README.md package.json dist --flat",
-    "copy:operators": "cpy src/operators/* dist/operators --flat",
+    "copy:operators": "cpy \"src/operators/**\" dist/operators",
     "clean": "rimraf dist",
     "prepare": "npm run build",
     "build": "npm run clean; tsc; tsc -p tsconfig.esm.json; npm run copy; npm run copy:operators",
+    "pull": "ts-node scripts/pull-manifests.ts",
     "test": "jest",
     "test:watch": "jest --watch"
   },
