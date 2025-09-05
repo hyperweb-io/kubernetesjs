@@ -100,8 +100,8 @@ setup_ingress() {
     helm repo update
     
     # Install ingress controller (using same namespace as your existing setup)
-    helm upgrade --install nginx-ingress ingress-nginx/ingress-nginx \
-        --namespace ingress \
+    helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+        --namespace ingress-nginx \
         --create-namespace \
         --set controller.metrics.enabled=true \
         --set controller.podAnnotations."prometheus\.io/scrape"="true" \
