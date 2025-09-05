@@ -114,10 +114,6 @@ importers:
     publishDirectory: dist
 
   packages/interwebjs:
-    dependencies:
-      '@interweb/fetch-api-client':
-        specifier: ^0.6.1
-        version: 0.6.1(encoding@0.1.13)
     devDependencies:
       schema-sdk:
         specifier: ^0.14.0
@@ -394,6 +390,10 @@ packages:
       '@types/node':
         optional: true
 
+  '@inquirer/figures@1.0.13':
+    resolution: {integrity: sha512-lGPVU3yO9ZNqA7vTYz26jny41lE7yoQansmqdMLBEfqaGsmdg7V3W9mK9Pvb5IL4EVZ9GnSDGMO/cJXud5dMaw==}
+    engines: {node: '>=18'}
+
   '@interweb-utils/casing@0.2.0':
     resolution: {integrity: sha512-ORQySrHzMYmtVRkYvtE1HGa8QnoqYPhu5UWQyv9302D/ZZe0Ae6cpk4NH1xEXgHeFq/CraiOcnLhmc3h7wdNHg==}
 
@@ -402,10 +402,6 @@ packages:
 
   '@interweb/http-errors@0.1.1':
     resolution: {integrity: sha512-JEwL0a8ixMT1WQwx4YNEHLiFrB/7QKxMU2j/HxycdS1BIfZxWVLggdmONHENdmsVPOuaxUJduGmhzFVidOL0IA==}
-
-  '@inquirer/figures@1.0.13':
-    resolution: {integrity: sha512-lGPVU3yO9ZNqA7vTYz26jny41lE7yoQansmqdMLBEfqaGsmdg7V3W9mK9Pvb5IL4EVZ9GnSDGMO/cJXud5dMaw==}
-    engines: {node: '>=18'}
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -3741,6 +3737,8 @@ snapshots:
     optionalDependencies:
       '@types/node': 22.17.1
 
+  '@inquirer/figures@1.0.13': {}
+
   '@interweb-utils/casing@0.2.0': {}
 
   '@interweb/fetch-api-client@0.6.1(encoding@0.1.13)':
@@ -3751,8 +3749,6 @@ snapshots:
       - encoding
 
   '@interweb/http-errors@0.1.1': {}
-
-  '@inquirer/figures@1.0.13': {}
 
   '@isaacs/cliui@8.0.2':
     dependencies:

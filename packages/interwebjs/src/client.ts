@@ -9,6 +9,9 @@ interface RequestOptions<Params> {
 }
 
 export interface APIClientOptions {
+  kubeconfig: string;
+  namespace: string;
+  context: string;
   restEndpoint: string;
 }
 

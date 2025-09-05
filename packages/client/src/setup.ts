@@ -1,12 +1,12 @@
-import { KubernetesClient } from 'kubernetesjs';
+import { InterwebClient as InterwebKubernetesClient } from '@interweb/interwebjs';
 import { ManifestLoader, SUPPORTED_OPERATORS } from '@interweb/manifests';
 import { ClusterSetupConfig, ApplicationConfig, DeploymentStatus, InterwebClientConfig, OperatorConfig } from './types';
 import axios from 'axios';
 
 export class SetupClient {
-  private client: KubernetesClient;
+  private client: InterwebKubernetesClient;
 
-  constructor(client: KubernetesClient) {
+  constructor(client: InterwebKubernetesClient) {
     this.client = client;
   }
 

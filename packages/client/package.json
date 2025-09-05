@@ -15,7 +15,8 @@
     "prepare": "npm run build",
     "build": "npm run clean; tsc; tsc -p tsconfig.esm.json; npm run copy",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "proxy": "kubectl proxy --port=8001 --accept-hosts='^.*$' --address='0.0.0.0'"
   },
   "dependencies": {
     "@interweb/interwebjs": "workspace:^",

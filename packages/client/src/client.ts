@@ -1,6 +1,7 @@
 import chalk from 'chalk';
+import { InterwebClient as InterwebKubernetesClient } from '@interweb/interwebjs';
 import { ConfigLoader } from './config-loader';
-import { SetupClient } from './kubernetes-client';
+import { SetupClient } from './setup';
 import {
   ClusterSetupConfig,
   ApplicationConfig,
@@ -17,18 +18,20 @@ export interface InterwebContext {
   restEndpoint?: string; // For kubernetesjs REST endpoint
 }
 
-export class InterwebClient {
+export class Client {
   private setupClient: SetupClient;
   private ctx: InterwebContext;
-
+  private kubeClient: InterwebKubernetesClient;
+  
   constructor(ctx: InterwebContext = {}) {
     this.ctx = ctx;
-    this.setupClient = new SetupClient({
+    this.kubeClient = new InterwebKubernetesClient({
       kubeconfig: ctx.kubeconfig,
       namespace: ctx.namespace,
       context: ctx.context,
       restEndpoint: ctx.restEndpoint
     });
+    this.setupClient = new SetupClient(this.kubeClient);
   }
 
   /**

@@ -1,9 +1,9 @@
 export * from './types';
 export * from './config-loader';
-export * from './kubernetes-client';
-export * from './interweb-client';
+export * from './setup';
+export * from './client';
 
 // Re-export main classes for convenience
-export { InterwebClient } from './interweb-client';
+export { Client } from './client';
 export { ConfigLoader } from './config-loader';
-export { SetupClient } from './kubernetes-client';
+export { SetupClient } from './setup';
