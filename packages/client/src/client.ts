@@ -31,7 +31,7 @@ export class Client {
       context: ctx.context,
       restEndpoint: ctx.restEndpoint
     });
-    this.setupClient = new SetupClient(this.kubeClient);
+    this.setupClient = new SetupClient(this.kubeClient, ctx.namespace || 'default');
   }
 
   /**

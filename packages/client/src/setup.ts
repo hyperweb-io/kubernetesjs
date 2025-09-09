@@ -1,13 +1,16 @@
 import { InterwebClient as InterwebKubernetesClient } from '@interweb/interwebjs';
-import { ManifestLoader, SUPPORTED_OPERATORS } from '@interweb/manifests';
+import { ManifestLoader, SUPPORTED_OPERATORS, KubernetesResource } from '@interweb/manifests';
 import { ClusterSetupConfig, ApplicationConfig, DeploymentStatus, InterwebClientConfig, OperatorConfig } from './types';
 import axios from 'axios';
+import { applyKubernetesResource, applyKubernetesResources } from './k8s-apply';
 
 export class SetupClient {
   private client: InterwebKubernetesClient;
+  private defaultNamespace: string;
 
-  constructor(client: InterwebKubernetesClient) {
+  constructor(client: InterwebKubernetesClient, defaultNamespace: string = 'default') {
     this.client = client;
+    this.defaultNamespace = defaultNamespace || 'default';
   }
 
   /**
@@ -25,21 +28,20 @@ export class SetupClient {
     }
   }
 
-  public async applyManifest(manifest: any): Promise<void> {
-    const kind = manifest.kind;
-    const apiVersion = manifest.apiVersion;
-    const metadata = manifest.metadata;
-    const spec = manifest.spec;
-    const data = manifest.data;
+  public async applyManifest(manifest: KubernetesResource): Promise<void> {
+    await applyKubernetesResource(this.client, manifest, {
+      defaultNamespace: this.defaultNamespace,
+      continueOnError: true,
+      log: (m) => console.log(m),
+    });
+  }
 
-    switch (kind) {
-      case 'Namespace':
-        await this.client.createCoreV1Namespace({
-          body: manifest,
-          query: {}
-        });
-        break;
-    }
+  public async applyManifests(manifests: KubernetesResource[]): Promise<void> {
+    await applyKubernetesResources(this.client, manifests, {
+      defaultNamespace: this.defaultNamespace,
+      continueOnError: true,
+      log: (m) => console.log(m),
+    });
   }
 
   /**
@@ -60,9 +62,7 @@ export class SetupClient {
       }
 
       const manifests = ManifestLoader.loadOperatorManifests(operator.name, operator.version);
-      for (const manifest of manifests) {
-        await this.applyManifest(manifest);
-      }
+      await this.applyManifests(manifests);
     }
   }
 
