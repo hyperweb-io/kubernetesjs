@@ -1,9 +1,14 @@
 # Source: jetstack/cert-manager@v1.17.0
+---
 # Added by pull-manifests.ts to ensure namespace exists
 apiVersion: v1
 kind: Namespace
 metadata:
   name: cert-manager
+  labels:
+    app.kubernetes.io/name: cert-manager
+
+---
 ---
 # Source: cert-manager/templates/cainjector-serviceaccount.yaml
 apiVersion: v1

@@ -193,6 +193,26 @@ function prependNamespaceDoc(yamlText: string, namespace: string): string {
   return `---\n${nsDoc}\n---\n${rest}\n`;
 }
 
+// function yamlDocsFrom(text: string): any[] {
+//   try {
+//     return (yaml.loadAll(text) as any[]).filter((d) => d && typeof d === 'object');
+//   } catch {
+//     return [];
+//   }
+// }
+
+function docKey(d: any): string {
+  const apiVersion = d?.apiVersion || 'core';
+  const kind = d?.kind || '';
+  const name = d?.metadata?.name || '';
+  const ns = d?.metadata?.namespace || '';
+  return `${apiVersion}|${kind}|${name}|${ns}`;
+}
+
+// function dumpDocs(docs: any[]): string {
+//   return docs.map((d) => yaml.dump(d).trim()).join('\n---\n') + '\n';
+// }
+
 function toValuesArgs(values?: Record<string, any>): string[] {
   if (!values) return [];
   const args: string[] = [];
@@ -234,14 +254,42 @@ async function pullOperator(op: OperatorConfig, version?: string, outDir = path.
     const targetFile = path.join(targetDir, fileName);
 
     if (src.type === 'urls') {
-      const parts: string[] = [];
+      // Fetch and combine raw YAML documents while de-duplicating by logical identity.
+      // Preserve original formatting/comments by NOT re-serializing via js-yaml.
+      const seen = new Set<string>();
+      const outPieces: string[] = [];
+
       for (const url of src.urls) {
         // eslint-disable-next-line no-await-in-loop
         const content = await fetchUrl(url);
-        parts.push(`# Source: ${url}\n${content.trim()}\n`);
+        const docsRaw = content
+          .split(/\n---\s*\n/gm) // split on standalone doc separators
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0);
+
+        let wroteHeaderForSource = false;
+        for (const raw of docsRaw) {
+          let key = '';
+          try {
+            const parsed = yaml.load(raw) as any;
+            key = docKey(parsed);
+          } catch {
+            // If parse fails, keep a content hash as a fallback key
+            key = `raw:${Buffer.from(raw).toString('base64').slice(0, 24)}`;
+          }
+          if (seen.has(key)) continue;
+          seen.add(key);
+
+          if (!wroteHeaderForSource) {
+            outPieces.push(`# Source: ${url}`);
+            wroteHeaderForSource = true;
+          }
+          outPieces.push(raw);
+        }
       }
-      const combined = parts.join('\n---\n');
-      writeFile(targetFile, combined + '\n');
+
+      const combined = outPieces.join('\n---\n') + '\n';
+      writeFile(targetFile, combined);
       // Also update unversioned latest pointer (copy) if this is highest version
     } else if (src.type === 'helm') {
       // Ensure repo

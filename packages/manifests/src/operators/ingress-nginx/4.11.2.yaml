@@ -1,9 +1,12 @@
 # Source: ingress-nginx/ingress-nginx@4.11.2
+---
 # Added by pull-manifests.ts to ensure namespace exists
 apiVersion: v1
 kind: Namespace
 metadata:
   name: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
 
 ---
 ---

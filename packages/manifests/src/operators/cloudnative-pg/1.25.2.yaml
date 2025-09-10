@@ -1,4 +1,5 @@
 # Source: https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.25/releases/cnpg-1.25.2.yaml
+---
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -17799,4 +17800,3 @@ webhooks:
     resources:
     - scheduledbackups
   sideEffects: None
-
