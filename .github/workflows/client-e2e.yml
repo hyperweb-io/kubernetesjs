@@ -88,5 +88,3 @@ jobs:
           kubectl get namespaces
           echo '=== Pods ==='
           kubectl get pods -A -o wide
-
-  # Removed multi-operator job to simplify CI and resource usage.
