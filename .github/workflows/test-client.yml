@@ -48,17 +48,16 @@ jobs:
         kubectl_version: v1.31.3
         wait: 300s
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      if: inputs.cli-version != '0.0.0'
-      with:
-        node-version: "20.x"
-        cache: "pnpm"
-
     - name: Setup pnpm
       uses: pnpm/action-setup@v2
       with:
         version: 10.12.2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20.x"
+        cache: "pnpm"
 
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
@@ -100,3 +99,12 @@ jobs:
         kubectl get pods --all-namespaces
         echo "=== Events ==="
         kubectl get events --all-namespaces --sort-by='.lastTimestamp' | tail -20
+
+    - name: Cleanup kubectl proxy
+      if: always()
+      run: |
+        if [ ! -z "$PROXY_PID" ]; then
+          kill $PROXY_PID || true
+        fi
+        # Also kill any remaining kubectl proxy processes
+        pkill -f "kubectl proxy" || true
