@@ -8,11 +8,11 @@ import type { ClusterSetupConfig } from '../src/types';
 // Start proxy before running: pnpm --filter @interweb/client proxy
 // Optionally set K8S_API to your API server URL.
 
-jest.setTimeout(600_000);
+jest.setTimeout(60_000);
 
 const K8S_API = process.env.K8S_API || 'http://127.0.0.1:8001';
 
-describe('SetupClient: basic flow with config', () => {
+describe('SetupClient deleteOperators: basic flow with config', () => {
   const api = new InterwebKubernetesClient({ restEndpoint: K8S_API } as any);
   const setup = new SetupClient(api as any);
 
@@ -32,9 +32,9 @@ describe('SetupClient: basic flow with config', () => {
     }
   });
 
-  it('runs installOperators on config', async () => {
+  it('runs deleteOperators on config', async () => {
     if (!cfg) return;
-    await setup.installOperators(cfg);
+    await setup.deleteOperators(cfg);
     const status = await setup.getClusterSetupStatus(cfg);
     expect(status.phase === 'ready' || status.phase === 'installing').toBe(true);
   });

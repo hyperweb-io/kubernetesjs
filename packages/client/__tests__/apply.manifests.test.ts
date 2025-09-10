@@ -128,4 +128,76 @@ describe('apply: manifests from @interweb/manifests', () => {
     // But should have logged an error
     expect(logs.some(log => log.includes('Error creating') || log.includes('Apply error'))).toBe(true);
   });
+
+  it('should delete a namespace successfully', async () => {
+    const connected = await setup.checkConnection();
+    if (!connected) {
+      console.warn('Kubernetes cluster not reachable; skipping test.');
+      return;
+    }
+
+    const testNsName = 'test-delete-namespace';
+    
+    // Create a test namespace first
+    const testNamespace = {
+      apiVersion: 'v1',
+      kind: 'Namespace',
+      metadata: {
+        name: testNsName
+      }
+    };
+
+    // Apply the namespace
+    await setup.applyManifest(testNamespace as any, { 
+      continueOnError: false,
+      log: (msg) => console.log(`[CREATE] ${msg}`)
+    });
+
+    // Verify it exists
+    const created = await api.readCoreV1Namespace({ path: { name: testNsName }, query: {} as any });
+    expect(created?.metadata?.name).toBe(testNsName);
+
+    // Now delete it
+    await setup.deleteManifest(testNamespace as any, { 
+      continueOnError: false,
+      log: (msg) => console.log(`[DELETE] ${msg}`)
+    });
+
+    // Verify it's deleted (should throw 404)
+    await expect(
+      api.readCoreV1Namespace({ path: { name: testNsName }, query: {} as any })
+    ).rejects.toThrow();
+  });
+
+  it('should handle deleting non-existent resources gracefully', async () => {
+    const connected = await setup.checkConnection();
+    if (!connected) {
+      console.warn('Kubernetes cluster not reachable; skipping test.');
+      return;
+    }
+
+    const nonExistentManifest = {
+      apiVersion: 'v1',
+      kind: 'Namespace',
+      metadata: {
+        name: 'non-existent-namespace-xyz'
+      }
+    };
+
+    const logs: string[] = [];
+
+    // Should not throw with continueOnError=true (default)
+    await expect(
+      setup.deleteManifest(nonExistentManifest as any, { 
+        continueOnError: true,
+        log: (msg) => {
+          console.log(`[DELETE_MISSING] ${msg}`);
+          logs.push(msg);
+        }
+      })
+    ).resolves.not.toThrow();
+
+    // Should log that it was not found
+    expect(logs.some(log => log.includes('not found') || log.includes('already deleted'))).toBe(true);
+  });
 });

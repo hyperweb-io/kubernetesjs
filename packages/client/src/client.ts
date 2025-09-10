@@ -65,28 +65,28 @@ export class Client {
   /**
    * Deploy an application with the specified configuration
    */
-  async deployApplication(configPath: string): Promise<void> {
-    try {
-      this.log('Loading application configuration...');
-      const config = ConfigLoader.loadApplication(configPath);
+  // async deployApplication(configPath: string): Promise<void> {
+  //   try {
+  //     this.log('Loading application configuration...');
+  //     const config = ConfigLoader.loadApplication(configPath);
       
-      this.log(`Deploying application: ${config.metadata.name}`);
+  //     this.log(`Deploying application: ${config.metadata.name}`);
       
-      // Check Kubernetes connection
-      const connected = await this.setupClient.checkConnection();
-      if (!connected) {
-        throw new Error('Unable to connect to Kubernetes cluster');
-      }
+  //     // Check Kubernetes connection
+  //     const connected = await this.setupClient.checkConnection();
+  //     if (!connected) {
+  //       throw new Error('Unable to connect to Kubernetes cluster');
+  //     }
       
-      // Deploy application
-      await this.setupClient.deployApplication(config);
+  //     // Deploy application
+  //     await this.setupClient.installOperators(config);
       
-      this.log('✓ Application deployed successfully');
-    } catch (error) {
-      this.log(`✗ Application deployment failed: ${error}`);
-      throw error;
-    }
-  }
+  //     this.log('✓ Application deployed successfully');
+  //   } catch (error) {
+  //     this.log(`✗ Application deployment failed: ${error}`);
+  //     throw error;
+  //   }
+  // }
 
   /**
    * Get the status of a cluster setup
@@ -198,21 +198,21 @@ export class Client {
   /**
    * Delete an application and all its resources
    */
-  async deleteApplication(configPath: string): Promise<void> {
-    try {
-      this.log('Loading application configuration...');
-      const config = ConfigLoader.loadApplication(configPath);
+  // async deleteApplication(configPath: string): Promise<void> {
+  //   try {
+  //     this.log('Loading application configuration...');
+  //     const config = ConfigLoader.loadApplication(configPath);
       
-      this.log(`Deleting application: ${config.metadata.name}`);
+  //     this.log(`Deleting application: ${config.metadata.name}`);
       
-      await this.setupClient.deleteApplication(config);
+  //     await this.setupClient.deleteApplication(config);
       
-      this.log(chalk.green('✓ Application deleted successfully'));
-    } catch (error) {
-      this.log(chalk.red(`✗ Application deletion failed: ${error}`));
-      throw error;
-    }
-  }
+  //     this.log(chalk.green('✓ Application deleted successfully'));
+  //   } catch (error) {
+  //     this.log(chalk.red(`✗ Application deletion failed: ${error}`));
+  //     throw error;
+  //   }
+  // }
 
   /**
    * Validate a configuration file

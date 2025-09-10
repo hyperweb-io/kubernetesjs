@@ -2,7 +2,7 @@ import { InterwebClient as InterwebKubernetesClient } from '@interweb/interwebjs
 import { ManifestLoader, SUPPORTED_OPERATORS, KubernetesResource } from '@interweb/manifests';
 import { ClusterSetupConfig, ApplicationConfig, DeploymentStatus, InterwebClientConfig, OperatorConfig } from './types';
 import axios from 'axios';
-import { applyKubernetesResource, applyKubernetesResources } from './apply';
+import { applyKubernetesResource, applyKubernetesResources, deleteKubernetesResource, deleteKubernetesResources } from './apply';
 
 export class SetupClient {
   private client: InterwebKubernetesClient;
@@ -44,6 +44,22 @@ export class SetupClient {
     });
   }
 
+  public async deleteManifest(manifest: KubernetesResource, options?: { continueOnError?: boolean; log?: (msg: string) => void }): Promise<void> {
+    await deleteKubernetesResource(this.client, manifest, {
+      defaultNamespace: this.defaultNamespace,
+      continueOnError: options?.continueOnError ?? true,
+      log: options?.log ?? ((m) => console.log(m)),
+    });
+  }
+
+  public async deleteManifests(manifests: KubernetesResource[], options?: { continueOnError?: boolean; log?: (msg: string) => void }): Promise<void> {
+    await deleteKubernetesResources(this.client, manifests, {
+      defaultNamespace: this.defaultNamespace,
+      continueOnError: options?.continueOnError ?? true,
+      log: options?.log ?? ((m) => console.log(m)),
+    });
+  }
+
   /**
    * Install operators based on cluster setup configuration
    */
@@ -67,6 +83,42 @@ export class SetupClient {
         log: (m) => console.log(m),
       });
       console.log(`Operator installed: ${operator.name} ${operator.version}`);
+    }
+  }
+
+  /**
+   * Delete operators based on cluster setup configuration
+   */
+  public async deleteOperators(config: ClusterSetupConfig, options?: { continueOnError?: boolean }): Promise<void> {
+    // check config.spec.operators are in the SUPPORTED_OPERATORS
+    for (const operator of config.spec.operators) {
+      if (!SUPPORTED_OPERATORS.includes(operator.name as any)) {
+        throw new Error(`Unsupported operator: ${operator.name}`);
+      }
+    }
+
+    // Process operators in reverse order for safer deletion
+    const operatorsToDelete = config.spec.operators
+      .filter(op => op.enabled)
+      .reverse();
+
+    for (const operator of operatorsToDelete) {
+      console.log(`Deleting operator: ${operator.name} ${operator.version}`);
+      try {
+        const manifests = ManifestLoader.loadOperatorManifests(operator.name, operator.version);
+        await this.deleteManifests(manifests, {
+          continueOnError: options?.continueOnError ?? true,
+          log: (m) => console.log(m),
+        });
+        console.log(`Operator deleted: ${operator.name} ${operator.version}`);
+      } catch (error) {
+        const errorMsg = `Failed to delete operator ${operator.name}: ${error}`;
+        if (options?.continueOnError ?? true) {
+          console.warn(errorMsg);
+        } else {
+          throw new Error(errorMsg);
+        }
+      }
     }
   }
 
