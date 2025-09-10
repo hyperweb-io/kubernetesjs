@@ -16,6 +16,7 @@
     "prepare": "npm run build",
     "build": "npm run clean; tsc; tsc -p tsconfig.esm.json; npm run copy; npm run copy:operators",
     "pull": "ts-node scripts/pull-manifests.ts",
+    "pull:all": "ts-node scripts/pull-manifests.ts --all",
     "test": "jest",
     "test:watch": "jest --watch"
   },

@@ -1,9 +1,11 @@
----
+# Source: ingress-nginx/ingress-nginx@4.11.2
+# Added by pull-manifests.ts to ensure namespace exists
 apiVersion: v1
 kind: Namespace
 metadata:
   name: ingress-nginx
-# Source: ingress-nginx/ingress-nginx@4.11.2
+
+---
 ---
 # Source: ingress-nginx/templates/controller-serviceaccount.yaml
 apiVersion: v1
@@ -776,3 +778,4 @@ spec:
       serviceAccountName: ingress-nginx-admission
       nodeSelector: 
         kubernetes.io/os: linux
+

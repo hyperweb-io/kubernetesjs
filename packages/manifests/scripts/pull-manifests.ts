@@ -3,6 +3,7 @@ import { spawnSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
+import * as yaml from 'js-yaml';
 
 type Source =
   | {
@@ -151,11 +152,45 @@ function fetchUrl(url: string): Promise<string> {
 }
 
 function helmTemplate(args: string[], cwd?: string): string {
-  const { stdout, stderr, status } = spawnSync('helm', args, { encoding: 'utf8', cwd });
+  const { stdout, stderr, status, error } = spawnSync('helm', args, {
+    encoding: 'utf8',
+    cwd,
+    // Large charts (e.g., kube-prometheus-stack with --include-crds) can exceed default buffer.
+    maxBuffer: 64 * 1024 * 1024, // 64 MB
+  });
+  if (error) {
+    throw new Error(`helm ${args.join(' ')} error: ${error.message}`);
+  }
   if (status !== 0) {
     throw new Error(`helm ${args.join(' ')} failed: ${stderr || stdout}`);
   }
   return stdout;
+}
+
+function hasNamespaceDoc(yamlText: string, namespace: string): boolean {
+  try {
+    const docs = yaml.loadAll(yamlText) as any[];
+    return docs.some((d) => d && d.kind === 'Namespace' && d.metadata?.name === namespace);
+  } catch {
+    // If parse fails, fall back to a string heuristic
+    const pattern = new RegExp(`kind:\\s*Namespace[\\s\\S]*?name:\\s*${namespace}\\b`);
+    return pattern.test(yamlText);
+  }
+}
+
+function prependNamespaceDoc(yamlText: string, namespace: string): string {
+  const nsDoc = [
+    `# Added by pull-manifests.ts to ensure namespace exists`,
+    `apiVersion: v1`,
+    `kind: Namespace`,
+    `metadata:`,
+    `  name: ${namespace}`,
+    `  labels:`,
+    `    app.kubernetes.io/name: ${namespace}`,
+    ``,
+  ].join('\n');
+  const rest = yamlText.trim();
+  return `---\n${nsDoc}\n---\n${rest}\n`;
 }
 
 function toValuesArgs(values?: Record<string, any>): string[] {
@@ -217,15 +252,25 @@ async function pullOperator(op: OperatorConfig, version?: string, outDir = path.
         'template',
         op.name,
         `${src.repoName}/${src.chart}`,
+        '--include-crds',
         '--version',
         src.version,
       ];
-      if (src.namespace) args.push('-n', src.namespace);
+      if (src.namespace) args.push('-n', src.namespace, '--create-namespace');
       args.push(...toValuesArgs(src.values));
       if (src.extraArgs) args.push(...src.extraArgs);
 
-      const rendered = helmTemplate(args);
-      writeFile(targetFile, `# Source: ${src.repoName}/${src.chart}@${src.version}\n${rendered.trim()}\n`);
+      let rendered = helmTemplate(args).trim();
+      // If a namespace was specified for the chart and the rendered output does not
+      // include a Namespace resource for it, prepend one so apply can create the ns.
+      if (src.namespace && !hasNamespaceDoc(rendered, src.namespace)) {
+        rendered = prependNamespaceDoc(rendered, src.namespace);
+      }
+
+      writeFile(
+        targetFile,
+        `# Source: ${src.repoName}/${src.chart}@${src.version}\n${rendered}\n`
+      );
     }
   }
 
