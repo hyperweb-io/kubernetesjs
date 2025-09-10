@@ -86,10 +86,6 @@ export class ConfigLoader {
       throw new Error('spec.operators must be an array');
     }
     
-    if (!config.spec.networking) {
-      throw new Error('Missing required field: spec.networking');
-    }
-    
     // Validate operators
     config.spec.operators.forEach((operator, index) => {
       if (!operator.name) {
@@ -100,14 +96,14 @@ export class ConfigLoader {
       }
     });
     
-    // Validate networking
-    if (!config.spec.networking.ingressClass) {
-      throw new Error('Missing required field: spec.networking.ingressClass');
-    }
+    // // Validate networking
+    // if (!config.spec.networking.ingressClass) {
+    //   throw new Error('Missing required field: spec.networking.ingressClass');
+    // }
     
-    if (!config.spec.networking.domain) {
-      throw new Error('Missing required field: spec.networking.domain');
-    }
+    // if (!config.spec.networking.domain) {
+    //   throw new Error('Missing required field: spec.networking.domain');
+    // }
   }
 
   /**

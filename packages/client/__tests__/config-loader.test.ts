@@ -64,11 +64,7 @@ describe('ConfigLoader', () => {
           // Missing name
         },
         spec: {
-          operators: [],
-          networking: {
-            ingressClass: 'nginx',
-            domain: 'example.com'
-          }
+          operators: [] as any[],
         }
       };
 

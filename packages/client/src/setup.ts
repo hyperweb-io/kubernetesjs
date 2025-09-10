@@ -1,13 +1,16 @@
 import { InterwebClient as InterwebKubernetesClient } from '@interweb/interwebjs';
-import { ManifestLoader, SUPPORTED_OPERATORS } from '@interweb/manifests';
+import { ManifestLoader, SUPPORTED_OPERATORS, KubernetesResource } from '@interweb/manifests';
 import { ClusterSetupConfig, ApplicationConfig, DeploymentStatus, InterwebClientConfig, OperatorConfig } from './types';
 import axios from 'axios';
+import { applyKubernetesResource, applyKubernetesResources, deleteKubernetesResource, deleteKubernetesResources } from './apply';
 
 export class SetupClient {
   private client: InterwebKubernetesClient;
+  private defaultNamespace: string;
 
-  constructor(client: InterwebKubernetesClient) {
+  constructor(client: InterwebKubernetesClient, defaultNamespace: string = 'default') {
     this.client = client;
+    this.defaultNamespace = defaultNamespace || 'default';
   }
 
   /**
@@ -25,21 +28,36 @@ export class SetupClient {
     }
   }
 
-  public async applyManifest(manifest: any): Promise<void> {
-    const kind = manifest.kind;
-    const apiVersion = manifest.apiVersion;
-    const metadata = manifest.metadata;
-    const spec = manifest.spec;
-    const data = manifest.data;
+  public async applyManifest(manifest: KubernetesResource, options?: { continueOnError?: boolean; log?: (msg: string) => void }): Promise<void> {
+    await applyKubernetesResource(this.client, manifest, {
+      defaultNamespace: this.defaultNamespace,
+      continueOnError: options?.continueOnError ?? true,
+      log: options?.log ?? ((m) => console.log(m)),
+    });
+  }
 
-    switch (kind) {
-      case 'Namespace':
-        await this.client.createCoreV1Namespace({
-          body: manifest,
-          query: {}
-        });
-        break;
-    }
+  public async applyManifests(manifests: KubernetesResource[], options?: { continueOnError?: boolean; log?: (msg: string) => void }): Promise<void> {
+    await applyKubernetesResources(this.client, manifests, {
+      defaultNamespace: this.defaultNamespace,
+      continueOnError: options?.continueOnError ?? true,
+      log: options?.log ?? ((m) => console.log(m)),
+    });
+  }
+
+  public async deleteManifest(manifest: KubernetesResource, options?: { continueOnError?: boolean; log?: (msg: string) => void }): Promise<void> {
+    await deleteKubernetesResource(this.client, manifest, {
+      defaultNamespace: this.defaultNamespace,
+      continueOnError: options?.continueOnError ?? true,
+      log: options?.log ?? ((m) => console.log(m)),
+    });
+  }
+
+  public async deleteManifests(manifests: KubernetesResource[], options?: { continueOnError?: boolean; log?: (msg: string) => void }): Promise<void> {
+    await deleteKubernetesResources(this.client, manifests, {
+      defaultNamespace: this.defaultNamespace,
+      continueOnError: options?.continueOnError ?? true,
+      log: options?.log ?? ((m) => console.log(m)),
+    });
   }
 
   /**
@@ -58,10 +76,48 @@ export class SetupClient {
         console.log(`Skipping disabled operator: ${operator.name}`);
         continue;
       }
-
+      console.log(`Applying operator: ${operator.name} ${operator.version}`);
       const manifests = ManifestLoader.loadOperatorManifests(operator.name, operator.version);
-      for (const manifest of manifests) {
-        await this.applyManifest(manifest);
+      await this.applyManifests(manifests, {
+        continueOnError: false,
+        log: (m) => console.log(m),
+      });
+      console.log(`Operator installed: ${operator.name} ${operator.version}`);
+    }
+  }
+
+  /**
+   * Delete operators based on cluster setup configuration
+   */
+  public async deleteOperators(config: ClusterSetupConfig, options?: { continueOnError?: boolean }): Promise<void> {
+    // check config.spec.operators are in the SUPPORTED_OPERATORS
+    for (const operator of config.spec.operators) {
+      if (!SUPPORTED_OPERATORS.includes(operator.name as any)) {
+        throw new Error(`Unsupported operator: ${operator.name}`);
+      }
+    }
+
+    // Process operators in reverse order for safer deletion
+    const operatorsToDelete = config.spec.operators
+      .filter(op => op.enabled)
+      .reverse();
+
+    for (const operator of operatorsToDelete) {
+      console.log(`Deleting operator: ${operator.name} ${operator.version}`);
+      try {
+        const manifests = ManifestLoader.loadOperatorManifests(operator.name, operator.version);
+        await this.deleteManifests(manifests, {
+          continueOnError: options?.continueOnError ?? true,
+          log: (m) => console.log(m),
+        });
+        console.log(`Operator deleted: ${operator.name} ${operator.version}`);
+      } catch (error) {
+        const errorMsg = `Failed to delete operator ${operator.name}: ${error}`;
+        if (options?.continueOnError ?? true) {
+          console.warn(errorMsg);
+        } else {
+          throw new Error(errorMsg);
+        }
       }
     }
   }

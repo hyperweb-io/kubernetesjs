@@ -1,5 +1,10 @@
 # Source: ingress-nginx/ingress-nginx@4.11.2
 ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-nginx
+---
 # Source: ingress-nginx/templates/controller-serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount

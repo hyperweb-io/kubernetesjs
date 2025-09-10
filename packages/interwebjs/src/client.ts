@@ -211,16 +211,16 @@ export class APIClient {
   ): Promise<Resp> {
     const headers = opts.isFormData
       ? {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        ...opts.headers,
-      }
+          'Content-Type': 'application/x-www-form-urlencoded',
+          ...opts.headers,
+        }
       : {
-        'Content-Type': 'application/json',
-        ...opts.headers,
-      };
+          'Content-Type': 'application/json',
+          ...opts.headers,
+        };
     const bodyContent = opts.isFormData
       ? new URLSearchParams(body as any).toString()
-      : JSON.stringify(body);
+      : body;
 
     return this.request<Resp>({
       path: endpoint,
@@ -228,7 +228,7 @@ export class APIClient {
       // @ts-ignore
       headers,
       timeout: opts.timeout || this.defaultTimeout,
-      params: bodyContent,
+      body: bodyContent,
     });
   }
 
@@ -242,7 +242,6 @@ export class APIClient {
       'Content-Type': 'application/json',
       ...opts.headers,
     };
-    const bodyContent = JSON.stringify(body);
 
     return this.request<Resp>({
       path: endpoint,
@@ -250,7 +249,7 @@ export class APIClient {
       // @ts-ignore
       headers,
       timeout: opts.timeout || this.defaultTimeout,
-      params: bodyContent,
+      body,
     });
   }
 

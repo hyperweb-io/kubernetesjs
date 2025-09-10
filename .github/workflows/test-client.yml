@@ -1,0 +1,180 @@
+name: Test Client Package
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'packages/client/**'
+      - 'packages/interwebjs/**'
+      - 'packages/manifests/**'
+      - '.github/workflows/test-client.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'packages/client/**'
+      - 'packages/interwebjs/**'
+      - 'packages/manifests/**'
+      - '.github/workflows/test-client.yml'
+  workflow_dispatch:
+    inputs:
+      kubeconfig:
+        description: 'Custom kubeconfig (leave empty to use Kind cluster)'
+        required: false
+        default: ''
+      cli-version:
+        description: 'CLI version to test (0.0.0 for local testing)'
+        required: false
+        default: '0.0.0'
+
+jobs:
+  client-small-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: v1.31.3
+
+    - name: Setup Kind cluster
+      if: ${{ inputs.kubeconfig == '' }}
+      uses: helm/kind-action@v1.12.0
+      with:
+        cluster_name: kind
+        kubectl_version: v1.31.3
+        wait: 300s
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 10.12.2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20.x"
+        cache: "pnpm"
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Build packages
+      run: pnpm build
+
+    - name: Verify cluster connection
+      run: |
+        kubectl cluster-info
+        kubectl get nodes
+        kubectl get namespaces
+
+    - name: Start kubectl proxy
+      run: |
+        kubectl proxy --port=8001 --accept-hosts='^.*$' --address='0.0.0.0' &
+        echo "PROXY_PID=$!" >> $GITHUB_ENV
+        # Wait for proxy to be ready
+        sleep 5
+        curl -f http://localhost:8001/api/v1/namespaces || exit 1
+        echo "kubectl proxy is running on port 8001"
+      env:
+        K8S_API: http://127.0.0.1:8001
+
+    - name: Run specific manifest application tests
+      run: |
+        cd packages/client
+        pnpm test -- \
+          __tests__/apply.manifests.test.ts \
+          __tests__/config-loader.test.ts \
+          __tests__/apply.test.ts \
+          __tests__/apply.cert-manager.test.ts \
+          __tests__/apply.ingress-nginx.full.test.ts \
+          --verbose
+      env:
+        K8S_API: http://127.0.0.1:8001
+        NODE_ENV: test
+
+    - name: Check cluster state after tests
+      if: always()
+      run: |
+        echo "=== Namespaces ==="
+        kubectl get namespaces
+        echo "=== Pods in all namespaces ==="
+        kubectl get pods --all-namespaces
+        echo "=== Events ==="
+        kubectl get events --all-namespaces --sort-by='.lastTimestamp' | tail -20
+
+  setup-operators:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: v1.31.3
+
+    - name: Setup Kind cluster
+      if: ${{ inputs.kubeconfig == '' }}
+      uses: helm/kind-action@v1.12.0
+      with:
+        cluster_name: kind
+        kubectl_version: v1.31.3
+        wait: 300s
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 10.12.2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20.x"
+        cache: "pnpm"
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Build packages
+      run: pnpm build
+
+    - name: Verify cluster connection
+      run: |
+        kubectl cluster-info
+        kubectl get nodes
+        kubectl get namespaces
+
+    - name: Start kubectl proxy
+      run: |
+        kubectl proxy --port=8001 --accept-hosts='^.*$' --address='0.0.0.0' &
+        echo "PROXY_PID=$!" >> $GITHUB_ENV
+        # Wait for proxy to be ready
+        sleep 5
+        curl -f http://localhost:8001/api/v1/namespaces || exit 1
+        echo "kubectl proxy is running on port 8001"
+      env:
+        K8S_API: http://127.0.0.1:8001
+
+    - name: Run specific manifest application tests
+      run: |
+        cd packages/client
+        pnpm test -- __tests__/e2e.setup.client.test.ts --verbose
+      env:
+        K8S_API: http://127.0.0.1:8001
+        NODE_ENV: test
+
+    - name: Check cluster state after tests
+      if: always()
+      run: |
+        echo "=== Namespaces ==="
+        kubectl get namespaces
+        echo "=== Pods in all namespaces ==="
+        kubectl get pods --all-namespaces
+        echo "=== Events ==="
+        kubectl get events --all-namespaces --sort-by='.lastTimestamp' | tail -20
