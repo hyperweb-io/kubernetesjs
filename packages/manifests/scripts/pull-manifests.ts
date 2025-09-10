@@ -185,10 +185,12 @@ function prependNamespaceDoc(yamlText: string, namespace: string): string {
     `kind: Namespace`,
     `metadata:`,
     `  name: ${namespace}`,
+    `  labels:`,
+    `    app.kubernetes.io/name: ${namespace}`,
     ``,
   ].join('\n');
   const rest = yamlText.trim();
-  return `${nsDoc}\n---\n${rest}\n`;
+  return `---\n${nsDoc}\n---\n${rest}\n`;
 }
 
 function toValuesArgs(values?: Record<string, any>): string[] {
