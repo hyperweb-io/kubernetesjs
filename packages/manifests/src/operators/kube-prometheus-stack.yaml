@@ -1,3 +1,8 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
 # Source: prometheus-community/kube-prometheus-stack@77.5.0
 ---
 # Source: kube-prometheus-stack/charts/grafana/templates/serviceaccount.yaml

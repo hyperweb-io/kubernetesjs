@@ -12,16 +12,16 @@ jest.setTimeout(60_000);
 
 const K8S_API = process.env.K8S_API || 'http://127.0.0.1:8001';
 
-describe('SetupClient: basic flow with simple config', () => {
+describe('SetupClient: basic flow with config', () => {
   const api = new InterwebKubernetesClient({ restEndpoint: K8S_API } as any);
   const setup = new SetupClient(api as any);
 
-  const cfgPath = path.join(__dirname, '..', '__fixtures__', 'config', 'setup.simple.yaml');
+  const cfgPath = path.join(__dirname, '..', '__fixtures__', 'config', 'setup.config.yaml');
   let cfg: ClusterSetupConfig;
 
   it('loads config and connects to cluster', async () => {
     cfg = ConfigLoader.loadClusterSetup(cfgPath);
-    expect(cfg?.metadata?.name).toBe('e2e-simple');
+    expect(cfg?.metadata?.name).toBe('dev-cluster');
 
     const ok = await setup.checkConnection();
     expect(typeof ok).toBe('boolean');
@@ -32,7 +32,7 @@ describe('SetupClient: basic flow with simple config', () => {
     }
   });
 
-  it('runs installOperators on simple config (no operators)', async () => {
+  it('runs installOperators on config', async () => {
     if (!cfg) return;
     await setup.installOperators(cfg);
     const status = await setup.getClusterSetupStatus(cfg);

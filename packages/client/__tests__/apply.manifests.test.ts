@@ -44,13 +44,88 @@ describe('apply: manifests from @interweb/manifests', () => {
     const nsDoc = docs.find((d) => d && d.kind === 'Namespace');
     expect(nsDoc).toBeTruthy();
 
-    await setup.applyManifest(nsDoc as any);
+    // Apply with strict error handling - should throw on any error
+    await setup.applyManifest(nsDoc as any, { 
+      continueOnError: false,
+      log: (msg) => console.log(`[APPLY] ${msg}`)
+    });
 
     // Verify the namespace now exists
     const got = await api.readCoreV1Namespace({ path: { name: nsName }, query: {} as any });
     expect(got?.metadata?.name).toBe(nsName);
 
-    // Re-apply to exercise idempotent update path
-    await setup.applyManifest(nsDoc as any);
+    // Re-apply to exercise idempotent update path - should also succeed
+    await setup.applyManifest(nsDoc as any, { 
+      continueOnError: false,
+      log: (msg) => console.log(`[REAPPLY] ${msg}`)
+    });
+  });
+
+  it('should fail when applying invalid manifest with continueOnError=false', async () => {
+    const connected = await setup.checkConnection();
+    if (!connected) {
+      console.warn('Kubernetes cluster not reachable; skipping test.');
+      return;
+    }
+
+    // Create an invalid manifest (missing required namespace)
+    const invalidManifest = {
+      apiVersion: 'v1',
+      kind: 'Service',
+      metadata: {
+        name: 'invalid-service',
+        namespace: 'non-existent-namespace-12345' // This namespace doesn't exist
+      },
+      spec: {
+        ports: [{ port: 80 }],
+        selector: { app: 'test' }
+      }
+    };
+
+    // Should throw an error with continueOnError=false
+    await expect(
+      setup.applyManifest(invalidManifest as any, { 
+        continueOnError: false,
+        log: (msg) => console.log(`[ERROR_TEST] ${msg}`)
+      })
+    ).rejects.toThrow();
+  });
+
+  it('should not fail when applying invalid manifest with continueOnError=true', async () => {
+    const connected = await setup.checkConnection();
+    if (!connected) {
+      console.warn('Kubernetes cluster not reachable; skipping test.');
+      return;
+    }
+
+    // Create an invalid manifest (missing required namespace)
+    const invalidManifest = {
+      apiVersion: 'v1',
+      kind: 'Service',
+      metadata: {
+        name: 'invalid-service-2',
+        namespace: 'non-existent-namespace-67890' // This namespace doesn't exist
+      },
+      spec: {
+        ports: [{ port: 80 }],
+        selector: { app: 'test' }
+      }
+    };
+
+    const logs: string[] = [];
+
+    // Should NOT throw an error with continueOnError=true (default)
+    await expect(
+      setup.applyManifest(invalidManifest as any, { 
+        continueOnError: true,
+        log: (msg) => {
+          console.log(`[TOLERANT_TEST] ${msg}`);
+          logs.push(msg);
+        }
+      })
+    ).resolves.not.toThrow();
+
+    // But should have logged an error
+    expect(logs.some(log => log.includes('Error creating') || log.includes('Apply error'))).toBe(true);
   });
 });

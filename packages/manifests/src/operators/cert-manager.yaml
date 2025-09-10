@@ -1,3 +1,10 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app.kubernetes.io/name: cloudnative-pg
+  name: cert-manager
 # Source: jetstack/cert-manager@v1.17.0
 ---
 # Source: cert-manager/templates/cainjector-serviceaccount.yaml

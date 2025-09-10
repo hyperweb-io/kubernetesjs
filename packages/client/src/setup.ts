@@ -2,7 +2,7 @@ import { InterwebClient as InterwebKubernetesClient } from '@interweb/interwebjs
 import { ManifestLoader, SUPPORTED_OPERATORS, KubernetesResource } from '@interweb/manifests';
 import { ClusterSetupConfig, ApplicationConfig, DeploymentStatus, InterwebClientConfig, OperatorConfig } from './types';
 import axios from 'axios';
-import { applyKubernetesResource, applyKubernetesResources } from './k8s-apply';
+import { applyKubernetesResource, applyKubernetesResources } from './apply';
 
 export class SetupClient {
   private client: InterwebKubernetesClient;
@@ -28,19 +28,19 @@ export class SetupClient {
     }
   }
 
-  public async applyManifest(manifest: KubernetesResource): Promise<void> {
+  public async applyManifest(manifest: KubernetesResource, options?: { continueOnError?: boolean; log?: (msg: string) => void }): Promise<void> {
     await applyKubernetesResource(this.client, manifest, {
       defaultNamespace: this.defaultNamespace,
-      continueOnError: true,
-      log: (m) => console.log(m),
+      continueOnError: options?.continueOnError ?? true,
+      log: options?.log ?? ((m) => console.log(m)),
     });
   }
 
-  public async applyManifests(manifests: KubernetesResource[]): Promise<void> {
+  public async applyManifests(manifests: KubernetesResource[], options?: { continueOnError?: boolean; log?: (msg: string) => void }): Promise<void> {
     await applyKubernetesResources(this.client, manifests, {
       defaultNamespace: this.defaultNamespace,
-      continueOnError: true,
-      log: (m) => console.log(m),
+      continueOnError: options?.continueOnError ?? true,
+      log: options?.log ?? ((m) => console.log(m)),
     });
   }
 
@@ -60,9 +60,13 @@ export class SetupClient {
         console.log(`Skipping disabled operator: ${operator.name}`);
         continue;
       }
-
+      console.log(`Applying operator: ${operator.name} ${operator.version}`);
       const manifests = ManifestLoader.loadOperatorManifests(operator.name, operator.version);
-      await this.applyManifests(manifests);
+      await this.applyManifests(manifests, {
+        continueOnError: false,
+        log: (m) => console.log(m),
+      });
+      console.log(`Operator installed: ${operator.name} ${operator.version}`);
     }
   }
 

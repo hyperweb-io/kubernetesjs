@@ -192,7 +192,7 @@ export class K8sApplier {
     const cached = this.discovery.get(gv.key);
     if (cached) return cached;
     const path = gv.group ? `/apis/${gv.group}/${gv.version}` : `/api/${gv.version}`;
-    const list = await this.client.get<APIResourceList>(path);
+    const list = await this.client.get(path) as APIResourceList;
     this.discovery.set(gv.key, list);
     return list;
   }
