@@ -1,79 +1,66 @@
-# interweb
+# Interweb
 
-Modern pnpm workspace with tsc-only builds, Jest tests, and Lerna for interdependent publishing.
+<p align="left" width="100%">
+  <a href="https://github.com/hyperweb-io/interweb/actions/workflows/test-client.yml"><img height="20" src="https://github.com/hyperweb-io/interweb/actions/workflows/test-client.yml/badge.svg" alt="Client Tests" /></a>
+  <a href="https://github.com/hyperweb-io/interweb/actions/workflows/client-e2e.yml"><img height="20" src="https://github.com/hyperweb-io/interweb/actions/workflows/client-e2e.yml/badge.svg" alt="Client E2E" /></a>
+</p>
 
-Packages
-- @pagebond/my-first
-- @pagebond/my-second (depends on @pagebond/my-first)
-- @pagebond/my-third (directory: packages/my-thid; depends on @pagebond/my-first and @pagebond/my-second)
+Interweb is a TypeScript toolkit for programmatic Kubernetes operations. It ships a curated set of operator manifests, a generated Kubernetes API client, and a high‑level client that applies manifests with kube‑native semantics (create/replace), CRD awareness, and sensible ordering.
 
-Prerequisites
-- pnpm installed (see "packageManager" in root package.json)
+Use Interweb to install core platform operators (ingress-nginx, cert-manager, Knative Serving, CloudNativePG, kube‑prometheus‑stack) and to manage app resources without shelling out to kubectl/helm.
 
-Install
-- pnpm install
+## Packages
+- @interweb/interwebjs: Generated, fetch‑based Kubernetes REST client (CJS + ESM)
+- @interweb/client: High‑level SetupClient with CRD‑aware apply/delete, status helpers
+- @interweb/manifests: Versioned YAML bundles for supported operators (with CRDs)
+- @interweb/cli: Thin CLI wrapper around the client (optional)
 
-Build, Test, Clean, Lint
-- Build all: pnpm -r build
-- Test all: pnpm -r test
-- Clean all: pnpm -r clean
-- Lint: pnpm eslint .
+## Quick Start (dev)
+- Prereqs: Node 20+, pnpm, a Kubernetes cluster (Kind/Docker Desktop), kubectl
+- Install: `pnpm install`
+- Build all: `pnpm -r build`
+- Start API proxy (in another shell): `kubectl proxy --port=8001 --accept-hosts='^.*$' --address='0.0.0.0'`
 
-Internal Dependencies (workspace protocol)
-- Use workspace:^ in package.json:
-  - "dependencies": { "@pagebond/my-first": "workspace:^" }
-- Behavior:
-  - During development, pnpm links internal packages locally.
-  - On publish, real semver versions are written and packages are published in topological order by Lerna.
+Apply an operator in code (example):
 
-Lerna Publishing Workflow
-We use Lerna for interdependent publishing; pnpm -r is used for build/test/lint.
+```ts
+import { InterwebClient as K8s } from '@interweb/interwebjs';
+import { SetupClient } from '@interweb/client/src/setup';
+import { ManifestLoader } from '@interweb/manifests';
 
-1) Ensure builds and tests pass
-- pnpm install
-- pnpm -r build
-- pnpm -r test
+const api = new K8s({ restEndpoint: 'http://127.0.0.1:8001' } as any);
+const setup = new SetupClient(api);
 
-2) Version packages with changes
-- Independent versioning (recommended):
-  - lerna version
-- Fixed versioning (single version across repo):
-  - lerna version --conventional-commits
-- Useful dry-run flags:
-  - lerna version --no-git-tag-version --no-push
-Notes:
-- Lerna detects changed packages and bumps versions.
-- Internal workspace:^ ranges are updated automatically.
-- Without dry-run flags, commits and tags are created.
+const manifests = ManifestLoader.loadOperatorManifests('ingress-nginx');
+await setup.applyManifests(manifests);
+```
 
-3) Publish changed packages
-- After versioning/tags:
-  - lerna publish from-package
-- Dry run:
-  - lerna publish from-package --dry-run
-- Canary/pre-release (optional):
-  - lerna publish prerelease --dist-tag next
+## Testing
+- Unit tests: `pnpm -r test`
+- E2E (per‑operator, requires cluster + proxy):
+  - `cd packages/client`
+  - `OPERATOR=ingress-nginx K8S_API=http://127.0.0.1:8001 pnpm test -- __tests__/e2e.setup.operator.test.ts`
 
-Types and Build Outputs
-- Builds are tsc-only (CJS/ESM as configured per package) and output to dist/
-- .d.ts are emitted to dist/ and package.json "main"/"types" point to dist
-- Build scripts copy LICENSE/README/package.json via cpy
+CI runs two workflows:
+- Test Client Package: small smoke tests + targeted applies
+- Client E2E (Per Operator): matrix job, one operator per Kind cluster
 
-Troubleshooting
-- ESLint linting dist:
-  - Flat config ignores **/dist/** and **/node_modules/** at the top level
-- Interdependent publishing:
-  - Ensure internal deps use workspace:^
-  - Run lerna version before lerna publish from-package
-  - Configure publishConfig/access per package if publishing public packages
-- Dependency warnings:
-  - Deprecated glob versions are overridden to glob@11 via pnpm.overrides at root
+## Manifests Maintenance
+- Update all bundles: `pnpm -w @interweb/manifests run pull:all`
+- Notes:
+  - Helm charts are rendered with `--include-crds` and a large buffer; a Namespace doc is auto‑prepended if a chart doesn’t ship one.
+  - URL‑sourced bundles (e.g., Knative Serving) are combined without reformatting and de‑duplicated by (apiVersion, kind, name, namespace) to avoid duplicate CRDs.
 
-Common Commands
-- Install: pnpm install
-- Build all: pnpm -r build
-- Test all: pnpm -r test
-- Clean all: pnpm -r clean
-- Lint: pnpm eslint .
-- Lerna dry-run version: lerna version --no-git-tag-version --no-push
-- Lerna dry-run publish: lerna publish from-package --dry-run
+## Apply Engine Highlights
+- Create/replace semantics (idempotent)
+- Phased ordering: CRDs → Namespaces → built‑in kinds → webhooks ready → custom kinds
+- Waits for CRDs to be Established and for webhook Services to have endpoints
+- Tolerates 409 conflicts on CRDs (install‑only behavior)
+
+## Local Tips
+- Verify proxy: `curl http://127.0.0.1:8001/api`
+- Inspect a bundle: `less packages/manifests/src/operators/ingress-nginx.yaml`
+- Apply just Namespaces/CRDs first if debugging timing on new clusters
+
+## License
+MIT © Hyperweb
