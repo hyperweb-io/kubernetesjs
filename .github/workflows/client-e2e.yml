@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  e2e-per-operator:
+  e2e-operators:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     strategy:
