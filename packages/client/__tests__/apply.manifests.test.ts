@@ -163,11 +163,30 @@ describe('apply: manifests from @interweb/manifests', () => {
       log: (msg) => console.log(`[DELETE] ${msg}`)
     });
 
-    // Verify it's deleted (should throw 404)
-    await expect(
-      api.readCoreV1Namespace({ path: { name: testNsName }, query: {} as any })
-    ).rejects.toThrow();
+    // Verify it's fully deleted: namespace deletion is async, so wait until GET returns 404
+    await waitForNamespaceGone(api, testNsName, 60_000);
   });
+
+  async function waitForNamespaceGone(client: any, name: string, timeoutMs = 60_000) {
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      try {
+        const ns = await client.readCoreV1Namespace({ path: { name }, query: {} as any });
+        const phase = (ns as any)?.status?.phase;
+        if (phase === 'Terminating') {
+          await new Promise((r) => setTimeout(r, 1500));
+          continue;
+        }
+        // If it exists and isn't terminating, wait a bit and retry
+      } catch (err: any) {
+        const msg = String(err?.message || '');
+        if (/status:\s*404/.test(msg)) return; // gone
+        throw err;
+      }
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    throw new Error(`Timeout waiting for namespace ${name} to be deleted`);
+  }
 
   it('should handle deleting non-existent resources gracefully', async () => {
     const connected = await setup.checkConnection();

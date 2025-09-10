@@ -24,4 +24,4 @@ spec:
     - name: kube-prometheus-stack
       namespace: monitoring
       version: 77.5.0
-      enabled: true
+      enabled: false
