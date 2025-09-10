@@ -77,6 +77,8 @@ if kind get clusters | grep -q "^${CLUSTER_NAME}$"; then
     log "Using existing Kind cluster: $CLUSTER_NAME"
 else
     log "Creating Kind cluster: $CLUSTER_NAME"
+    # Use --image flag to specify Kubernetes version if needed
+    # kind create cluster --name "$CLUSTER_NAME" --image kindest/node:v1.31.3 --wait 300s
     kind create cluster --name "$CLUSTER_NAME" --wait 300s
 fi
 
