@@ -61,4 +61,30 @@ export function Sidebar() {
                         )}
                       >
                         <item.icon
-                          className={cn(\n                            'h-6 w-6 shrink-0',\n                            isActive ? 'text-primary' : 'text-gray-400 group-hover:text-primary'\n                          )}\n                          aria-hidden=\"true\"\n                        />\n                        {item.name}\n                      </Link>\n                    </li>\n                  );\n                })}\n              </ul>\n            </li>\n\n            {/* Footer */}\n            <li className=\"mt-auto\">\n              <div className=\"rounded-md bg-gray-50 p-3\">\n                <div className=\"text-xs text-gray-500 mb-1\">Cluster Context</div>\n                <div className=\"text-sm font-medium text-gray-900\">kubectl current-context</div>\n              </div>\n            </li>\n          </ul>\n        </nav>\n      </div>\n    </div>\n  );\n}"]}]
+                          className={cn(
+                            'h-6 w-6 shrink-0',
+                            isActive ? 'text-primary' : 'text-gray-400 group-hover:text-primary'
+                          )}
+                          aria-hidden="true"
+                        />
+                        {item.name}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </li>
+
+            {/* Footer */}
+            <li className="mt-auto">
+              <div className="rounded-md bg-gray-50 p-3">
+                <div className="text-xs text-gray-500 mb-1">Cluster Context</div>
+                <div className="text-sm font-medium text-gray-900">kubectl current-context</div>
+              </div>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  );
+}

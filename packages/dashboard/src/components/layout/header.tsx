@@ -3,6 +3,7 @@
 import { Menu, RefreshCw, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useClusterStatus } from '@/hooks/use-cluster-status';
+import { cn } from '@/lib/utils';
 
 export function Header() {
   const { data: cluster, isLoading, refetch } = useClusterStatus();

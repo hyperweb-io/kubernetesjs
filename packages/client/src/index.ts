@@ -7,3 +7,4 @@ export * from './client';
 export { Client } from './client';
 export { ConfigLoader } from './config-loader';
 export { SetupClient } from './setup';
+export { applyKubernetesResource, applyKubernetesResources, deleteKubernetesResource, deleteKubernetesResources } from './apply';
