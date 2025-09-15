@@ -21,6 +21,8 @@ export interface PostgresDeployOptions {
   poolerName?: string;
   poolerInstances?: number;
   poolMode?: PostgresPoolMode; // defaults to 'transaction'
+  // Operator webhook namespace (where cnpg-webhook-service lives)
+  operatorNamespace?: string; // defaults to 'cnpg-system'
   // Logging/diagnostics
   log?: (msg: string) => void;
 }
@@ -270,6 +272,11 @@ export class PostgresDeployer {
     const ns = opts.namespace;
     const clusterName = opts.name;
 
+    // Ensure CNPG admission webhooks are fully ready before creating CRs
+    await this.waitForCnpgWebhooksReady(options.operatorNamespace || 'cnpg-system', 180_000).catch((e) => {
+      this.log(`Warning: CNPG webhooks not confirmed ready: ${String(e)}`);
+    });
+
     const resources: KubernetesResource[] = [
       buildNamespace(ns),
       ...buildSecrets(ns, opts.superuserUsername, opts.superuserPassword, opts.appUsername, opts.appPassword),
@@ -345,6 +352,101 @@ export class PostgresDeployer {
       await new Promise((r) => setTimeout(r, pollMs));
     }
     throw new Error(`Timeout waiting for Pooler ${name} in ${namespace} to be ready`);
+  }
+
+  private async waitForCnpgWebhooksReady(namespace: string, timeoutMs = 480_000, pollMs = 3_000) {
+    const start = Date.now();
+    this.log(`Waiting for CNPG webhook service and CA bundle in namespace ${namespace}...`);
+    // 0) Operator deployment available
+    while (Date.now() - start < timeoutMs) {
+      try {
+        const dep: any = await this.kube.readAppsV1NamespacedDeployment({ path: { namespace, name: 'cnpg-controller-manager' } } as any);
+        const av = dep?.status?.availableReplicas || 0;
+        const desired = dep?.spec?.replicas || 0;
+        if (av >= 1) {
+          break;
+        }
+        this.log(`... cnpg-controller-manager availableReplicas ${av}/${desired}`);
+      } catch {}
+      await new Promise((r) => setTimeout(r, pollMs));
+    }
+
+    // 1) Webhook cert secret present (created by operator)
+    while (Date.now() - start < timeoutMs) {
+      try {
+        const sec: any = await this.kube.readCoreV1NamespacedSecret({ path: { namespace, name: 'cnpg-webhook-cert' } } as any);
+        const hasCrt = !!sec?.data?.['tls.crt'];
+        const hasKey = !!sec?.data?.['tls.key'];
+        if (hasCrt && hasKey) break;
+      } catch {}
+      await new Promise((r) => setTimeout(r, pollMs));
+    }
+
+    // 2) Service endpoints present
+    while (Date.now() - start < timeoutMs) {
+      try {
+        const ep = await this.kube.readCoreV1NamespacedEndpoints({ path: { namespace, name: 'cnpg-webhook-service' } } as any);
+        const subsets = (ep as any)?.subsets;
+        if (Array.isArray(subsets) && subsets.some(s => Array.isArray(s.addresses) && s.addresses.length > 0)) {
+          break;
+        }
+      } catch {}
+      await new Promise(r => setTimeout(r, pollMs));
+    }
+
+    // 3) CA bundle injected into webhook configurations
+    const mwcPath = `/apis/admissionregistration.k8s.io/v1/mutatingwebhookconfigurations/cnpg-mutating-webhook-configuration`;
+    const vwcPath = `/apis/admissionregistration.k8s.io/v1/validatingwebhookconfigurations/cnpg-validating-webhook-configuration`;
+    while (Date.now() - start < timeoutMs) {
+      try {
+        const [mwc, vwc]: any[] = await Promise.all([
+          this.kube.get(mwcPath).catch((): any => null),
+          this.kube.get(vwcPath).catch((): any => null),
+        ]);
+        const mwcReady = Array.isArray(mwc?.webhooks) && mwc.webhooks.length > 0 && mwc.webhooks.every((w: any) => Boolean(w?.clientConfig?.caBundle));
+        const vwcReady = Array.isArray(vwc?.webhooks) && vwc.webhooks.length > 0 && vwc.webhooks.every((w: any) => Boolean(w?.clientConfig?.caBundle));
+        if (mwcReady && vwcReady) {
+          this.log(`✓ CNPG webhooks report CA bundle injected.`);
+          return;
+        }
+      } catch {}
+      await new Promise(r => setTimeout(r, pollMs));
+    }
+    // Fallback: try to inject caBundle from the webhook secret (for CI flakiness)
+    try {
+      const sec: any = await this.kube.readCoreV1NamespacedSecret({ path: { namespace, name: 'cnpg-webhook-cert' } } as any);
+      const ca = (sec?.data?.['ca.crt'] || sec?.data?.['tls.crt']) as string | undefined;
+      if (ca) {
+        await this.injectCaBundleIntoWebhooks(ca);
+        this.log('✓ Injected CNPG webhook caBundle from secret.');
+        return; // consider ready after manual injection
+      }
+    } catch {}
+
+    throw new Error(`Timeout waiting for CNPG webhook CA bundle injection`);
+  }
+
+  private async injectCaBundleIntoWebhooks(caBundleB64: string): Promise<void> {
+    const mwcPath = `/apis/admissionregistration.k8s.io/v1/mutatingwebhookconfigurations/cnpg-mutating-webhook-configuration`;
+    const vwcPath = `/apis/admissionregistration.k8s.io/v1/validatingwebhookconfigurations/cnpg-validating-webhook-configuration`;
+    const [mwc, vwc]: any[] = await Promise.all([
+      this.kube.get(mwcPath).catch((): any => null),
+      this.kube.get(vwcPath).catch((): any => null),
+    ]);
+    if (mwc?.webhooks) {
+      mwc.webhooks = mwc.webhooks.map((w: any) => ({
+        ...w,
+        clientConfig: { ...(w.clientConfig || {}), caBundle: caBundleB64 },
+      }));
+      await this.kube.put(mwcPath, undefined, mwc as any);
+    }
+    if (vwc?.webhooks) {
+      vwc.webhooks = vwc.webhooks.map((w: any) => ({
+        ...w,
+        clientConfig: { ...(w.clientConfig || {}), caBundle: caBundleB64 },
+      }));
+      await this.kube.put(vwcPath, undefined, vwc as any);
+    }
   }
 }
 
