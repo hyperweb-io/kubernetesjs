@@ -143,11 +143,13 @@ export class APIClient {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout || this.defaultTimeout);
 
-    const fetchOptions: RequestInit = {
+    const fetchOptions: RequestInit & { next?: { revalidate?: number } } = {
       method,
       headers,
       signal: controller.signal,
       body: method !== 'GET' && method !== 'DELETE' ? JSON.stringify(body) : null,
+      cache: 'no-store',
+      next: { revalidate: 0 },
     };
 
     try {
