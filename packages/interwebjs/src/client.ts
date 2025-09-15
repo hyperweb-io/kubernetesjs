@@ -149,7 +149,7 @@ export class APIClient {
       signal: controller.signal,
       body: method !== 'GET' && method !== 'DELETE' ? JSON.stringify(body) : null,
       cache: 'no-store',
-      next: { revalidate: 0 },
+      //next: { revalidate: 0 },
     };
 
     try {

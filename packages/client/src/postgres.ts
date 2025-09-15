@@ -3,6 +3,7 @@ import { KubernetesResource } from '@interweb/manifests';
 import { SetupClient } from './setup';
 
 export type PostgresPoolMode = 'session' | 'transaction' | 'statement';
+export type BackupMethod = 'barmanObjectStore' | 'volumeSnapshot' | 'plugin';
 
 export interface PostgresDeployOptions {
   name?: string; // Cluster name
@@ -352,6 +353,27 @@ export class PostgresDeployer {
       await new Promise((r) => setTimeout(r, pollMs));
     }
     throw new Error(`Timeout waiting for Pooler ${name} in ${namespace} to be ready`);
+  }
+
+  /**
+   * Create an on-demand Backup CR for a cluster.
+   * If 'method' is omitted, CNPG uses the Cluster's backup config; otherwise it can be forced.
+   */
+  async createBackup(opts: { namespace: string; clusterName: string; method?: BackupMethod; name?: string }) {
+    const ns = opts.namespace; const clusterName = opts.clusterName;
+    const name = opts.name || `${clusterName}-backup-${Date.now()}`;
+    const cr: KubernetesResource = {
+      apiVersion: 'postgresql.cnpg.io/v1',
+      kind: 'Backup',
+      metadata: { name, namespace: ns },
+      spec: { cluster: { name: clusterName }, ...(opts.method ? { method: opts.method } : {}) } as any,
+    } as any;
+    await this.kube.createPostgresqlCnpgIoV1NamespacedBackup({
+      path: { namespace: ns },
+      query: {} as any,
+      body: cr as any,
+    });
+    return { name, namespace: ns };
   }
 
   private async waitForCnpgWebhooksReady(namespace: string, timeoutMs = 480_000, pollMs = 3_000) {
