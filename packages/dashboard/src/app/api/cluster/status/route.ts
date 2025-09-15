@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
-import { dashboardClient } from '@/lib/interweb-client';
+export const dynamic = 'force-dynamic';
+import { createSetupClient } from '@/lib/k8s';
 
 export async function GET() {
   try {
-    const status = await dashboardClient.getClusterStatus();
-    return NextResponse.json(status);
+    const setup = createSetupClient();
+    const status = await setup.getClusterOverview();
+    return NextResponse.json(status, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     console.error('Failed to fetch cluster status:', error);
     

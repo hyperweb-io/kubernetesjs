@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { OperatorInfo } from '@/lib/interweb-client';
+import type { OperatorInfo } from '@interweb/client';
 
 export function useOperators() {
   return useQuery<OperatorInfo[]>({
@@ -11,8 +11,8 @@ export function useOperators() {
       }
       return response.json();
     },
-    refetchInterval: 30000, // Refetch every 30 seconds
-    staleTime: 10000, // Consider data stale after 10 seconds
+    refetchInterval: 20000,
+    staleTime: 0, // Always consider stale so invalidation refetches immediately
   });
 }
 
@@ -21,7 +21,7 @@ export function useOperatorMutation() {
 
   const installOperator = useMutation({
     mutationFn: async (operatorName: string) => {
-      const response = await fetch(`/api/operators/${operatorName}/install`, {
+      const response = await fetch(`/api/operators/${operatorName}/install?wait=true&timeoutMs=240000`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
@@ -34,14 +34,13 @@ export function useOperatorMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['operators'] });
       queryClient.invalidateQueries({ queryKey: ['cluster-status'] });
+      queryClient.refetchQueries({ queryKey: ['operators'], type: 'active' });
     },
   });
 
   const uninstallOperator = useMutation({
     mutationFn: async (operatorName: string) => {
-      const response = await fetch(`/api/operators/${operatorName}/install`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(`/api/operators/${operatorName}/install?wait=true&timeoutMs=240000`, { method: 'DELETE' });
       if (!response.ok) {
         throw new Error('Failed to uninstall operator');
       }
@@ -50,6 +49,7 @@ export function useOperatorMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['operators'] });
       queryClient.invalidateQueries({ queryKey: ['cluster-status'] });
+      queryClient.refetchQueries({ queryKey: ['operators'], type: 'active' });
     },
   });
 

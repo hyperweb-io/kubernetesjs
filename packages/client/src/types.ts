@@ -121,3 +121,43 @@ export interface InterwebClientConfig {
   context?: string;
   restEndpoint?: string; // For kubernetesjs REST endpoint
 }
+
+// Dashboard-friendly types for reuse
+export type OperatorInstallStatus = 'installed' | 'not-installed' | 'installing' | 'error';
+
+export interface OperatorInfo {
+  name: string;
+  displayName: string;
+  description: string;
+  docsUrl?: string;
+  version: string;
+  status: OperatorInstallStatus;
+  namespace?: string;
+  installations?: Array<{
+    namespace: string;
+    status: OperatorInstallStatus;
+    version: string;
+  }>;
+}
+
+export interface ClusterOverview {
+  healthy: boolean;
+  nodeCount: number;
+  podCount: number;
+  serviceCount: number;
+  operatorCount: number;
+  version: string;
+  nodes: Array<{
+    name: string;
+    status: string;
+    version: string;
+    roles: string[];
+  }>;
+}
+
+export interface SecretConfig {
+  name: string;
+  namespace: string;
+  type: 'Opaque' | 'kubernetes.io/dockerconfigjson' | 'kubernetes.io/tls';
+  data: Record<string, string>;
+}

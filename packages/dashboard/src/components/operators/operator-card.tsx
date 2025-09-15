@@ -9,7 +9,7 @@ import { StatusIndicator } from '@/components/ui/status-indicator';
 import { useOperatorMutation } from '@/hooks/use-operators';
 import { Settings, ExternalLink, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { OperatorInfo } from '@/lib/interweb-client';
+import type { OperatorInfo } from '@interweb/client';
 
 interface OperatorCardProps {
   operator: OperatorInfo;
@@ -45,7 +45,8 @@ export function OperatorCard({ operator, compact = false }: OperatorCardProps) {
     }
   };
 
-  const isInstalled = operator.status === 'installed';
+  // Treat installing as 'on' to reflect intent immediately
+  const isInstalled = operator.status !== 'not-installed';
   const isInstalling = operator.status === 'installing' || isToggling;
   const hasError = operator.status === 'error';
 

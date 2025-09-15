@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import type { ClusterStatus } from '@/lib/interweb-client';
+import type { ClusterOverview } from '@interweb/client';
 
 export function useClusterStatus() {
-  return useQuery<ClusterStatus>({
+  return useQuery<ClusterOverview>({
     queryKey: ['cluster-status'],
     queryFn: async () => {
       const response = await fetch('/api/cluster/status');
