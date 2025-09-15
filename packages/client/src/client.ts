@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import { InterwebClient as InterwebKubernetesClient } from '@interweb/interwebjs';
 import { ConfigLoader } from './config-loader';
 import { SetupClient } from './setup';
+import { PostgresDeployer, PostgresDeployOptions, DeployResult, connectionInfo } from './postgres';
 import {
   ClusterSetupConfig,
   ApplicationConfig,
@@ -22,6 +23,7 @@ export class Client {
   private setupClient: SetupClient;
   private ctx: InterwebContext;
   private kubeClient: InterwebKubernetesClient;
+  private pg?: PostgresDeployer;
   
   constructor(ctx: InterwebContext = {}) {
     this.ctx = ctx;
@@ -32,6 +34,7 @@ export class Client {
       restEndpoint: ctx.restEndpoint
     });
     this.setupClient = new SetupClient(this.kubeClient, ctx.namespace || 'default');
+    this.pg = new PostgresDeployer(this.kubeClient, this.setupClient, (m) => this.log(m));
   }
 
   /**
@@ -60,6 +63,22 @@ export class Client {
       this.log(`✗ Cluster setup failed: ${error}`);
       throw error;
     }
+  }
+
+  /**
+   * Deploy a PostgreSQL database using CloudNativePG (operator must be installed).
+   * Returns connection endpoints once ready.
+   */
+  async deployPostgres(options: PostgresDeployOptions = {}): Promise<DeployResult> {
+    if (!this.pg) {
+      this.pg = new PostgresDeployer(this.kubeClient, this.setupClient, (m) => this.log(m));
+    }
+    const res = await this.pg.deploy(options);
+    const info = connectionInfo(res, options.appUsername ?? 'appuser', options.appPassword ?? 'appuser123!');
+    this.log('PostgreSQL connection info:');
+    this.log(`  Direct: ${info.direct.url}`);
+    if (info.pooled?.url) this.log(`  Pooled: ${info.pooled.url}`);
+    return res;
   }
 
   /**
