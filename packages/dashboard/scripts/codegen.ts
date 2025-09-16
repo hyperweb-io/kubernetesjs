@@ -18,12 +18,12 @@ const openApiOptions = {
   ...options,
   npmApiClient: './client',
   operationNamingStrategy: {
-    aliases: {
-      listCoreV1PodForAllNamespaces: 'getPods',
-    },
-    renameMap: {
-      listCoreV1PodForAllNamespaces: 'listPods',
-    },
+    // aliases: {
+    //   listCoreV1PodForAllNamespaces: 'getPods',
+    // },
+    // renameMap: {
+    //   listCoreV1PodForAllNamespaces: 'listPods',
+    // },
   },
   paths: {
     exclude: ['*flowschema*', '*v1beta1*', '*v2beta1*'],

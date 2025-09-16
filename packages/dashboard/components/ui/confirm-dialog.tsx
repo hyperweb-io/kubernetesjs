@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,20 +8,20 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 export interface ConfirmDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  title?: string
-  description?: string
-  confirmText?: string
-  cancelText?: string
-  confirmVariant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
-  onConfirm?: () => void | Promise<void>
-  onCancel?: () => void
-  loading?: boolean
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title?: string;
+  description?: string;
+  confirmText?: string;
+  cancelText?: string;
+  confirmVariant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  onConfirm?: () => void | Promise<void>;
+  onCancel?: () => void;
+  loading?: boolean;
 }
 
 export function ConfirmDialog({
@@ -36,68 +36,58 @@ export function ConfirmDialog({
   onCancel,
   loading = false,
 }: ConfirmDialogProps) {
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const handleConfirm = async () => {
     if (onConfirm) {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
-        await onConfirm()
-        onOpenChange(false)
+        await onConfirm();
+        onOpenChange(false);
       } catch (error) {
-        console.error('Confirm action failed:', error)
+        console.error('Confirm action failed:', error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     } else {
-      onOpenChange(false)
+      onOpenChange(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    onCancel?.()
-    onOpenChange(false)
-  }
+    onCancel?.();
+    onOpenChange(false);
+  };
 
   // Handle Enter key for confirmation
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (open && event.key === 'Enter' && !event.defaultPrevented) {
-        event.preventDefault()
-        handleConfirm()
+        event.preventDefault();
+        handleConfirm();
       }
-    }
+    };
 
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [open, onConfirm])
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onConfirm]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          {description && (
-            <DialogDescription>{description}</DialogDescription>
-          )}
+          {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={handleCancel}
-            disabled={loading || isLoading}
-          >
+          <Button variant="outline" onClick={handleCancel} disabled={loading || isLoading}>
             {cancelText}
           </Button>
-          <Button
-            variant={confirmVariant}
-            onClick={handleConfirm}
-            disabled={loading || isLoading}
-          >
+          <Button variant={confirmVariant} onClick={handleConfirm} disabled={loading || isLoading}>
             {loading || isLoading ? 'Loading...' : confirmText}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

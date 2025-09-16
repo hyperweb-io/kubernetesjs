@@ -4018,6 +4018,8 @@ export function useCreateAppsV1NamespacedDeployment() {
     }
   });
 }
+
+
 export function useDeleteAppsV1CollectionNamespacedDeployment() {
   const client = useKubernetes().client;
   const queryClient = useQueryClient();

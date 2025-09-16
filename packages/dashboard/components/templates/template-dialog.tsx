@@ -13,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, CheckCircle, XCircle } from 'lucide-react'
+import { Loader2, CheckCircle, XCircle, FileJson } from 'lucide-react'
 import { type Deployment, type Service } from 'kubernetesjs'
 import { useCreateAppsV1NamespacedDeployment, useCreateCoreV1NamespacedService } from '../../k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
@@ -50,7 +50,7 @@ export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogP
     ports: number[]
     environment?: Record<string, string>
   }) => {
-    const { templateId, name, namespace, image, ports, environment } = params
+    const { templateId, name, namespace, image, ports, environment } = params;
 
     // Create deployment configuration
     const deployment: Deployment = {
