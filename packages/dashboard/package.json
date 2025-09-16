@@ -1,5 +1,5 @@
 {
-  "name": "kubernetes-dashboard",
+  "name": "@interweb/dashboard",
   "version": "0.1.0",
   "private": true,
   "scripts": {
