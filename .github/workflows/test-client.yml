@@ -7,14 +7,14 @@ on:
       - 'packages/client/**'
       - 'packages/interwebjs/**'
       - 'packages/manifests/**'
-      - '.github/workflows/integration-test-client.yml'
+      - '.github/workflows/test-client.yml'
   pull_request:
     branches: [ main ]
     paths:
       - 'packages/client/**'
       - 'packages/interwebjs/**'
       - 'packages/manifests/**'
-      - '.github/workflows/integration-test-client.yml'
+      - '.github/workflows/test-client.yml'
   workflow_dispatch:
     inputs:
       kubeconfig:
