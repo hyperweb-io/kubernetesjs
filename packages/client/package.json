@@ -21,12 +21,13 @@
   "dependencies": {
     "@interweb/interwebjs": "workspace:^",
     "@interweb/manifests": "workspace:^",
-    "js-yaml": "^4.1.0",
-    "kubernetesjs": "^0.7.2",
+    "axios": "^1.7.2",
     "chalk": "^4.1.0",
-    "axios": "^1.7.2"
+    "js-yaml": "^4.1.0",
+    "pg": "^8.16.3"
   },
   "devDependencies": {
-    "@types/js-yaml": "^4.0.5"
+    "@types/js-yaml": "^4.0.5",
+    "@types/pg": "^8.11.10"
   }
 }

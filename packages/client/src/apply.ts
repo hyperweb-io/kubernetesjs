@@ -83,7 +83,7 @@ export class K8sApplier {
         const body = this.prepareForCreate(manifest, isNamespaced, ns);
         try {
           this.opts.log(`Creating ${kind}/${name}${ns ? ` in namespace ${ns}` : ''} (${gv.key})...`);
-          await (this.client as any).post(collectionPath, undefined, body);
+          await this.postWithRetries(collectionPath, body, `${kind}/${name}${ns ? ` in ${ns}` : ''}`);
           this.opts.log(`Created ${kind}/${name}${ns ? ` in ${ns}` : ''}`);
         } catch (err) {
           // If already exists, fall back to update
@@ -131,10 +131,13 @@ export class K8sApplier {
     if (parts.webhookServices.length > 0) {
       this.opts.log(`Waiting for ${parts.webhookServices.length} webhook service(s) to be ready...`);
       for (const svc of parts.webhookServices) {
-        await this.waitForServiceEndpoints(svc.namespace, svc.name, 180_000).catch((e) => {
+        await this.waitForServiceReady(svc.namespace, svc.name, 240_000).catch((e) => {
           this.opts.log(`Webhook service not ready: ${svc.namespace}/${svc.name}: ${String(e)}`);
         });
       }
+      // Give kube-proxy/endpoints a brief settle time to avoid rare connection refused races
+      await new Promise((r) => setTimeout(r, 5_000));
+      this.opts.log(`Webhook services reported Ready; proceeding after 5s settle.`);
     }
 
     // Phase 3: Custom (cluster-scoped then namespaced)
@@ -227,7 +230,7 @@ export class K8sApplier {
   ) {
     const body = this.prepareForReplace(manifest, existing ?? undefined, isNamespaced, ns);
     try {
-      await (this.client as any).put(itemPath, undefined, body);
+      await this.putWithRetries(itemPath, body, `${manifest.kind}/${manifest.metadata?.name}${ns ? ` in ${ns}` : ''}`);
       this.opts.log(`Updated ${manifest.kind}/${manifest.metadata?.name}${ns ? ` in ${ns}` : ''}`);
     } catch (err) {
       if (!this.opts.continueOnError) throw err;
@@ -392,22 +395,124 @@ export class K8sApplier {
     return { crds, namespaces, builtinCluster, builtinNamespaced, webhookServices, customCluster, customNamespaced };
   }
 
-  private async waitForServiceEndpoints(namespace: string, name: string, timeoutMs = 120_000, pollMs = 2_000) {
+  private async waitForServiceReady(namespace: string, name: string, timeoutMs = 180_000, pollMs = 2_000) {
     const start = Date.now();
+    const toLabelSelector = (sel: Record<string, string> | undefined): string | undefined => {
+      if (!sel) return undefined;
+      return Object.entries(sel)
+        .map(([k, v]) => `${k}=${v}`)
+        .join(',');
+    };
+
     while (Date.now() - start < timeoutMs) {
+      let podNames: string[] = [];
+      let usedSelector = '';
       try {
-        const ep = await this.client.readCoreV1NamespacedEndpoints({ path: { namespace, name } } as any);
-        const subsets = (ep as any)?.subsets;
-        if (Array.isArray(subsets) && subsets.some(s => Array.isArray(s.addresses) && s.addresses.length > 0)) {
-          this.opts.log(`Webhook service ${namespace}/${name} has ready endpoints.`);
+        // Prefer Endpoints targetRefs
+        const ep: any = await this.client.readCoreV1NamespacedEndpoints({ path: { namespace, name } } as any);
+        const subsets = ep?.subsets || [];
+        const addrs = subsets.flatMap((s: any) => (s.addresses || []));
+        podNames = addrs
+          .map((a: any) => a?.targetRef?.kind === 'Pod' ? a?.targetRef?.name : undefined)
+          .filter(Boolean);
+        if (addrs.length > 0) this.opts.log(`Webhook service ${namespace}/${name} has endpoints; verifying pod readiness...`);
+      } catch {
+        // ignore
+      }
+
+      if (podNames.length === 0) {
+        // Fallback: derive pods via Service selector
+        try {
+          const svc: any = await this.client.readCoreV1NamespacedService({ path: { namespace, name } } as any);
+          const selector = toLabelSelector(svc?.spec?.selector);
+          usedSelector = selector || '';
+          if (selector) {
+            const pods: any = await this.client.listCoreV1NamespacedPod({ path: { namespace }, query: { labelSelector: selector } as any });
+            podNames = (pods?.items || []).map((p: any) => p?.metadata?.name).filter(Boolean);
+          }
+        } catch {
+          // service may not exist yet
+        }
+      }
+
+      // If we have candidate pods, check they report Ready
+      if (podNames.length > 0) {
+        let allReady = true;
+        for (const pn of podNames) {
+          try {
+            const pod: any = await this.client.readCoreV1NamespacedPod({ path: { namespace, name: pn } } as any);
+            const conds: any[] = pod?.status?.conditions || [];
+            const readyCond = conds.find((c) => c.type === 'Ready');
+            const containers: any[] = pod?.status?.containerStatuses || [];
+            const containersReady = containers.length > 0 && containers.every((c) => c.ready === true);
+            if (!readyCond || readyCond.status !== 'True' || !containersReady) {
+              allReady = false;
+              break;
+            }
+          } catch {
+            allReady = false;
+            break;
+          }
+        }
+        if (allReady) {
+          this.opts.log(`Webhook service ${namespace}/${name} pods are Ready (${podNames.length}).`);
           return;
         }
-      } catch (err) {
-        // ignore 404s until created
       }
+
       await new Promise((r) => setTimeout(r, pollMs));
     }
-    throw new Error(`Timeout waiting for endpoints for service ${namespace}/${name}`);
+    throw new Error(`Timeout waiting for webhook service ${namespace}/${name} to become Ready`);
+  }
+
+  private isAdmissionWebhookTransient(err: any): boolean {
+    const msg = String(err?.message || err || '').toLowerCase();
+    // Common transient cases when webhooks are rolling or not yet listening
+    return (
+      msg.includes('failed calling webhook') &&
+      (
+        msg.includes('connect: connection refused') ||
+        msg.includes('context deadline exceeded') ||
+        msg.includes('no endpoints available for service') ||
+        /status:\s*500/.test(msg)
+      )
+    );
+  }
+
+  private async postWithRetries(path: string, body: any, ref: string, maxAttempts = 6, baseDelayMs = 2_000) {
+    let attempt = 0;
+    let lastErr: any;
+    while (attempt < maxAttempts) {
+      try {
+        return await (this.client as any).post(path, undefined, body);
+      } catch (err: any) {
+        lastErr = err;
+        if (!this.isAdmissionWebhookTransient(err)) throw err;
+        const delay = Math.min(baseDelayMs * Math.pow(2, attempt), 10_000);
+        this.opts.log(`Retrying ${ref} due to webhook readiness (attempt ${attempt + 1}/${maxAttempts}) in ${delay}ms...`);
+        await new Promise((r) => setTimeout(r, delay));
+        attempt++;
+      }
+    }
+    throw lastErr;
+  }
+
+  private async putWithRetries(path: string, body: any, ref: string, maxAttempts = 5, baseDelayMs = 2_000) {
+    let attempt = 0;
+    let lastErr: any;
+    while (attempt < maxAttempts) {
+      try {
+        return await (this.client as any).put(path, undefined, body);
+      } catch (err: any) {
+        lastErr = err;
+        if (!this.isAdmissionWebhookTransient(err)) throw err;
+        const delay = Math.min(baseDelayMs * Math.pow(2, attempt), 10_000);
+        this.opts.log(`Retrying update for ${ref} due to webhook readiness (attempt ${attempt + 1}/${maxAttempts}) in ${delay}ms...`);
+        await new Promise((r) => setTimeout(r, delay));
+        attempt++;
+      }
+    }
+    throw lastErr;
   }
 }
 

@@ -119,7 +119,7 @@ export interface InterwebClientConfig {
   kubeconfig?: string;
   namespace?: string;
   context?: string;
-  restEndpoint?: string; // For kubernetesjs REST endpoint
+  restEndpoint?: string;
 }
 
 // Dashboard-friendly types for reuse

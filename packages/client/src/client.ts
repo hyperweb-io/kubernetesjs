@@ -16,7 +16,7 @@ export interface InterwebContext {
   context?: string;
   verbose?: boolean;
   timeout?: string;
-  restEndpoint?: string; // For kubernetesjs REST endpoint
+  restEndpoint?: string;
 }
 
 export class Client {
