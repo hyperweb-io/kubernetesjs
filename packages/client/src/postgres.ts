@@ -7,6 +7,8 @@ import { InterwebClient as InterwebKubernetesClient,
 import { KubernetesResource } from '@interweb/manifests';
 import { SetupClient } from './setup';
 
+import { escapeIdentifier, escapeLiteral } from 'pg-escape';
+
 export type PostgresPoolMode = 'session' | 'transaction';
 
 export interface PostgresDeployOptions {
@@ -144,10 +146,10 @@ function buildCluster(opts: Required<PostgresDeployOptions>): Cluster {
         localeCollate: 'en_US.UTF-8',
         localeCType: 'en_US.UTF-8',
         postInitSQL: [
-          `CREATE USER ${opts.appUsername} WITH PASSWORD '${opts.appPassword}' CREATEDB;`,
-          `GRANT CREATE ON DATABASE postgres TO ${opts.appUsername};`,
+          `CREATE USER ${escapeIdentifier(opts.appUsername)} WITH PASSWORD ${escapeLiteral(opts.appPassword)} CREATEDB;`,
+          `GRANT CREATE ON DATABASE postgres TO ${escapeIdentifier(opts.appUsername)};`,
           'CREATE SCHEMA IF NOT EXISTS public;',
-          `GRANT ALL PRIVILEGES ON SCHEMA public TO ${opts.appUsername};`,
+          `GRANT ALL PRIVILEGES ON SCHEMA public TO ${escapeIdentifier(opts.appUsername)};`,
         ],
       },
     },
