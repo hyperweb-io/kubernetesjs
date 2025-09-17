@@ -1,0 +1,35 @@
+name: starship-devnet
+version: 1.3.0
+
+chains1:
+  - id: hyperweb-1
+    name: hyperweb
+    numValidators: 1
+    image: ghcr.io/hyperweb-io/hyperweb:latest
+    coins: 100000000000000uhyper,100000000000000uhypweb,100000000000000uatom,100000000000000uusdc
+    ports:
+      rest: 1317
+      rpc: 26657
+      faucet: 8000
+      exposer: 8001
+    resources:
+      cpu: "0.4"
+      memory: "400M"
+    faucet:
+      enabled: true
+      type: starship
+      concurrency: 2
+      resources:
+        cpu: "0.2"
+        memory: "200M"
+
+registry:
+  enabled: true
+  ports:
+    rest: 8081
+  resources:
+    cpu: "0.1"
+    memory: "100M"
+
+images:
+  imagePullPolicy: Always
