@@ -38,15 +38,22 @@ const defaultOpts: Required<Pick<PostgresDeployOptions,
   storage: '10Gi',
   imageName: 'ghcr.io/cloudnative-pg/postgresql:16.4',
   superuserUsername: 'postgres',
-  superuserPassword: 'postgres123!',
+  superuserPassword: process.env.POSTGRES_SUPERUSER_PASSWORD || 'postgres123!',
   appUsername: 'appuser',
-  appPassword: 'appuser123!',
+  appPassword: process.env.POSTGRES_APP_PASSWORD || 'appuser123!',
   enablePooler: true,
   poolerName: 'postgres-pooler',
   poolerInstances: 2,
   poolMode: 'transaction',
 };
 
+// Warn if default passwords are used
+if ((defaultOpts.superuserPassword === 'postgres123!') && typeof defaultOpts.log === 'function') {
+  defaultOpts.log('[WARNING] Using default superuser password. Set POSTGRES_SUPERUSER_PASSWORD in environment for production.');
+}
+if ((defaultOpts.appPassword === 'appuser123!') && typeof defaultOpts.log === 'function') {
+  defaultOpts.log('[WARNING] Using default app user password. Set POSTGRES_APP_PASSWORD in environment for production.');
+}
 function b64(v: string): string {
   return Buffer.from(v, 'utf8').toString('base64');
 }
