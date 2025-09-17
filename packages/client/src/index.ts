@@ -1,6 +1,7 @@
 export * from './types';
 export * from './config-loader';
 export * from './setup';
+export * from './postgres';
 export * from './client';
 
 // Re-export main classes for convenience
