@@ -107,10 +107,16 @@ importers:
       kubernetesjs:
         specifier: ^0.7.2
         version: 0.7.2
+      pg-escape:
+        specifier: ^0.2.0
+        version: 0.2.0
     devDependencies:
       '@types/js-yaml':
         specifier: ^4.0.5
         version: 4.0.9
+      '@types/pg-escape':
+        specifier: ^0.2.3
+        version: 0.2.3
     publishDirectory: dist
 
   packages/dashboard:
@@ -3180,6 +3186,9 @@ packages:
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
+
+  '@types/pg-escape@0.2.3':
+    resolution: {integrity: sha512-pH5acHzd/Vg4dcHBBZDMUj92vsom8Cy5tCpZ4yfsM6C1bObUZTl8NbSI99gJpovpJ0l+r56q/v2OcdZLhKl2GA==}
 
   '@types/prop-types@15.7.15':
     resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
@@ -7030,6 +7039,9 @@ packages:
 
   perfect-freehand@1.2.2:
     resolution: {integrity: sha512-eh31l019WICQ03pkF3FSzHxB8n07ItqIQ++G5UV8JX0zVOXzgTGCqnRR0jJ2h9U8/2uW4W4mtGJELt9kEV0CFQ==}
+
+  pg-escape@0.2.0:
+    resolution: {integrity: sha512-QfXcpxyN9vT+kvexQpTeNyiwCxs4LPXLAV/C0EeLTJPCF61swhGdDlnHcuDgxJudgKGfQYiCkegg0GsSKSvvEg==}
 
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
@@ -12500,6 +12512,8 @@ snapshots:
 
   '@types/normalize-package-data@2.4.4': {}
 
+  '@types/pg-escape@0.2.3': {}
+
   '@types/prop-types@15.7.15': {}
 
   '@types/react-dom@18.3.7(@types/react@18.3.24)':
@@ -17796,6 +17810,8 @@ snapshots:
       path2d: 0.2.2
 
   perfect-freehand@1.2.2: {}
+
+  pg-escape@0.2.0: {}
 
   picocolors@1.1.1: {}
 
