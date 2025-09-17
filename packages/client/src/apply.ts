@@ -131,7 +131,7 @@ export class K8sApplier {
     if (parts.webhookServices.length > 0) {
       this.opts.log(`Waiting for ${parts.webhookServices.length} webhook service(s) to be ready...`);
       for (const svc of parts.webhookServices) {
-        await this.waitForServiceEndpoints(svc.namespace, svc.name, 180_000).catch((e) => {
+        await this.waitForServiceReady(svc.namespace, svc.name, 240_000).catch((e) => {
           this.opts.log(`Webhook service not ready: ${svc.namespace}/${svc.name}: ${String(e)}`);
         });
       }
@@ -392,22 +392,74 @@ export class K8sApplier {
     return { crds, namespaces, builtinCluster, builtinNamespaced, webhookServices, customCluster, customNamespaced };
   }
 
-  private async waitForServiceEndpoints(namespace: string, name: string, timeoutMs = 120_000, pollMs = 2_000) {
+  private async waitForServiceReady(namespace: string, name: string, timeoutMs = 180_000, pollMs = 2_000) {
     const start = Date.now();
+    const toLabelSelector = (sel: Record<string, string> | undefined): string | undefined => {
+      if (!sel) return undefined;
+      return Object.entries(sel)
+        .map(([k, v]) => `${k}=${v}`)
+        .join(',');
+    };
+
     while (Date.now() - start < timeoutMs) {
+      let podNames: string[] = [];
+      let usedSelector = '';
       try {
-        const ep = await this.client.readCoreV1NamespacedEndpoints({ path: { namespace, name } } as any);
-        const subsets = (ep as any)?.subsets;
-        if (Array.isArray(subsets) && subsets.some(s => Array.isArray(s.addresses) && s.addresses.length > 0)) {
-          this.opts.log(`Webhook service ${namespace}/${name} has ready endpoints.`);
+        // Prefer Endpoints targetRefs
+        const ep: any = await this.client.readCoreV1NamespacedEndpoints({ path: { namespace, name } } as any);
+        const subsets = ep?.subsets || [];
+        const addrs = subsets.flatMap((s: any) => (s.addresses || []));
+        podNames = addrs
+          .map((a: any) => a?.targetRef?.kind === 'Pod' ? a?.targetRef?.name : undefined)
+          .filter(Boolean);
+        if (addrs.length > 0) this.opts.log(`Webhook service ${namespace}/${name} has endpoints; verifying pod readiness...`);
+      } catch {
+        // ignore
+      }
+
+      if (podNames.length === 0) {
+        // Fallback: derive pods via Service selector
+        try {
+          const svc: any = await this.client.readCoreV1NamespacedService({ path: { namespace, name } } as any);
+          const selector = toLabelSelector(svc?.spec?.selector);
+          usedSelector = selector || '';
+          if (selector) {
+            const pods: any = await this.client.listCoreV1NamespacedPod({ path: { namespace }, query: { labelSelector: selector } as any });
+            podNames = (pods?.items || []).map((p: any) => p?.metadata?.name).filter(Boolean);
+          }
+        } catch {
+          // service may not exist yet
+        }
+      }
+
+      // If we have candidate pods, check they report Ready
+      if (podNames.length > 0) {
+        let allReady = true;
+        for (const pn of podNames) {
+          try {
+            const pod: any = await this.client.readCoreV1NamespacedPod({ path: { namespace, name: pn } } as any);
+            const conds: any[] = pod?.status?.conditions || [];
+            const readyCond = conds.find((c) => c.type === 'Ready');
+            const containers: any[] = pod?.status?.containerStatuses || [];
+            const containersReady = containers.length > 0 && containers.every((c) => c.ready === true);
+            if (!readyCond || readyCond.status !== 'True' || !containersReady) {
+              allReady = false;
+              break;
+            }
+          } catch {
+            allReady = false;
+            break;
+          }
+        }
+        if (allReady) {
+          this.opts.log(`Webhook service ${namespace}/${name} pods are Ready (${podNames.length}).`);
           return;
         }
-      } catch (err) {
-        // ignore 404s until created
       }
+
       await new Promise((r) => setTimeout(r, pollMs));
     }
-    throw new Error(`Timeout waiting for endpoints for service ${namespace}/${name}`);
+    throw new Error(`Timeout waiting for webhook service ${namespace}/${name} to become Ready`);
   }
 }
 
