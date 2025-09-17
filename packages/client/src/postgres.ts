@@ -52,13 +52,6 @@ const defaultOpts: Required<Pick<PostgresDeployOptions,
   poolMode: 'transaction',
 };
 
-// Warn if default passwords are used
-if ((defaultOpts.superuserPassword === 'postgres123!') && typeof defaultOpts.log === 'function') {
-  defaultOpts.log('[WARNING] Using default superuser password. Set POSTGRES_SUPERUSER_PASSWORD in environment for production.');
-}
-if ((defaultOpts.appPassword === 'appuser123!') && typeof defaultOpts.log === 'function') {
-  defaultOpts.log('[WARNING] Using default app user password. Set POSTGRES_APP_PASSWORD in environment for production.');
-}
 function b64(v: string): string {
   return Buffer.from(v, 'utf8').toString('base64');
 }
