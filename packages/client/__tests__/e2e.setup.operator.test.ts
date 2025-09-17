@@ -26,6 +26,13 @@ const DEFAULT_NAMESPACES: Record<string, string> = {
   'kube-prometheus-stack': 'monitoring',
 };
 
+// Minimal operator dependency map for tests. Extend over time as needed.
+// Example: knative-serving and cloudnative-pg both require cert-manager present.
+const OPERATOR_DEPENDENCIES: Record<string, string[]> = {
+  'knative-serving': ['cert-manager'],
+  'cloudnative-pg': ['cert-manager'],
+};
+
 function buildOperator(name: string): OperatorConfig {
   const version = DEFAULT_VERSIONS[name];
   if (!version) throw new Error(`Unknown operator '${name}'`);
@@ -33,13 +40,31 @@ function buildOperator(name: string): OperatorConfig {
   return { name, enabled: true, version, namespace } as OperatorConfig;
 }
 
+// Resolve requested operators into a de-duplicated, dependency-ordered list
+function resolveOperatorOrder(requested: string[]): string[] {
+  const seen = new Set<string>();
+  const order: string[] = [];
+
+  const addWithDeps = (name: string) => {
+    if (seen.has(name)) return;
+    const deps = OPERATOR_DEPENDENCIES[name] || [];
+    for (const d of deps) addWithDeps(d);
+    seen.add(name);
+    order.push(name);
+  };
+
+  for (const r of requested) addWithDeps(r);
+  return order;
+}
+
 describe('SetupClient E2E (matrix): install operators', () => {
   const api = new InterwebKubernetesClient({ restEndpoint: K8S_API } as any);
   const setup = new SetupClient(api as any);
 
-  const op1 = process.env.OPERATOR;
+  // Allow single or comma/space-separated list via OPERATOR or OPERATORS
+  const rawOps = process.env.OPERATORS || process.env.OPERATOR;
 
-  if (!op1) {
+  if (!rawOps) {
     // Make intent clear in local runs
     it('skips because OPERATOR env not set', () => {
       console.warn('OPERATOR env not set; skipping e2e.setup.operator.test');
@@ -47,19 +72,26 @@ describe('SetupClient E2E (matrix): install operators', () => {
     return;
   }
 
-  const operators: OperatorConfig[] = [buildOperator(op1 as string)];
+  const requested = String(rawOps)
+    .split(/[\s,]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const resolvedNames = resolveOperatorOrder(requested);
+  const operators: OperatorConfig[] = resolvedNames.map(buildOperator);
 
   const cfg: ClusterSetupConfig = {
     apiVersion: 'interweb.dev/v1',
     kind: 'ClusterSetup',
-    metadata: { name: `e2e-${operators[0].name}`, namespace: 'interweb-system' },
+    metadata: { name: `e2e-${requested[0]}`, namespace: 'interweb-system' },
     spec: {
       operators,
       networking: { ingressClass: 'kourier', domain: '127.0.0.1.nip.io' },
     },
   };
 
-  it(`installs operator: ${operators[0].name}@${operators[0].version}`, async () => {
+  const label = operators.map((o) => `${o.name}@${o.version}`).join(', ');
+  it(`installs operators: ${label}`, async () => {
     const connected = await setup.checkConnection();
     if (!connected) {
       console.warn('Kubernetes cluster not reachable; skipping test.');
