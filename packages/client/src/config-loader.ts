@@ -210,11 +210,11 @@ export class ConfigLoader {
           enabled: false,
           prometheus: {
             retention: '7d',
-            storage: '10Gi'
+            storage: '1Gi'
           },
           grafana: {
             adminPassword: 'admin',
-            persistence: '5Gi'
+            persistence: '1Gi'
           }
         },
         networking: {

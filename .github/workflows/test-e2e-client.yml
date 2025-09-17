@@ -1,4 +1,4 @@
-name: Client E2E (Per Operator)
+name: Test Client E2E (Per Operator)
 
 on:
   push:
@@ -7,14 +7,14 @@ on:
       - 'packages/client/**'
       - 'packages/interwebjs/**'
       - 'packages/manifests/**'
-      - '.github/workflows/client-e2e.yml'
+      - '.github/workflows/test-e2e-client.yml'
   pull_request:
     branches: [ main ]
     paths:
       - 'packages/client/**'
       - 'packages/interwebjs/**'
       - 'packages/manifests/**'
-      - '.github/workflows/client-e2e.yml'
+      - '.github/workflows/test-e2e-client.yml'
   workflow_dispatch:
 
 jobs:
@@ -56,8 +56,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build packages
-        run: pnpm build
+      - name: Build packages (excluding dashboard - TEMP)
+        run: pnpm --filter='!@interweb/dashboard' build
 
       - name: Verify cluster connection
         run: |
@@ -122,8 +122,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build packages
-        run: pnpm build
+      - name: Build packages (excluding dashboard - TEMP)
+        run: pnpm --filter='!@interweb/dashboard' build
 
       - name: Verify cluster connection
         run: |
