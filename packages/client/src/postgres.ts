@@ -7,7 +7,7 @@ import { InterwebClient as InterwebKubernetesClient,
 import { KubernetesResource } from '@interweb/manifests';
 import { SetupClient } from './setup';
 
-import { escapeIdentifier, escapeLiteral } from 'pg-escape';
+import { escapeIdentifier, escapeLiteral } from 'pg';
 
 export type PostgresPoolMode = 'session' | 'transaction';
 

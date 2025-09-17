@@ -24,10 +24,10 @@
     "axios": "^1.7.2",
     "chalk": "^4.1.0",
     "js-yaml": "^4.1.0",
-    "pg-escape": "^0.2.0"
+    "pg": "^8.16.3"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.5",
-    "@types/pg-escape": "^0.2.3"
+    "@types/pg": "^8.11.10"
   }
 }
