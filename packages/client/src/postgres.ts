@@ -440,14 +440,14 @@ export class PostgresDeployer {
         ...w,
         clientConfig: { ...(w.clientConfig || {}), caBundle: caBundleB64 },
       }));
-      await this.kube.replaceAdmissionregistrationV1MutatingWebhookConfiguration({ path: { name: 'cnpg-mutating-webhook-configuration' }, query: {} , body: mwc});
+      await this.kube.replaceAdmissionregistrationV1MutatingWebhookConfiguration({ path: { name: 'cnpg-mutating-webhook-configuration' }, query: {} , body: mwc });
     }
     if (vwc?.webhooks) {
       vwc.webhooks = vwc.webhooks.map((w) => ({
         ...w,
         clientConfig: { ...(w.clientConfig || {}), caBundle: caBundleB64 },
       }));
-      await this.kube.replaceAdmissionregistrationV1ValidatingWebhookConfiguration({ path: { name: 'cnpg-validating-webhook-configuration' }, query: {} , body: vwc});
+      await this.kube.replaceAdmissionregistrationV1ValidatingWebhookConfiguration({ path: { name: 'cnpg-validating-webhook-configuration' }, query: {}, body: vwc });
     }
   }
 }
