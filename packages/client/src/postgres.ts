@@ -1,8 +1,13 @@
-import { InterwebClient as InterwebKubernetesClient } from '@interweb/interwebjs';
+import { InterwebClient as InterwebKubernetesClient,
+  Namespace,
+  Secret,
+  Cluster,
+  Pooler, 
+} from '@interweb/interwebjs';
 import { KubernetesResource } from '@interweb/manifests';
 import { SetupClient } from './setup';
 
-export type PostgresPoolMode = 'session' | 'transaction' | 'statement';
+export type PostgresPoolMode = 'session' | 'transaction';
 
 export interface PostgresDeployOptions {
   name?: string; // Cluster name
@@ -12,10 +17,10 @@ export interface PostgresDeployOptions {
   storageClass?: string; // optional
   imageName?: string; // e.g. 'ghcr.io/cloudnative-pg/postgresql:16.4'
   // Credentials (for dev defaults only; change in prod)
-  superuserUsername?: string; // defaults to 'postgres'
-  superuserPassword?: string; // defaults to 'postgres123!'
-  appUsername?: string; // defaults to 'appuser'
-  appPassword?: string; // defaults to 'appuser123!'
+  superuserUsername?: string;
+  superuserPassword?: string;
+  appUsername?: string;
+  appPassword?: string;
   // Pooler
   enablePooler?: boolean;
   poolerName?: string;
@@ -58,16 +63,16 @@ function b64(v: string): string {
   return Buffer.from(v, 'utf8').toString('base64');
 }
 
-function buildNamespace(ns: string): KubernetesResource {
+function buildNamespace(ns: string): Namespace {
   return {
     apiVersion: 'v1',
     kind: 'Namespace',
     metadata: { name: ns, labels: { 'app.interweb.dev/managed': 'true' } },
-  } as any;
+  };
 }
 
-function buildSecrets(ns: string, suUser: string, suPass: string, appUser: string, appPass: string): KubernetesResource[] {
-  const superuser: KubernetesResource = {
+function buildSecrets(ns: string, suUser: string, suPass: string, appUser: string, appPass: string): Secret[] {
+  const superuser: Secret = {
     apiVersion: 'v1',
     kind: 'Secret',
     metadata: {
@@ -84,9 +89,9 @@ function buildSecrets(ns: string, suUser: string, suPass: string, appUser: strin
       username: b64(suUser),
       password: b64(suPass),
     },
-  } as any;
+  };
 
-  const app: KubernetesResource = {
+  const app: Secret = {
     apiVersion: 'v1',
     kind: 'Secret',
     metadata: {
@@ -102,15 +107,15 @@ function buildSecrets(ns: string, suUser: string, suPass: string, appUser: strin
       username: b64(appUser),
       password: b64(appPass),
     },
-  } as any;
+  };
 
   return [superuser, app];
 }
 
-function buildCluster(opts: Required<PostgresDeployOptions>): KubernetesResource {
+function buildCluster(opts: Required<PostgresDeployOptions>): Cluster {
   const ns = opts.namespace!;
   const name = opts.name!;
-  const spec: any = {
+  const spec = {
     instances: opts.instances,
     imageName: opts.imageName,
     superuserSecret: { name: 'postgres-superuser' },
@@ -173,10 +178,10 @@ function buildCluster(opts: Required<PostgresDeployOptions>): KubernetesResource
       },
     },
     spec,
-  } as any;
+  };
 }
 
-function buildPooler(opts: Required<PostgresDeployOptions>): KubernetesResource {
+function buildPooler(opts: Required<PostgresDeployOptions>): Pooler {
   const ns = opts.namespace!;
   const poolerName = opts.poolerName!;
   return {
@@ -249,7 +254,7 @@ function buildPooler(opts: Required<PostgresDeployOptions>): KubernetesResource 
         },
       },
     },
-  } as any;
+  };
 }
 
 export interface DeployResult {
@@ -284,7 +289,7 @@ export class PostgresDeployer {
       this.log(`Warning: CNPG webhooks not confirmed ready: ${String(e)}`);
     });
 
-    const resources: KubernetesResource[] = [
+    const resources: (Namespace | Secret | Cluster | Pooler)[] = [
       buildNamespace(ns),
       ...buildSecrets(ns, opts.superuserUsername, opts.superuserPassword, opts.appUsername, opts.appPassword),
       buildCluster(opts),
@@ -292,7 +297,7 @@ export class PostgresDeployer {
     ];
 
     this.log(`Applying ${resources.length} PostgreSQL manifest(s) to namespace ${ns}...`);
-    await this.setup.applyManifests(resources, { continueOnError: false, log: this.log });
+    await this.setup.applyManifests(resources as KubernetesResource[], { continueOnError: false, log: this.log });
 
     // Wait for cluster ready
     await this.waitForClusterReady(clusterName, ns, 10 * 60 * 1000);
@@ -318,12 +323,11 @@ export class PostgresDeployer {
     this.log(`Waiting for CNPG Cluster ${name} in ${namespace} to be healthy...`);
     while (Date.now() - start < timeoutMs) {
       try {
-        const path = `/apis/postgresql.cnpg.io/v1/namespaces/${namespace}/clusters/${name}`;
-        const cluster: any = await this.kube.get(path);
-        const phase: string = cluster?.status?.phase || '';
+        const cluster = await this.kube.readPostgresqlCnpgIoV1NamespacedCluster({ path: { namespace, name }, query: {} });
+        const phase: string = cluster.status.phase || '';
         const ready = String(phase).toLowerCase().includes('healthy');
-        const instances = cluster?.status?.readyInstances ?? 0;
-        const desired = cluster?.spec?.instances ?? 0;
+        const instances = cluster.status.readyInstances ?? 0;
+        const desired = cluster.spec.instances ?? 0;
         if (ready && instances >= desired && desired > 0) {
           this.log(`✓ Cluster healthy: ${instances}/${desired} instances ready`);
           return;
@@ -343,16 +347,16 @@ export class PostgresDeployer {
     while (Date.now() - start < timeoutMs) {
       try {
         // Check pooler pods readiness by label
-        const pods: any = await this.kube.listCoreV1NamespacedPod({
+        const pods = await this.kube.listCoreV1NamespacedPod({
           path: { namespace },
           query: { labelSelector: `cnpg.io/poolerName=${name}` },
-        } as any);
-        const items: any[] = pods?.items ?? [];
-        if (items.length > 0 && items.every(p => (p.status?.containerStatuses || []).every((c: any) => c.ready))) {
+        });
+        const items = pods.items ?? [];
+        if (items.length > 0 && items.every(p => (p.status.containerStatuses || []).every((c) => c.ready))) {
           this.log(`✓ Pooler ready with ${items.length} pod(s)`);
           return;
         }
-        this.log(`... pooler pods ready: ${items.filter(p => (p.status?.containerStatuses || []).every((c: any) => c.ready)).length}/${items.length}`);
+        this.log(`... pooler pods ready: ${items.filter(p => (p.status.containerStatuses || []).every((c) => c.ready)).length}/${items.length}`);
       } catch (err) {
         // ignore and retry
       }
@@ -367,9 +371,9 @@ export class PostgresDeployer {
     // 0) Operator deployment available
     while (Date.now() - start < timeoutMs) {
       try {
-        const dep: any = await this.kube.readAppsV1NamespacedDeployment({ path: { namespace, name: 'cnpg-controller-manager' } } as any);
-        const av = dep?.status?.availableReplicas || 0;
-        const desired = dep?.spec?.replicas || 0;
+        const dep = await this.kube.readAppsV1NamespacedDeployment({ path: { namespace, name: 'cnpg-controller-manager' }, query: {} });
+        const av = dep.status.availableReplicas || 0;
+        const desired = dep.spec.replicas || 0;
         if (av >= 1) {
           break;
         }
@@ -381,9 +385,9 @@ export class PostgresDeployer {
     // 1) Webhook cert secret present (created by operator)
     while (Date.now() - start < timeoutMs) {
       try {
-        const sec: any = await this.kube.readCoreV1NamespacedSecret({ path: { namespace, name: 'cnpg-webhook-cert' } } as any);
-        const hasCrt = !!sec?.data?.['tls.crt'];
-        const hasKey = !!sec?.data?.['tls.key'];
+        const sec = await this.kube.readCoreV1NamespacedSecret({ path: { namespace, name: 'cnpg-webhook-cert' }, query: {} });
+        const hasCrt = !!sec.data?.['tls.crt'];
+        const hasKey = !!sec.data?.['tls.key'];
         if (hasCrt && hasKey) break;
       } catch {}
       await new Promise((r) => setTimeout(r, pollMs));
@@ -392,8 +396,8 @@ export class PostgresDeployer {
     // 2) Service endpoints present
     while (Date.now() - start < timeoutMs) {
       try {
-        const ep = await this.kube.readCoreV1NamespacedEndpoints({ path: { namespace, name: 'cnpg-webhook-service' } } as any);
-        const subsets = (ep as any)?.subsets;
+        const ep = await this.kube.readCoreV1NamespacedEndpoints({ path: { namespace, name: 'cnpg-webhook-service' }, query: {} });
+        const subsets = ep.subsets;
         if (Array.isArray(subsets) && subsets.some(s => Array.isArray(s.addresses) && s.addresses.length > 0)) {
           break;
         }
@@ -402,16 +406,14 @@ export class PostgresDeployer {
     }
 
     // 3) CA bundle injected into webhook configurations
-    const mwcPath = `/apis/admissionregistration.k8s.io/v1/mutatingwebhookconfigurations/cnpg-mutating-webhook-configuration`;
-    const vwcPath = `/apis/admissionregistration.k8s.io/v1/validatingwebhookconfigurations/cnpg-validating-webhook-configuration`;
     while (Date.now() - start < timeoutMs) {
       try {
-        const [mwc, vwc]: any[] = await Promise.all([
-          this.kube.get(mwcPath).catch((): any => null),
-          this.kube.get(vwcPath).catch((): any => null),
+        const [mwc, vwc] = await Promise.all([
+          this.kube.readAdmissionregistrationV1MutatingWebhookConfiguration({ path: { name: 'cnpg-mutating-webhook-configuration' }, query: {} }),
+          this.kube.readAdmissionregistrationV1ValidatingWebhookConfiguration({ path: { name: 'cnpg-validating-webhook-configuration' }, query: {} }),
         ]);
-        const mwcReady = Array.isArray(mwc?.webhooks) && mwc.webhooks.length > 0 && mwc.webhooks.every((w: any) => Boolean(w?.clientConfig?.caBundle));
-        const vwcReady = Array.isArray(vwc?.webhooks) && vwc.webhooks.length > 0 && vwc.webhooks.every((w: any) => Boolean(w?.clientConfig?.caBundle));
+        const mwcReady = Array.isArray(mwc?.webhooks) && mwc.webhooks.length > 0 && mwc.webhooks.every((w) => Boolean(w?.clientConfig?.caBundle));
+        const vwcReady = Array.isArray(vwc?.webhooks) && vwc.webhooks.length > 0 && vwc.webhooks.every((w) => Boolean(w?.clientConfig?.caBundle));
         if (mwcReady && vwcReady) {
           this.log(`✓ CNPG webhooks report CA bundle injected.`);
           return;
@@ -421,7 +423,7 @@ export class PostgresDeployer {
     }
     // Fallback: try to inject caBundle from the webhook secret (for CI flakiness)
     try {
-      const sec: any = await this.kube.readCoreV1NamespacedSecret({ path: { namespace, name: 'cnpg-webhook-cert' } } as any);
+      const sec = await this.kube.readCoreV1NamespacedSecret({ path: { namespace, name: 'cnpg-webhook-cert' }, query: {} });
       const ca = (sec?.data?.['ca.crt'] || sec?.data?.['tls.crt']) as string | undefined;
       if (ca) {
         await this.injectCaBundleIntoWebhooks(ca);
@@ -434,25 +436,23 @@ export class PostgresDeployer {
   }
 
   private async injectCaBundleIntoWebhooks(caBundleB64: string): Promise<void> {
-    const mwcPath = `/apis/admissionregistration.k8s.io/v1/mutatingwebhookconfigurations/cnpg-mutating-webhook-configuration`;
-    const vwcPath = `/apis/admissionregistration.k8s.io/v1/validatingwebhookconfigurations/cnpg-validating-webhook-configuration`;
-    const [mwc, vwc]: any[] = await Promise.all([
-      this.kube.get(mwcPath).catch((): any => null),
-      this.kube.get(vwcPath).catch((): any => null),
+    const [mwc, vwc] = await Promise.all([
+      this.kube.readAdmissionregistrationV1MutatingWebhookConfiguration({ path: { name: 'cnpg-mutating-webhook-configuration' }, query: {} }),
+      this.kube.readAdmissionregistrationV1ValidatingWebhookConfiguration({ path: { name: 'cnpg-validating-webhook-configuration' }, query: {} }),
     ]);
     if (mwc?.webhooks) {
-      mwc.webhooks = mwc.webhooks.map((w: any) => ({
+      mwc.webhooks = mwc.webhooks.map((w) => ({
         ...w,
         clientConfig: { ...(w.clientConfig || {}), caBundle: caBundleB64 },
       }));
-      await this.kube.put(mwcPath, undefined, mwc as any);
+      await this.kube.replaceAdmissionregistrationV1MutatingWebhookConfiguration({ path: { name: 'cnpg-mutating-webhook-configuration' }, query: {} , body: mwc});
     }
     if (vwc?.webhooks) {
-      vwc.webhooks = vwc.webhooks.map((w: any) => ({
+      vwc.webhooks = vwc.webhooks.map((w) => ({
         ...w,
         clientConfig: { ...(w.clientConfig || {}), caBundle: caBundleB64 },
       }));
-      await this.kube.put(vwcPath, undefined, vwc as any);
+      await this.kube.replaceAdmissionregistrationV1ValidatingWebhookConfiguration({ path: { name: 'cnpg-validating-webhook-configuration' }, query: {} , body: vwc});
     }
   }
 }
