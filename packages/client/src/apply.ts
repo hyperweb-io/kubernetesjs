@@ -83,7 +83,7 @@ export class K8sApplier {
         const body = this.prepareForCreate(manifest, isNamespaced, ns);
         try {
           this.opts.log(`Creating ${kind}/${name}${ns ? ` in namespace ${ns}` : ''} (${gv.key})...`);
-          await (this.client as any).post(collectionPath, undefined, body);
+          await this.postWithRetries(collectionPath, body, `${kind}/${name}${ns ? ` in ${ns}` : ''}`);
           this.opts.log(`Created ${kind}/${name}${ns ? ` in ${ns}` : ''}`);
         } catch (err) {
           // If already exists, fall back to update
@@ -135,6 +135,9 @@ export class K8sApplier {
           this.opts.log(`Webhook service not ready: ${svc.namespace}/${svc.name}: ${String(e)}`);
         });
       }
+      // Give kube-proxy/endpoints a brief settle time to avoid rare connection refused races
+      await new Promise((r) => setTimeout(r, 5_000));
+      this.opts.log(`Webhook services reported Ready; proceeding after 5s settle.`);
     }
 
     // Phase 3: Custom (cluster-scoped then namespaced)
@@ -227,7 +230,7 @@ export class K8sApplier {
   ) {
     const body = this.prepareForReplace(manifest, existing ?? undefined, isNamespaced, ns);
     try {
-      await (this.client as any).put(itemPath, undefined, body);
+      await this.putWithRetries(itemPath, body, `${manifest.kind}/${manifest.metadata?.name}${ns ? ` in ${ns}` : ''}`);
       this.opts.log(`Updated ${manifest.kind}/${manifest.metadata?.name}${ns ? ` in ${ns}` : ''}`);
     } catch (err) {
       if (!this.opts.continueOnError) throw err;
@@ -460,6 +463,56 @@ export class K8sApplier {
       await new Promise((r) => setTimeout(r, pollMs));
     }
     throw new Error(`Timeout waiting for webhook service ${namespace}/${name} to become Ready`);
+  }
+
+  private isAdmissionWebhookTransient(err: any): boolean {
+    const msg = String(err?.message || err || '').toLowerCase();
+    // Common transient cases when webhooks are rolling or not yet listening
+    return (
+      msg.includes('failed calling webhook') &&
+      (
+        msg.includes('connect: connection refused') ||
+        msg.includes('context deadline exceeded') ||
+        msg.includes('no endpoints available for service') ||
+        /status:\s*500/.test(msg)
+      )
+    );
+  }
+
+  private async postWithRetries(path: string, body: any, ref: string, maxAttempts = 6, baseDelayMs = 2_000) {
+    let attempt = 0;
+    let lastErr: any;
+    while (attempt < maxAttempts) {
+      try {
+        return await (this.client as any).post(path, undefined, body);
+      } catch (err: any) {
+        lastErr = err;
+        if (!this.isAdmissionWebhookTransient(err)) throw err;
+        const delay = Math.min(baseDelayMs * Math.pow(2, attempt), 10_000);
+        this.opts.log(`Retrying ${ref} due to webhook readiness (attempt ${attempt + 1}/${maxAttempts}) in ${delay}ms...`);
+        await new Promise((r) => setTimeout(r, delay));
+        attempt++;
+      }
+    }
+    throw lastErr;
+  }
+
+  private async putWithRetries(path: string, body: any, ref: string, maxAttempts = 5, baseDelayMs = 2_000) {
+    let attempt = 0;
+    let lastErr: any;
+    while (attempt < maxAttempts) {
+      try {
+        return await (this.client as any).put(path, undefined, body);
+      } catch (err: any) {
+        lastErr = err;
+        if (!this.isAdmissionWebhookTransient(err)) throw err;
+        const delay = Math.min(baseDelayMs * Math.pow(2, attempt), 10_000);
+        this.opts.log(`Retrying update for ${ref} due to webhook readiness (attempt ${attempt + 1}/${maxAttempts}) in ${delay}ms...`);
+        await new Promise((r) => setTimeout(r, delay));
+        attempt++;
+      }
+    }
+    throw lastErr;
   }
 }
 
