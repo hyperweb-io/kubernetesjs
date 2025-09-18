@@ -317,45 +317,6 @@ export default function DatabasesPage() {
               </table>
             </div>
           </div>
-
-          {/* Backups table */}
-          <div className="lg:col-span-3 rounded-lg border bg-white p-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold mb-3">Backups</h2>
-              {backups.isFetching && <span className="text-xs text-gray-500">Refreshing…</span>}
-            </div>
-            {backups.isLoading && <div className="text-gray-600">Loading backups…</div>}
-            {backups.error && <div className="text-red-600">Failed to load backups</div>}
-            {backups.data && (
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead>
-                    <tr className="text-left text-gray-500">
-                      <th className="py-1 pr-4">Name</th>
-                      <th className="py-1 pr-4">Method</th>
-                      <th className="py-1 pr-4">Phase</th>
-                      <th className="py-1 pr-4">Started</th>
-                      <th className="py-1 pr-4">Completed</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(backups.data.backups || []).map((b: any) => (
-                      <tr key={b.name} className="border-t">
-                        <td className="py-1 pr-4 font-medium">{b.name}</td>
-                        <td className="py-1 pr-4">{b.method || '-'}</td>
-                        <td className="py-1 pr-4">{b.phase || '-'}</td>
-                        <td className="py-1 pr-4">{b.startedAt || '-'}</td>
-                        <td className="py-1 pr-4">{b.completedAt || '-'}</td>
-                      </tr>
-                    ))}
-                    {(!backups.data.backups || backups.data.backups.length === 0) && (
-                      <tr><td className="py-2 text-gray-500" colSpan={5}>No backups</td></tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
         </div>
       )}
     </div>
