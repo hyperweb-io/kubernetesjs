@@ -14,7 +14,17 @@ export async function GET(
 
   try {
     // Cluster CR
-    const cluster: any = await kube.get(`/apis/postgresql.cnpg.io/v1/namespaces/${ns}/clusters/${name}`);
+    let cluster: any;
+    try {
+      cluster = await kube.get(`/apis/postgresql.cnpg.io/v1/namespaces/${ns}/clusters/${name}`);
+    } catch (err: any) {
+      const msg = String(err?.message || err);
+      if (/status:\s*404/.test(msg) || /not found/i.test(msg)) {
+        // Graceful not-found: report no database instead of 500
+        return NextResponse.json({ notFound: true, name: `${ns}/${name}`, namespace: ns, cluster: name }, { headers: { 'Cache-Control': 'no-store' } });
+      }
+      throw err;
+    }
     const phase = cluster?.status?.phase as string | undefined;
     const image = cluster?.spec?.imageName as string | undefined;
     const instances = Number(cluster?.spec?.instances ?? 0);

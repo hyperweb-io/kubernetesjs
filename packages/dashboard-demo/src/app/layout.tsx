@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
-import { Sidebar } from '@/components/layout/sidebar';
-import { Header } from '@/components/layout/header';
+import dynamic from 'next/dynamic';
+// Avoid SSR for icon-heavy client components to prevent hydration mismatches
+const Sidebar = dynamic(() => import('@/components/layout/sidebar').then(m => m.Sidebar), { ssr: false });
+const Header = dynamic(() => import('@/components/layout/header').then(m => m.Header), { ssr: false });
 
 const inter = Inter({ subsets: ['latin'] });
 

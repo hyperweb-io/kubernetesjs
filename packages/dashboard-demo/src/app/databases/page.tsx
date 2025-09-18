@@ -8,9 +8,50 @@ export default function DatabasesPage() {
   // For now default to the standard ns/name; later we can add list + picker
   const [ns, setNs] = useState('postgres-db');
   const [name, setName] = useState('postgres-cluster');
-  const { data: status, isLoading, error } = useDatabaseStatus(ns, name);
+  const { data: status, isLoading, error, refetch } = useDatabaseStatus(ns, name) as any;
   const qc = useQueryClient();
   const [methodChoice, setMethodChoice] = useState<'auto'|'barmanObjectStore'|'volumeSnapshot'>('auto');
+
+  // Create DB form state (required fields)
+  const [showCreate, setShowCreate] = useState(false);
+  const [instances, setInstances] = useState<number>(1);
+  const [storage, setStorage] = useState<string>('1Gi');
+  const [storageClass, setStorageClass] = useState<string>('');
+  const [appUsername, setAppUsername] = useState<string>('appuser');
+  const [appPassword, setAppPassword] = useState<string>('appuser123!');
+  const [superuserPassword, setSuperuserPassword] = useState<string>('postgres123!');
+  const [enablePooler, setEnablePooler] = useState<boolean>(true);
+  const [poolerName, setPoolerName] = useState<string>('postgres-pooler');
+  const [poolerInstances, setPoolerInstances] = useState<number>(1);
+
+  const createDb = useMutation({
+    mutationFn: async () => {
+      const r = await fetch(`/api/databases/${ns}/${name}/deploy`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          instances,
+          storage,
+          storageClass: storageClass || undefined,
+          appUsername,
+          appPassword,
+          superuserPassword,
+          enablePooler,
+          poolerName: enablePooler ? poolerName : undefined,
+          poolerInstances: enablePooler ? poolerInstances : undefined,
+        }),
+      });
+      if (!r.ok) throw new Error(await r.text());
+      return r.json();
+    },
+    onSuccess: async () => {
+      setShowCreate(false);
+      await Promise.all([
+        refetch?.(),
+        qc.invalidateQueries({ queryKey: ['db-status', ns, name] }),
+      ]);
+    },
+  });
 
   const backups = useQuery({
     queryKey: ['db-backups', ns, name],
@@ -46,13 +87,90 @@ export default function DatabasesPage() {
         <div className="flex gap-2">
           <input className="border rounded px-2 py-1" placeholder="Namespace" value={ns} onChange={(e) => setNs(e.target.value)} />
           <input className="border rounded px-2 py-1" placeholder="Cluster name" value={name} onChange={(e) => setName(e.target.value)} />
+          <button
+            className="border rounded px-3 py-1 bg-blue-600 text-white hover:bg-blue-700"
+            onClick={() => setShowCreate((v) => !v)}
+          >
+            {showCreate ? 'Close' : 'Create DB'}
+          </button>
         </div>
       </div>
 
-      {isLoading && <div className="text-gray-600">Loading status...</div>}
-      {error && <div className="text-red-600">Failed to load: {(error as Error).message}</div>}
+      {showCreate && (
+        <div className="rounded-lg border bg-white p-4 space-y-3">
+          <h2 className="text-lg font-semibold">Create PostgreSQL (CloudNativePG)</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <label className="flex flex-col gap-1">
+              <span className="text-gray-600">Instances</span>
+              <input type="number" min={1} max={5} value={instances} onChange={(e) => setInstances(parseInt(e.target.value || '1', 10))} className="border rounded px-2 py-1" />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-gray-600">Storage</span>
+              <input value={storage} onChange={(e) => setStorage(e.target.value)} placeholder="10Gi" className="border rounded px-2 py-1" />
+            </label>
+            <label className="flex flex-col gap-1 sm:col-span-2">
+              <span className="text-gray-600">Storage Class (optional)</span>
+              <input value={storageClass} onChange={(e) => setStorageClass(e.target.value)} placeholder="standard" className="border rounded px-2 py-1" />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-gray-600">App Username</span>
+              <input value={appUsername} onChange={(e) => setAppUsername(e.target.value)} className="border rounded px-2 py-1" />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-gray-600">App Password</span>
+              <input type="password" value={appPassword} onChange={(e) => setAppPassword(e.target.value)} className="border rounded px-2 py-1" />
+            </label>
+            <label className="flex flex-col gap-1 sm:col-span-2">
+              <span className="text-gray-600">Superuser Password</span>
+              <input type="password" value={superuserPassword} onChange={(e) => setSuperuserPassword(e.target.value)} className="border rounded px-2 py-1" />
+            </label>
+            <label className="flex items-center gap-2 sm:col-span-2">
+              <input type="checkbox" checked={enablePooler} onChange={(e) => setEnablePooler(e.target.checked)} />
+              <span className="text-gray-700">Enable PgBouncer Pooler</span>
+            </label>
+            {enablePooler && (
+              <>
+                <label className="flex flex-col gap-1">
+                  <span className="text-gray-600">Pooler Name</span>
+                  <input value={poolerName} onChange={(e) => setPoolerName(e.target.value)} className="border rounded px-2 py-1" />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-gray-600">Pooler Instances</span>
+                  <input type="number" min={1} max={5} value={poolerInstances} onChange={(e) => setPoolerInstances(parseInt(e.target.value || '1', 10))} className="border rounded px-2 py-1" />
+                </label>
+              </>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <button
+              className="border rounded px-3 py-1 bg-gray-100 hover:bg-gray-200"
+              onClick={() => setShowCreate(false)}
+              disabled={createDb.isPending}
+            >Cancel</button>
+            <button
+              className="border rounded px-3 py-1 bg-blue-600 text-white hover:bg-blue-700"
+              onClick={() => createDb.mutate()}
+              disabled={createDb.isPending}
+            >{createDb.isPending ? 'Creating…' : 'Create'}</button>
+            {createDb.error && (
+              <span className="text-red-600 text-sm">{String((createDb.error as any)?.message || createDb.error)}</span>
+            )}
+          </div>
+        </div>
+      )}
 
-      {status && (
+      {isLoading && <div className="text-gray-600">Loading status...</div>}
+      {(!isLoading && (status as any)?.notFound) && (
+        <div className="rounded-lg border bg-white p-4">
+          <h2 className="text-lg font-semibold mb-1">No database found</h2>
+          <p className="text-gray-600 text-sm">Use the Create DB button to deploy a PostgreSQL cluster in “{ns}” named “{name}”.</p>
+        </div>
+      )}
+      {!isLoading && !status && error && (
+        <div className="text-red-600">Failed to load: {(error as Error).message}</div>
+      )}
+
+      {status && !(status as any).notFound && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Cluster Summary */}
           <div className="lg:col-span-2 rounded-lg border bg-white p-4">
