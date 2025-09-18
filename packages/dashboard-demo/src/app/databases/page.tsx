@@ -299,7 +299,7 @@ export default function DatabasesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {status.instancesTable.map((row) => (
+                  {status.instancesTable.map((row: any) => (
                     <tr key={row.name} className="border-t">
                       <td className="py-1 pr-4 font-medium">{row.name}</td>
                       <td className="py-1 pr-4">{row.role}</td>
