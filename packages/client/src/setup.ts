@@ -1,5 +1,5 @@
 import { InterwebClient as InterwebKubernetesClient } from '@interweb/interwebjs';
-import { ManifestLoader, SUPPORTED_OPERATORS, KubernetesResource } from '@interweb/manifests';
+import { ManifestLoader, SUPPORTED_OPERATORS, KubernetesResource, OPERATOR_CATALOG } from '@interweb/manifests';
 import {
   ClusterSetupConfig,
   ApplicationConfig,
@@ -275,47 +275,17 @@ export class SetupClient {
    * List supported operators with detected status + version across all namespaces.
    */
   public async listOperatorsInfo(): Promise<OperatorInfo[]> {
-    const catalog: Array<Pick<OperatorInfo, 'name' | 'displayName' | 'description' | 'docsUrl'>> = [
-      {
-        name: 'ingress-nginx',
-        displayName: 'NGINX Ingress Controller',
-        description: 'Ingress controller using NGINX as a reverse proxy and load balancer',
-        docsUrl: 'https://kubernetes.github.io/ingress-nginx/',
-      },
-      {
-        name: 'cert-manager',
-        displayName: 'cert-manager',
-        description: 'X.509 certificate management for Kubernetes',
-        docsUrl: 'https://cert-manager.io/',
-      },
-      {
-        name: 'knative-serving',
-        displayName: 'Knative Serving',
-        description: 'Serverless workloads on Kubernetes',
-        docsUrl: 'https://knative.dev/docs/serving/',
-      },
-      {
-        name: 'cloudnative-pg',
-        displayName: 'CloudNativePG',
-        description: 'PostgreSQL operator for Kubernetes',
-        docsUrl: 'https://cloudnative-pg.io/',
-      },
-      {
-        name: 'kube-prometheus-stack',
-        displayName: 'Prometheus Stack',
-        description: 'Monitoring stack with Prometheus, Grafana, Alertmanager',
-        docsUrl: 'https://prometheus.io/',
-      },
-    ];
     const results: OperatorInfo[] = [];
-    for (const entry of catalog) {
+    for (const name of SUPPORTED_OPERATORS) {
+      const meta = OPERATOR_CATALOG[name] || { name, displayName: name, description: '', docsUrl: undefined };
+      const entry = { name, displayName: meta.displayName, description: meta.description, docsUrl: meta.docsUrl } as Pick<OperatorInfo, 'name' | 'displayName' | 'description' | 'docsUrl'>;
       const installs = await this.getOperatorInstallations(entry.name);
       // Derive summary
       const installed = installs.find(i => i.status === 'installed');
       const installing = installs.find(i => i.status === 'installing');
       const status = installed ? 'installed' : installing ? 'installing' : 'not-installed';
       const version = installed?.version || installing?.version || 'unknown';
-      const namespace = installed?.namespace || installing?.namespace || this.getOperatorDetector(entry.name).namespaces?.[0];
+      const namespace = installed?.namespace || installing?.namespace || this.getOperatorDetector(entry.name).namespaces?.[0] || (OPERATOR_CATALOG[name]?.namespaces?.[0]);
       results.push({ ...entry, status, version, namespace, installations: installs });
     }
     return results;

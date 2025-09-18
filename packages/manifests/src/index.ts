@@ -217,3 +217,50 @@ export const SUPPORTED_OPERATORS = [
 ] as const;
 
 export type SupportedOperator = typeof SUPPORTED_OPERATORS[number];
+
+// Optional metadata for UIs: display name, description, docs, and (optionally) canonical namespaces
+export interface OperatorCatalogEntry {
+  name: SupportedOperator | string;
+  displayName: string;
+  description: string;
+  docsUrl?: string;
+  namespaces?: string[];
+}
+
+export const OPERATOR_CATALOG: Record<string, OperatorCatalogEntry> = {
+  'ingress-nginx': {
+    name: 'ingress-nginx',
+    displayName: 'NGINX Ingress Controller',
+    description: 'Ingress controller using NGINX as a reverse proxy and load balancer',
+    docsUrl: 'https://kubernetes.github.io/ingress-nginx/',
+    namespaces: ['ingress-nginx'],
+  },
+  'cert-manager': {
+    name: 'cert-manager',
+    displayName: 'cert-manager',
+    description: 'X.509 certificate management for Kubernetes',
+    docsUrl: 'https://cert-manager.io/',
+    namespaces: ['cert-manager'],
+  },
+  'knative-serving': {
+    name: 'knative-serving',
+    displayName: 'Knative Serving',
+    description: 'Serverless workloads on Kubernetes',
+    docsUrl: 'https://knative.dev/docs/serving/',
+    namespaces: ['knative-serving', 'kourier-system'],
+  },
+  'cloudnative-pg': {
+    name: 'cloudnative-pg',
+    displayName: 'CloudNativePG',
+    description: 'PostgreSQL operator for Kubernetes',
+    docsUrl: 'https://cloudnative-pg.io/',
+    namespaces: ['cnpg-system'],
+  },
+  'kube-prometheus-stack': {
+    name: 'kube-prometheus-stack',
+    displayName: 'Prometheus Stack',
+    description: 'Monitoring stack with Prometheus, Grafana, Alertmanager',
+    docsUrl: 'https://prometheus.io/',
+    namespaces: ['monitoring'],
+  },
+};
