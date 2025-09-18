@@ -2,7 +2,7 @@
 
 <p align="left" width="100%">
   <a href="https://github.com/hyperweb-io/interweb/actions/workflows/test-client.yml"><img height="20" src="https://github.com/hyperweb-io/interweb/actions/workflows/test-client.yml/badge.svg" alt="Integration Tests" /></a>
-  <a href="https://github.com/hyperweb-io/interweb/actions/workflows/test-client-e2e.yml"><img height="20" src="https://github.com/hyperweb-io/interweb/actions/workflows/test-client-e2e.yml/badge.svg" alt="E2E Tests" /></a>
+  <a href="https://github.com/hyperweb-io/interweb/actions/workflows/test-e2e-client.yml"><img height="20" src="https://github.com/hyperweb-io/interweb/actions/workflows/test-e2e-client.yml/badge.svg" alt="E2E Tests" /></a>
 </p>
 
 Interweb is a TypeScript toolkit for programmatic Kubernetes operations. It ships a curated set of operator manifests, a generated Kubernetes API client, and a high‑level client that applies manifests with kube‑native semantics (create/replace), CRD awareness, and sensible ordering.
