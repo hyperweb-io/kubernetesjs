@@ -5,7 +5,7 @@ import { createSetupClient } from '@/lib/k8s';
 export async function GET(_req: Request, { params }: { params: { operator: string } }) {
   try {
     const setup = createSetupClient();
-    const state = await setup.getOperatorInstallState(params.operator);
+    const state = await setup.getOperatorInstallations(params.operator);
     return NextResponse.json(state);
   } catch (error) {
     console.error('Failed to fetch operator status:', error);

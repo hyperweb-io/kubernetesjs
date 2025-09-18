@@ -9,7 +9,9 @@ import { SetupClient } from './setup';
 
 import { escapeIdentifier, escapeLiteral } from 'pg';
 
+// todo: refactor: these should be in interwebjs
 export type PostgresPoolMode = 'session' | 'transaction';
+export type BackupMethod = 'barmanObjectStore' | 'volumeSnapshot' | 'plugin';
 
 export interface PostgresDeployOptions {
   name?: string; // Cluster name

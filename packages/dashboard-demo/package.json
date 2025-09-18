@@ -1,5 +1,5 @@
 {
-  "name": "@interweb/dashboard",
+  "name": "@interweb/dashboard-demo",
   "version": "0.0.1",
   "description": "Web dashboard for Interweb Kubernetes toolkit",
   "private": true,
