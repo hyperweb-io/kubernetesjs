@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState } from 'react'
 
-export type AppMode = 'smart-objects' | 'infra' | 'ide'
+export type AppMode = 'smart-objects' | 'infra'
 
 interface AppContextValue {
   mode: AppMode

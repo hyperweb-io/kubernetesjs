@@ -45,12 +45,6 @@ import {
   ChevronRight,
   ChevronLeft,
   Heart,
-  Code,
-  MessageSquare,
-  CloudIcon,
-  FunctionSquare,
-  Play,
-  Code2,
 } from 'lucide-react';
 
 // Smart Objects navigation
@@ -65,8 +59,6 @@ const smartObjectsNavigation = [
   // Blockchain section
   { id: 'blockchain-header', label: 'Blockchain', isHeader: true, section: 'blockchain' },
   { id: 'chains', label: 'Blockchains', icon: Link, href: '/d/chains', section: 'blockchain' },
-  { id: 'contracts', label: 'Contracts', icon: FileCode2, href: '/d/contracts', section: 'blockchain' },
-  { id: 'playground', label: 'Playground', icon: Code2, href: '/d/playground', section: 'blockchain' },
   { id: 'relayers', label: 'Relayers', icon: Globe, href: '/d/relayers', section: 'blockchain' },
   { id: 'registry', label: 'Registry', icon: Database, href: '/d/registry', section: 'blockchain' },
 
