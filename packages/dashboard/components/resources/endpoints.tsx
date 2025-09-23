@@ -30,7 +30,7 @@ export function EndpointsView() {
   const { namespace } = usePreferredNamespace()
   
   const query = namespace === '_all' 
-    ? useListCoreV1EndpointsForAllNamespacesQuery({ path: {}, query: {} })
+    ? useListCoreV1EndpointsForAllNamespacesQuery({ query: {} })
     : useListCoreV1NamespacedEndpointsQuery({ path: { namespace }, query: {} })
     
   const { data, isLoading, error, refetch } = query

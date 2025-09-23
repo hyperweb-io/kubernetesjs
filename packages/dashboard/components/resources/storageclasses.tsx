@@ -13,7 +13,8 @@ import {
   AlertCircle,
   Database,
   Zap,
-  Archive
+  Archive,
+  HardDrive
 } from 'lucide-react'
 import { 
   useListStorageV1StorageClassQuery,
@@ -26,7 +27,7 @@ import { confirmDialog } from '@/hooks/useConfirm'
 export function StorageClassesView() {
   const [selectedClass, setSelectedClass] = useState<StorageClass | null>(null)
   
-  const { data, isLoading, error, refetch } = useListStorageV1StorageClassQuery({ path: {}, query: {} })
+  const { data, isLoading, error, refetch } = useListStorageV1StorageClassQuery({ query: {} })
   const deleteClass = useDeleteStorageV1StorageClass()
 
   const storageClasses = data?.items || []

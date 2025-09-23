@@ -17,7 +17,7 @@ export function useConfigMaps(namespace?: string) {
   const ns = namespace || defaultNamespace
 
   if (ns === '_all') {
-    return useListCoreV1ConfigMapForAllNamespacesQuery({ query: {}, path: {} })
+    return useListCoreV1ConfigMapForAllNamespacesQuery({ query: {} })
   }
   return useListCoreV1NamespacedConfigMapQuery({ path: { namespace: ns }, query: {} })
 }

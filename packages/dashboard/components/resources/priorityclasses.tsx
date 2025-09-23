@@ -25,7 +25,7 @@ import { confirmDialog } from '@/hooks/useConfirm'
 export function PriorityClassesView() {
   const [selectedPriorityClass, setSelectedPriorityClass] = useState<PriorityClass | null>(null)
   
-  const { data, isLoading, error, refetch } = useListSchedulingV1PriorityClassQuery({ path: {}, query: {} })
+  const { data, isLoading, error, refetch } = useListSchedulingV1PriorityClassQuery({ query: {} })
   const deletePriorityClass = useDeleteSchedulingV1PriorityClass()
 
   const priorityClasses = data?.items || []

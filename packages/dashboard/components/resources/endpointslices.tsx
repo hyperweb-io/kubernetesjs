@@ -30,7 +30,7 @@ export function EndpointSlicesView() {
   const { namespace } = usePreferredNamespace()
   
   const query = namespace === '_all' 
-    ? useListDiscoveryV1EndpointSliceForAllNamespacesQuery({ path: {}, query: {} })
+    ? useListDiscoveryV1EndpointSliceForAllNamespacesQuery({ query: {} })
     : useListDiscoveryV1NamespacedEndpointSliceQuery({ path: { namespace }, query: {} })
     
   const { data, isLoading, error, refetch } = query
@@ -75,11 +75,12 @@ export function EndpointSlicesView() {
   }
 
   const getServiceName = (slice: EndpointSlice): string => {
-    return slice.metadata?.labels?.['kubernetes.io/service-name'] || 'Unknown'
+    const label = slice.metadata?.labels?.['kubernetes.io/service-name'] as string | undefined;
+    return label?.trim() ? label : 'Unknown';
   }
 
   const getAddressType = (slice: EndpointSlice): string => {
-    return slice.addressType || 'Unknown'
+    return slice.addressType ?? 'Unknown';
   }
 
   const getPorts = (slice: EndpointSlice): string => {

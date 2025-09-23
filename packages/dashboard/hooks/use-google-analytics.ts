@@ -11,6 +11,12 @@ interface EventOptions {
 	[key: string]: any;
 }
 
+declare global {
+	interface Window {
+		gtag?: (...args: unknown[]) => void;
+	}
+}
+
 export function useGoogleAnalytics() {
 	const trackEvent = useCallback((options: EventOptions) => {
 		// Check if GA is enabled and consent was given
@@ -21,7 +27,7 @@ export function useGoogleAnalytics() {
 			return;
 		}
 
-		if (typeof window !== 'undefined' && window.gtag) {
+		if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
 			window.gtag('event', options.action, {
 				event_category: options.category,
 				event_label: options.label,

@@ -31,7 +31,7 @@ export function ServiceAccountsView() {
   const { namespace } = usePreferredNamespace()
   
   const query = namespace === '_all' 
-    ? useListCoreV1ServiceAccountForAllNamespacesQuery({ path: {}, query: {} })
+    ? useListCoreV1ServiceAccountForAllNamespacesQuery({ query: {} })
     : useListCoreV1NamespacedServiceAccountQuery({ path: { namespace }, query: {} })
     
   const { data, isLoading, error, refetch } = query
