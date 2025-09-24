@@ -6,6 +6,7 @@ Usage
 - List operators: `pnpm --filter @interweb/manifests run pull -- --list`
 - Pull all: `pnpm --filter @interweb/manifests run pull -- --all`
 - Pull one: `pnpm --filter @interweb/manifests run pull -- --operator knative-serving --version v1.15.0`
+- Generate JS manifests: `pnpm --filter @interweb/manifests run codegen`
 
 Layout
 - Operators live under `src/operators`.
