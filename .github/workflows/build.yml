@@ -1,0 +1,66 @@
+name: Build Packages
+
+on:
+  push:
+    branches:
+      - main
+      - release/*
+  pull_request:
+    branches:
+      - main
+      - release/*
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 10.12.2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20.x"
+        cache: "pnpm"
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Build packages
+      run: pnpm build
+
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 10.12.2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20.x"
+        cache: "pnpm"
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Lint packages
+      run: pnpm lint
