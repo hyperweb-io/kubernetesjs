@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { InterwebClient, ConfigLoader } from '@interweb/client';
+import { Client, ConfigLoader } from '@interweb/client';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 
@@ -151,7 +151,7 @@ async function deleteResources(options: any): Promise<void> {
   }
 
   // Create client and delete resources
-  const client = new InterwebClient({
+  const client = new Client({
     namespace: options.namespace || config.metadata.namespace,
     kubeconfig: options.kubeconfig,
     context: options.context,

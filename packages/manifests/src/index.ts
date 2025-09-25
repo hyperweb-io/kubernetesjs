@@ -1,6 +1,7 @@
 import * as yaml from 'js-yaml';
 import * as fs from 'fs';
 import * as path from 'path';
+import { createRequire } from 'module';
 
 export interface KubernetesResource {
   apiVersion: string;
@@ -22,6 +23,33 @@ export class ManifestLoader {
    * Get the correct manifests directory path (works in both dev and built environments)
    */
   private static getManifestsDir(): string {
+    // Allow override via environment variable (useful for bundlers like Next.js)
+    const override = process.env.INTERWEB_MANIFESTS_DIR;
+    if (override && fs.existsSync(override)) {
+      return override;
+    }
+
+    // Resolve from the installed package root using Node's module resolver.
+    // This is robust even when the code is bundled by Next, because resolution
+    // is done against the actual package entry, not the route's __dirname.
+    try {
+      // Prefer CJS require when available; otherwise create a require from the ESM URL via eval.
+      let pkgPath: string | undefined;
+      try {
+        // @ts-ignore - in ESM this will throw
+        pkgPath = require.resolve('@interweb/manifests/package.json');
+      } catch {
+        const esmUrl = (0, eval)('import.meta.url') as string;
+        const req = createRequire(esmUrl);
+        pkgPath = req.resolve('@interweb/manifests/package.json');
+      }
+      if (pkgPath) {
+        const base = path.dirname(pkgPath);
+        const fromPkg = path.join(base, 'operators');
+        if (fs.existsSync(fromPkg)) return fromPkg;
+      }
+    } catch {}
+
     // Try multiple possible paths for the operators directory
     const possiblePaths = [
       // Development environment
@@ -189,3 +217,50 @@ export const SUPPORTED_OPERATORS = [
 ] as const;
 
 export type SupportedOperator = typeof SUPPORTED_OPERATORS[number];
+
+// Optional metadata for UIs: display name, description, docs, and (optionally) canonical namespaces
+export interface OperatorCatalogEntry {
+  name: SupportedOperator | string;
+  displayName: string;
+  description: string;
+  docsUrl?: string;
+  namespaces?: string[];
+}
+
+export const OPERATOR_CATALOG: Record<string, OperatorCatalogEntry> = {
+  'ingress-nginx': {
+    name: 'ingress-nginx',
+    displayName: 'NGINX Ingress Controller',
+    description: 'Ingress controller using NGINX as a reverse proxy and load balancer',
+    docsUrl: 'https://kubernetes.github.io/ingress-nginx/',
+    namespaces: ['ingress-nginx'],
+  },
+  'cert-manager': {
+    name: 'cert-manager',
+    displayName: 'cert-manager',
+    description: 'X.509 certificate management for Kubernetes',
+    docsUrl: 'https://cert-manager.io/',
+    namespaces: ['cert-manager'],
+  },
+  'knative-serving': {
+    name: 'knative-serving',
+    displayName: 'Knative Serving',
+    description: 'Serverless workloads on Kubernetes',
+    docsUrl: 'https://knative.dev/docs/serving/',
+    namespaces: ['knative-serving', 'kourier-system'],
+  },
+  'cloudnative-pg': {
+    name: 'cloudnative-pg',
+    displayName: 'CloudNativePG',
+    description: 'PostgreSQL operator for Kubernetes',
+    docsUrl: 'https://cloudnative-pg.io/',
+    namespaces: ['cnpg-system'],
+  },
+  'kube-prometheus-stack': {
+    name: 'kube-prometheus-stack',
+    displayName: 'Prometheus Stack',
+    description: 'Monitoring stack with Prometheus, Grafana, Alertmanager',
+    docsUrl: 'https://prometheus.io/',
+    namespaces: ['monitoring'],
+  },
+};

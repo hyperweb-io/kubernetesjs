@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { InterwebClient, ConfigLoader } from '@interweb/client';
+import { Client, ConfigLoader } from '@interweb/client';
 import chalk from 'chalk';
 
 export function createStatusCommand(): Command {
@@ -70,7 +70,7 @@ async function checkStatus(options: any): Promise<void> {
   console.log(chalk.blue(`📊 Interweb ${configType === 'cluster' ? 'Cluster' : 'Application'} Status`));
   console.log('=====================================\n');
 
-  const client = new InterwebClient({
+  const client = new Client({
     namespace: options.namespace,
     kubeconfig: options.kubeconfig,
     context: options.context,
