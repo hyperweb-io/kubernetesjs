@@ -378,7 +378,11 @@ function emitOperatorObjectModules(typeMap: Map<string, string>, models?: Operat
   // Remove legacy './objects' dir if present
   const legacyDir = path.join(outDir, 'objects');
   if (fs.existsSync(legacyDir)) {
-    try { fs.rmSync(legacyDir, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(legacyDir, { recursive: true, force: true }); } catch (err: any) {
+      if (err?.code !== 'ENOENT') {
+        console.error(`Failed to remove legacy directory '${legacyDir}':`, err);
+      }
+    }
   }
   const emitted: string[] = [];
   for (const op of ops) {
