@@ -175,12 +175,6 @@ function arrayLiteral<T>(items: T[], map: (x: T) => t.Expression): t.ArrayExpres
   return t.arrayExpression(items.map(map));
 }
 
-// Deprecated: previously used to emit src/generated/operators.ts (ids + versions). We now
-// inject this data into the aggregator (generated/index.ts).
-function buildModuleAst(_models: OperatorModel[]): t.File {
-  return t.file(t.program([]));
-}
-
 function main() {
   const rawModels = scanOperators();
   const typeMap = buildGvkToTypeMap();
