@@ -124,48 +124,9 @@ importers:
       '@ark-ui/react':
         specifier: ^5.0.1
         version: 5.24.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@chain-registry/client':
-        specifier: ^2.0.3
-        version: 2.0.61(encoding@0.1.13)
-      '@chain-registry/v2':
-        specifier: ^1.71.148
-        version: 1.71.237
-      '@cosmjs/encoding':
-        specifier: ^0.32.4
-        version: 0.32.4
-      '@hookform/resolvers':
-        specifier: ^3.10.0
-        version: 3.10.0(react-hook-form@7.62.0(react@18.3.1))
-      '@hyperweb/build':
-        specifier: ^1.0.1
-        version: 1.6.0
-      '@hyperweb/parse':
-        specifier: ^1.7.0
-        version: 1.7.0
-      '@interchain-kit/core':
-        specifier: 0.3.2
-        version: 0.3.2(encoding@0.1.13)(typescript@5.9.2)(zod@3.25.76)
-      '@interchain-kit/keplr-extension':
-        specifier: 0.3.2
-        version: 0.3.2(encoding@0.1.13)(starknet@7.6.4)(typescript@5.9.2)(zod@3.25.76)
-      '@interchain-kit/react':
-        specifier: 0.3.2
-        version: 0.3.2(@chain-registry/v2@1.71.237)(@types/react-dom@18.3.7(@types/react@18.3.24))(@types/react@18.3.24)(encoding@0.1.13)(immer@10.1.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.2)(use-sync-external-store@1.5.0(react@18.3.1))(zod@3.25.76)
-      '@interchain-ui/react':
-        specifier: 1.26.3
-        version: 1.26.3(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@interchainjs/cosmos':
-        specifier: ^1.11.0
-        version: 1.17.5(@chain-registry/v2-types@0.53.68)(@chain-registry/v2@1.71.237)
-      '@interchainjs/encoding':
-        specifier: ^1.11.0
-        version: 1.17.5
       '@interweb/interwebjs':
         specifier: workspace:^0.0.1
         version: link:../interwebjs/dist
-      '@monaco-editor/react':
-        specifier: ^4.7.0
-        version: 4.7.0(monaco-editor@0.52.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-accordion':
         specifier: ^1.2.3
         version: 1.2.12(@types/react-dom@18.3.7(@types/react@18.3.24))(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -253,12 +214,9 @@ importers:
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0
-      json-schema-faker:
-        specifier: ^0.5.9
-        version: 0.5.9
-      jszip:
-        specifier: ^3.10.1
-        version: 3.10.1
+      kubernetesjs:
+        specifier: ^0.6.1
+        version: 0.6.2
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
@@ -1020,70 +978,6 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
-
-  '@jsep-plugin/assignment@1.3.0':
-    resolution: {integrity: sha512-VVgV+CXrhbMI3aSusQyclHkenWSAm95WaiKrMxRFam3JSUiIaQjoMIw2sEs/OX4XifnqeQUN4DYbJjlA8EfktQ==}
-    engines: {node: '>= 10.16.0'}
-    peerDependencies:
-      jsep: ^0.4.0||^1.0.0
-
-  '@jsep-plugin/regex@1.0.4':
-    resolution: {integrity: sha512-q7qL4Mgjs1vByCaTnDFcBnV9HS7GVPJX5vyVoCgZHNSC9rjwIlmbXG5sUuorR5ndfHAIlJ8pVStxvjXHbNvtUg==}
-    engines: {node: '>= 10.16.0'}
-    peerDependencies:
-      jsep: ^0.4.0||^1.0.0
-
-  '@keplr-wallet/common@0.12.28':
-    resolution: {integrity: sha512-ESQorPZw8PRiUXhsrxED+E1FEWkAdc6Kwi3Az7ce204gMBQDI2j0XJtTd4uCUp+C24Em9fk0samdHzdoB4caIg==}
-
-  '@keplr-wallet/cosmos@0.12.28':
-    resolution: {integrity: sha512-IuqmSBgKgIeWBA0XGQKKs28IXFeFMCrfadCbtiZccNc7qnNr5Y/Cyyk01BPC8Dd1ZyEyAByoICgrxvtGN0GGvA==}
-
-  '@keplr-wallet/crypto@0.12.28':
-    resolution: {integrity: sha512-le1je+78/4213qshSMgQTYqhCCvzsL9+YfhjXg1kd/ali69MLWK8L8Z09ducHPS6C+LqQXXTNJQpbH2uiFSd5w==}
-
-  '@keplr-wallet/proto-types@0.12.28':
-    resolution: {integrity: sha512-ukti/eCTltPUP64jxtk5TjtwJogyfKPqlBIT3KGUCGzBLIPeYMsffL5w5aoHsMjINzOITjYqzXyEF8LTIK/fmw==}
-
-  '@keplr-wallet/provider-extension@0.12.272':
-    resolution: {integrity: sha512-9q43kPs9mmesmoJmEPAhUDVBzDiKxeCA0lX0WMouTQJhtl0X9MKrF0QmWKU/O09yVlJKviNbO4daJkois2Jxng==}
-    peerDependencies:
-      starknet: ^7
-
-  '@keplr-wallet/simple-fetch@0.12.28':
-    resolution: {integrity: sha512-T2CiKS2B5n0ZA7CWw0CA6qIAH0XYI1siE50MP+i+V0ZniCGBeL+BMcDw64vFJUcEH+1L5X4sDAzV37fQxGwllA==}
-
-  '@keplr-wallet/types@0.12.272':
-    resolution: {integrity: sha512-q5J/vxtikhD0KHxrFpAcC0ATzrFQSRqjmhcGZEbRtB413piytIqqEBUtyjTYEy1jMOVaZRIDDt6cOez9O5zG5Q==}
-    peerDependencies:
-      starknet: ^7
-
-  '@keplr-wallet/types@0.12.28':
-    resolution: {integrity: sha512-EcM9d46hYDm3AO4lf4GUbTSLRySONtTmhKb7p88q56OQOgJN3MMjRacEo2p9jX9gpPe7gRIjMUalhAfUiFpZoQ==}
-
-  '@keplr-wallet/unit@0.12.28':
-    resolution: {integrity: sha512-kpXigHDBJGOmhtPkv9hqsQid9zkFo7OQPeKgO2n8GUlOINIXW6kWG5LXYTi/Yg9Uiw1CQF69gFMuZCJ8IzVHlA==}
-
-  '@ledgerhq/devices@8.5.1':
-    resolution: {integrity: sha512-oW75YQQiP2muHveXTuwSAze6CBxJ7jOYILhFiJbsVzmgLPVqtdw4s0bJJlOBft4Aup67yNAjboFCIU7kTYQBFg==}
-
-  '@ledgerhq/errors@6.25.0':
-    resolution: {integrity: sha512-9cU0dgUyq3Adb1bHAjJnbwl+r+4WBjuPq0k+/DbBNpuYHwcz2xKtRIjLimUJyACjHti3iWwRt1sFcbQDDdI08w==}
-
-  '@ledgerhq/hw-app-cosmos@6.32.6':
-    resolution: {integrity: sha512-DiLK+OJfiWS5h0VYRCnkPHIIuBk3QPgXzo7eMTDAdkByUVQCvbp6h4qZoxL5iDXwOw3nfBf64KXVCsyEKPO72g==}
-
-  '@ledgerhq/hw-transport-webhid@6.30.6':
-    resolution: {integrity: sha512-AOzjFv5n1OTMfvEInAZRfLO11G5zfG8pB5zhmjK5d/mVQfFNcKsLZNAC2h4OZZMBtUy8UTT3n03z93e6k6n4pQ==}
-
-  '@ledgerhq/hw-transport-webusb@6.29.10':
-    resolution: {integrity: sha512-3op7ipyZrM/Gg2qUBUM6tGKgYVh7k3hvXPE7z4i5ElAFHBdM5XMI4OD2cfl38XE0fij1dk/NCpKntOekIL7lmA==}
-
-  '@ledgerhq/hw-transport@6.31.10':
-    resolution: {integrity: sha512-ruNtkTPMO3rFCaSM+oPTOXXerzxWFZF43pAHVAHhsjiQGhLWzLSkMc7qBEpWIpZPubKRAbWSXR2zXBIJPNy8oQ==}
-
-  '@ledgerhq/logs@6.13.0':
-    resolution: {integrity: sha512-4+qRW2Pc8V+btL0QEmdB2X+uyx0kOWMWE1/LWsq5sZy3Q5tpi4eItJS6mB0XL3wGW59RQ+8bchNQQ1OW/va8Og==}
 
   '@lerna/create@8.2.3':
     resolution: {integrity: sha512-f+68+iojcQ0tZRMfCgQyJdsdz+YPu3/d+0Zo1RJz92bgBxTCiEU+dHACVq1n3sEjm/YWPnFGdag8U5EYYmP3WA==}
@@ -4617,6 +4511,9 @@ packages:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
     engines: {node: '>=6'}
 
+  kubernetesjs@0.6.2:
+    resolution: {integrity: sha512-pGo1uaVnAg4M6T18Y32xkIZ2KBgt7GfWHMi2yBXSlkijCIRDuv6kOpPC6JamtC8B7wCnbNmm/f6JK8WLFS+UPg==}
+
   kubernetesjs@0.7.2:
     resolution: {integrity: sha512-WzvmRiZiW1fstCgVLXGWloV/0yv7n9tuMPX640caIIK5nRviCOEux85cCgrumZ3AGZ3hFM5rxhkOH40e2FF6wg==}
 
@@ -7417,115 +7314,6 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
-
-  '@jsep-plugin/assignment@1.3.0(jsep@1.4.0)':
-    dependencies:
-      jsep: 1.4.0
-
-  '@jsep-plugin/regex@1.0.4(jsep@1.4.0)':
-    dependencies:
-      jsep: 1.4.0
-
-  '@keplr-wallet/common@0.12.28':
-    dependencies:
-      '@keplr-wallet/crypto': 0.12.28
-      '@keplr-wallet/types': 0.12.28
-      buffer: 6.0.3
-      delay: 4.4.1
-      mobx: 6.13.7
-
-  '@keplr-wallet/cosmos@0.12.28':
-    dependencies:
-      '@ethersproject/address': 5.8.0
-      '@keplr-wallet/common': 0.12.28
-      '@keplr-wallet/crypto': 0.12.28
-      '@keplr-wallet/proto-types': 0.12.28
-      '@keplr-wallet/simple-fetch': 0.12.28
-      '@keplr-wallet/types': 0.12.28
-      '@keplr-wallet/unit': 0.12.28
-      bech32: 1.1.4
-      buffer: 6.0.3
-      long: 4.0.0
-      protobufjs: 6.11.4
-
-  '@keplr-wallet/crypto@0.12.28':
-    dependencies:
-      '@ethersproject/keccak256': 5.8.0
-      bip32: 2.0.6
-      bip39: 3.1.0
-      bs58check: 2.1.2
-      buffer: 6.0.3
-      crypto-js: 4.2.0
-      elliptic: 6.6.1
-      sha.js: 2.4.12
-
-  '@keplr-wallet/proto-types@0.12.28':
-    dependencies:
-      long: 4.0.0
-      protobufjs: 6.11.4
-
-  '@keplr-wallet/provider-extension@0.12.272(starknet@7.6.4)':
-    dependencies:
-      '@keplr-wallet/types': 0.12.272(starknet@7.6.4)
-      deepmerge: 4.3.1
-      long: 4.0.0
-      starknet: 7.6.4
-      uuid: 11.1.0
-
-  '@keplr-wallet/simple-fetch@0.12.28': {}
-
-  '@keplr-wallet/types@0.12.272(starknet@7.6.4)':
-    dependencies:
-      long: 4.0.0
-      starknet: 7.6.4
-
-  '@keplr-wallet/types@0.12.28':
-    dependencies:
-      long: 4.0.0
-
-  '@keplr-wallet/unit@0.12.28':
-    dependencies:
-      '@keplr-wallet/types': 0.12.28
-      big-integer: 1.6.52
-      utility-types: 3.11.0
-
-  '@ledgerhq/devices@8.5.1':
-    dependencies:
-      '@ledgerhq/errors': 6.25.0
-      '@ledgerhq/logs': 6.13.0
-      rxjs: 7.8.2
-      semver: 7.7.2
-
-  '@ledgerhq/errors@6.25.0': {}
-
-  '@ledgerhq/hw-app-cosmos@6.32.6':
-    dependencies:
-      '@ledgerhq/errors': 6.25.0
-      '@ledgerhq/hw-transport': 6.31.10
-      bip32-path: 0.4.2
-
-  '@ledgerhq/hw-transport-webhid@6.30.6':
-    dependencies:
-      '@ledgerhq/devices': 8.5.1
-      '@ledgerhq/errors': 6.25.0
-      '@ledgerhq/hw-transport': 6.31.10
-      '@ledgerhq/logs': 6.13.0
-
-  '@ledgerhq/hw-transport-webusb@6.29.10':
-    dependencies:
-      '@ledgerhq/devices': 8.5.1
-      '@ledgerhq/errors': 6.25.0
-      '@ledgerhq/hw-transport': 6.31.10
-      '@ledgerhq/logs': 6.13.0
-
-  '@ledgerhq/hw-transport@6.31.10':
-    dependencies:
-      '@ledgerhq/devices': 8.5.1
-      '@ledgerhq/errors': 6.25.0
-      '@ledgerhq/logs': 6.13.0
-      events: 3.3.0
-
-  '@ledgerhq/logs@6.13.0': {}
 
   '@lerna/create@8.2.3(@swc/core@1.13.5(@swc/helpers@0.5.17))(@types/node@22.17.1)(encoding@0.1.13)(typescript@5.9.2)':
     dependencies:
@@ -11935,6 +11723,8 @@ snapshots:
   kind-of@6.0.3: {}
 
   kleur@3.0.3: {}
+
+  kubernetesjs@0.6.2: {}
 
   kubernetesjs@0.7.2: {}
 
