@@ -243,7 +243,7 @@ function pickLatest(versions: string[]): string {
   })[0];
 }
 
-async function pullOperator(op: OperatorConfig, version?: string, outDir = path.resolve(__dirname, '..', 'src', 'operators')) {
+async function pullOperator(op: OperatorConfig, version?: string, outDir = path.resolve(__dirname, '..', 'operators')) {
   const sources = version ? op.sources.filter((s) => s.version === version) : op.sources;
   if (sources.length === 0) throw new Error(`No sources for ${op.name}${version ? `@${version}` : ''}`);
 
@@ -355,7 +355,7 @@ async function main() {
     process.exit(0);
   }
 
-  const outDir = out ? path.resolve(out) : path.resolve(__dirname, '..', 'src', 'operators');
+  const outDir = out ? path.resolve(out) : path.resolve(__dirname, '..', 'operators');
   ensureDir(outDir);
 
   if (all) {

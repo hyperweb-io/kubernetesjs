@@ -1,5 +1,4 @@
-import { InterwebClient as InterwebKubernetesClient, APIResourceList, APIResource } from '@interweb/interwebjs';
-import type { KubernetesResource } from '@interweb/manifests';
+import { InterwebClient as InterwebKubernetesClient, APIResourceList, APIResource, KubernetesResource, ObjectMeta } from '@interweb/interwebjs';
 
 type GroupVersion = { group: string | null; version: string; key: string };
 
@@ -229,12 +228,13 @@ export class K8sApplier {
     ns?: string
   ) {
     const body = this.prepareForReplace(manifest, existing ?? undefined, isNamespaced, ns);
+    const name = manifest.metadata && 'name' in manifest.metadata ? manifest.metadata.name : undefined;
     try {
-      await this.putWithRetries(itemPath, body, `${manifest.kind}/${manifest.metadata?.name}${ns ? ` in ${ns}` : ''}`);
-      this.opts.log(`Updated ${manifest.kind}/${manifest.metadata?.name}${ns ? ` in ${ns}` : ''}`);
+      await this.putWithRetries(itemPath, body, `${manifest.kind}/${name}${ns ? ` in ${ns}` : ''}`);
+      this.opts.log(`Updated ${manifest.kind}/${name}${ns ? ` in ${ns}` : ''}`);
     } catch (err) {
       if (!this.opts.continueOnError) throw err;
-      this.opts.log(`Error updating ${manifest.kind}/${manifest.metadata?.name}: ${String((err as any)?.message || err)}`);
+      this.opts.log(`Error updating ${manifest.kind}/${name}: ${String((err as any)?.message || err)}`);
     }
   }
 

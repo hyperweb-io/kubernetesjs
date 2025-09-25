@@ -9,9 +9,9 @@ Usage
 - Generate JS manifests: `pnpm --filter @interweb/manifests run codegen`
 
 Layout
-- Operators live under `src/operators`.
-- Unversioned files like `src/operators/knative-serving.yaml` point to the latest version we have.
-- Versioned files are stored at `src/operators/<name>/<version>.yaml`.
+- Operators live under `operators/` (outside `src`, not published).
+- Unversioned files like `operators/knative-serving.yaml` point to the latest version we have.
+- Versioned files are stored at `operators/<name>/<version>.yaml`.
 
 Supported operators
 - cloudnative-pg: 1.25.2 (upstream release YAML)
@@ -20,5 +20,5 @@ Supported operators
 - ingress-nginx: 4.11.2 chart (helm-rendered)
 
 Notes
-- This package vendor-pins exact upstream manifests for reproducibility.
-- To bump versions, update the sources in `scripts/pull-manifests.ts` and pull again.
+- Only generated artifacts are included in the published package. The raw `operators/` YAML is local-only and gitignored.
+- To bump versions, update the sources in `scripts/pull-manifests.ts`, run `pnpm pull` (or `pull:all`) which writes to `operators/`, then run `pnpm codegen` to refresh `src/generated/*`.

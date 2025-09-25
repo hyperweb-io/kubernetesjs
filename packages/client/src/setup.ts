@@ -1,5 +1,5 @@
-import { InterwebClient as InterwebKubernetesClient } from '@interweb/interwebjs';
-import { ManifestLoader, SUPPORTED_OPERATORS, KubernetesResource, OPERATOR_CATALOG } from '@interweb/manifests';
+import { InterwebClient as InterwebKubernetesClient, KubernetesResource } from '@interweb/interwebjs';
+import { getOperatorIds, getOperatorResources, getOperatorVersions, getOperatorInfo } from '@interweb/manifests';
 import {
   ClusterSetupConfig,
   ApplicationConfig,
@@ -75,7 +75,7 @@ export class SetupClient {
   public async installOperators(config: ClusterSetupConfig): Promise<void> {
     // check config.spec.operators are in the SUPPORTED_OPERATORS
     for (const operator of config.spec.operators) {
-      if (!SUPPORTED_OPERATORS.includes(operator.name as any)) {
+      if (!getOperatorIds().includes(operator.name as any)) {
         throw new Error(`Unsupported operator: ${operator.name}`);
       }
     }
@@ -86,7 +86,7 @@ export class SetupClient {
         continue;
       }
       console.log(`Applying operator: ${operator.name} ${operator.version}`);
-      const manifests = ManifestLoader.loadOperatorManifests(operator.name, operator.version);
+      const manifests = getOperatorResources(operator.name, operator.version);
       await this.applyManifests(manifests, {
         continueOnError: false,
         log: (m) => console.log(m),
@@ -101,7 +101,7 @@ export class SetupClient {
   public async deleteOperators(config: ClusterSetupConfig, options?: { continueOnError?: boolean }): Promise<void> {
     // check config.spec.operators are in the SUPPORTED_OPERATORS
     for (const operator of config.spec.operators) {
-      if (!SUPPORTED_OPERATORS.includes(operator.name as any)) {
+      if (!getOperatorIds().includes(operator.name as any)) {
         throw new Error(`Unsupported operator: ${operator.name}`);
       }
     }
@@ -114,7 +114,7 @@ export class SetupClient {
     for (const operator of operatorsToDelete) {
       console.log(`Deleting operator: ${operator.name} ${operator.version}`);
       try {
-        const manifests = ManifestLoader.loadOperatorManifests(operator.name, operator.version);
+        const manifests = getOperatorResources(operator.name, operator.version);
         await this.deleteManifests(manifests, {
           continueOnError: options?.continueOnError ?? true,
           log: (m) => console.log(m),
@@ -253,7 +253,7 @@ export class SetupClient {
    * Install a single operator by name (optional version).
    */
   public async installOperatorByName(name: string, version?: string): Promise<void> {
-    const manifests = ManifestLoader.loadOperatorManifests(name, version);
+    const manifests = getOperatorResources(name, version);
     await this.applyManifests(manifests, {
       continueOnError: false,
       log: (m) => console.log(m),
@@ -264,7 +264,7 @@ export class SetupClient {
    * Uninstall a single operator by name (optional version).
    */
   public async uninstallOperatorByName(name: string, version?: string): Promise<void> {
-    const manifests = ManifestLoader.loadOperatorManifests(name, version);
+    const manifests = getOperatorResources(name, version);
     await this.deleteManifests(manifests, {
       continueOnError: true,
       log: (m) => console.log(m),
@@ -276,8 +276,8 @@ export class SetupClient {
    */
   public async listOperatorsInfo(): Promise<OperatorInfo[]> {
     const results: OperatorInfo[] = [];
-    for (const name of SUPPORTED_OPERATORS) {
-      const meta = OPERATOR_CATALOG[name] || { name, displayName: name, description: '', docsUrl: undefined };
+    for (const name of getOperatorIds()) {
+      const meta = getOperatorInfo(name) || { name, displayName: name, description: '', docsUrl: undefined };
       const entry = { name, displayName: meta.displayName, description: meta.description, docsUrl: meta.docsUrl } as Pick<OperatorInfo, 'name' | 'displayName' | 'description' | 'docsUrl'>;
       const installs = await this.getOperatorInstallations(entry.name);
       // Derive summary
@@ -285,7 +285,7 @@ export class SetupClient {
       const installing = installs.find(i => i.status === 'installing');
       const status = installed ? 'installed' : installing ? 'installing' : 'not-installed';
       const version = installed?.version || installing?.version || 'unknown';
-      const namespace = installed?.namespace || installing?.namespace || this.getOperatorDetector(entry.name).namespaces?.[0] || (OPERATOR_CATALOG[name]?.namespaces?.[0]);
+      const namespace = installed?.namespace || installing?.namespace || this.getOperatorDetector(entry.name).namespaces?.[0] || (getOperatorInfo(name)?.namespaces?.[0]);
       results.push({ ...entry, status, version, namespace, installations: installs });
     }
     return results;

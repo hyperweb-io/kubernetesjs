@@ -23718,7 +23718,7 @@ export type RawExtension = {
 };
 /* io.k8s.apimachinery.pkg.util.intstr.IntOrString */
 /* IntOrString is a type that can hold an int32 or a string.  When used in JSON or YAML marshalling and unmarshalling, it produces or consumes the inner type.  This allows you to have, for example, a JSON field that can accept a name or number. */
-export type IntOrString = string;
+export type IntOrString = string | number;
 /* io.k8s.apimachinery.pkg.version.Info */
 /* Info contains versioning information. how we'll want to distribute that information. */
 export interface Info {

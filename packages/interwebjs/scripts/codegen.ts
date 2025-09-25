@@ -1,5 +1,5 @@
 import { writeFileSync } from 'fs';
-import { generateOpenApiClient,getDefaultSchemaSDKOptions } from 'schema-sdk';
+import { generateOpenApiClient, getDefaultSchemaSDKOptions } from 'schema-sdk';
 
 import schema from './swagger.json';
 
@@ -10,25 +10,19 @@ const options = getDefaultSchemaSDKOptions({
   exclude: [
     '*autoscaling.v2*',
   ],
-  jsonpatch: [
-    {
-      op: 'remove',
-      path: '/definitions/io.k8s.apimachinery.pkg.util.intstr.IntOrString/type'
-    },
-    {
-      op: 'remove',
-      path: '/definitions/io.k8s.apimachinery.pkg.util.intstr.IntOrString/format'
-    },
-    {
-      op: 'add',
-      path: '/definitions/io.k8s.apimachinery.pkg.util.intstr.IntOrString/oneOf',
-      value: [
-        { type: 'string' },
-        { type: 'integer', format: 'int32' }
-      ]
-    }
-  ]
 });
+// Apply IntOrString patch once (mutating a cloned schema)
+const patchedSchema = JSON.parse(JSON.stringify(schema)) as any;
+const intOrString = patchedSchema?.definitions?.['io.k8s.apimachinery.pkg.util.intstr.IntOrString'];
+if (intOrString && typeof intOrString === 'object') {
+  delete intOrString.type;
+  delete intOrString.format;
+  intOrString.oneOf = [
+    { type: 'string' },
+    { type: 'integer', format: 'int32' },
+  ];
+}
+
 const code = generateOpenApiClient(
   {
     ...options,
@@ -70,7 +64,7 @@ const code = generateOpenApiClient(
       },
     },
   },
-  schema as any
+  patchedSchema as any
 );
 writeFileSync(
   __dirname + '/../src/index.ts',

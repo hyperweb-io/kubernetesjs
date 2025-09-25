@@ -2,9 +2,9 @@ import { InterwebClient as InterwebKubernetesClient,
   Namespace,
   Secret,
   PostgresqlCnpgIoV1Cluster,
-  PostgresqlCnpgIoV1Pooler, 
+  PostgresqlCnpgIoV1Pooler,
+  KubernetesResource,
 } from '@interweb/interwebjs';
-import { KubernetesResource } from '@interweb/manifests';
 import { SetupClient } from './setup';
 
 import { escapeIdentifier, escapeLiteral } from 'pg';
