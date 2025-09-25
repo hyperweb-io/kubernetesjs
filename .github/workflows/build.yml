@@ -15,6 +15,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
     
     steps:
     - name: Checkout code
