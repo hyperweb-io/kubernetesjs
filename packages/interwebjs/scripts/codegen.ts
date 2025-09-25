@@ -7,9 +7,6 @@ const options = getDefaultSchemaSDKOptions({
   includePropertyComments: true,
   clientName: 'InterwebClient',
   includeSwaggerUrl: true,
-  exclude: [
-    '*autoscaling.v2*',
-  ],
 });
 // Apply IntOrString patch once (mutating a cloned schema)
 const patchedSchema = JSON.parse(JSON.stringify(schema)) as any;
@@ -44,7 +41,6 @@ const code = generateOpenApiClient(
       excludeRequests: ['head', 'options'],
       excludeTags: [
         'storage_v1beta1',
-        '*autoscaling*',
       ],
     },
     includeTypeComments: true,

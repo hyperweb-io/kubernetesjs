@@ -1,5 +1,5 @@
 /** Auto-generated typed resources for operator: knative-serving*/
-import type { KubernetesResource, AdmissionregistrationK8sIoV1MutatingWebhookConfiguration, AdmissionregistrationK8sIoV1ValidatingWebhookConfiguration, ApiextensionsK8sIoV1CustomResourceDefinition, AppsV1Deployment, CachingInternalKnativeDevV1alpha1Image, ConfigMap, NetworkingInternalKnativeDevV1alpha1Certificate, PolicyV1PodDisruptionBudget, RbacAuthorizationK8sIoV1ClusterRole, RbacAuthorizationK8sIoV1ClusterRoleBinding, RbacAuthorizationK8sIoV1Role, RbacAuthorizationK8sIoV1RoleBinding, Secret, Service, ServiceAccount } from "@interweb/interwebjs";
+import type { KubernetesResource, AdmissionregistrationK8sIoV1MutatingWebhookConfiguration, AdmissionregistrationK8sIoV1ValidatingWebhookConfiguration, ApiextensionsK8sIoV1CustomResourceDefinition, AppsV1Deployment, AutoscalingV2HorizontalPodAutoscaler, CachingInternalKnativeDevV1alpha1Image, ConfigMap, NetworkingInternalKnativeDevV1alpha1Certificate, PolicyV1PodDisruptionBudget, RbacAuthorizationK8sIoV1ClusterRole, RbacAuthorizationK8sIoV1ClusterRoleBinding, RbacAuthorizationK8sIoV1Role, RbacAuthorizationK8sIoV1RoleBinding, Secret, Service, ServiceAccount } from "@interweb/interwebjs";
 export const CustomResourceDefinition_CertificatesNetworkingInternalKnativeDev: ApiextensionsK8sIoV1CustomResourceDefinition = {
   apiVersion: "apiextensions.k8s.io/v1",
   kind: "CustomResourceDefinition",
@@ -6271,7 +6271,7 @@ export const ConfigMap_ConfigTracing: ConfigMap = {
     _example: "################################\n#                              #\n#    EXAMPLE CONFIGURATION     #\n#                              #\n################################\n\n# This block is not actually functional configuration,\n# but serves to illustrate the available configuration\n# options and document them in a way that is accessible\n# to users that `kubectl edit` this config map.\n#\n# These sample configuration options may be copied out of\n# this example block and unindented to be in the data block\n# to actually change the configuration.\n#\n# This may be \"zipkin\" or \"none\" (default)\nbackend: \"none\"\n\n# URL to zipkin collector where traces are sent.\n# This must be specified when backend is \"zipkin\"\nzipkin-endpoint: \"http://zipkin.istio-system.svc.cluster.local:9411/api/v2/spans\"\n\n# Enable zipkin debug mode. This allows all spans to be sent to the server\n# bypassing sampling.\ndebug: \"false\"\n\n# Percentage (0-1) of requests to trace\nsample-rate: \"0.1\"\n"
   }
 };
-export const HorizontalPodAutoscaler_Activator: KubernetesResource = {
+export const HorizontalPodAutoscaler_Activator: AutoscalingV2HorizontalPodAutoscaler = {
   apiVersion: "autoscaling/v2",
   kind: "HorizontalPodAutoscaler",
   metadata: {
@@ -6820,7 +6820,7 @@ export const Service_Controller: Service = {
     }
   }
 };
-export const HorizontalPodAutoscaler_Webhook: KubernetesResource = {
+export const HorizontalPodAutoscaler_Webhook: AutoscalingV2HorizontalPodAutoscaler = {
   apiVersion: "autoscaling/v2",
   kind: "HorizontalPodAutoscaler",
   metadata: {
@@ -7624,7 +7624,7 @@ export const Service_KourierInternal: Service = {
     type: "ClusterIP"
   }
 };
-export const HorizontalPodAutoscaler_3scaleKourierGateway: KubernetesResource = {
+export const HorizontalPodAutoscaler_3scaleKourierGateway: AutoscalingV2HorizontalPodAutoscaler = {
   apiVersion: "autoscaling/v2",
   kind: "HorizontalPodAutoscaler",
   metadata: {

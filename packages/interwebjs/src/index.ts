@@ -20256,6 +20256,183 @@ export interface ScaleStatus {
   replicas: number;
   selector?: string;
 }
+/* io.k8s.api.autoscaling.v2.ContainerResourceMetricSource */
+/* ContainerResourceMetricSource indicates how to scale on a resource metric known to Kubernetes, as specified in requests and limits, describing each pod in the current scale target (e.g. CPU or memory).  The values will be averaged together before being compared to the target.  Such metrics are built in to Kubernetes, and have special scaling options on top of those available to normal per-pod metrics using the "pods" source.  Only one "target" type should be set. */
+export interface ContainerResourceMetricSource {
+  container: string;
+  name: string;
+  target: MetricTarget;
+}
+/* io.k8s.api.autoscaling.v2.ContainerResourceMetricStatus */
+/* ContainerResourceMetricStatus indicates the current value of a resource metric known to Kubernetes, as specified in requests and limits, describing a single container in each pod in the current scale target (e.g. CPU or memory).  Such metrics are built in to Kubernetes, and have special scaling options on top of those available to normal per-pod metrics using the "pods" source. */
+export interface ContainerResourceMetricStatus {
+  container: string;
+  current: MetricValueStatus;
+  name: string;
+}
+/* io.k8s.api.autoscaling.v2.CrossVersionObjectReference */
+/* CrossVersionObjectReference contains enough information to let you identify the referred resource. */
+export interface IoK8sApiAutoscalingV2CrossVersionObjectReference {
+  apiVersion?: string;
+  kind: string;
+  name: string;
+}
+/* io.k8s.api.autoscaling.v2.ExternalMetricSource */
+/* ExternalMetricSource indicates how to scale on a metric not associated with any Kubernetes object (for example length of queue in cloud messaging service, or QPS from loadbalancer running outside of cluster). */
+export interface ExternalMetricSource {
+  metric: MetricIdentifier;
+  target: MetricTarget;
+}
+/* io.k8s.api.autoscaling.v2.ExternalMetricStatus */
+/* ExternalMetricStatus indicates the current value of a global metric not associated with any Kubernetes object. */
+export interface ExternalMetricStatus {
+  current: MetricValueStatus;
+  metric: MetricIdentifier;
+}
+/* io.k8s.api.autoscaling.v2.HPAScalingPolicy */
+/* HPAScalingPolicy is a single policy which must hold true for a specified past interval. */
+export interface HPAScalingPolicy {
+  periodSeconds: number;
+  type: string;
+  value: number;
+}
+/* io.k8s.api.autoscaling.v2.HPAScalingRules */
+/* HPAScalingRules configures the scaling behavior for one direction. These Rules are applied after calculating DesiredReplicas from metrics for the HPA. They can limit the scaling velocity by specifying scaling policies. They can prevent flapping by specifying the stabilization window, so that the number of replicas is not set instantly, instead, the safest value from the stabilization window is chosen. */
+export interface HPAScalingRules {
+  policies?: HPAScalingPolicy[];
+  selectPolicy?: string;
+  stabilizationWindowSeconds?: number;
+}
+/* io.k8s.api.autoscaling.v2.HorizontalPodAutoscaler */
+/* HorizontalPodAutoscaler is the configuration for a horizontal pod autoscaler, which automatically manages the replica count of any resource implementing the scale subresource based on the metrics specified. */
+export interface AutoscalingV2HorizontalPodAutoscaler {
+  apiVersion?: string;
+  kind?: string;
+  metadata?: ObjectMeta;
+  spec?: IoK8sApiAutoscalingV2HorizontalPodAutoscalerSpec;
+  status?: IoK8sApiAutoscalingV2HorizontalPodAutoscalerStatus;
+}
+/* io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerBehavior */
+/* HorizontalPodAutoscalerBehavior configures the scaling behavior of the target in both Up and Down directions (scaleUp and scaleDown fields respectively). */
+export interface HorizontalPodAutoscalerBehavior {
+  scaleDown?: HPAScalingRules;
+  scaleUp?: HPAScalingRules;
+}
+/* io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerCondition */
+/* HorizontalPodAutoscalerCondition describes the state of a HorizontalPodAutoscaler at a certain point. */
+export interface HorizontalPodAutoscalerCondition {
+  lastTransitionTime?: Time;
+  message?: string;
+  reason?: string;
+  status: string;
+  type: string;
+}
+/* io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerList */
+/* HorizontalPodAutoscalerList is a list of horizontal pod autoscaler objects. */
+export interface AutoscalingV2HorizontalPodAutoscalerList {
+  apiVersion?: string;
+  items: AutoscalingV2HorizontalPodAutoscaler[];
+  kind?: string;
+  metadata?: ListMeta;
+}
+/* io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerSpec */
+/* HorizontalPodAutoscalerSpec describes the desired functionality of the HorizontalPodAutoscaler. */
+export interface IoK8sApiAutoscalingV2HorizontalPodAutoscalerSpec {
+  behavior?: HorizontalPodAutoscalerBehavior;
+  maxReplicas: number;
+  metrics?: MetricSpec[];
+  minReplicas?: number;
+  scaleTargetRef: IoK8sApiAutoscalingV2CrossVersionObjectReference;
+}
+/* io.k8s.api.autoscaling.v2.HorizontalPodAutoscalerStatus */
+/* HorizontalPodAutoscalerStatus describes the current status of a horizontal pod autoscaler. */
+export interface IoK8sApiAutoscalingV2HorizontalPodAutoscalerStatus {
+  conditions?: HorizontalPodAutoscalerCondition[];
+  currentMetrics?: MetricStatus[];
+  currentReplicas?: number;
+  desiredReplicas: number;
+  lastScaleTime?: Time;
+  observedGeneration?: number;
+}
+/* io.k8s.api.autoscaling.v2.MetricIdentifier */
+/* MetricIdentifier defines the name and optionally selector for a metric */
+export interface MetricIdentifier {
+  name: string;
+  selector?: LabelSelector;
+}
+/* io.k8s.api.autoscaling.v2.MetricSpec */
+/* MetricSpec specifies how to scale based on a single metric (only `type` and one other matching field should be set at once). */
+export interface MetricSpec {
+  containerResource?: ContainerResourceMetricSource;
+  external?: ExternalMetricSource;
+  object?: ObjectMetricSource;
+  pods?: PodsMetricSource;
+  resource?: ResourceMetricSource;
+  type: string;
+}
+/* io.k8s.api.autoscaling.v2.MetricStatus */
+/* MetricStatus describes the last-read state of a single metric. */
+export interface MetricStatus {
+  containerResource?: ContainerResourceMetricStatus;
+  external?: ExternalMetricStatus;
+  object?: ObjectMetricStatus;
+  pods?: PodsMetricStatus;
+  resource?: ResourceMetricStatus;
+  type: string;
+}
+/* io.k8s.api.autoscaling.v2.MetricTarget */
+/* MetricTarget defines the target value, average value, or average utilization of a specific metric */
+export interface MetricTarget {
+  averageUtilization?: number;
+  averageValue?: Quantity;
+  type: string;
+  value?: Quantity;
+}
+/* io.k8s.api.autoscaling.v2.MetricValueStatus */
+/* MetricValueStatus holds the current value for a metric */
+export interface MetricValueStatus {
+  averageUtilization?: number;
+  averageValue?: Quantity;
+  value?: Quantity;
+}
+/* io.k8s.api.autoscaling.v2.ObjectMetricSource */
+/* ObjectMetricSource indicates how to scale on a metric describing a kubernetes object (for example, hits-per-second on an Ingress object). */
+export interface ObjectMetricSource {
+  describedObject: IoK8sApiAutoscalingV2CrossVersionObjectReference;
+  metric: MetricIdentifier;
+  target: MetricTarget;
+}
+/* io.k8s.api.autoscaling.v2.ObjectMetricStatus */
+/* ObjectMetricStatus indicates the current value of a metric describing a kubernetes object (for example, hits-per-second on an Ingress object). */
+export interface ObjectMetricStatus {
+  current: MetricValueStatus;
+  describedObject: IoK8sApiAutoscalingV2CrossVersionObjectReference;
+  metric: MetricIdentifier;
+}
+/* io.k8s.api.autoscaling.v2.PodsMetricSource */
+/* PodsMetricSource indicates how to scale on a metric describing each pod in the current scale target (for example, transactions-processed-per-second). The values will be averaged together before being compared to the target value. */
+export interface PodsMetricSource {
+  metric: MetricIdentifier;
+  target: MetricTarget;
+}
+/* io.k8s.api.autoscaling.v2.PodsMetricStatus */
+/* PodsMetricStatus indicates the current value of a metric describing each pod in the current scale target (for example, transactions-processed-per-second). */
+export interface PodsMetricStatus {
+  current: MetricValueStatus;
+  metric: MetricIdentifier;
+}
+/* io.k8s.api.autoscaling.v2.ResourceMetricSource */
+/* ResourceMetricSource indicates how to scale on a resource metric known to Kubernetes, as specified in requests and limits, describing each pod in the current scale target (e.g. CPU or memory).  The values will be averaged together before being compared to the target.  Such metrics are built in to Kubernetes, and have special scaling options on top of those available to normal per-pod metrics using the "pods" source.  Only one "target" type should be set. */
+export interface ResourceMetricSource {
+  name: string;
+  target: MetricTarget;
+}
+/* io.k8s.api.autoscaling.v2.ResourceMetricStatus */
+/* ResourceMetricStatus indicates the current value of a resource metric known to Kubernetes, as specified in requests and limits, describing each pod in the current scale target (e.g. CPU or memory).  Such metrics are built in to Kubernetes, and have special scaling options on top of those available to normal per-pod metrics using the "pods" source. */
+export interface ResourceMetricStatus {
+  current: MetricValueStatus;
+  name: string;
+}
 /* io.k8s.api.batch.v1.CronJob */
 /* CronJob represents the configuration of a single cron job. */
 export interface BatchV1CronJob {
@@ -29235,6 +29412,719 @@ export interface CreateAuthorizationV1SubjectAccessReviewRequest {
     pretty?: string;
   };
   body: AuthorizationK8sIoV1SubjectAccessReview;
+}
+export interface ListAutoscalingInternalKnativeDevV1alpha1MetricForAllNamespacesRequest {
+  query: {
+    allowWatchBookmarks?: boolean;
+    continue?: string;
+    fieldSelector?: string;
+    labelSelector?: string;
+    limit?: number;
+    pretty?: string;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+    watch?: boolean;
+  };
+}
+export interface ListAutoscalingInternalKnativeDevV1alpha1NamespacedMetricRequest {
+  query: {
+    pretty?: string;
+    allowWatchBookmarks?: boolean;
+    continue?: string;
+    fieldSelector?: string;
+    labelSelector?: string;
+    limit?: number;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+    watch?: boolean;
+  };
+  path: {
+    namespace: string;
+  };
+}
+export interface CreateAutoscalingInternalKnativeDevV1alpha1NamespacedMetricRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+  };
+  path: {
+    namespace: string;
+  };
+  body: AutoscalingInternalKnativeDevV1alpha1Metric;
+}
+export interface DeleteAutoscalingInternalKnativeDevV1alpha1CollectionNamespacedMetricRequest {
+  query: {
+    pretty?: string;
+    allowWatchBookmarks?: boolean;
+    continue?: string;
+    fieldSelector?: string;
+    labelSelector?: string;
+    limit?: number;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+    watch?: boolean;
+  };
+  path: {
+    namespace: string;
+  };
+}
+export interface ReadAutoscalingInternalKnativeDevV1alpha1NamespacedMetricRequest {
+  query: {
+    pretty?: string;
+    resourceVersion?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+}
+export interface ReplaceAutoscalingInternalKnativeDevV1alpha1NamespacedMetricRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+  body: AutoscalingInternalKnativeDevV1alpha1Metric;
+}
+export interface DeleteAutoscalingInternalKnativeDevV1alpha1NamespacedMetricRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    gracePeriodSeconds?: number;
+    ignoreStoreReadErrorWithClusterBreakingPotential?: boolean;
+    orphanDependents?: boolean;
+    propagationPolicy?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+}
+export interface PatchAutoscalingInternalKnativeDevV1alpha1NamespacedMetricRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+    force?: boolean;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+  body: Patch;
+}
+export interface ReadAutoscalingInternalKnativeDevV1alpha1NamespacedMetricStatusRequest {
+  query: {
+    pretty?: string;
+    resourceVersion?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+}
+export interface ReplaceAutoscalingInternalKnativeDevV1alpha1NamespacedMetricStatusRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+  body: AutoscalingInternalKnativeDevV1alpha1Metric;
+}
+export interface PatchAutoscalingInternalKnativeDevV1alpha1NamespacedMetricStatusRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+    force?: boolean;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+  body: Patch;
+}
+export interface ListAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    allowWatchBookmarks?: boolean;
+    continue?: string;
+    fieldSelector?: string;
+    labelSelector?: string;
+    limit?: number;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+    watch?: boolean;
+  };
+  path: {
+    namespace: string;
+  };
+}
+export interface CreateAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+  };
+  path: {
+    namespace: string;
+  };
+  body: AutoscalingInternalKnativeDevV1alpha1PodAutoscaler;
+}
+export interface DeleteAutoscalingInternalKnativeDevV1alpha1CollectionNamespacedPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    allowWatchBookmarks?: boolean;
+    continue?: string;
+    fieldSelector?: string;
+    labelSelector?: string;
+    limit?: number;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+    watch?: boolean;
+  };
+  path: {
+    namespace: string;
+  };
+}
+export interface ReadAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    resourceVersion?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+}
+export interface ReplaceAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+  body: AutoscalingInternalKnativeDevV1alpha1PodAutoscaler;
+}
+export interface DeleteAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    gracePeriodSeconds?: number;
+    ignoreStoreReadErrorWithClusterBreakingPotential?: boolean;
+    orphanDependents?: boolean;
+    propagationPolicy?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+}
+export interface PatchAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+    force?: boolean;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+  body: Patch;
+}
+export interface ReadAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerStatusRequest {
+  query: {
+    pretty?: string;
+    resourceVersion?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+}
+export interface ReplaceAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerStatusRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+  body: AutoscalingInternalKnativeDevV1alpha1PodAutoscaler;
+}
+export interface PatchAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerStatusRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+    force?: boolean;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+  body: Patch;
+}
+export interface ListAutoscalingInternalKnativeDevV1alpha1PodAutoscalerForAllNamespacesRequest {
+  query: {
+    allowWatchBookmarks?: boolean;
+    continue?: string;
+    fieldSelector?: string;
+    labelSelector?: string;
+    limit?: number;
+    pretty?: string;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+    watch?: boolean;
+  };
+}
+export interface GetAutoscalingAPIGroupRequest {}
+export interface GetAutoscalingV1APIResourcesRequest {}
+export interface ListAutoscalingV1HorizontalPodAutoscalerForAllNamespacesRequest {
+  query: {
+    allowWatchBookmarks?: boolean;
+    continue?: string;
+    fieldSelector?: string;
+    labelSelector?: string;
+    limit?: number;
+    pretty?: string;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+    watch?: boolean;
+  };
+}
+export interface ListAutoscalingV1NamespacedHorizontalPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    allowWatchBookmarks?: boolean;
+    continue?: string;
+    fieldSelector?: string;
+    labelSelector?: string;
+    limit?: number;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+    watch?: boolean;
+  };
+  path: {
+    namespace: string;
+  };
+}
+export interface CreateAutoscalingV1NamespacedHorizontalPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+  };
+  path: {
+    namespace: string;
+  };
+  body: AutoscalingV1HorizontalPodAutoscaler;
+}
+export interface DeleteAutoscalingV1CollectionNamespacedHorizontalPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    continue?: string;
+    dryRun?: string;
+    fieldSelector?: string;
+    gracePeriodSeconds?: number;
+    ignoreStoreReadErrorWithClusterBreakingPotential?: boolean;
+    labelSelector?: string;
+    limit?: number;
+    orphanDependents?: boolean;
+    propagationPolicy?: string;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+  };
+  path: {
+    namespace: string;
+  };
+}
+export interface ReadAutoscalingV1NamespacedHorizontalPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+}
+export interface ReplaceAutoscalingV1NamespacedHorizontalPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+  body: AutoscalingV1HorizontalPodAutoscaler;
+}
+export interface DeleteAutoscalingV1NamespacedHorizontalPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    gracePeriodSeconds?: number;
+    ignoreStoreReadErrorWithClusterBreakingPotential?: boolean;
+    orphanDependents?: boolean;
+    propagationPolicy?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+}
+export interface PatchAutoscalingV1NamespacedHorizontalPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+    force?: boolean;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+  body: Patch;
+}
+export interface ReadAutoscalingV1NamespacedHorizontalPodAutoscalerStatusRequest {
+  query: {
+    pretty?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+}
+export interface ReplaceAutoscalingV1NamespacedHorizontalPodAutoscalerStatusRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+  body: AutoscalingV1HorizontalPodAutoscaler;
+}
+export interface PatchAutoscalingV1NamespacedHorizontalPodAutoscalerStatusRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+    force?: boolean;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+  body: Patch;
+}
+export interface WatchAutoscalingV1HorizontalPodAutoscalerListForAllNamespacesRequest {
+  query: {
+    allowWatchBookmarks?: boolean;
+    continue?: string;
+    fieldSelector?: string;
+    labelSelector?: string;
+    limit?: number;
+    pretty?: string;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+    watch?: boolean;
+  };
+}
+export interface WatchAutoscalingV1NamespacedHorizontalPodAutoscalerListRequest {
+  query: {
+    allowWatchBookmarks?: boolean;
+    continue?: string;
+    fieldSelector?: string;
+    labelSelector?: string;
+    limit?: number;
+    pretty?: string;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+    watch?: boolean;
+  };
+  path: {
+    namespace: string;
+  };
+}
+export interface WatchAutoscalingV1NamespacedHorizontalPodAutoscalerRequest {
+  query: {
+    allowWatchBookmarks?: boolean;
+    continue?: string;
+    fieldSelector?: string;
+    labelSelector?: string;
+    limit?: number;
+    pretty?: string;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+    watch?: boolean;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+}
+export interface GetAutoscalingV2APIResourcesRequest {}
+export interface ListAutoscalingV2HorizontalPodAutoscalerForAllNamespacesRequest {
+  query: {
+    allowWatchBookmarks?: boolean;
+    continue?: string;
+    fieldSelector?: string;
+    labelSelector?: string;
+    limit?: number;
+    pretty?: string;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+    watch?: boolean;
+  };
+}
+export interface ListAutoscalingV2NamespacedHorizontalPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    allowWatchBookmarks?: boolean;
+    continue?: string;
+    fieldSelector?: string;
+    labelSelector?: string;
+    limit?: number;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+    watch?: boolean;
+  };
+  path: {
+    namespace: string;
+  };
+}
+export interface CreateAutoscalingV2NamespacedHorizontalPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+  };
+  path: {
+    namespace: string;
+  };
+  body: AutoscalingV2HorizontalPodAutoscaler;
+}
+export interface DeleteAutoscalingV2CollectionNamespacedHorizontalPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    continue?: string;
+    dryRun?: string;
+    fieldSelector?: string;
+    gracePeriodSeconds?: number;
+    ignoreStoreReadErrorWithClusterBreakingPotential?: boolean;
+    labelSelector?: string;
+    limit?: number;
+    orphanDependents?: boolean;
+    propagationPolicy?: string;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+  };
+  path: {
+    namespace: string;
+  };
+}
+export interface ReadAutoscalingV2NamespacedHorizontalPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+}
+export interface ReplaceAutoscalingV2NamespacedHorizontalPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+  body: AutoscalingV2HorizontalPodAutoscaler;
+}
+export interface DeleteAutoscalingV2NamespacedHorizontalPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    gracePeriodSeconds?: number;
+    ignoreStoreReadErrorWithClusterBreakingPotential?: boolean;
+    orphanDependents?: boolean;
+    propagationPolicy?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+}
+export interface PatchAutoscalingV2NamespacedHorizontalPodAutoscalerRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+    force?: boolean;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+  body: Patch;
+}
+export interface ReadAutoscalingV2NamespacedHorizontalPodAutoscalerStatusRequest {
+  query: {
+    pretty?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+}
+export interface ReplaceAutoscalingV2NamespacedHorizontalPodAutoscalerStatusRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+  body: AutoscalingV2HorizontalPodAutoscaler;
+}
+export interface PatchAutoscalingV2NamespacedHorizontalPodAutoscalerStatusRequest {
+  query: {
+    pretty?: string;
+    dryRun?: string;
+    fieldManager?: string;
+    fieldValidation?: string;
+    force?: boolean;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
+  body: Patch;
+}
+export interface WatchAutoscalingV2HorizontalPodAutoscalerListForAllNamespacesRequest {
+  query: {
+    allowWatchBookmarks?: boolean;
+    continue?: string;
+    fieldSelector?: string;
+    labelSelector?: string;
+    limit?: number;
+    pretty?: string;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+    watch?: boolean;
+  };
+}
+export interface WatchAutoscalingV2NamespacedHorizontalPodAutoscalerListRequest {
+  query: {
+    allowWatchBookmarks?: boolean;
+    continue?: string;
+    fieldSelector?: string;
+    labelSelector?: string;
+    limit?: number;
+    pretty?: string;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+    watch?: boolean;
+  };
+  path: {
+    namespace: string;
+  };
+}
+export interface WatchAutoscalingV2NamespacedHorizontalPodAutoscalerRequest {
+  query: {
+    allowWatchBookmarks?: boolean;
+    continue?: string;
+    fieldSelector?: string;
+    labelSelector?: string;
+    limit?: number;
+    pretty?: string;
+    resourceVersion?: string;
+    resourceVersionMatch?: string;
+    sendInitialEvents?: boolean;
+    timeoutSeconds?: number;
+    watch?: boolean;
+  };
+  path: {
+    name: string;
+    namespace: string;
+  };
 }
 export interface GetBatchAPIGroupRequest {}
 export interface GetBatchV1APIResourcesRequest {}
@@ -39358,6 +40248,218 @@ export class InterwebClient extends APIClient {
     const path = `/apis/authorization.k8s.io/v1/subjectaccessreviews`;
     return await this.post<AuthorizationK8sIoV1SubjectAccessReview>(path, null, params.body, opts);
   }
+  async listAutoscalingInternalKnativeDevV1alpha1MetricForAllNamespaces(params: ListAutoscalingInternalKnativeDevV1alpha1MetricForAllNamespacesRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1MetricList> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/metrics`;
+    return await this.get<AutoscalingInternalKnativeDevV1alpha1MetricList>(path, null, null, opts);
+  }
+  async listAutoscalingInternalKnativeDevV1alpha1NamespacedMetric(params: ListAutoscalingInternalKnativeDevV1alpha1NamespacedMetricRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1MetricList> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/metrics`;
+    return await this.get<AutoscalingInternalKnativeDevV1alpha1MetricList>(path, null, null, opts);
+  }
+  async createAutoscalingInternalKnativeDevV1alpha1NamespacedMetric(params: CreateAutoscalingInternalKnativeDevV1alpha1NamespacedMetricRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1Metric> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/metrics`;
+    return await this.post<AutoscalingInternalKnativeDevV1alpha1Metric>(path, params.query, params.body, opts);
+  }
+  async deleteAutoscalingInternalKnativeDevV1alpha1CollectionNamespacedMetric(params: DeleteAutoscalingInternalKnativeDevV1alpha1CollectionNamespacedMetricRequest, opts?: APIClientRequestOpts): Promise<Status> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/metrics`;
+    return await this.delete<Status>(path, null, null, opts);
+  }
+  async readAutoscalingInternalKnativeDevV1alpha1NamespacedMetric(params: ReadAutoscalingInternalKnativeDevV1alpha1NamespacedMetricRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1Metric> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/metrics/${params.path.name}`;
+    return await this.get<AutoscalingInternalKnativeDevV1alpha1Metric>(path, null, null, opts);
+  }
+  async replaceAutoscalingInternalKnativeDevV1alpha1NamespacedMetric(params: ReplaceAutoscalingInternalKnativeDevV1alpha1NamespacedMetricRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1Metric> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/metrics/${params.path.name}`;
+    return await this.put<AutoscalingInternalKnativeDevV1alpha1Metric>(path, params.query, params.body, opts);
+  }
+  async deleteAutoscalingInternalKnativeDevV1alpha1NamespacedMetric(params: DeleteAutoscalingInternalKnativeDevV1alpha1NamespacedMetricRequest, opts?: APIClientRequestOpts): Promise<Status> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/metrics/${params.path.name}`;
+    return await this.delete<Status>(path, params.query, null, opts);
+  }
+  async patchAutoscalingInternalKnativeDevV1alpha1NamespacedMetric(params: PatchAutoscalingInternalKnativeDevV1alpha1NamespacedMetricRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1Metric> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/metrics/${params.path.name}`;
+    return await this.patch<AutoscalingInternalKnativeDevV1alpha1Metric>(path, params.query, null, opts);
+  }
+  async readAutoscalingInternalKnativeDevV1alpha1NamespacedMetricStatus(params: ReadAutoscalingInternalKnativeDevV1alpha1NamespacedMetricStatusRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1Metric> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/metrics/${params.path.name}/status`;
+    return await this.get<AutoscalingInternalKnativeDevV1alpha1Metric>(path, null, null, opts);
+  }
+  async replaceAutoscalingInternalKnativeDevV1alpha1NamespacedMetricStatus(params: ReplaceAutoscalingInternalKnativeDevV1alpha1NamespacedMetricStatusRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1Metric> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/metrics/${params.path.name}/status`;
+    return await this.put<AutoscalingInternalKnativeDevV1alpha1Metric>(path, params.query, params.body, opts);
+  }
+  async patchAutoscalingInternalKnativeDevV1alpha1NamespacedMetricStatus(params: PatchAutoscalingInternalKnativeDevV1alpha1NamespacedMetricStatusRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1Metric> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/metrics/${params.path.name}/status`;
+    return await this.patch<AutoscalingInternalKnativeDevV1alpha1Metric>(path, params.query, null, opts);
+  }
+  async listAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscaler(params: ListAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1PodAutoscalerList> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/podautoscalers`;
+    return await this.get<AutoscalingInternalKnativeDevV1alpha1PodAutoscalerList>(path, null, null, opts);
+  }
+  async createAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscaler(params: CreateAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1PodAutoscaler> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/podautoscalers`;
+    return await this.post<AutoscalingInternalKnativeDevV1alpha1PodAutoscaler>(path, params.query, params.body, opts);
+  }
+  async deleteAutoscalingInternalKnativeDevV1alpha1CollectionNamespacedPodAutoscaler(params: DeleteAutoscalingInternalKnativeDevV1alpha1CollectionNamespacedPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<Status> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/podautoscalers`;
+    return await this.delete<Status>(path, null, null, opts);
+  }
+  async readAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscaler(params: ReadAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1PodAutoscaler> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/podautoscalers/${params.path.name}`;
+    return await this.get<AutoscalingInternalKnativeDevV1alpha1PodAutoscaler>(path, null, null, opts);
+  }
+  async replaceAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscaler(params: ReplaceAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1PodAutoscaler> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/podautoscalers/${params.path.name}`;
+    return await this.put<AutoscalingInternalKnativeDevV1alpha1PodAutoscaler>(path, params.query, params.body, opts);
+  }
+  async deleteAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscaler(params: DeleteAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<Status> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/podautoscalers/${params.path.name}`;
+    return await this.delete<Status>(path, params.query, null, opts);
+  }
+  async patchAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscaler(params: PatchAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1PodAutoscaler> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/podautoscalers/${params.path.name}`;
+    return await this.patch<AutoscalingInternalKnativeDevV1alpha1PodAutoscaler>(path, params.query, null, opts);
+  }
+  async readAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerStatus(params: ReadAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerStatusRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1PodAutoscaler> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/podautoscalers/${params.path.name}/status`;
+    return await this.get<AutoscalingInternalKnativeDevV1alpha1PodAutoscaler>(path, null, null, opts);
+  }
+  async replaceAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerStatus(params: ReplaceAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerStatusRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1PodAutoscaler> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/podautoscalers/${params.path.name}/status`;
+    return await this.put<AutoscalingInternalKnativeDevV1alpha1PodAutoscaler>(path, params.query, params.body, opts);
+  }
+  async patchAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerStatus(params: PatchAutoscalingInternalKnativeDevV1alpha1NamespacedPodAutoscalerStatusRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1PodAutoscaler> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/namespaces/${params.path.namespace}/podautoscalers/${params.path.name}/status`;
+    return await this.patch<AutoscalingInternalKnativeDevV1alpha1PodAutoscaler>(path, params.query, null, opts);
+  }
+  async listAutoscalingInternalKnativeDevV1alpha1PodAutoscalerForAllNamespaces(params: ListAutoscalingInternalKnativeDevV1alpha1PodAutoscalerForAllNamespacesRequest, opts?: APIClientRequestOpts): Promise<AutoscalingInternalKnativeDevV1alpha1PodAutoscalerList> {
+    const path = `/apis/autoscaling.internal.knative.dev/v1alpha1/podautoscalers`;
+    return await this.get<AutoscalingInternalKnativeDevV1alpha1PodAutoscalerList>(path, null, null, opts);
+  }
+  async getAutoscalingAPIGroup(params: GetAutoscalingAPIGroupRequest, opts?: APIClientRequestOpts): Promise<APIGroup> {
+    const path = `/apis/autoscaling/`;
+    return await this.get<APIGroup>(path, null, null, opts);
+  }
+  async getAutoscalingV1APIResources(params: GetAutoscalingV1APIResourcesRequest, opts?: APIClientRequestOpts): Promise<APIResourceList> {
+    const path = `/apis/autoscaling/v1/`;
+    return await this.get<APIResourceList>(path, null, null, opts);
+  }
+  async listAutoscalingV1HorizontalPodAutoscalerForAllNamespaces(params: ListAutoscalingV1HorizontalPodAutoscalerForAllNamespacesRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV1HorizontalPodAutoscalerList> {
+    const path = `/apis/autoscaling/v1/horizontalpodautoscalers`;
+    return await this.get<AutoscalingV1HorizontalPodAutoscalerList>(path, null, null, opts);
+  }
+  async listAutoscalingV1NamespacedHorizontalPodAutoscaler(params: ListAutoscalingV1NamespacedHorizontalPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV1HorizontalPodAutoscalerList> {
+    const path = `/apis/autoscaling/v1/namespaces/${params.path.namespace}/horizontalpodautoscalers`;
+    return await this.get<AutoscalingV1HorizontalPodAutoscalerList>(path, null, null, opts);
+  }
+  async createAutoscalingV1NamespacedHorizontalPodAutoscaler(params: CreateAutoscalingV1NamespacedHorizontalPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV1HorizontalPodAutoscaler> {
+    const path = `/apis/autoscaling/v1/namespaces/${params.path.namespace}/horizontalpodautoscalers`;
+    return await this.post<AutoscalingV1HorizontalPodAutoscaler>(path, params.query, params.body, opts);
+  }
+  async deleteAutoscalingV1CollectionNamespacedHorizontalPodAutoscaler(params: DeleteAutoscalingV1CollectionNamespacedHorizontalPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<Status> {
+    const path = `/apis/autoscaling/v1/namespaces/${params.path.namespace}/horizontalpodautoscalers`;
+    return await this.delete<Status>(path, params.query, null, opts);
+  }
+  async readAutoscalingV1NamespacedHorizontalPodAutoscaler(params: ReadAutoscalingV1NamespacedHorizontalPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV1HorizontalPodAutoscaler> {
+    const path = `/apis/autoscaling/v1/namespaces/${params.path.namespace}/horizontalpodautoscalers/${params.path.name}`;
+    return await this.get<AutoscalingV1HorizontalPodAutoscaler>(path, null, null, opts);
+  }
+  async replaceAutoscalingV1NamespacedHorizontalPodAutoscaler(params: ReplaceAutoscalingV1NamespacedHorizontalPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV1HorizontalPodAutoscaler> {
+    const path = `/apis/autoscaling/v1/namespaces/${params.path.namespace}/horizontalpodautoscalers/${params.path.name}`;
+    return await this.put<AutoscalingV1HorizontalPodAutoscaler>(path, params.query, params.body, opts);
+  }
+  async deleteAutoscalingV1NamespacedHorizontalPodAutoscaler(params: DeleteAutoscalingV1NamespacedHorizontalPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<Status> {
+    const path = `/apis/autoscaling/v1/namespaces/${params.path.namespace}/horizontalpodautoscalers/${params.path.name}`;
+    return await this.delete<Status>(path, params.query, null, opts);
+  }
+  async patchAutoscalingV1NamespacedHorizontalPodAutoscaler(params: PatchAutoscalingV1NamespacedHorizontalPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV1HorizontalPodAutoscaler> {
+    const path = `/apis/autoscaling/v1/namespaces/${params.path.namespace}/horizontalpodautoscalers/${params.path.name}`;
+    return await this.patch<AutoscalingV1HorizontalPodAutoscaler>(path, params.query, null, opts);
+  }
+  async readAutoscalingV1NamespacedHorizontalPodAutoscalerStatus(params: ReadAutoscalingV1NamespacedHorizontalPodAutoscalerStatusRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV1HorizontalPodAutoscaler> {
+    const path = `/apis/autoscaling/v1/namespaces/${params.path.namespace}/horizontalpodautoscalers/${params.path.name}/status`;
+    return await this.get<AutoscalingV1HorizontalPodAutoscaler>(path, null, null, opts);
+  }
+  async replaceAutoscalingV1NamespacedHorizontalPodAutoscalerStatus(params: ReplaceAutoscalingV1NamespacedHorizontalPodAutoscalerStatusRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV1HorizontalPodAutoscaler> {
+    const path = `/apis/autoscaling/v1/namespaces/${params.path.namespace}/horizontalpodautoscalers/${params.path.name}/status`;
+    return await this.put<AutoscalingV1HorizontalPodAutoscaler>(path, params.query, params.body, opts);
+  }
+  async patchAutoscalingV1NamespacedHorizontalPodAutoscalerStatus(params: PatchAutoscalingV1NamespacedHorizontalPodAutoscalerStatusRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV1HorizontalPodAutoscaler> {
+    const path = `/apis/autoscaling/v1/namespaces/${params.path.namespace}/horizontalpodautoscalers/${params.path.name}/status`;
+    return await this.patch<AutoscalingV1HorizontalPodAutoscaler>(path, params.query, null, opts);
+  }
+  async watchAutoscalingV1HorizontalPodAutoscalerListForAllNamespaces(params: WatchAutoscalingV1HorizontalPodAutoscalerListForAllNamespacesRequest, opts?: APIClientRequestOpts): Promise<WatchEvent> {
+    const path = `/apis/autoscaling/v1/watch/horizontalpodautoscalers`;
+    return await this.get<WatchEvent>(path, null, null, opts);
+  }
+  async watchAutoscalingV1NamespacedHorizontalPodAutoscalerList(params: WatchAutoscalingV1NamespacedHorizontalPodAutoscalerListRequest, opts?: APIClientRequestOpts): Promise<WatchEvent> {
+    const path = `/apis/autoscaling/v1/watch/namespaces/${params.path.namespace}/horizontalpodautoscalers`;
+    return await this.get<WatchEvent>(path, null, null, opts);
+  }
+  async watchAutoscalingV1NamespacedHorizontalPodAutoscaler(params: WatchAutoscalingV1NamespacedHorizontalPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<WatchEvent> {
+    const path = `/apis/autoscaling/v1/watch/namespaces/${params.path.namespace}/horizontalpodautoscalers/${params.path.name}`;
+    return await this.get<WatchEvent>(path, null, null, opts);
+  }
+  async getAutoscalingV2APIResources(params: GetAutoscalingV2APIResourcesRequest, opts?: APIClientRequestOpts): Promise<APIResourceList> {
+    const path = `/apis/autoscaling/v2/`;
+    return await this.get<APIResourceList>(path, null, null, opts);
+  }
+  async listAutoscalingV2HorizontalPodAutoscalerForAllNamespaces(params: ListAutoscalingV2HorizontalPodAutoscalerForAllNamespacesRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV2HorizontalPodAutoscalerList> {
+    const path = `/apis/autoscaling/v2/horizontalpodautoscalers`;
+    return await this.get<AutoscalingV2HorizontalPodAutoscalerList>(path, null, null, opts);
+  }
+  async listAutoscalingV2NamespacedHorizontalPodAutoscaler(params: ListAutoscalingV2NamespacedHorizontalPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV2HorizontalPodAutoscalerList> {
+    const path = `/apis/autoscaling/v2/namespaces/${params.path.namespace}/horizontalpodautoscalers`;
+    return await this.get<AutoscalingV2HorizontalPodAutoscalerList>(path, null, null, opts);
+  }
+  async createAutoscalingV2NamespacedHorizontalPodAutoscaler(params: CreateAutoscalingV2NamespacedHorizontalPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV2HorizontalPodAutoscaler> {
+    const path = `/apis/autoscaling/v2/namespaces/${params.path.namespace}/horizontalpodautoscalers`;
+    return await this.post<AutoscalingV2HorizontalPodAutoscaler>(path, params.query, params.body, opts);
+  }
+  async deleteAutoscalingV2CollectionNamespacedHorizontalPodAutoscaler(params: DeleteAutoscalingV2CollectionNamespacedHorizontalPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<Status> {
+    const path = `/apis/autoscaling/v2/namespaces/${params.path.namespace}/horizontalpodautoscalers`;
+    return await this.delete<Status>(path, params.query, null, opts);
+  }
+  async readAutoscalingV2NamespacedHorizontalPodAutoscaler(params: ReadAutoscalingV2NamespacedHorizontalPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV2HorizontalPodAutoscaler> {
+    const path = `/apis/autoscaling/v2/namespaces/${params.path.namespace}/horizontalpodautoscalers/${params.path.name}`;
+    return await this.get<AutoscalingV2HorizontalPodAutoscaler>(path, null, null, opts);
+  }
+  async replaceAutoscalingV2NamespacedHorizontalPodAutoscaler(params: ReplaceAutoscalingV2NamespacedHorizontalPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV2HorizontalPodAutoscaler> {
+    const path = `/apis/autoscaling/v2/namespaces/${params.path.namespace}/horizontalpodautoscalers/${params.path.name}`;
+    return await this.put<AutoscalingV2HorizontalPodAutoscaler>(path, params.query, params.body, opts);
+  }
+  async deleteAutoscalingV2NamespacedHorizontalPodAutoscaler(params: DeleteAutoscalingV2NamespacedHorizontalPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<Status> {
+    const path = `/apis/autoscaling/v2/namespaces/${params.path.namespace}/horizontalpodautoscalers/${params.path.name}`;
+    return await this.delete<Status>(path, params.query, null, opts);
+  }
+  async patchAutoscalingV2NamespacedHorizontalPodAutoscaler(params: PatchAutoscalingV2NamespacedHorizontalPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV2HorizontalPodAutoscaler> {
+    const path = `/apis/autoscaling/v2/namespaces/${params.path.namespace}/horizontalpodautoscalers/${params.path.name}`;
+    return await this.patch<AutoscalingV2HorizontalPodAutoscaler>(path, params.query, null, opts);
+  }
+  async readAutoscalingV2NamespacedHorizontalPodAutoscalerStatus(params: ReadAutoscalingV2NamespacedHorizontalPodAutoscalerStatusRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV2HorizontalPodAutoscaler> {
+    const path = `/apis/autoscaling/v2/namespaces/${params.path.namespace}/horizontalpodautoscalers/${params.path.name}/status`;
+    return await this.get<AutoscalingV2HorizontalPodAutoscaler>(path, null, null, opts);
+  }
+  async replaceAutoscalingV2NamespacedHorizontalPodAutoscalerStatus(params: ReplaceAutoscalingV2NamespacedHorizontalPodAutoscalerStatusRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV2HorizontalPodAutoscaler> {
+    const path = `/apis/autoscaling/v2/namespaces/${params.path.namespace}/horizontalpodautoscalers/${params.path.name}/status`;
+    return await this.put<AutoscalingV2HorizontalPodAutoscaler>(path, params.query, params.body, opts);
+  }
+  async patchAutoscalingV2NamespacedHorizontalPodAutoscalerStatus(params: PatchAutoscalingV2NamespacedHorizontalPodAutoscalerStatusRequest, opts?: APIClientRequestOpts): Promise<AutoscalingV2HorizontalPodAutoscaler> {
+    const path = `/apis/autoscaling/v2/namespaces/${params.path.namespace}/horizontalpodautoscalers/${params.path.name}/status`;
+    return await this.patch<AutoscalingV2HorizontalPodAutoscaler>(path, params.query, null, opts);
+  }
+  async watchAutoscalingV2HorizontalPodAutoscalerListForAllNamespaces(params: WatchAutoscalingV2HorizontalPodAutoscalerListForAllNamespacesRequest, opts?: APIClientRequestOpts): Promise<WatchEvent> {
+    const path = `/apis/autoscaling/v2/watch/horizontalpodautoscalers`;
+    return await this.get<WatchEvent>(path, null, null, opts);
+  }
+  async watchAutoscalingV2NamespacedHorizontalPodAutoscalerList(params: WatchAutoscalingV2NamespacedHorizontalPodAutoscalerListRequest, opts?: APIClientRequestOpts): Promise<WatchEvent> {
+    const path = `/apis/autoscaling/v2/watch/namespaces/${params.path.namespace}/horizontalpodautoscalers`;
+    return await this.get<WatchEvent>(path, null, null, opts);
+  }
+  async watchAutoscalingV2NamespacedHorizontalPodAutoscaler(params: WatchAutoscalingV2NamespacedHorizontalPodAutoscalerRequest, opts?: APIClientRequestOpts): Promise<WatchEvent> {
+    const path = `/apis/autoscaling/v2/watch/namespaces/${params.path.namespace}/horizontalpodautoscalers/${params.path.name}`;
+    return await this.get<WatchEvent>(path, null, null, opts);
+  }
   async getBatchAPIGroup(params: GetBatchAPIGroupRequest, opts?: APIClientRequestOpts): Promise<APIGroup> {
     const path = `/apis/batch/`;
     return await this.get<APIGroup>(path, null, null, opts);
@@ -41940,6 +43042,10 @@ export interface ResourceTypeMap {
   "apps/v1/Deployment": AppsV1Deployment;
   "apps/v1/ReplicaSet": AppsV1ReplicaSet;
   "apps/v1/StatefulSet": AppsV1StatefulSet;
+  "autoscaling.internal.knative.dev/v1alpha1/Metric": AutoscalingInternalKnativeDevV1alpha1Metric;
+  "autoscaling.internal.knative.dev/v1alpha1/PodAutoscaler": AutoscalingInternalKnativeDevV1alpha1PodAutoscaler;
+  "autoscaling/v1/HorizontalPodAutoscaler": AutoscalingV1HorizontalPodAutoscaler;
+  "autoscaling/v2/HorizontalPodAutoscaler": AutoscalingV2HorizontalPodAutoscaler;
   "batch/v1/CronJob": BatchV1CronJob;
   "batch/v1/Job": BatchV1Job;
   "caching.internal.knative.dev/v1alpha1/Image": CachingInternalKnativeDevV1alpha1Image;
@@ -42006,4 +43112,4 @@ export interface ResourceTypeMap {
   "authorization.k8s.io/v1/SelfSubjectRulesReview": AuthorizationK8sIoV1SelfSubjectRulesReview;
   "authorization.k8s.io/v1/SubjectAccessReview": AuthorizationK8sIoV1SubjectAccessReview;
 }
-export type KubernetesResource = ComponentStatus | ConfigMap | Endpoints | Event | LimitRange | Namespace | Binding | Status | PersistentVolumeClaim | Pod | PodTemplate | ReplicationController | ResourceQuota | Secret | ServiceAccount | Service | Node | PersistentVolume | AcmeCertManagerIoV1Challenge | AcmeCertManagerIoV1Order | AdmissionregistrationK8sIoV1MutatingWebhookConfiguration | AdmissionregistrationK8sIoV1ValidatingAdmissionPolicy | AdmissionregistrationK8sIoV1ValidatingAdmissionPolicyBinding | AdmissionregistrationK8sIoV1ValidatingWebhookConfiguration | ApiextensionsK8sIoV1CustomResourceDefinition | ApiregistrationK8sIoV1APIService | AppsV1ControllerRevision | AppsV1DaemonSet | AppsV1Deployment | AppsV1ReplicaSet | AppsV1StatefulSet | BatchV1CronJob | BatchV1Job | CachingInternalKnativeDevV1alpha1Image | CertManagerIoV1ClusterIssuer | CertManagerIoV1CertificateRequest | CertManagerIoV1Certificate | CertManagerIoV1Issuer | CertificatesK8sIoV1CertificateSigningRequest | CoordinationK8sIoV1Lease | DiscoveryK8sIoV1EndpointSlice | EventsK8sIoV1Event | FlowcontrolApiserverK8sIoV1FlowSchema | FlowcontrolApiserverK8sIoV1PriorityLevelConfiguration | MonitoringCoreosComV1Alertmanager | MonitoringCoreosComV1PodMonitor | MonitoringCoreosComV1Probe | MonitoringCoreosComV1Prometheus | MonitoringCoreosComV1PrometheusRule | MonitoringCoreosComV1ServiceMonitor | MonitoringCoreosComV1ThanosRuler | MonitoringCoreosComV1alpha1AlertmanagerConfig | MonitoringCoreosComV1alpha1PrometheusAgent | MonitoringCoreosComV1alpha1ScrapeConfig | NetworkingInternalKnativeDevV1alpha1ClusterDomainClaim | NetworkingInternalKnativeDevV1alpha1Certificate | NetworkingInternalKnativeDevV1alpha1Ingress | NetworkingInternalKnativeDevV1alpha1ServerlessService | NetworkingK8sIoV1IngressClass | NetworkingK8sIoV1Ingress | NetworkingK8sIoV1NetworkPolicy | NodeK8sIoV1RuntimeClass | PolicyV1PodDisruptionBudget | PostgresqlCnpgIoV1ClusterImageCatalog | PostgresqlCnpgIoV1Backup | PostgresqlCnpgIoV1Cluster | PostgresqlCnpgIoV1Database | PostgresqlCnpgIoV1ImageCatalog | PostgresqlCnpgIoV1Pooler | PostgresqlCnpgIoV1Publication | PostgresqlCnpgIoV1ScheduledBackup | PostgresqlCnpgIoV1Subscription | RbacAuthorizationK8sIoV1ClusterRoleBinding | RbacAuthorizationK8sIoV1ClusterRole | RbacAuthorizationK8sIoV1RoleBinding | RbacAuthorizationK8sIoV1Role | SchedulingK8sIoV1PriorityClass | ServingKnativeDevV1Configuration | ServingKnativeDevV1Revision | ServingKnativeDevV1Route | ServingKnativeDevV1Service | ServingKnativeDevV1beta1DomainMapping | StorageK8sIoV1CSIDriver | StorageK8sIoV1CSINode | StorageK8sIoV1CSIStorageCapacity | StorageK8sIoV1StorageClass | StorageK8sIoV1VolumeAttachment | PolicyV1Eviction | AutoscalingV1Scale | AuthenticationK8sIoV1TokenRequest | AuthenticationK8sIoV1SelfSubjectReview | AuthenticationK8sIoV1TokenReview | AuthorizationK8sIoV1LocalSubjectAccessReview | AuthorizationK8sIoV1SelfSubjectAccessReview | AuthorizationK8sIoV1SelfSubjectRulesReview | AuthorizationK8sIoV1SubjectAccessReview;
+export type KubernetesResource = ComponentStatus | ConfigMap | Endpoints | Event | LimitRange | Namespace | Binding | Status | PersistentVolumeClaim | Pod | PodTemplate | ReplicationController | ResourceQuota | Secret | ServiceAccount | Service | Node | PersistentVolume | AcmeCertManagerIoV1Challenge | AcmeCertManagerIoV1Order | AdmissionregistrationK8sIoV1MutatingWebhookConfiguration | AdmissionregistrationK8sIoV1ValidatingAdmissionPolicy | AdmissionregistrationK8sIoV1ValidatingAdmissionPolicyBinding | AdmissionregistrationK8sIoV1ValidatingWebhookConfiguration | ApiextensionsK8sIoV1CustomResourceDefinition | ApiregistrationK8sIoV1APIService | AppsV1ControllerRevision | AppsV1DaemonSet | AppsV1Deployment | AppsV1ReplicaSet | AppsV1StatefulSet | AutoscalingInternalKnativeDevV1alpha1Metric | AutoscalingInternalKnativeDevV1alpha1PodAutoscaler | AutoscalingV1HorizontalPodAutoscaler | AutoscalingV2HorizontalPodAutoscaler | BatchV1CronJob | BatchV1Job | CachingInternalKnativeDevV1alpha1Image | CertManagerIoV1ClusterIssuer | CertManagerIoV1CertificateRequest | CertManagerIoV1Certificate | CertManagerIoV1Issuer | CertificatesK8sIoV1CertificateSigningRequest | CoordinationK8sIoV1Lease | DiscoveryK8sIoV1EndpointSlice | EventsK8sIoV1Event | FlowcontrolApiserverK8sIoV1FlowSchema | FlowcontrolApiserverK8sIoV1PriorityLevelConfiguration | MonitoringCoreosComV1Alertmanager | MonitoringCoreosComV1PodMonitor | MonitoringCoreosComV1Probe | MonitoringCoreosComV1Prometheus | MonitoringCoreosComV1PrometheusRule | MonitoringCoreosComV1ServiceMonitor | MonitoringCoreosComV1ThanosRuler | MonitoringCoreosComV1alpha1AlertmanagerConfig | MonitoringCoreosComV1alpha1PrometheusAgent | MonitoringCoreosComV1alpha1ScrapeConfig | NetworkingInternalKnativeDevV1alpha1ClusterDomainClaim | NetworkingInternalKnativeDevV1alpha1Certificate | NetworkingInternalKnativeDevV1alpha1Ingress | NetworkingInternalKnativeDevV1alpha1ServerlessService | NetworkingK8sIoV1IngressClass | NetworkingK8sIoV1Ingress | NetworkingK8sIoV1NetworkPolicy | NodeK8sIoV1RuntimeClass | PolicyV1PodDisruptionBudget | PostgresqlCnpgIoV1ClusterImageCatalog | PostgresqlCnpgIoV1Backup | PostgresqlCnpgIoV1Cluster | PostgresqlCnpgIoV1Database | PostgresqlCnpgIoV1ImageCatalog | PostgresqlCnpgIoV1Pooler | PostgresqlCnpgIoV1Publication | PostgresqlCnpgIoV1ScheduledBackup | PostgresqlCnpgIoV1Subscription | RbacAuthorizationK8sIoV1ClusterRoleBinding | RbacAuthorizationK8sIoV1ClusterRole | RbacAuthorizationK8sIoV1RoleBinding | RbacAuthorizationK8sIoV1Role | SchedulingK8sIoV1PriorityClass | ServingKnativeDevV1Configuration | ServingKnativeDevV1Revision | ServingKnativeDevV1Route | ServingKnativeDevV1Service | ServingKnativeDevV1beta1DomainMapping | StorageK8sIoV1CSIDriver | StorageK8sIoV1CSINode | StorageK8sIoV1CSIStorageCapacity | StorageK8sIoV1StorageClass | StorageK8sIoV1VolumeAttachment | PolicyV1Eviction | AutoscalingV1Scale | AuthenticationK8sIoV1TokenRequest | AuthenticationK8sIoV1SelfSubjectReview | AuthenticationK8sIoV1TokenReview | AuthorizationK8sIoV1LocalSubjectAccessReview | AuthorizationK8sIoV1SelfSubjectAccessReview | AuthorizationK8sIoV1SelfSubjectRulesReview | AuthorizationK8sIoV1SubjectAccessReview;
