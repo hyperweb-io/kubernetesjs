@@ -1,6 +1,7 @@
 # Interweb
 
 <p align="left" width="100%">
+  <a href="https://github.com/hyperweb-io/interweb/actions/workflows/build.yml"><img height="20" src="https://github.com/hyperweb-io/interweb/actions/workflows/build.yml/badge.svg" alt="Build" /></a>
   <a href="https://github.com/hyperweb-io/interweb/actions/workflows/test-client.yml"><img height="20" src="https://github.com/hyperweb-io/interweb/actions/workflows/test-client.yml/badge.svg" alt="Integration Tests" /></a>
   <a href="https://github.com/hyperweb-io/interweb/actions/workflows/test-e2e-client.yml"><img height="20" src="https://github.com/hyperweb-io/interweb/actions/workflows/test-e2e-client.yml/badge.svg" alt="E2E Tests" /></a>
 </p>
