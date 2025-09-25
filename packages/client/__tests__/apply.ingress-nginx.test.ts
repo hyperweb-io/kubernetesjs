@@ -1,5 +1,5 @@
 import { InterwebClient as InterwebKubernetesClient } from '@interweb/interwebjs';
-import { ManifestLoader } from '@interweb/manifests';
+import { getOperatorResources } from '@interweb/manifests';
 import { SetupClient } from '../src/setup';
 
 jest.setTimeout(10 * 60 * 1000); // up to 10 minutes for full operator
@@ -36,7 +36,7 @@ describe('FULL APPLY: ingress-nginx operator', () => {
       return;
     }
 
-    const manifests = ManifestLoader.loadOperatorManifests('ingress-nginx');
+    const manifests = getOperatorResources('ingress-nginx');
     await setup.applyManifests(manifests);
 
     const ns = await api.readCoreV1Namespace({ path: { name: nsName }, query: {} as any });

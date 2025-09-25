@@ -1,5 +1,5 @@
 import { InterwebClient as InterwebKubernetesClient } from '@interweb/interwebjs';
-import { ManifestLoader } from '@interweb/manifests';
+import { getOperatorResources } from '@interweb/manifests';
 import { SetupClient } from '../src/setup';
 
 jest.setTimeout(10 * 60 * 1000); // up to 10 minutes for full operator
@@ -18,12 +18,12 @@ describe('FULL APPLY: cert-manager operator', () => {
       return;
     }
 
-    const manifests = ManifestLoader.loadOperatorManifests('cert-manager');
+    const manifests = getOperatorResources('cert-manager');
 
     // check the manifest have a valid namespace object
     const nsDoc = manifests.find((m) => m.kind === 'Namespace');
     expect(nsDoc).toBeDefined();
-    expect(nsDoc?.metadata?.name).toBe(nsName);
+    expect((nsDoc?.metadata as any).name).toBe(nsName);
 
     await setup.applyManifests(manifests);
 

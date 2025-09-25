@@ -1,5 +1,5 @@
 import { InterwebClient as InterwebKubernetesClient } from '@interweb/interwebjs';
-import { ManifestLoader } from '@interweb/manifests';
+import { getOperatorResources } from '@interweb/manifests';
 import { SetupClient } from '../src/setup';
 
 jest.setTimeout(120_000);
@@ -38,7 +38,7 @@ describe('apply: manifests from @interweb/manifests', () => {
     }
 
     // Load the operator manifests from the manifests package (versioned path)
-    const docs = ManifestLoader.loadOperatorManifests('ingress-nginx');
+    const docs = getOperatorResources('ingress-nginx');
 
     // Take the Namespace manifest from the operator (first doc in this file)
     const nsDoc = docs.find((d) => d && d.kind === 'Namespace');
