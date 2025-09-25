@@ -22,7 +22,8 @@
     "codegen": "ts-node scripts/codegen-operators.ts"
   },
   "dependencies": {
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "@interweb/interwebjs": "workspace:*"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.5",

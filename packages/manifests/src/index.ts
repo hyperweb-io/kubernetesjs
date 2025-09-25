@@ -2,6 +2,7 @@ import * as yaml from 'js-yaml';
 import * as fs from 'fs';
 import * as path from 'path';
 import { createRequire } from 'module';
+import { OPERATOR_OBJECTS } from './generated/objects';
 
 export interface KubernetesResource {
   apiVersion: string;
@@ -78,6 +79,18 @@ export class ManifestLoader {
    * Load all manifests for a specific operator
    */
   static loadOperatorManifests(operatorName: string, version?: string): KubernetesResource[] {
+    // Prefer generated TS objects when available
+    const mod = (OPERATOR_OBJECTS as Record<string, { Resources?: KubernetesResource[]; resources?: KubernetesResource[]; versions?: Record<string, KubernetesResource[]>; }>)[operatorName];
+    if (mod) {
+      if (version && mod.versions && mod.versions[version]) {
+        return mod.versions[version] as KubernetesResource[];
+      }
+      if (!version) {
+        if (mod.Resources && mod.Resources.length) return mod.Resources as KubernetesResource[];
+        if (mod.resources && mod.resources.length) return mod.resources as KubernetesResource[];
+      }
+      // fall through to YAML if specific version not available
+    }
     // If a version is provided, prefer versioned manifest path first
     if (version) {
       const versionedPath = path.join(this.getManifestsDir(), operatorName, `${version}.yaml`);
@@ -173,6 +186,14 @@ export class ManifestLoader {
     operatorName: string, 
     variables: Record<string, string> = {}
   ): KubernetesResource[] {
+    // Use generated objects when available; no substitution applied here
+    const mod = (OPERATOR_OBJECTS as Record<string, { Resources?: KubernetesResource[]; resources?: KubernetesResource[]; versions?: Record<string, KubernetesResource[]>; }>)[operatorName];
+    if (mod?.Resources && mod.Resources.length) {
+      return mod.Resources as KubernetesResource[];
+    }
+    if (mod?.resources && mod.resources.length) {
+      return mod.resources as KubernetesResource[];
+    }
     // Handle composite operators that have multiple manifest files
     if (operatorName === 'knative-serving') {
       let allResources = this.loadKnativeServingManifests();

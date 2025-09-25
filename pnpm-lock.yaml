@@ -418,6 +418,9 @@ importers:
 
   packages/manifests:
     dependencies:
+      '@interweb/interwebjs':
+        specifier: workspace:*
+        version: link:../interwebjs/dist
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0
