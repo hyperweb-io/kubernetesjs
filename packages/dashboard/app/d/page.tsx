@@ -2,18 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
-import {
-  Database,
-  Zap,
-  Link as LinkIcon,
-  FileCode2,
-  Globe,
-  Settings,
-  ArrowRight,
-  Activity,
-  TrendingUp,
-  Users,
-} from 'lucide-react';
+import { Database, Zap, Link as LinkIcon, Globe, Settings, ArrowRight, Activity, TrendingUp, Users } from 'lucide-react';
 
 const smartObjects = [
   {
@@ -41,15 +30,6 @@ const smartObjects = [
     icon: LinkIcon,
     href: '/d/chains',
     color: 'text-purple-600',
-    status: 'Available',
-  },
-  {
-    id: 'contracts',
-    title: 'Smart Contracts',
-    description: 'Deployed smart contracts and ABIs',
-    icon: FileCode2,
-    href: '/d/contracts',
-    color: 'text-green-600',
     status: 'Available',
   },
   {

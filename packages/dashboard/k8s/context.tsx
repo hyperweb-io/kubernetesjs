@@ -26,7 +26,7 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       retry: 3,
       staleTime: 30 * 1000, // 30 seconds
-      gcTime: 5 * 60 * 1000, // 5 minutes
+      cacheTime: 5 * 60 * 1000, // 5 minutes
       // Use background fetching to prevent UI blocking
       refetchOnMount: 'always',
       keepPreviousData: true,
@@ -45,8 +45,9 @@ export function KubernetesProvider({
   children, 
   initialConfig 
 }: KubernetesProviderProps) {
+  const defaultEndpoint = initialConfig?.restEndpoint ?? 'http://127.0.0.1:8001';
   const [config, setConfig] = useState<KubernetesConfig>({
-    restEndpoint: initialConfig?.restEndpoint,
+    restEndpoint: defaultEndpoint,
     headers: initialConfig?.headers || {},
   })
 

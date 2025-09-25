@@ -60,7 +60,7 @@ export const usePagination = ({
 		}
 
 		// Sort and deduplicate
-		visiblePages = [...new Set(visiblePages)].sort((a, b) => a - b);
+		visiblePages = Array.from(new Set(visiblePages)).sort((a, b) => a - b);
 
 		// Build the final array with ellipses where needed
 		for (let i = 0; i < visiblePages.length; i++) {

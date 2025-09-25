@@ -34,7 +34,8 @@ export async function listDeployments(namespace = 'default') {
   const k8s = getClient()
   try {
     const result = await k8s.listAppsV1NamespacedDeployment({
-      path: { namespace }
+      path: { namespace },
+      query: {},
     })
     return result.items || []
   } catch (error) {
@@ -47,7 +48,8 @@ export async function listServices(namespace = 'default') {
   const k8s = getClient()
   try {
     const result = await k8s.listCoreV1NamespacedService({
-      path: { namespace }
+      path: { namespace },
+      query: {},
     })
     return result.items || []
   } catch (error) {
@@ -60,7 +62,8 @@ export async function listSecrets(namespace = 'default') {
   const k8s = getClient()
   try {
     const result = await k8s.listCoreV1NamespacedSecret({
-      path: { namespace }
+      path: { namespace },
+      query: {},
     })
     return result.items || []
   } catch (error) {
@@ -73,7 +76,8 @@ export async function listConfigMaps(namespace = 'default') {
   const k8s = getClient()
   try {
     const result = await k8s.listCoreV1NamespacedConfigMap({
-      path: { namespace }
+      path: { namespace },
+      query: {},
     })
     return result.items || []
   } catch (error) {
@@ -86,7 +90,8 @@ export async function listPods(namespace = 'default') {
   const k8s = getClient()
   try {
     const result = await k8s.listCoreV1NamespacedPod({
-      path: { namespace }
+      path: { namespace },
+      query: {},
     })
     return result.items || []
   } catch (error) {

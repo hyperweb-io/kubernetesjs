@@ -4,9 +4,15 @@ import matter from 'gray-matter';
 import { remark } from 'remark';
 import { visit } from 'unist-util-visit';
 
-import { PostMetadata } from '@/types/blog.types';
-
 import { getAuthorAvatarUrl, getAuthorName } from './lookup';
+
+export interface PostMetadata {
+	id: string;
+	authorGithubId?: string;
+	title?: string;
+	description?: string;
+	[key: string]: unknown;
+}
 
 const getFullPath = (filePath: string) => path.join(process.cwd(), filePath);
 
@@ -88,8 +94,9 @@ export type PostInfo = PostMetadata & { avatarSrc: string; authorName: string };
 
 export const getPostsInfo = (postsDir: string): PostInfo[] => {
 	return getPostsMetadata(postsDir).map((meta) => {
-		const avatarSrc = getAuthorAvatarUrl(meta.authorGithubId) ?? '';
-		const authorName = getAuthorName(meta.authorGithubId);
+		const authorId = meta.authorGithubId ?? 'unknown';
+		const avatarSrc = getAuthorAvatarUrl(authorId) ?? '';
+		const authorName = getAuthorName(authorId);
 		return { ...meta, avatarSrc, authorName };
 	});
 };

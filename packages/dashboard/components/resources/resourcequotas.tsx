@@ -29,7 +29,7 @@ export function ResourceQuotasView() {
   const { namespace } = usePreferredNamespace()
   
   const query = namespace === '_all' 
-    ? useListCoreV1ResourceQuotaForAllNamespacesQuery({ path: {}, query: {} })
+    ? useListCoreV1ResourceQuotaForAllNamespacesQuery({ query: {} })
     : useListCoreV1NamespacedResourceQuotaQuery({ path: { namespace }, query: {} })
     
   const { data, isLoading, error, refetch } = query
@@ -143,8 +143,8 @@ export function ResourceQuotasView() {
               {quotas.filter(q => {
                 const used = q.status?.used || {}
                 const hard = q.status?.hard || {}
-                return Object.keys(hard).some(key => 
-                  getUsagePercentage(used[key] || '0', hard[key]) >= 75
+                return Object.keys(hard).some((key) =>
+                  getUsagePercentage(String(used[key] ?? '0'), String(hard[key] ?? '0')) >= 75
                 )
               }).length}
             </div>
@@ -213,10 +213,15 @@ export function ResourceQuotasView() {
                         </>
                       )}
                       <TableCell className="font-mono text-sm">{resource}</TableCell>
-                      <TableCell>{used[resource] || '0'}</TableCell>
-                      <TableCell>{hard[resource]}</TableCell>
+                      <TableCell>{String(used[resource] ?? '0')}</TableCell>
+                      <TableCell>{String(hard[resource] ?? '0')}</TableCell>
                       <TableCell>
-                        {getUsageBadge(getUsagePercentage(used[resource] || '0', hard[resource]))}
+                        {getUsageBadge(
+                          getUsagePercentage(
+                            String(used[resource] ?? '0'),
+                            String(hard[resource] ?? '0')
+                          )
+                        )}
                       </TableCell>
                       {idx === 0 && (
                         <TableCell rowSpan={resources.length} className="text-right">

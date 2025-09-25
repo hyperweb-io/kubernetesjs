@@ -31,7 +31,7 @@ export function HPAsView() {
   const { namespace } = usePreferredNamespace()
   
   const query = namespace === '_all' 
-    ? useListAutoscalingV2beta2HorizontalPodAutoscalerForAllNamespacesQuery({ path: {}, query: {} })
+    ? useListAutoscalingV2beta2HorizontalPodAutoscalerForAllNamespacesQuery({ query: {} })
     : useListAutoscalingV2beta2NamespacedHorizontalPodAutoscalerQuery({ path: { namespace }, query: {} })
     
   const { data, isLoading, error, refetch } = query

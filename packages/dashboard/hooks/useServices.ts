@@ -17,7 +17,7 @@ export function useServices(namespace?: string) {
   const ns = namespace || defaultNamespace
 
   if (ns === '_all') {
-    return useListCoreV1ServiceForAllNamespacesQuery({ path: {}, query: {} })
+    return useListCoreV1ServiceForAllNamespacesQuery({ query: {} })
   }
   return useListCoreV1NamespacedServiceQuery({ path: { namespace: ns }, query: {} })
 }

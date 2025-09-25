@@ -18,7 +18,7 @@ export function useDeployments(namespace?: string) {
   const ns = namespace || defaultNamespace
 
   if (ns === '_all') {
-    return useListAppsV1DeploymentForAllNamespacesQuery({ path: {}, query: {} })
+    return useListAppsV1DeploymentForAllNamespacesQuery({ query: {} })
   }
   return useListAppsV1NamespacedDeploymentQuery({ path: { namespace: ns }, query: {} })
 }
@@ -114,6 +114,7 @@ export function useScaleDeployment() {
       base.mutate(
         {
           path: { namespace: namespace || defaultNamespace, name },
+          query: {},
           body: {
             apiVersion: 'autoscaling/v1',
             kind: 'Scale',
@@ -130,6 +131,7 @@ export function useScaleDeployment() {
       base.mutateAsync(
         {
           path: { namespace: namespace || defaultNamespace, name },
+          query: {},
           body: {
             apiVersion: 'autoscaling/v1',
             kind: 'Scale',

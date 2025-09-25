@@ -33,7 +33,7 @@ export function CronJobsView() {
   
   // Use k8s hooks directly
   const query = namespace === '_all' 
-    ? useListBatchV1CronJobForAllNamespacesQuery({ path: {}, query: {} })
+    ? useListBatchV1CronJobForAllNamespacesQuery({ query: {} })
     : useListBatchV1NamespacedCronJobQuery({ path: { namespace }, query: {} })
     
   const { data, isLoading, error, refetch } = query
