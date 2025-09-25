@@ -401,7 +401,7 @@ export function SecretsView() {
           {error ? (
             <div className="flex flex-col items-center justify-center py-8 text-destructive">
               <AlertCircle className="h-8 w-8 mb-2" />
-              <p className="text-sm">{error}</p>
+              <p className="text-sm">{error instanceof Error ? error.message : 'Failed to fetch secrets'}</p>
               <Button variant="outline" size="sm" onClick={handleRefresh} className="mt-4">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Retry

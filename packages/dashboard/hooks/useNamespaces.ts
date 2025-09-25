@@ -10,7 +10,7 @@ import type { Namespace, NamespaceList } from 'kubernetesjs'
 const NAMESPACES_KEY = ['namespaces'] as const
 
 export function useNamespaces() {
-  return useListCoreV1NamespaceQuery({ path: {}, query: {} })
+  return useListCoreV1NamespaceQuery({ query: {} })
 }
 
 export function useNamespace(name: string) {
@@ -27,7 +27,6 @@ export function useCreateNamespace() {
     ) =>
       base.mutate(
         {
-          path: {},
           query: {},
           body: {
             apiVersion: 'v1',
@@ -43,7 +42,6 @@ export function useCreateNamespace() {
     ) =>
       base.mutateAsync(
         {
-          path: {},
           query: {},
           body: {
             apiVersion: 'v1',

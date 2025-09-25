@@ -15,7 +15,7 @@ export function useDaemonSets(namespace?: string) {
   const ns = namespace || defaultNamespace
 
   if (ns === '_all') {
-    return useListAppsV1DaemonSetForAllNamespacesQuery({ path: {}, query: {} })
+    return useListAppsV1DaemonSetForAllNamespacesQuery({ query: {} })
   }
   return useListAppsV1NamespacedDaemonSetQuery({ path: { namespace: ns }, query: {} })
 }

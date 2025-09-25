@@ -10,11 +10,10 @@ import {
 } from '@/components/ui/select'
 import { 
   Layers, 
-  Server, 
-  Code
+  Server
 } from 'lucide-react'
 
-type RouteMode = 'smart-objects' | 'infra' | 'editor'
+type RouteMode = 'smart-objects' | 'infra'
 
 const modeConfig = {
   'smart-objects': {
@@ -28,18 +27,11 @@ const modeConfig = {
     icon: Server,
     color: 'text-blue-600',
     route: '/i'
-  },
-  'editor': {
-    label: 'Editor',
-    icon: Code,
-    color: 'text-green-600',
-    route: '/editor'
   }
 }
 
 // Determine current mode from route
 function getModeFromRoute(pathname: string): RouteMode {
-  if (pathname === '/editor') return 'editor'
   if (pathname === '/d' || pathname.startsWith('/d/')) return 'smart-objects'
   if (pathname === '/i' || pathname.startsWith('/i/')) return 'infra'
   return 'infra' // Default

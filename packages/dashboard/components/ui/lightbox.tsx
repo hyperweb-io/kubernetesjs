@@ -1,11 +1,30 @@
 import { useEffect, useState } from 'react';
+import type { ImgHTMLAttributes } from 'react';
 import { X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ImageWithFallback } from '@/components/common/image-with-fallback';
-
 import { Button } from './button';
+
+interface LightboxImageProps extends ImgHTMLAttributes<HTMLImageElement> {
+	onLoadingComplete?: () => void;
+}
+
+function LightboxImage({ onLoadingComplete, onLoad, onError, ...rest }: LightboxImageProps) {
+	return (
+		<img
+			{...rest}
+			onLoad={(event) => {
+				onLoadingComplete?.();
+				onLoad?.(event);
+			}}
+			onError={(event) => {
+				onLoadingComplete?.();
+				onError?.(event);
+			}}
+		/>
+	);
+}
 
 interface LightboxProps {
 	src: string;
@@ -55,7 +74,7 @@ export function Lightbox({ src, alt, title, onClose }: LightboxProps) {
 					</div>
 
 					{/* Image */}
-					<ImageWithFallback
+					<LightboxImage
 						src={src}
 						alt={alt}
 						width={1200}

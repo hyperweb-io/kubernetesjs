@@ -31,7 +31,7 @@ export function IngressesView() {
   const { namespace } = usePreferredNamespace()
   
   const query = namespace === '_all' 
-    ? useListNetworkingV1IngressForAllNamespacesQuery({ path: {}, query: {} })
+    ? useListNetworkingV1IngressForAllNamespacesQuery({ query: {} })
     : useListNetworkingV1NamespacedIngressQuery({ path: { namespace }, query: {} })
     
   const { data, isLoading, error, refetch } = query
@@ -80,7 +80,10 @@ export function IngressesView() {
   }
 
   const getIngressClass = (ingress: Ingress): string => {
-    return ingress.spec?.ingressClassName || ingress.metadata?.annotations?.['kubernetes.io/ingress.class'] || 'default'
+    const className = ingress.spec?.ingressClassName as string | undefined;
+    const annotation = ingress.metadata?.annotations?.['kubernetes.io/ingress.class'] as string | undefined;
+
+    return className?.trim() || annotation?.trim() || 'default';
   }
 
   const hasTLS = (ingress: Ingress): boolean => {

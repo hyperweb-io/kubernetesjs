@@ -48,7 +48,7 @@ A modern, React-based dashboard for interacting with Kubernetes clusters, powere
    ```
 3. Install dependencies:
    ```bash
-   yarn install
+   pnpm install
    ```
 
 ## Usage
@@ -59,16 +59,16 @@ A modern, React-based dashboard for interacting with Kubernetes clusters, powere
    ```
 2. Run the development server:
    ```bash
-   yarn dev
+   pnpm --filter @interweb/dashboard dev
    ```
 3. Open your browser and go to [http://localhost:3000](http://localhost:3000)
 
 ## Available Scripts
 
-- `yarn dev` - Run the app in development mode
-- `yarn build` - Build the app for production
-- `yarn start` - Start the production build
-- `yarn lint` - Run linter checks
+- `pnpm --filter @interweb/dashboard dev` - Run the app in development mode
+- `pnpm --filter @interweb/dashboard build` - Build the app for production
+- `pnpm --filter @interweb/dashboard start` - Start the production build
+- `pnpm --filter @interweb/dashboard lint` - Run linter checks
 
 ## Contributing
 

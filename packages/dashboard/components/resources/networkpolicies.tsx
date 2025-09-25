@@ -31,7 +31,7 @@ export function NetworkPoliciesView() {
   const { namespace } = usePreferredNamespace()
   
   const query = namespace === '_all' 
-    ? useListNetworkingV1NetworkPolicyForAllNamespacesQuery({ path: {}, query: {} })
+    ? useListNetworkingV1NetworkPolicyForAllNamespacesQuery({ query: {} })
     : useListNetworkingV1NamespacedNetworkPolicyQuery({ path: { namespace }, query: {} })
     
   const { data, isLoading, error, refetch } = query

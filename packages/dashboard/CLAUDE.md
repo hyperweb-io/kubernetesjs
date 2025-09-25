@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-- `yarn dev` - Start development server on http://localhost:3000
-- `yarn build` - Build for production
-- `yarn start` - Start production server
-- `yarn lint` - Run ESLint checks
-- `yarn codegen` - Generate code from TypeScript schemas/configs
+- `pnpm --filter @interweb/dashboard dev` - Start development server on http://localhost:3000
+- `pnpm --filter @interweb/dashboard build` - Build for production
+- `pnpm --filter @interweb/dashboard start` - Start production server
+- `pnpm --filter @interweb/dashboard lint` - Run ESLint checks
+- `pnpm --filter @interweb/dashboard codegen` - Generate code from TypeScript schemas/configs
 
 ## Prerequisites for Development
 
@@ -29,7 +29,6 @@ This is a Next.js 14 React application that provides a modern dashboard for mana
 ### Key Components
 - **DashboardLayout** (`components/dashboard-layout.tsx`) - Main layout with collapsible sidebar navigation, theme toggle, and integrated AI chat
 - **Resources** (`components/resources/`) - Individual resource management components for each Kubernetes resource type
-- **IDE Components** (`components/ide/`) - File explorer, terminal, and AI chat for integrated development experience
 
 ### Data Layer
 - **Kubernetes Client** - Uses `kubernetesjs` library for API communication
@@ -46,8 +45,7 @@ The sidebar navigation is organized into collapsible sections:
 - Cluster (Resource Quotas, HPAs, Events, etc.)
 
 ### API Routes
-- `/api/k8s/[...path]` - Proxies requests to Kubernetes API
-- `/api/ide/fs/` - File system operations for IDE functionality
+- `/api/k8s/[...path]` - Proxies requests to the Kubernetes API
 - `/api/init` - Application initialization
 
 ### Styling
@@ -57,10 +55,10 @@ The sidebar navigation is organized into collapsible sections:
 - Responsive design with mobile-friendly sidebar
 
 ### Key Dependencies
-- `@kubernetesjs/react` & `kubernetesjs` - Kubernetes API client
-- `@tanstack/react-query` - Data fetching and state management
-- `@monaco-editor/react` - Code editor for YAML editing
-- `xterm` - Terminal emulator for IDE functionality
+- `kubernetesjs` - Kubernetes API client used across hooks and services
+- `@tanstack/react-query` - Data fetching and caching layer
+- `lucide-react` - Icon set used throughout the UI
+- `tailwindcss` & `tailwindcss-animate` - Utility-first styling and animations
 
 ### new items
 use agentic-kit to switch between providers, these files have the info you need:
