@@ -20,6 +20,6 @@
     "openapi:fetch": "ts-node ./scripts/fetch-swagger.ts --out ./scripts/swagger.json"
   },
   "devDependencies": {
-    "schema-sdk": "^0.14.0"
+    "schema-sdk": "^0.15.0"
   }
 }

@@ -412,8 +412,8 @@ importers:
   packages/interwebjs:
     devDependencies:
       schema-sdk:
-        specifier: ^0.14.0
-        version: 0.14.0(encoding@0.1.13)
+        specifier: ^0.15.0
+        version: 0.15.0(encoding@0.1.13)
     publishDirectory: dist
 
   packages/manifests:
@@ -5806,8 +5806,8 @@ packages:
   schema-sdk@0.11.3:
     resolution: {integrity: sha512-clsw2kq2jkXAEhVw7qc1vV1xVBNUSbDc9OqhxU69XlKtiZaOfjz1viPB1FAFW4vFBM98YTzKNDDPA/jEh5Rr8A==}
 
-  schema-sdk@0.14.0:
-    resolution: {integrity: sha512-Q0EYsO2QkuREQc48nO6H86sJ0diexiljD0ayjCLbsWxMjmJc2tQyjc9i5Uw7am3s3YcQYCK0RBr5Rcg6Y90MrQ==}
+  schema-sdk@0.15.0:
+    resolution: {integrity: sha512-O7FFduWsrdjUew42oQ1cj66ckW5ElYB0iX+khV8f1W5Q7pC3cCCcPK7meH7EypEQEOHENTrW/kWziCX/dR9Mbg==}
 
   schema-typescript@0.12.1:
     resolution: {integrity: sha512-dgfQrLjqsXEAC7vZ3fJDBsIPpUDJ2SrzuQFvXslrEjVjOSQyVykBua2tNmM4uFn4uIL7K3Ux64pXbaUnngkhhw==}
@@ -13445,7 +13445,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  schema-sdk@0.14.0(encoding@0.1.13):
+  schema-sdk@0.15.0(encoding@0.1.13):
     dependencies:
       '@babel/generator': 7.28.0
       '@babel/types': 7.28.2
