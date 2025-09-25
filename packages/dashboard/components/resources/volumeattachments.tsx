@@ -20,7 +20,7 @@ import {
   useListStorageV1VolumeAttachmentQuery,
   useDeleteStorageV1VolumeAttachment
 } from '@/k8s'
-import type { VolumeAttachment } from 'kubernetesjs'
+import type { VolumeAttachment } from '@interweb/interwebjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 

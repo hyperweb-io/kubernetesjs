@@ -21,7 +21,7 @@ import {
   useDeleteBatchV1NamespacedJob
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { Job } from 'kubernetesjs'
+import type { Job } from '@interweb/interwebjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 

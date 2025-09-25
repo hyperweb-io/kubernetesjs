@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useMemo, useState } from 'react'
-import { KubernetesClient } from 'kubernetesjs'
+import { InterwebClient } from '@interweb/interwebjs'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Configuration types
@@ -11,7 +11,7 @@ export interface KubernetesConfig {
 
 // Context types
 interface KubernetesContextValue {
-  client: KubernetesClient;
+  client: InterwebClient;
   config: KubernetesConfig;
   updateConfig: (config: Partial<KubernetesConfig>) => void;
 }
@@ -27,9 +27,6 @@ const queryClient = new QueryClient({
       retry: 3,
       staleTime: 30 * 1000, // 30 seconds
       gcTime: 5 * 60 * 1000, // 5 minutes
-      // Use background fetching to prevent UI blocking
-      refetchOnMount: 'always',
-      keepPreviousData: true,
     },
   },
 })
@@ -52,7 +49,7 @@ export function KubernetesProvider({
 
   // Create client instance
   const client = useMemo(() => {
-    return new KubernetesClient({
+    return new InterwebClient({
       restEndpoint: config.restEndpoint,
     })
   }, [config.restEndpoint])

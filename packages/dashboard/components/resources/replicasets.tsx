@@ -16,7 +16,7 @@ import {
   CheckCircle,
   Copy
 } from 'lucide-react'
-import { type ReplicaSet as K8sReplicaSet } from 'kubernetesjs'
+import { type ReplicaSet as K8sReplicaSet } from '@interweb/interwebjs'
 import { useReplicaSets, useDeleteReplicaSet, useScaleReplicaSet } from '@/hooks/useReplicaSets'
 
 import { confirmDialog } from '@/hooks/useConfirm'

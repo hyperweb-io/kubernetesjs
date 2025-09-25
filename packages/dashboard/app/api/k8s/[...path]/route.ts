@@ -11,13 +11,14 @@ const KUBECTL_PROXY_URL = process.env.KUBERNETES_PROXY_URL ||
 
 console.log('Using kubectl proxy URL:', KUBECTL_PROXY_URL);
 
-export async function GET(request: NextRequest, { params }: { params: { path: string[] } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   try {
-    const path = params.path.join('/');
+    const { path } = await params;
+    const pathStr = path.join('/');
     const url = new URL(request.url);
     const queryString = url.search;
     
-    const proxyUrl = `${KUBECTL_PROXY_URL}/${path}${queryString}`;
+    const proxyUrl = `${KUBECTL_PROXY_URL}/${pathStr}${queryString}`;
     
     console.log('Proxying GET request to:', proxyUrl);
     
@@ -45,14 +46,15 @@ export async function GET(request: NextRequest, { params }: { params: { path: st
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { path: string[] } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   try {
-    const path = params.path.join('/');
+    const { path } = await params;
+    const pathStr = path.join('/');
     const url = new URL(request.url);
     const queryString = url.search;
     const body = await request.json();
     
-    const proxyUrl = `${KUBECTL_PROXY_URL}/${path}${queryString}`;
+    const proxyUrl = `${KUBECTL_PROXY_URL}/${pathStr}${queryString}`;
     
     console.log('Proxying POST request to:', proxyUrl);
     
@@ -82,13 +84,14 @@ export async function POST(request: NextRequest, { params }: { params: { path: s
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { path: string[] } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   try {
-    const path = params.path.join('/');
+    const { path } = await params;
+    const pathStr = path.join('/');
     const url = new URL(request.url);
     const queryString = url.search;
     
-    const proxyUrl = `${KUBECTL_PROXY_URL}/${path}${queryString}`;
+    const proxyUrl = `${KUBECTL_PROXY_URL}/${pathStr}${queryString}`;
     
     console.log('Proxying DELETE request to:', proxyUrl);
     
@@ -116,14 +119,15 @@ export async function DELETE(request: NextRequest, { params }: { params: { path:
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { path: string[] } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   try {
-    const path = params.path.join('/');
+    const { path } = await params;
+    const pathStr = path.join('/');
     const url = new URL(request.url);
     const queryString = url.search;
     const body = await request.json();
     
-    const proxyUrl = `${KUBECTL_PROXY_URL}/${path}${queryString}`;
+    const proxyUrl = `${KUBECTL_PROXY_URL}/${pathStr}${queryString}`;
     
     console.log('Proxying PUT request to:', proxyUrl);
     
@@ -153,14 +157,15 @@ export async function PUT(request: NextRequest, { params }: { params: { path: st
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { path: string[] } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   try {
-    const path = params.path.join('/');
+    const { path } = await params;
+    const pathStr = path.join('/');
     const url = new URL(request.url);
     const queryString = url.search;
     const body = await request.json();
     
-    const proxyUrl = `${KUBECTL_PROXY_URL}/${path}${queryString}`;
+    const proxyUrl = `${KUBECTL_PROXY_URL}/${pathStr}${queryString}`;
     
     console.log('Proxying PATCH request to:', proxyUrl);
     

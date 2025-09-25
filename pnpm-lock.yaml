@@ -157,9 +157,9 @@ importers:
       '@interchainjs/encoding':
         specifier: ^1.11.0
         version: 1.17.5
-      '@kubernetesjs/react':
-        specifier: ^0.6.1
-        version: 0.6.3(@tanstack/react-query@4.41.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+      '@interweb/interwebjs':
+        specifier: workspace:^0.0.1
+        version: link:../interwebjs/dist
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.52.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -298,9 +298,6 @@ importers:
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
-      kubernetesjs:
-        specifier: ^0.6.1
-        version: 0.6.2
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
@@ -1464,12 +1461,6 @@ packages:
 
   '@keplr-wallet/unit@0.12.28':
     resolution: {integrity: sha512-kpXigHDBJGOmhtPkv9hqsQid9zkFo7OQPeKgO2n8GUlOINIXW6kWG5LXYTi/Yg9Uiw1CQF69gFMuZCJ8IzVHlA==}
-
-  '@kubernetesjs/react@0.6.3':
-    resolution: {integrity: sha512-nL69US9grNVHXmph0m+R+p7E0dAgqjCRkjO78GIb8MDd2hFUX6oTKlFxLOpoIr85B3U5HwXu75taJcrlcBeqpQ==}
-    peerDependencies:
-      '@tanstack/react-query': 5.79.2
-      react: ^18.2.0
 
   '@ledgerhq/devices@8.5.1':
     resolution: {integrity: sha512-oW75YQQiP2muHveXTuwSAze6CBxJ7jOYILhFiJbsVzmgLPVqtdw4s0bJJlOBft4Aup67yNAjboFCIU7kTYQBFg==}
@@ -6083,9 +6074,6 @@ packages:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
     engines: {node: '>=6'}
 
-  kubernetesjs@0.6.2:
-    resolution: {integrity: sha512-pGo1uaVnAg4M6T18Y32xkIZ2KBgt7GfWHMi2yBXSlkijCIRDuv6kOpPC6JamtC8B7wCnbNmm/f6JK8WLFS+UPg==}
-
   kubernetesjs@0.7.2:
     resolution: {integrity: sha512-WzvmRiZiW1fstCgVLXGWloV/0yv7n9tuMPX640caIIK5nRviCOEux85cCgrumZ3AGZ3hFM5rxhkOH40e2FF6wg==}
 
@@ -10276,12 +10264,6 @@ snapshots:
       '@keplr-wallet/types': 0.12.28
       big-integer: 1.6.52
       utility-types: 3.11.0
-
-  '@kubernetesjs/react@0.6.3(@tanstack/react-query@4.41.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@tanstack/react-query': 4.41.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      kubernetesjs: 0.6.2
-      react: 18.3.1
 
   '@ledgerhq/devices@8.5.1':
     dependencies:
@@ -16523,8 +16505,6 @@ snapshots:
   kind-of@6.0.3: {}
 
   kleur@3.0.3: {}
-
-  kubernetesjs@0.6.2: {}
 
   kubernetesjs@0.7.2: {}
 

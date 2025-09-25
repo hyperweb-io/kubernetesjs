@@ -19,7 +19,7 @@ import {
   useListEventsV1EventForAllNamespacesQuery
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { CoreV1Event } from 'kubernetesjs'
+import type { CoreV1Event } from '@interweb/interwebjs'
 
 export function EventsView() {
   const [typeFilter, setTypeFilter] = useState<string>('All')

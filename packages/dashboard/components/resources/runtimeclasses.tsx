@@ -18,7 +18,7 @@ import {
   useListNodeV1RuntimeClassQuery,
   useDeleteNodeV1RuntimeClass
 } from '@/k8s'
-import type { RuntimeClass } from 'kubernetesjs'
+import type { RuntimeClass } from '@interweb/interwebjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 

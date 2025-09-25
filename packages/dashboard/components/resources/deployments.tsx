@@ -15,7 +15,7 @@ import {
   AlertCircle,
   CheckCircle
 } from 'lucide-react'
-import { type Deployment as K8sDeployment } from 'kubernetesjs'
+import { type Deployment as K8sDeployment } from '@interweb/interwebjs'
 import { useDeployments, useDeleteDeployment, useScaleDeployment, useCreateDeployment } from '@/hooks'
 
 import { confirmDialog } from '@/hooks/useConfirm'

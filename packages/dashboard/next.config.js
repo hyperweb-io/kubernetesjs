@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-  transpilePackages: ['kubernetesjs', '@kubernetesjs/react', 'json-schema-faker'],
+  transpilePackages: ['json-schema-faker'],
   webpack: (config, { isServer }) => {
     // Fix for isomorphic-git
     config.resolve.fallback = {
