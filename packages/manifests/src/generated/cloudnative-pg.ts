@@ -1,5 +1,15 @@
 /** Auto-generated typed resources for operator: cloudnative-pg*/
-import type { KubernetesResource, AdmissionregistrationK8sIoV1MutatingWebhookConfiguration, AdmissionregistrationK8sIoV1ValidatingWebhookConfiguration, ApiextensionsK8sIoV1CustomResourceDefinition, AppsV1Deployment, ConfigMap, RbacAuthorizationK8sIoV1ClusterRole, RbacAuthorizationK8sIoV1ClusterRoleBinding, Service, ServiceAccount } from "@interweb/interwebjs";
+import type { KubernetesResource, AdmissionregistrationK8sIoV1MutatingWebhookConfiguration, AdmissionregistrationK8sIoV1ValidatingWebhookConfiguration, ApiextensionsK8sIoV1CustomResourceDefinition, AppsV1Deployment, ConfigMap, Namespace, RbacAuthorizationK8sIoV1ClusterRole, RbacAuthorizationK8sIoV1ClusterRoleBinding, Service, ServiceAccount } from "@interweb/interwebjs";
+export const Namespace_CnpgSystem: Namespace = {
+  apiVersion: "v1",
+  kind: "Namespace",
+  metadata: {
+    labels: {
+      "app.kubernetes.io/name": "cloudnative-pg"
+    },
+    name: "cnpg-system"
+  }
+};
 export const CustomResourceDefinition_BackupsPostgresqlCnpgIo: ApiextensionsK8sIoV1CustomResourceDefinition = {
   apiVersion: "apiextensions.k8s.io/v1",
   kind: "CustomResourceDefinition",
@@ -13666,7 +13676,7 @@ export const ValidatingWebhookConfiguration_CnpgValidatingWebhookConfiguration: 
     sideEffects: "None"
   }]
 };
-export const resources: ReadonlyArray<KubernetesResource> = [CustomResourceDefinition_BackupsPostgresqlCnpgIo, CustomResourceDefinition_ClusterimagecatalogsPostgresqlCnpgIo, CustomResourceDefinition_ClustersPostgresqlCnpgIo, CustomResourceDefinition_DatabasesPostgresqlCnpgIo, CustomResourceDefinition_ImagecatalogsPostgresqlCnpgIo, CustomResourceDefinition_PoolersPostgresqlCnpgIo, CustomResourceDefinition_PublicationsPostgresqlCnpgIo, CustomResourceDefinition_ScheduledbackupsPostgresqlCnpgIo, CustomResourceDefinition_SubscriptionsPostgresqlCnpgIo, ServiceAccount_CnpgManager, ClusterRole_CnpgDatabaseEditorRole, ClusterRole_CnpgDatabaseViewerRole, ClusterRole_CnpgManager, ClusterRole_CnpgPublicationEditorRole, ClusterRole_CnpgPublicationViewerRole, ClusterRole_CnpgSubscriptionEditorRole, ClusterRole_CnpgSubscriptionViewerRole, ClusterRoleBinding_CnpgManagerRolebinding, ConfigMap_CnpgDefaultMonitoring, Service_CnpgWebhookService, Deployment_CnpgControllerManager, MutatingWebhookConfiguration_CnpgMutatingWebhookConfiguration, ValidatingWebhookConfiguration_CnpgValidatingWebhookConfiguration];
+export const resources: ReadonlyArray<KubernetesResource> = [Namespace_CnpgSystem, CustomResourceDefinition_BackupsPostgresqlCnpgIo, CustomResourceDefinition_ClusterimagecatalogsPostgresqlCnpgIo, CustomResourceDefinition_ClustersPostgresqlCnpgIo, CustomResourceDefinition_DatabasesPostgresqlCnpgIo, CustomResourceDefinition_ImagecatalogsPostgresqlCnpgIo, CustomResourceDefinition_PoolersPostgresqlCnpgIo, CustomResourceDefinition_PublicationsPostgresqlCnpgIo, CustomResourceDefinition_ScheduledbackupsPostgresqlCnpgIo, CustomResourceDefinition_SubscriptionsPostgresqlCnpgIo, ServiceAccount_CnpgManager, ClusterRole_CnpgDatabaseEditorRole, ClusterRole_CnpgDatabaseViewerRole, ClusterRole_CnpgManager, ClusterRole_CnpgPublicationEditorRole, ClusterRole_CnpgPublicationViewerRole, ClusterRole_CnpgSubscriptionEditorRole, ClusterRole_CnpgSubscriptionViewerRole, ClusterRoleBinding_CnpgManagerRolebinding, ConfigMap_CnpgDefaultMonitoring, Service_CnpgWebhookService, Deployment_CnpgControllerManager, MutatingWebhookConfiguration_CnpgMutatingWebhookConfiguration, ValidatingWebhookConfiguration_CnpgValidatingWebhookConfiguration];
 export default {
   resources: resources
 };

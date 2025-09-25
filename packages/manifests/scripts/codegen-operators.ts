@@ -268,9 +268,8 @@ function typeOfDoc(doc: Doc, typeMap: Map<string, string>): string | undefined {
 
 function buildOperatorObjectsAst(op: OperatorDocs, typeMap: Map<string, string>): t.File {
   const body: t.Statement[] = [];
-  // Filter out Namespace docs (we don't need to embed them as objects)
-  const isKept = (d: Doc) => String(d?.kind) !== 'Namespace';
-  const defaultDocs = (op.default || []).filter(isKept);
+  // Include all docs, including Namespace (so generated bundles are self-sufficient)
+  const defaultDocs = (op.default || []);
   // Note: we intentionally do not embed versioned docs in generated objects anymore.
 
   // Import types actually used

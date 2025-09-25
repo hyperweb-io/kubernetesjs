@@ -16,8 +16,7 @@ function loadYamlDocsIfExists(file: string): K8s[] | undefined {
   try {
     const raw = fs.readFileSync(file, 'utf8');
     const docs = (yaml.loadAll(raw) as K8s[]).filter((d) => d && typeof d === 'object');
-    // codegen skips Namespace docs; align the comparison by filtering those out here too
-    return docs.filter((d) => d.kind !== 'Namespace');
+    return docs;
   } catch {
     return undefined;
   }

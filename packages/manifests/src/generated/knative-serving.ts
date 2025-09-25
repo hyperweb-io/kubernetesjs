@@ -1,5 +1,5 @@
 /** Auto-generated typed resources for operator: knative-serving*/
-import type { KubernetesResource, AdmissionregistrationK8sIoV1MutatingWebhookConfiguration, AdmissionregistrationK8sIoV1ValidatingWebhookConfiguration, ApiextensionsK8sIoV1CustomResourceDefinition, AppsV1Deployment, AutoscalingV2HorizontalPodAutoscaler, CachingInternalKnativeDevV1alpha1Image, ConfigMap, NetworkingInternalKnativeDevV1alpha1Certificate, PolicyV1PodDisruptionBudget, RbacAuthorizationK8sIoV1ClusterRole, RbacAuthorizationK8sIoV1ClusterRoleBinding, RbacAuthorizationK8sIoV1Role, RbacAuthorizationK8sIoV1RoleBinding, Secret, Service, ServiceAccount } from "@interweb/interwebjs";
+import type { KubernetesResource, AdmissionregistrationK8sIoV1MutatingWebhookConfiguration, AdmissionregistrationK8sIoV1ValidatingWebhookConfiguration, ApiextensionsK8sIoV1CustomResourceDefinition, AppsV1Deployment, AutoscalingV2HorizontalPodAutoscaler, CachingInternalKnativeDevV1alpha1Image, ConfigMap, Namespace, NetworkingInternalKnativeDevV1alpha1Certificate, PolicyV1PodDisruptionBudget, RbacAuthorizationK8sIoV1ClusterRole, RbacAuthorizationK8sIoV1ClusterRoleBinding, RbacAuthorizationK8sIoV1Role, RbacAuthorizationK8sIoV1RoleBinding, Secret, Service, ServiceAccount } from "@interweb/interwebjs";
 export const CustomResourceDefinition_CertificatesNetworkingInternalKnativeDev: ApiextensionsK8sIoV1CustomResourceDefinition = {
   apiVersion: "apiextensions.k8s.io/v1",
   kind: "CustomResourceDefinition",
@@ -5653,6 +5653,17 @@ export const CustomResourceDefinition_ImagesCachingInternalKnativeDev: Apiextens
     }]
   }
 };
+export const Namespace_KnativeServing: Namespace = {
+  apiVersion: "v1",
+  kind: "Namespace",
+  metadata: {
+    labels: {
+      "app.kubernetes.io/name": "knative-serving",
+      "app.kubernetes.io/version": "1.15.0"
+    },
+    name: "knative-serving"
+  }
+};
 export const Role_KnativeServingActivator: RbacAuthorizationK8sIoV1Role = {
   apiVersion: "rbac.authorization.k8s.io/v1",
   kind: "Role",
@@ -7152,6 +7163,19 @@ export const Secret_WebhookCerts: Secret = {
     namespace: "knative-serving"
   }
 };
+export const Namespace_KourierSystem: Namespace = {
+  apiVersion: "v1",
+  kind: "Namespace",
+  metadata: {
+    labels: {
+      "app.kubernetes.io/component": "net-kourier",
+      "app.kubernetes.io/name": "knative-serving",
+      "app.kubernetes.io/version": "1.15.0",
+      "networking.knative.dev/ingress-provider": "kourier"
+    },
+    name: "kourier-system"
+  }
+};
 export const ConfigMap_KourierBootstrap: ConfigMap = {
   apiVersion: "v1",
   kind: "ConfigMap",
@@ -7679,7 +7703,7 @@ export const PodDisruptionBudget_3scaleKourierGatewayPdb: PolicyV1PodDisruptionB
     }
   }
 };
-export const resources: ReadonlyArray<KubernetesResource> = [CustomResourceDefinition_CertificatesNetworkingInternalKnativeDev, CustomResourceDefinition_ConfigurationsServingKnativeDev, CustomResourceDefinition_ClusterdomainclaimsNetworkingInternalKnativeDev, CustomResourceDefinition_DomainmappingsServingKnativeDev, CustomResourceDefinition_IngressesNetworkingInternalKnativeDev, CustomResourceDefinition_MetricsAutoscalingInternalKnativeDev, CustomResourceDefinition_PodautoscalersAutoscalingInternalKnativeDev, CustomResourceDefinition_RevisionsServingKnativeDev, CustomResourceDefinition_RoutesServingKnativeDev, CustomResourceDefinition_ServerlessservicesNetworkingInternalKnativeDev, CustomResourceDefinition_ServicesServingKnativeDev, CustomResourceDefinition_ImagesCachingInternalKnativeDev, Role_KnativeServingActivator, ClusterRole_KnativeServingActivatorCluster, ClusterRole_KnativeServingAggregatedAddressableResolver, ClusterRole_KnativeServingAddressableResolver, ClusterRole_KnativeServingNamespacedAdmin, ClusterRole_KnativeServingNamespacedEdit, ClusterRole_KnativeServingNamespacedView, ClusterRole_KnativeServingCore, ClusterRole_KnativeServingPodspecableBinding, ServiceAccount_Controller, ClusterRole_KnativeServingAdmin, ClusterRoleBinding_KnativeServingControllerAdmin, ClusterRoleBinding_KnativeServingControllerAddressableResolver, ServiceAccount_Activator, RoleBinding_KnativeServingActivator, ClusterRoleBinding_KnativeServingActivatorCluster, Certificate_RoutingServingCerts, Image_QueueProxy, ConfigMap_ConfigAutoscaler, ConfigMap_ConfigCertmanager, ConfigMap_ConfigDefaults, ConfigMap_ConfigDeployment, ConfigMap_ConfigDomain, ConfigMap_ConfigFeatures, ConfigMap_ConfigGc, ConfigMap_ConfigLeaderElection, ConfigMap_ConfigLogging, ConfigMap_ConfigNetwork, ConfigMap_ConfigObservability, ConfigMap_ConfigTracing, HorizontalPodAutoscaler_Activator, PodDisruptionBudget_ActivatorPdb, Deployment_Activator, Service_ActivatorService, Deployment_Autoscaler, Service_Autoscaler, Deployment_Controller, Service_Controller, HorizontalPodAutoscaler_Webhook, PodDisruptionBudget_WebhookPdb, Deployment_Webhook, Service_Webhook, ValidatingWebhookConfiguration_ConfigWebhookServingKnativeDev, MutatingWebhookConfiguration_WebhookServingKnativeDev, ValidatingWebhookConfiguration_ValidationWebhookServingKnativeDev, Secret_WebhookCerts, ConfigMap_KourierBootstrap, ConfigMap_ConfigKourier, ServiceAccount_NetKourier, ClusterRole_NetKourier, ClusterRoleBinding_NetKourier, Deployment_NetKourierController, Service_NetKourierController, Deployment_3scaleKourierGateway, Service_Kourier, Service_KourierInternal, HorizontalPodAutoscaler_3scaleKourierGateway, PodDisruptionBudget_3scaleKourierGatewayPdb];
+export const resources: ReadonlyArray<KubernetesResource> = [CustomResourceDefinition_CertificatesNetworkingInternalKnativeDev, CustomResourceDefinition_ConfigurationsServingKnativeDev, CustomResourceDefinition_ClusterdomainclaimsNetworkingInternalKnativeDev, CustomResourceDefinition_DomainmappingsServingKnativeDev, CustomResourceDefinition_IngressesNetworkingInternalKnativeDev, CustomResourceDefinition_MetricsAutoscalingInternalKnativeDev, CustomResourceDefinition_PodautoscalersAutoscalingInternalKnativeDev, CustomResourceDefinition_RevisionsServingKnativeDev, CustomResourceDefinition_RoutesServingKnativeDev, CustomResourceDefinition_ServerlessservicesNetworkingInternalKnativeDev, CustomResourceDefinition_ServicesServingKnativeDev, CustomResourceDefinition_ImagesCachingInternalKnativeDev, Namespace_KnativeServing, Role_KnativeServingActivator, ClusterRole_KnativeServingActivatorCluster, ClusterRole_KnativeServingAggregatedAddressableResolver, ClusterRole_KnativeServingAddressableResolver, ClusterRole_KnativeServingNamespacedAdmin, ClusterRole_KnativeServingNamespacedEdit, ClusterRole_KnativeServingNamespacedView, ClusterRole_KnativeServingCore, ClusterRole_KnativeServingPodspecableBinding, ServiceAccount_Controller, ClusterRole_KnativeServingAdmin, ClusterRoleBinding_KnativeServingControllerAdmin, ClusterRoleBinding_KnativeServingControllerAddressableResolver, ServiceAccount_Activator, RoleBinding_KnativeServingActivator, ClusterRoleBinding_KnativeServingActivatorCluster, Certificate_RoutingServingCerts, Image_QueueProxy, ConfigMap_ConfigAutoscaler, ConfigMap_ConfigCertmanager, ConfigMap_ConfigDefaults, ConfigMap_ConfigDeployment, ConfigMap_ConfigDomain, ConfigMap_ConfigFeatures, ConfigMap_ConfigGc, ConfigMap_ConfigLeaderElection, ConfigMap_ConfigLogging, ConfigMap_ConfigNetwork, ConfigMap_ConfigObservability, ConfigMap_ConfigTracing, HorizontalPodAutoscaler_Activator, PodDisruptionBudget_ActivatorPdb, Deployment_Activator, Service_ActivatorService, Deployment_Autoscaler, Service_Autoscaler, Deployment_Controller, Service_Controller, HorizontalPodAutoscaler_Webhook, PodDisruptionBudget_WebhookPdb, Deployment_Webhook, Service_Webhook, ValidatingWebhookConfiguration_ConfigWebhookServingKnativeDev, MutatingWebhookConfiguration_WebhookServingKnativeDev, ValidatingWebhookConfiguration_ValidationWebhookServingKnativeDev, Secret_WebhookCerts, Namespace_KourierSystem, ConfigMap_KourierBootstrap, ConfigMap_ConfigKourier, ServiceAccount_NetKourier, ClusterRole_NetKourier, ClusterRoleBinding_NetKourier, Deployment_NetKourierController, Service_NetKourierController, Deployment_3scaleKourierGateway, Service_Kourier, Service_KourierInternal, HorizontalPodAutoscaler_3scaleKourierGateway, PodDisruptionBudget_3scaleKourierGatewayPdb];
 export default {
   resources: resources
 };

@@ -1,5 +1,15 @@
 /** Auto-generated typed resources for operator: ingress-nginx*/
-import type { KubernetesResource, AdmissionregistrationK8sIoV1ValidatingWebhookConfiguration, AppsV1Deployment, BatchV1Job, ConfigMap, NetworkingK8sIoV1IngressClass, RbacAuthorizationK8sIoV1ClusterRole, RbacAuthorizationK8sIoV1ClusterRoleBinding, RbacAuthorizationK8sIoV1Role, RbacAuthorizationK8sIoV1RoleBinding, Service, ServiceAccount } from "@interweb/interwebjs";
+import type { KubernetesResource, AdmissionregistrationK8sIoV1ValidatingWebhookConfiguration, AppsV1Deployment, BatchV1Job, ConfigMap, Namespace, NetworkingK8sIoV1IngressClass, RbacAuthorizationK8sIoV1ClusterRole, RbacAuthorizationK8sIoV1ClusterRoleBinding, RbacAuthorizationK8sIoV1Role, RbacAuthorizationK8sIoV1RoleBinding, Service, ServiceAccount } from "@interweb/interwebjs";
+export const Namespace_IngressNginx: Namespace = {
+  apiVersion: "v1",
+  kind: "Namespace",
+  metadata: {
+    labels: {
+      "app.kubernetes.io/name": "ingress-nginx"
+    },
+    name: "ingress-nginx"
+  }
+};
 export const ServiceAccount_IngressNginx: ServiceAccount = {
   apiVersion: "v1",
   kind: "ServiceAccount",
@@ -789,7 +799,7 @@ export const Job_IngressNginxAdmissionPatch: BatchV1Job = {
     }
   }
 };
-export const resources: ReadonlyArray<KubernetesResource> = [ServiceAccount_IngressNginx, ConfigMap_IngressNginxController, ClusterRole_IngressNginx, ClusterRoleBinding_IngressNginx, Role_IngressNginx, RoleBinding_IngressNginx, Service_IngressNginxControllerMetrics, Service_IngressNginxControllerAdmission, Service_IngressNginxController, Deployment_IngressNginxController, IngressClass_Nginx, ValidatingWebhookConfiguration_IngressNginxAdmission, ServiceAccount_IngressNginxAdmission, ClusterRole_IngressNginxAdmission, ClusterRoleBinding_IngressNginxAdmission, Role_IngressNginxAdmission, RoleBinding_IngressNginxAdmission, Job_IngressNginxAdmissionCreate, Job_IngressNginxAdmissionPatch];
+export const resources: ReadonlyArray<KubernetesResource> = [Namespace_IngressNginx, ServiceAccount_IngressNginx, ConfigMap_IngressNginxController, ClusterRole_IngressNginx, ClusterRoleBinding_IngressNginx, Role_IngressNginx, RoleBinding_IngressNginx, Service_IngressNginxControllerMetrics, Service_IngressNginxControllerAdmission, Service_IngressNginxController, Deployment_IngressNginxController, IngressClass_Nginx, ValidatingWebhookConfiguration_IngressNginxAdmission, ServiceAccount_IngressNginxAdmission, ClusterRole_IngressNginxAdmission, ClusterRoleBinding_IngressNginxAdmission, Role_IngressNginxAdmission, RoleBinding_IngressNginxAdmission, Job_IngressNginxAdmissionCreate, Job_IngressNginxAdmissionPatch];
 export default {
   resources: resources
 };
