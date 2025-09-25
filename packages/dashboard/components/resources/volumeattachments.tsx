@@ -27,7 +27,7 @@ import { confirmDialog } from '@/hooks/useConfirm'
 export function VolumeAttachmentsView() {
   const [selectedAttachment, setSelectedAttachment] = useState<VolumeAttachment | null>(null)
   
-  const { data, isLoading, error, refetch } = useListStorageV1VolumeAttachmentQuery({ path: {}, query: {} })
+  const { data, isLoading, error, refetch } = useListStorageV1VolumeAttachmentQuery({ query: {} })
   const deleteAttachment = useDeleteStorageV1VolumeAttachment()
 
   const attachments = data?.items || []

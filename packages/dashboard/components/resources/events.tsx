@@ -27,7 +27,7 @@ export function EventsView() {
   
   // Note: Events API has changed in newer versions, using v1 events
   const query = namespace === '_all' 
-    ? useListEventsV1EventForAllNamespacesQuery({ path: {}, query: {} })
+    ? useListEventsV1EventForAllNamespacesQuery({ query: {} })
     : useListCoreV1NamespacedEventQuery({ path: { namespace }, query: {} })
     
   const { data, isLoading, error, refetch } = query
@@ -36,25 +36,25 @@ export function EventsView() {
 
   const handleRefresh = () => refetch()
 
-  const getEventType = (event: CoreV1Event): string => {
+  const getEventType = (event: K8sEvent): string => {
     return event.type || 'Normal'
   }
 
-  const getEventReason = (event: CoreV1Event): string => {
+  const getEventReason = (event: K8sEvent): string => {
     return event.reason || 'Unknown'
   }
 
-  const getEventMessage = (event: CoreV1Event): string => {
+  const getEventMessage = (event: K8sEvent): string => {
     return event.message || 'No message'
   }
 
-  const getEventObject = (event: CoreV1Event): string => {
+  const getEventObject = (event: K8sEvent): string => {
     const obj = event.involvedObject
     if (!obj) return 'Unknown'
     return `${obj.kind}/${obj.name}`
   }
 
-  const getEventTime = (event: CoreV1Event): string => {
+  const getEventTime = (event: K8sEvent): string => {
     const timestamp = event.lastTimestamp || event.firstTimestamp
     if (!timestamp) return 'Unknown'
     
@@ -68,7 +68,7 @@ export function EventsView() {
     return date.toLocaleDateString()
   }
 
-  const getEventCount = (event: CoreV1Event): number => {
+  const getEventCount = (event: K8sEvent): number => {
     return event.count || 1
   }
 

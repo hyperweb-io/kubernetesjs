@@ -11,10 +11,15 @@ const KUBECTL_PROXY_URL = process.env.KUBERNETES_PROXY_URL ||
 
 console.log('Using kubectl proxy URL:', KUBECTL_PROXY_URL);
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+const resolvePath = (context: any) => {
+  const rawParams = context?.params as { path?: string | string[] } | undefined;
+  const segments = Array.isArray(rawParams?.path) ? rawParams.path : rawParams?.path ? [rawParams.path] : [];
+  return segments.join('/');
+};
+
+export async function GET(request: NextRequest, context: any) {
   try {
-    const { path } = await params;
-    const pathStr = path.join('/');
+    const path = resolvePath(context);
     const url = new URL(request.url);
     const queryString = url.search;
     
@@ -46,10 +51,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+export async function POST(request: NextRequest, context: any) {
   try {
-    const { path } = await params;
-    const pathStr = path.join('/');
+    const path = resolvePath(context);
     const url = new URL(request.url);
     const queryString = url.search;
     const body = await request.json();
@@ -84,10 +88,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+export async function DELETE(request: NextRequest, context: any) {
   try {
-    const { path } = await params;
-    const pathStr = path.join('/');
+    const path = resolvePath(context);
     const url = new URL(request.url);
     const queryString = url.search;
     
@@ -119,10 +122,9 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+export async function PUT(request: NextRequest, context: any) {
   try {
-    const { path } = await params;
-    const pathStr = path.join('/');
+    const path = resolvePath(context);
     const url = new URL(request.url);
     const queryString = url.search;
     const body = await request.json();
@@ -157,10 +159,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+export async function PATCH(request: NextRequest, context: any) {
   try {
-    const { path } = await params;
-    const pathStr = path.join('/');
+    const path = resolvePath(context);
     const url = new URL(request.url);
     const queryString = url.search;
     const body = await request.json();

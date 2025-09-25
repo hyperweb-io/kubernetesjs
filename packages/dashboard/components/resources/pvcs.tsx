@@ -30,7 +30,7 @@ export function PVCsView() {
   const { namespace } = usePreferredNamespace()
   
   const query = namespace === '_all' 
-    ? useListCoreV1PersistentVolumeClaimForAllNamespacesQuery({ path: {}, query: {} })
+    ? useListCoreV1PersistentVolumeClaimForAllNamespacesQuery({ query: {} })
     : useListCoreV1NamespacedPersistentVolumeClaimQuery({ path: { namespace }, query: {} })
     
   const { data, isLoading, error, refetch } = query
@@ -39,6 +39,14 @@ export function PVCsView() {
   const pvcs = data?.items || []
 
   const handleRefresh = () => refetch()
+
+  const coerceString = (value: unknown): string | undefined => {
+    if (typeof value === 'string') {
+      const trimmed = value.trim()
+      return trimmed.length > 0 ? trimmed : undefined
+    }
+    return undefined
+  }
 
   const handleDelete = async (pvc: PersistentVolumeClaim) => {
     const name = pvc.metadata!.name!
@@ -103,17 +111,17 @@ export function PVCsView() {
   }
 
   const getStorageSize = (pvc: PersistentVolumeClaim): string => {
-    const storage = pvc.spec?.resources?.requests?.storage
-    const capacity = pvc.status?.capacity?.storage
+    const storage = coerceString(pvc.spec?.resources?.requests?.storage)
+    const capacity = coerceString(pvc.status?.capacity?.storage)
     return capacity || storage || 'Unknown'
   }
 
   const getStorageClass = (pvc: PersistentVolumeClaim): string => {
-    return pvc.spec?.storageClassName || 'default'
+    return coerceString(pvc.spec?.storageClassName) || 'default'
   }
 
   const getVolumeName = (pvc: PersistentVolumeClaim): string => {
-    return pvc.spec?.volumeName || 'Not bound'
+    return coerceString(pvc.spec?.volumeName) || 'Not bound'
   }
 
   return (

@@ -1,7 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import Editor from '@monaco-editor/react'
+import { useEffect, useMemo, useState } from 'react'
 
 interface YAMLEditorProps {
   value: string
@@ -28,26 +27,24 @@ export function YAMLEditor({ value, onChange, height = '400px', readOnly = false
     return () => window.removeEventListener('storage', handleThemeChange)
   }, [])
   
+  const editorClassName = useMemo(() => {
+    const base = 'h-full w-full resize-none p-4 font-mono text-sm outline-none'
+    const palette = theme === 'dark'
+      ? 'bg-slate-900 text-slate-100'
+      : 'bg-white text-slate-900'
+    const readOnlyStyles = readOnly ? 'cursor-not-allowed opacity-90' : ''
+    return [base, palette, readOnlyStyles].filter(Boolean).join(' ')
+  }, [theme, readOnly])
+
   return (
     <div className="border rounded-md overflow-hidden" style={{ height }}>
-      <Editor
-        height="100%"
-        defaultLanguage="yaml"
+      <textarea
         value={value}
-        onChange={onChange}
-        theme={theme === 'dark' ? 'vs-dark' : 'vs-light'}
-        options={{
-          minimap: { enabled: false },
-          fontSize: 14,
-          lineNumbers: 'on',
-          scrollBeyondLastLine: false,
-          automaticLayout: true,
-          formatOnPaste: true,
-          formatOnType: true,
-          readOnly,
-          wordWrap: 'on',
-          tabSize: 2,
-        }}
+        readOnly={readOnly}
+        onChange={(event) => onChange(event.target.value)}
+        spellCheck={false}
+        className={editorClassName}
+        style={{ height: '100%' }}
       />
     </div>
   )

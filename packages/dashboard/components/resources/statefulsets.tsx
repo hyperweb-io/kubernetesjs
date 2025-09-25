@@ -32,7 +32,7 @@ export function StatefulSetsView() {
   
   // Use k8s hooks directly
   const query = namespace === '_all' 
-    ? useListAppsV1StatefulSetForAllNamespacesQuery({ path: {}, query: {} })
+    ? useListAppsV1StatefulSetForAllNamespacesQuery({ query: {} })
     : useListAppsV1NamespacedStatefulSetQuery({ path: { namespace }, query: {} })
     
   const { data, isLoading, error, refetch } = query
@@ -58,7 +58,8 @@ export function StatefulSetsView() {
             kind: 'Scale',
             metadata: { name, namespace },
             spec: { replicas: Number(newReplicas) }
-          }
+          },
+          query: {}
         })
         refetch()
       } catch (err) {

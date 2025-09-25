@@ -31,7 +31,7 @@ export function JobsView() {
   
   // Use k8s hooks directly
   const query = namespace === '_all' 
-    ? useListBatchV1JobForAllNamespacesQuery({ path: {}, query: {} })
+    ? useListBatchV1JobForAllNamespacesQuery({ query: {} })
     : useListBatchV1NamespacedJobQuery({ path: { namespace }, query: {} })
     
   const { data, isLoading, error, refetch } = query

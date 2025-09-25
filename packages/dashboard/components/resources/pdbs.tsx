@@ -30,7 +30,7 @@ export function PDBsView() {
   const { namespace } = usePreferredNamespace()
   
   const query = namespace === '_all' 
-    ? useListPolicyV1PodDisruptionBudgetForAllNamespacesQuery({ path: {}, query: {} })
+    ? useListPolicyV1PodDisruptionBudgetForAllNamespacesQuery({ query: {} })
     : useListPolicyV1NamespacedPodDisruptionBudgetQuery({ path: { namespace }, query: {} })
     
   const { data, isLoading, error, refetch } = query

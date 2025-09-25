@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import '@interchain-ui/react/styles';
 import { Providers } from './providers';
 import { AppLayout } from '@/components/app-layout';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';

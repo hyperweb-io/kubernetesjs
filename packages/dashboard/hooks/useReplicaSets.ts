@@ -16,7 +16,7 @@ export function useReplicaSets(namespace?: string) {
   const ns = namespace || defaultNamespace
 
   if (ns === '_all') {
-    return useListAppsV1ReplicaSetForAllNamespacesQuery({ path: {}, query: {} })
+    return useListAppsV1ReplicaSetForAllNamespacesQuery({ query: {} })
   }
   return useListAppsV1NamespacedReplicaSetQuery({ path: { namespace: ns }, query: {} })
 }
@@ -64,6 +64,7 @@ export function useScaleReplicaSet() {
       base.mutate(
         {
           path: { namespace: namespace || defaultNamespace, name },
+          query: {},
           body: {
             apiVersion: 'autoscaling/v1',
             kind: 'Scale',
@@ -80,6 +81,7 @@ export function useScaleReplicaSet() {
       base.mutateAsync(
         {
           path: { namespace: namespace || defaultNamespace, name },
+          query: {},
           body: {
             apiVersion: 'autoscaling/v1',
             kind: 'Scale',

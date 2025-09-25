@@ -27,12 +27,20 @@ import { confirmDialog } from '@/hooks/useConfirm'
 export function PVsView() {
   const [selectedPV, setSelectedPV] = useState<PersistentVolume | null>(null)
   
-  const { data, isLoading, error, refetch } = useListCoreV1PersistentVolumeQuery({ path: {}, query: {} })
+  const { data, isLoading, error, refetch } = useListCoreV1PersistentVolumeQuery({ query: {} })
   const deletePV = useDeleteCoreV1PersistentVolume()
 
   const pvs = data?.items || []
 
   const handleRefresh = () => refetch()
+
+  const coerceString = (value: unknown): string | undefined => {
+    if (typeof value === 'string') {
+      const trimmed = value.trim()
+      return trimmed.length > 0 ? trimmed : undefined
+    }
+    return undefined
+  }
 
   const handleDelete = async (pv: PersistentVolume) => {
     const name = pv.metadata!.name!
@@ -101,25 +109,27 @@ export function PVsView() {
   }
 
   const getCapacity = (pv: PersistentVolume): string => {
-    return pv.spec?.capacity?.storage || 'Unknown'
+    return coerceString(pv.spec?.capacity?.storage) || 'Unknown'
   }
 
   const getStorageClass = (pv: PersistentVolume): string => {
-    return pv.spec?.storageClassName || 'None'
+    return coerceString(pv.spec?.storageClassName) || 'None'
   }
 
   const getReclaimPolicy = (pv: PersistentVolume): string => {
-    return pv.spec?.persistentVolumeReclaimPolicy || 'Retain'
+    return coerceString(pv.spec?.persistentVolumeReclaimPolicy) || 'Retain'
   }
 
   const getClaimRef = (pv: PersistentVolume): string => {
     const ref = pv.spec?.claimRef
     if (!ref) return 'Unbound'
-    return `${ref.namespace}/${ref.name}`
+    const namespace = coerceString(ref.namespace) || 'unknown'
+    const name = coerceString(ref.name) || 'unknown'
+    return `${namespace}/${name}`
   }
 
   const getVolumeMode = (pv: PersistentVolume): string => {
-    return pv.spec?.volumeMode || 'Filesystem'
+    return coerceString(pv.spec?.volumeMode) || 'Filesystem'
   }
 
   return (

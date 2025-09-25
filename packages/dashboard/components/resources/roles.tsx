@@ -34,11 +34,11 @@ export function RolesView() {
   
   // Namespace roles
   const nsQuery = namespace === '_all' 
-    ? useListRbacAuthorizationV1RoleForAllNamespacesQuery({ path: {}, query: {} })
+    ? useListRbacAuthorizationV1RoleForAllNamespacesQuery({ query: {} })
     : useListRbacAuthorizationV1NamespacedRoleQuery({ path: { namespace }, query: {} })
   
   // Cluster roles
-  const clusterQuery = useListRbacAuthorizationV1ClusterRoleQuery({ path: {}, query: {} })
+  const clusterQuery = useListRbacAuthorizationV1ClusterRoleQuery({ query: {} })
   
   const query = showClusterRoles ? clusterQuery : nsQuery
   const { data, isLoading, error, refetch } = query

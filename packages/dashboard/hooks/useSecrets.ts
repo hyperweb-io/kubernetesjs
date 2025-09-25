@@ -17,7 +17,7 @@ export function useSecrets(namespace?: string) {
   const ns = namespace || defaultNamespace
 
   if (ns === '_all') {
-    return useListCoreV1SecretForAllNamespacesQuery({ path: {}, query: {} })
+    return useListCoreV1SecretForAllNamespacesQuery({ query: {} })
   }
   return useListCoreV1NamespacedSecretQuery({ path: { namespace: ns }, query: {} })
 }

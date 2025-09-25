@@ -35,11 +35,11 @@ export function RoleBindingsView() {
   
   // Namespace role bindings
   const nsQuery = namespace === '_all' 
-    ? useListRbacAuthorizationV1RoleBindingForAllNamespacesQuery({ path: {}, query: {} })
+    ? useListRbacAuthorizationV1RoleBindingForAllNamespacesQuery({ query: {} })
     : useListRbacAuthorizationV1NamespacedRoleBindingQuery({ path: { namespace }, query: {} })
   
   // Cluster role bindings
-  const clusterQuery = useListRbacAuthorizationV1ClusterRoleBindingQuery({ path: {}, query: {} })
+  const clusterQuery = useListRbacAuthorizationV1ClusterRoleBindingQuery({ query: {} })
   
   const query = showClusterBindings ? clusterQuery : nsQuery
   const { data, isLoading, error, refetch } = query

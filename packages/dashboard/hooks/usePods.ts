@@ -16,7 +16,7 @@ export function usePods(namespace?: string) {
   const ns = namespace || defaultNamespace
 
   if (ns === '_all') {
-    return useListCoreV1PodForAllNamespacesQuery({ path: {}, query: {} })
+    return useListPodsQuery({ query: {} })
   }
   return useListCoreV1NamespacedPodQuery({ path: { namespace: ns }, query: {} })
 }

@@ -25,12 +25,20 @@ import { confirmDialog } from '@/hooks/useConfirm'
 export function RuntimeClassesView() {
   const [selectedRuntimeClass, setSelectedRuntimeClass] = useState<RuntimeClass | null>(null)
   
-  const { data, isLoading, error, refetch } = useListNodeV1RuntimeClassQuery({ path: {}, query: {} })
+  const { data, isLoading, error, refetch } = useListNodeV1RuntimeClassQuery({ query: {} })
   const deleteRuntimeClass = useDeleteNodeV1RuntimeClass()
 
   const runtimeClasses = data?.items || []
 
   const handleRefresh = () => refetch()
+
+  const coerceString = (value: unknown): string | undefined => {
+    if (typeof value === 'string') {
+      const trimmed = value.trim()
+      return trimmed.length > 0 ? trimmed : undefined
+    }
+    return undefined
+  }
 
   const handleDelete = async (rc: RuntimeClass) => {
     const name = rc.metadata!.name!
@@ -193,11 +201,11 @@ export function RuntimeClassesView() {
                         <div className="text-sm">
                           <div className="flex items-center gap-1">
                             <Cpu className="w-3 h-3" />
-                            CPU: {rc.overhead.podFixed.cpu || 'N/A'}
+                            CPU: {coerceString(rc.overhead.podFixed.cpu) || 'N/A'}
                           </div>
                           <div className="flex items-center gap-1">
                             <Box className="w-3 h-3" />
-                            Memory: {rc.overhead.podFixed.memory || 'N/A'}
+                            Memory: {coerceString(rc.overhead.podFixed.memory) || 'N/A'}
                           </div>
                         </div>
                       ) : (
