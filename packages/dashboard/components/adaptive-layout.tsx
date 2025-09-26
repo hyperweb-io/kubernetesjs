@@ -12,10 +12,7 @@ interface AdaptiveLayoutProps {
 }
 
 // Determine layout mode purely from route
-function getModeFromRoute(pathname: string): 'smart-objects' | 'infra' | 'editor' | 'admin' {
-  if (pathname === '/editor') {
-    return 'editor';
-  }
+function getModeFromRoute(pathname: string): 'smart-objects' | 'infra' | 'admin' {
   if (pathname === '/d' || pathname.startsWith('/d/')) {
     return 'smart-objects';
   }

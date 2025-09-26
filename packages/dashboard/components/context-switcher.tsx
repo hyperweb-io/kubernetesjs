@@ -15,7 +15,7 @@ import {
   Shield
 } from 'lucide-react'
 
-type RouteMode = 'smart-objects' | 'infra' | 'editor' | 'admin'
+type RouteMode = 'smart-objects' | 'infra' | 'admin'
 
 const modeConfig = {
   'smart-objects': {

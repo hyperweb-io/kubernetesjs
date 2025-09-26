@@ -152,7 +152,7 @@ export default function DatabasesPage() {
               onClick={() => createDb.mutate()}
               disabled={createDb.isPending}
             >{createDb.isPending ? 'Creating…' : 'Create'}</button>
-            {createDb.error && (
+            {!!createDb.error && (
               <span className="text-red-600 text-sm">{String((createDb.error as any)?.message || createDb.error)}</span>
             )}
           </div>

@@ -54,11 +54,22 @@ import {
   Boxes,
   LayoutDashboard,
   Rocket,
+  LucideIcon,
 } from 'lucide-react';
 import { AdminHeader } from './headers/admin-header';
 
+type NavigationItem = {
+  id: string;
+  label: string;
+  icon?: LucideIcon;
+  href?: string;
+  isHeader?: boolean;
+  section?: string;
+};
+
+
 // Smart Objects navigation
-const smartObjectsNavigation = [
+const smartObjectsNavigation:NavigationItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/d' },
 
   // Cloud section
@@ -184,7 +195,7 @@ export function DashboardLayout({
     }
   }, []);
 
-  const getNavigationItems = () =>{
+  const getNavigationItems = ():typeof smartObjectsNavigation =>{
     if(mode === 'admin') {
       return adminNavigation;
     }
