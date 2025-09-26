@@ -10,10 +10,12 @@ import {
 } from '@/components/ui/select'
 import { 
   Layers, 
-  Server
+  Server, 
+  Code,
+  Shield
 } from 'lucide-react'
 
-type RouteMode = 'smart-objects' | 'infra'
+type RouteMode = 'smart-objects' | 'infra' | 'editor' | 'admin'
 
 const modeConfig = {
   'smart-objects': {
@@ -27,6 +29,12 @@ const modeConfig = {
     icon: Server,
     color: 'text-blue-600',
     route: '/i'
+  },
+  'admin': {
+    label: 'Admin',
+    icon: Shield,
+    color: 'text-red-600',
+    route: '/admin'
   }
 }
 
@@ -34,6 +42,7 @@ const modeConfig = {
 function getModeFromRoute(pathname: string): RouteMode {
   if (pathname === '/d' || pathname.startsWith('/d/')) return 'smart-objects'
   if (pathname === '/i' || pathname.startsWith('/i/')) return 'infra'
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) return 'admin'
   return 'infra' // Default
 }
 
