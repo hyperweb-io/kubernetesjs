@@ -1,4 +1,4 @@
-
+'use client'
 import React, { createContext, useContext, useMemo, useState } from 'react'
 import { KubernetesClient } from 'kubernetesjs'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
