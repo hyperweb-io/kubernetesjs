@@ -11,15 +11,16 @@ const KUBECTL_PROXY_URL = process.env.KUBERNETES_PROXY_URL ||
 
 console.log('Using kubectl proxy URL:', KUBECTL_PROXY_URL);
 
-const resolvePath = (context: any) => {
-  const rawParams = context?.params as { path?: string | string[] } | undefined;
+const resolvePath = async (context: any) => {
+  const params = await context?.params;
+  const rawParams = params as { path?: string | string[] } | undefined;
   const segments = Array.isArray(rawParams?.path) ? rawParams.path : rawParams?.path ? [rawParams.path] : [];
   return segments.join('/');
 };
 
 export async function GET(request: NextRequest, context: any) {
   try {
-    const path = resolvePath(context);
+    const path = await resolvePath(context);
     const url = new URL(request.url);
     const queryString = url.search;
     
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest, context: any) {
 
 export async function POST(request: NextRequest, context: any) {
   try {
-    const path = resolvePath(context);
+    const path = await resolvePath(context);
     const url = new URL(request.url);
     const queryString = url.search;
     const body = await request.json();
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest, context: any) {
 
 export async function DELETE(request: NextRequest, context: any) {
   try {
-    const path = resolvePath(context);
+    const path = await resolvePath(context);
     const url = new URL(request.url);
     const queryString = url.search;
     
@@ -124,7 +125,7 @@ export async function DELETE(request: NextRequest, context: any) {
 
 export async function PUT(request: NextRequest, context: any) {
   try {
-    const path = resolvePath(context);
+    const path = await resolvePath(context);
     const url = new URL(request.url);
     const queryString = url.search;
     const body = await request.json();
@@ -161,7 +162,7 @@ export async function PUT(request: NextRequest, context: any) {
 
 export async function PATCH(request: NextRequest, context: any) {
   try {
-    const path = resolvePath(context);
+    const path = await resolvePath(context);
     const url = new URL(request.url);
     const queryString = url.search;
     const body = await request.json();

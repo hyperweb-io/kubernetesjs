@@ -1,12 +1,12 @@
 import {
-  useListPodsQuery,
+  useListCoreV1PodForAllNamespacesQuery,
   useListCoreV1NamespacedPodQuery,
   useReadCoreV1NamespacedPodQuery,
   useReadCoreV1NamespacedPodLogQuery,
   useDeleteCoreV1NamespacedPod,
 } from '../k8s/index'
 import { usePreferredNamespace } from '../contexts/NamespaceContext'
-import type { Pod, PodList } from 'kubernetesjs'
+import type { Pod, PodList } from '@interweb/interwebjs'
 
 // Query keys
 const PODS_KEY = ['pods'] as const

@@ -22,7 +22,7 @@ import {
   ChevronDown,
   ChevronRight
 } from 'lucide-react'
-import { type ConfigMap as K8sConfigMap } from 'kubernetesjs'
+import { type ConfigMap as K8sConfigMap } from '@interweb/interwebjs'
 import { useConfigMaps, useDeleteConfigMap, useUpdateConfigMap } from '@/hooks'
 
 import { confirmDialog } from '@/hooks/useConfirm'

@@ -21,7 +21,7 @@ import {
   useDeleteCoreV1NamespacedPersistentVolumeClaim
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { PersistentVolumeClaim } from 'kubernetesjs'
+import type { PersistentVolumeClaim } from '@interweb/interwebjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 

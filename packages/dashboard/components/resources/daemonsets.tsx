@@ -14,7 +14,7 @@ import {
   CheckCircle,
   Server
 } from 'lucide-react'
-import { type DaemonSet as K8sDaemonSet } from 'kubernetesjs'
+import { type DaemonSet as K8sDaemonSet } from '@interweb/interwebjs'
 import { useDaemonSets, useDeleteDaemonSet } from '@/hooks/useDaemonSets'
 
 import { confirmDialog } from '@/hooks/useConfirm'

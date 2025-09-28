@@ -22,7 +22,7 @@ import {
   useDeleteAutoscalingV2beta2NamespacedHorizontalPodAutoscaler
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { HorizontalPodAutoscaler } from 'kubernetesjs'
+import type { HorizontalPodAutoscaler } from '@interweb/interwebjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 
