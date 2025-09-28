@@ -55,6 +55,9 @@ export function KubernetesProvider({
   const client = useMemo(() => {
     return new InterwebClient({
       restEndpoint: config.restEndpoint,
+      kubeconfig: '',
+      namespace: 'default',
+      context: 'default'
     })
   }, [config.restEndpoint])
 

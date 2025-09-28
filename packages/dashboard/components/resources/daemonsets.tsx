@@ -54,16 +54,16 @@ export function DaemonSetsView() {
   }
   
   // Format daemon sets from query data
-  const daemonSets: DaemonSet[] = data?.items?.map(item => {
+  const daemonSets: DaemonSet[] = (data?.items as any[])?.map(item => {
     return {
-      name: item.metadata!.name!,
-      namespace: item.metadata!.namespace!,
+      name: item.metadata?.name || 'unknown',
+      namespace: item.metadata?.namespace || 'unknown',
       desiredNumberScheduled: item.status?.desiredNumberScheduled || 0,
       currentNumberScheduled: item.status?.currentNumberScheduled || 0,
       numberReady: item.status?.numberReady || 0,
       numberAvailable: item.status?.numberAvailable || 0,
-      image: item.spec?.template?.spec?.containers[0]?.image || 'unknown',
-      createdAt: item.metadata!.creationTimestamp!,
+      image: item.spec?.template?.spec?.containers?.[0]?.image || 'unknown',
+      createdAt: item.metadata?.creationTimestamp || new Date().toISOString(),
       status: determineDaemonSetStatus(item),
       k8sData: item
     }

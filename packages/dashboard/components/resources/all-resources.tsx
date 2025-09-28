@@ -16,6 +16,7 @@ import {
   AlertCircle
 } from 'lucide-react'
 import { useDeployments, useServices, usePods, useDaemonSets, useReplicaSets } from '@/hooks'
+import type { Deployment, Pod, Service, DaemonSet, ReplicaSet } from '@interweb/interwebjs'
 
 interface ResourceSectionProps {
   title: string
@@ -163,11 +164,11 @@ export function AllResourcesView() {
           color="text-blue-600"
           count={deployments.data?.items?.length || 0}
           loading={deployments.isLoading}
-          error={deployments.error}
+          error={deployments.error as Error | null}
           onRefresh={() => deployments.refetch()}
         >
           <div className="space-y-2">
-            {deployments.data?.items?.map((item) => {
+            {deployments.data?.items?.map((item: Deployment) => {
               const replicas = item.spec?.replicas || 0
               const readyReplicas = item.status?.readyReplicas || 0
               const isReady = replicas === readyReplicas && replicas > 0
@@ -200,7 +201,7 @@ export function AllResourcesView() {
           onRefresh={() => services.refetch()}
         >
           <div className="space-y-2">
-            {services.data?.items?.map((item) => {
+            {services.data?.items?.map((item: Service) => {
               const type = item.spec?.type || 'Unknown'
               const ports = item.spec?.ports?.map(p => p.port).join(', ') || 'none'
               
@@ -226,11 +227,11 @@ export function AllResourcesView() {
           color="text-orange-600"
           count={pods.data?.items?.length || 0}
           loading={pods.isLoading}
-          error={pods.error}
+          error={pods.error as Error | null}
           onRefresh={() => pods.refetch()}
         >
           <div className="space-y-2">
-            {pods.data?.items?.map((item) => {
+            {pods.data?.items?.map((item: Pod) => {
               const phase = item.status?.phase || 'Unknown'
               const containerStatuses = item.status?.containerStatuses || []
               const readyContainers = containerStatuses.filter(cs => cs.ready).length
@@ -263,11 +264,11 @@ export function AllResourcesView() {
           color="text-purple-600"
           count={daemonSets.data?.items?.length || 0}
           loading={daemonSets.isLoading}
-          error={daemonSets.error}
+          error={daemonSets.error as Error | null}
           onRefresh={() => daemonSets.refetch()}
         >
           <div className="space-y-2">
-            {daemonSets.data?.items?.map((item) => {
+            {daemonSets.data?.items?.map((item: DaemonSet) => {
               const desired = item.status?.desiredNumberScheduled || 0
               const ready = item.status?.numberReady || 0
               const isReady = desired === ready && desired > 0
@@ -300,7 +301,7 @@ export function AllResourcesView() {
           onRefresh={() => replicaSets.refetch()}
         >
           <div className="space-y-2">
-            {replicaSets.data?.items?.map((item) => {
+            {replicaSets.data?.items?.map((item: ReplicaSet) => {
               const replicas = item.spec?.replicas || 0
               const readyReplicas = item.status?.readyReplicas || 0
               const isReady = replicas === readyReplicas && replicas > 0
