@@ -33,6 +33,20 @@ type OperatorConfig = {
 // Keep explicit URLs for reliability and reproducibility.
 const OPERATORS: OperatorConfig[] = [
   {
+    name: 'minio-operator',
+    sources: [
+      {
+        type: 'helm',
+        // Helm chart version for MinIO Operator (pinned for reproducibility)
+        version: '7.1.1',
+        repo: 'https://operator.min.io',
+        repoName: 'minio-operator',
+        chart: 'operator',
+        namespace: 'minio-operator',
+      },
+    ],
+  },
+  {
     name: 'cloudnative-pg',
     sources: [
       {

@@ -5,6 +5,7 @@ import CloudnativePg from "./cloudnative-pg";
 import IngressNginx from "./ingress-nginx";
 import KnativeServing from "./knative-serving";
 import KubePrometheusStack from "./kube-prometheus-stack";
+import MinioOperator from "./minio-operator";
 export interface OperatorObjectModule {
   resources?: ReadonlyArray<KubernetesResource>;
 }
@@ -13,15 +14,17 @@ export const OPERATOR_OBJECTS: Record<string, OperatorObjectModule> = {
   "cloudnative-pg": CloudnativePg,
   "ingress-nginx": IngressNginx,
   "knative-serving": KnativeServing,
-  "kube-prometheus-stack": KubePrometheusStack
+  "kube-prometheus-stack": KubePrometheusStack,
+  "minio-operator": MinioOperator
 };
-export const OPERATOR_IDS: ReadonlyArray<string> = ["cert-manager", "cloudnative-pg", "ingress-nginx", "knative-serving", "kube-prometheus-stack"];
+export const OPERATOR_IDS: ReadonlyArray<string> = ["cert-manager", "cloudnative-pg", "ingress-nginx", "knative-serving", "kube-prometheus-stack", "minio-operator"];
 export const OPERATOR_VERSIONS = {
   "cert-manager": ["v1.17.0"],
   "cloudnative-pg": ["1.25.2"],
   "ingress-nginx": ["4.11.2"],
   "knative-serving": ["v1.15.0"],
-  "kube-prometheus-stack": ["77.5.0"]
+  "kube-prometheus-stack": ["77.5.0"],
+  "minio-operator": ["7.1.1"]
 };
 export const OPERATOR_MAP: Record<string, {
   resources: ReadonlyArray<KubernetesResource>;
@@ -46,5 +49,9 @@ export const OPERATOR_MAP: Record<string, {
   "kube-prometheus-stack": {
     versions: ["77.5.0"],
     resources: KubePrometheusStack.resources
+  },
+  "minio-operator": {
+    versions: ["7.1.1"],
+    resources: MinioOperator.resources
   }
 };

@@ -15,6 +15,13 @@ export interface OperatorCatalogEntry {
 }
 
 export const OPERATOR_CATALOG: Record<string, OperatorCatalogEntry> = {
+  'minio-operator': {
+    name: 'minio-operator',
+    displayName: 'MinIO Operator',
+    description: 'Operator to manage MinIO tenants and S3-compatible object storage on Kubernetes',
+    docsUrl: 'https://operator.min.io',
+    namespaces: ['minio-operator'],
+  },
   'ingress-nginx': {
     name: 'ingress-nginx',
     displayName: 'NGINX Ingress Controller',

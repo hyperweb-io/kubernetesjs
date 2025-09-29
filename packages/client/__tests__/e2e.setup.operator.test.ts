@@ -16,6 +16,7 @@ const DEFAULT_VERSIONS: Record<string, string> = {
   'knative-serving': 'v1.15.0',
   'cloudnative-pg': '1.25.2',
   'kube-prometheus-stack': '77.5.0',
+  'minio-operator': '7.1.1',
 };
 
 const DEFAULT_NAMESPACES: Record<string, string> = {
@@ -24,6 +25,7 @@ const DEFAULT_NAMESPACES: Record<string, string> = {
   'knative-serving': 'knative-serving',
   'cloudnative-pg': 'cnpg-system',
   'kube-prometheus-stack': 'monitoring',
+  'minio-operator': 'minio-operator',
 };
 
 // Minimal operator dependency map for tests. Extend over time as needed.
