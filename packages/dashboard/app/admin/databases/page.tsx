@@ -2,80 +2,74 @@
 
 import { useDatabaseStatus } from '@/hooks/use-database-status';
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { CreateDatabasesDialog } from '@/components/create-databases-dialog';
+import { CreateDatabaseParams, useCreateBackup, useCreateDatabases, useQueryBackups } from '@/hooks/useDatabases';
+import { AlertCircle, CheckCircle, Eye, Plus, RefreshCw } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { TableHeader, TableRow, TableHead, TableBody, TableCell,Table } from '@/components/ui/table';
+import { CreateBackupDialog } from '@/components/create-backup-dialog';
 
 export default function DatabasesPage() {
   // For now default to the standard ns/name; later we can add list + picker
   const [ns, setNs] = useState('postgres-db');
+
   const [name, setName] = useState('postgres-cluster');
+
   const { data: status, isLoading, error, refetch } = useDatabaseStatus(ns, name) as any;
+
   const qc = useQueryClient();
-  const [methodChoice, setMethodChoice] = useState<'auto'|'barmanObjectStore'|'volumeSnapshot'>('auto');
 
-  // Create DB form state (required fields)
   const [showCreate, setShowCreate] = useState(false);
-  const [instances, setInstances] = useState<number>(1);
-  const [storage, setStorage] = useState<string>('1Gi');
-  const [storageClass, setStorageClass] = useState<string>('');
-  const [appUsername, setAppUsername] = useState<string>('appuser');
-  const [appPassword, setAppPassword] = useState<string>('appuser123!');
-  const [superuserPassword, setSuperuserPassword] = useState<string>('postgres123!');
-  const [enablePooler, setEnablePooler] = useState<boolean>(true);
-  const [poolerName, setPoolerName] = useState<string>('postgres-pooler');
-  const [poolerInstances, setPoolerInstances] = useState<number>(1);
 
-  const createDb = useMutation({
-    mutationFn: async () => {
-      const r = await fetch(`/api/databases/${ns}/${name}/deploy`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          instances,
-          storage,
-          storageClass: storageClass || undefined,
-          appUsername,
-          appPassword,
-          superuserPassword,
-          enablePooler,
-          poolerName: enablePooler ? poolerName : undefined,
-          poolerInstances: enablePooler ? poolerInstances : undefined,
-        }),
-      });
-      if (!r.ok) throw new Error(await r.text());
-      return r.json();
-    },
-    onSuccess: async () => {
-      setShowCreate(false);
-      await Promise.all([
-        refetch?.(),
-        qc.invalidateQueries({ queryKey: ['db-status', ns, name] }),
-      ]);
-    },
-  });
+  const [showCreateBackup, setShowCreateBackup] = useState(false);
 
-  const backups = useQuery({
-    queryKey: ['db-backups', ns, name],
-    queryFn: async () => {
-      const r = await fetch(`/api/databases/${ns}/${name}/backups`, { cache: 'no-store' });
-      if (!r.ok) throw new Error('Failed to list backups');
-      return r.json();
-    },
-    enabled: !!status,
-    refetchInterval: 20000,
-  });
+  const createDb = useCreateDatabases()
 
-  const createBackup = useMutation({
-    mutationFn: async (method?: string) => {
-      const r = await fetch(`/api/databases/${ns}/${name}/backups`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'onDemand', method }),
-      });
-      if (!r.ok) throw new Error(await r.text());
-      return r.json();
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['db-backups', ns, name] }),
-  });
+  const backups = useQueryBackups(ns, name)
+
+  const createBackup = useCreateBackup()
+
+  const handleCreateDb = async (data: CreateDatabaseParams) =>{
+    return createDb.mutateAsync(data,{
+      onSuccess(){
+        refetch();
+        qc.invalidateQueries({ queryKey: ['db-status', ns, name] });
+      }
+    })
+  }
+
+  const openBackupDialog = () => {
+    setShowCreateBackup(true)
+  }
+
+  const handleCreateBackUp = (method?: string) =>{
+    return createBackup.mutateAsync({
+      name,
+      ns,
+      method
+    },{
+      onSuccess: () => qc.invalidateQueries({ queryKey: ['db-backups', ns, name] }),
+    })
+  }
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'Cluster in healthy state':
+        return <Badge variant="success" className="items-center gap-1">
+          <CheckCircle className="w-3 h-3" />
+          running
+        </Badge>
+      default:
+        return <Badge variant="outline">{status}</Badge>
+    }
+  }
+
+  const handleRefresh = () => {
+    refetch()
+  }
 
   return (
     <div className="space-y-6">
@@ -85,240 +79,157 @@ export default function DatabasesPage() {
           <p className="text-gray-600">CloudNativePG clusters and status</p>
         </div>
         <div className="flex gap-2">
-          <input className="border rounded px-2 py-1" placeholder="Namespace" value={ns} onChange={(e) => setNs(e.target.value)} />
-          <input className="border rounded px-2 py-1" placeholder="Cluster name" value={name} onChange={(e) => setName(e.target.value)} />
-          <button
-            className="border rounded px-3 py-1 bg-blue-600 text-white hover:bg-blue-700"
-            onClick={() => setShowCreate((v) => !v)}
+          {/* <Button onClick={() => setShowCreate((v) => !v)}>Create DB</Button> */}
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={()=>backups.refetch()}
+            disabled={isLoading}
           >
-            {showCreate ? 'Close' : 'Create DB'}
-          </button>
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          </Button>
+          <Button onClick={() => setShowCreate(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Database
+          </Button>
         </div>
+      </div> 
+
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total Pods
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{status?.instances || 0}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Running
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              {status?.readyInstances || 0}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Pending
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">
+              {status?.pendingInstances || 0}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Failed
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">
+              {status?.failedInstances || 0}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {showCreate && (
-        <div className="rounded-lg border bg-white p-4 space-y-3">
-          <h2 className="text-lg font-semibold">Create PostgreSQL (CloudNativePG)</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            <label className="flex flex-col gap-1">
-              <span className="text-gray-600">Instances</span>
-              <input type="number" min={1} max={5} value={instances} onChange={(e) => setInstances(parseInt(e.target.value || '1', 10))} className="border rounded px-2 py-1" />
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-gray-600">Storage</span>
-              <input value={storage} onChange={(e) => setStorage(e.target.value)} placeholder="10Gi" className="border rounded px-2 py-1" />
-            </label>
-            <label className="flex flex-col gap-1 sm:col-span-2">
-              <span className="text-gray-600">Storage Class (optional)</span>
-              <input value={storageClass} onChange={(e) => setStorageClass(e.target.value)} placeholder="standard" className="border rounded px-2 py-1" />
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-gray-600">App Username</span>
-              <input value={appUsername} onChange={(e) => setAppUsername(e.target.value)} className="border rounded px-2 py-1" />
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-gray-600">App Password</span>
-              <input type="password" value={appPassword} onChange={(e) => setAppPassword(e.target.value)} className="border rounded px-2 py-1" />
-            </label>
-            <label className="flex flex-col gap-1 sm:col-span-2">
-              <span className="text-gray-600">Superuser Password</span>
-              <input type="password" value={superuserPassword} onChange={(e) => setSuperuserPassword(e.target.value)} className="border rounded px-2 py-1" />
-            </label>
-            <label className="flex items-center gap-2 sm:col-span-2">
-              <input type="checkbox" checked={enablePooler} onChange={(e) => setEnablePooler(e.target.checked)} />
-              <span className="text-gray-700">Enable PgBouncer Pooler</span>
-            </label>
-            {enablePooler && (
-              <>
-                <label className="flex flex-col gap-1">
-                  <span className="text-gray-600">Pooler Name</span>
-                  <input value={poolerName} onChange={(e) => setPoolerName(e.target.value)} className="border rounded px-2 py-1" />
-                </label>
-                <label className="flex flex-col gap-1">
-                  <span className="text-gray-600">Pooler Instances</span>
-                  <input type="number" min={1} max={5} value={poolerInstances} onChange={(e) => setPoolerInstances(parseInt(e.target.value || '1', 10))} className="border rounded px-2 py-1" />
-                </label>
-              </>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <button
-              className="border rounded px-3 py-1 bg-gray-100 hover:bg-gray-200"
-              onClick={() => setShowCreate(false)}
-              disabled={createDb.isPending}
-            >Cancel</button>
-            <button
-              className="border rounded px-3 py-1 bg-blue-600 text-white hover:bg-blue-700"
-              onClick={() => createDb.mutate()}
-              disabled={createDb.isPending}
-            >{createDb.isPending ? 'Creating…' : 'Create'}</button>
-            {createDb.error ? (
-              <span className="text-red-600 text-sm">{String((createDb.error as any)?.message || createDb.error)}</span>
-            ) : null}
-          </div>
-        </div>
-      )}
-
-      {isLoading && <div className="text-gray-600">Loading status...</div>}
-      {(!isLoading && (status as any)?.notFound) && (
-        <div className="rounded-lg border bg-white p-4">
-          <h2 className="text-lg font-semibold mb-1">No database found</h2>
-          <p className="text-gray-600 text-sm">Use the Create DB button to deploy a PostgreSQL cluster in “{ns}” named “{name}”.</p>
-        </div>
-      )}
-      {!isLoading && !status && error && (
-        <div className="text-red-600">Failed to load: {(error as Error).message}</div>
-      )}
-
-      {status && !(status as any).notFound && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Cluster Summary */}
-          <div className="lg:col-span-2 rounded-lg border bg-white p-4">
-            <h2 className="text-lg font-semibold mb-3">Cluster Summary</h2>
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
-              <div><dt className="text-gray-500">Name</dt><dd className="font-medium">{status.name}</dd></div>
-              <div><dt className="text-gray-500">PostgreSQL Image</dt><dd className="font-medium">{status.image || 'unknown'}</dd></div>
-              <div><dt className="text-gray-500">Primary instance</dt><dd className="font-medium">{status.primary || 'unknown'}</dd></div>
-              <div><dt className="text-gray-500">Primary start time</dt><dd className="font-medium">{status.primaryStartTime || 'unknown'}</dd></div>
-              <div><dt className="text-gray-500">Status</dt><dd className="font-medium">{status.phase || 'unknown'}</dd></div>
-              <div><dt className="text-gray-500">Instances</dt><dd className="font-medium">{status.instances}</dd></div>
-              <div><dt className="text-gray-500">Ready instances</dt><dd className="font-medium">{status.readyInstances}</dd></div>
-              <div><dt className="text-gray-500">System ID</dt><dd className="font-medium">{status.systemID || 'unknown'}</dd></div>
-              <div className="sm:col-span-2"><dt className="text-gray-500">Services</dt><dd className="font-medium break-all">rw: {status.services.rw} | ro: {status.services.ro} {status.services.poolerRw ? `| pooler-rw: ${status.services.poolerRw}` : ''}</dd></div>
-            </dl>
-          </div>
-
-          {/* Backup/Streaming */}
-          <div className="rounded-lg border bg-white p-4 space-y-3">
-            <h2 className="text-lg font-semibold">Protection</h2>
-            <div>
-              <div className="text-gray-500 text-sm">Continuous Backup</div>
-              <div className="font-medium text-sm">{status.backups.configured ? `Scheduled: ${status.backups.scheduledCount}, last: ${status.backups.lastBackupTime || 'n/a'}` : 'Not configured'}</div>
+      <Card>
+        <CardHeader>
+          <CardTitle>All Clusters</CardTitle>
+          <CardDescription>
+            A list of all cluster
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {error ? (
+            <div className="flex flex-col items-center justify-center py-8 text-destructive">
+              <AlertCircle className="h-8 w-8 mb-2" />
+              <p className="text-sm">{error instanceof Error ? error.message : 'Failed to fetch database'}</p>
+              <Button variant="outline" size="sm" onClick={handleRefresh} className="mt-4">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry
+              </Button>
             </div>
-            <div>
-              <div className="text-gray-500 text-sm">Streaming Replication</div>
-              <div className="font-medium text-sm">{status.streaming.configured ? `${status.streaming.replicas} replica(s)` : 'Not configured'}</div>
+          ) : isLoading ? (
+            <div className="flex justify-center py-8">
+              <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
-            <div className="pt-2">
-              <div className="flex items-center gap-2">
-                <select
-                  className="border rounded px-2 py-1 text-sm"
-                  value={methodChoice}
-                  onChange={(e) => setMethodChoice(e.target.value as any)}
-                >
-                  <option value="auto">Auto</option>
-                  <option value="barmanObjectStore" disabled={backups.isFetched && backups.data?.methodConfigured !== 'barmanObjectStore'}>
-                    barmanObjectStore
-                  </option>
-                  <option value="volumeSnapshot" disabled={backups.isFetched && !backups.data?.snapshotSupported}>
-                    volumeSnapshot
-                  </option>
-                </select>
-                <button
-                  className="px-3 py-1 rounded bg-primary text-white disabled:opacity-50"
-                  disabled={
-                    createBackup.isPending ||
-                    (backups.isFetched && (
-                      (methodChoice === 'auto' && !(backups.data?.configured || backups.data?.snapshotSupported)) ||
-                      (methodChoice === 'barmanObjectStore' && backups.data?.methodConfigured !== 'barmanObjectStore') ||
-                      (methodChoice === 'volumeSnapshot' && !backups.data?.snapshotSupported)
-                    ))
-                  }
-                  onClick={() => {
-                    const methodParam = methodChoice === 'auto' ? undefined : methodChoice;
-                    createBackup.mutate(methodParam);
-                  }}
-                  title={(() => {
-                    if (!backups.isFetched) return 'Create on-demand backup';
-                    if (methodChoice === 'auto' && !(backups.data?.configured || backups.data?.snapshotSupported)) return 'Configure backups (barman) or install VolumeSnapshot CRDs';
-                    if (methodChoice === 'barmanObjectStore' && backups.data?.methodConfigured !== 'barmanObjectStore') return 'Cluster is not configured for barman backups';
-                    if (methodChoice === 'volumeSnapshot' && !backups.data?.snapshotSupported) return 'VolumeSnapshot CRDs/CSI not available';
-                    return 'Create on-demand backup';
-                  })()}
-                >
-                  {createBackup.isPending ? 'Creating…' : 'Create Backup'}
-                </button>
-              </div>
+          ) : status?.notFound ? (
+            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+              <p className="text-sm">No database found in the {ns} namespace</p>
+              <Button variant="outline" size="sm" onClick={handleRefresh} className="mt-4">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
             </div>
-          </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>PostgreSQL Image</TableHead>
+                  <TableHead>Primary instance</TableHead>
+                  <TableHead>Primary start time</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Instances</TableHead>
+                  <TableHead>Ready instances</TableHead>
+                  <TableHead>System ID</TableHead>
+                  <TableHead>Services</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium">{status?.name}</TableCell>
+                  <TableCell className="font-medium">{status?.image || 'unknown'}</TableCell>
+                  <TableCell className="font-medium">{status?.primary || 'unknown'}</TableCell>
+                  <TableCell className="font-medium">{status?.primaryStartTime || 'unknown'}</TableCell>
+                  <TableCell className="font-medium">{getStatusBadge(status.phase as any)}</TableCell>
+                  <TableCell className="font-medium">{status?.instances}</TableCell>
+                  <TableCell className="font-medium">{status?.readyInstances}</TableCell>
+                  <TableCell className="font-medium">{status?.systemID || 'unknown'}</TableCell>
+                  <TableCell className="font-medium break-all">rw: {status?.services?.rw} | ro: {status?.services?.ro} {status?.services?.poolerRw ? `| pooler-rw: ${status?.services?.poolerRw}` : ''}</TableCell>
+                  <TableCell className="font-medium">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>openBackupDialog()}
+                      title="View deployment"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
 
-          {/* Backups table moved earlier for prominence */}
-          <div className="lg:col-span-3 rounded-lg border bg-white p-4 order-last lg:order-none">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold mb-3">Backups</h2>
-              {backups.isFetching && <span className="text-xs text-gray-500">Refreshing…</span>}
-            </div>
-            {backups.isLoading && <div className="text-gray-600">Loading backups…</div>}
-            {backups.error && <div className="text-red-600">Failed to load backups</div>}
-            {backups.data && (
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead>
-                    <tr className="text-left text-gray-500">
-                      <th className="py-1 pr-4">Name</th>
-                      <th className="py-1 pr-4">Method</th>
-                      <th className="py-1 pr-4">Phase</th>
-                      <th className="py-1 pr-4">Started</th>
-                      <th className="py-1 pr-4">Completed</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(backups.data.backups || []).map((b: any) => (
-                      <tr key={b.name} className="border-t">
-                        <td className="py-1 pr-4 font-medium">{b.name}</td>
-                        <td className="py-1 pr-4">{b.method || '-'}</td>
-                        <td className="py-1 pr-4">{b.phase || '-'}</td>
-                        <td className="py-1 pr-4">{b.startedAt || '-'}</td>
-                        <td className="py-1 pr-4">{b.completedAt || '-'}</td>
-                      </tr>
-                    ))}
-                    {(!backups.data.backups || backups.data.backups.length === 0) && (
-                      <tr><td className="py-2 text-gray-500" colSpan={5}>No backups</td></tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+      <CreateDatabasesDialog 
+        open={showCreate} 
+        onOpenChange={setShowCreate} 
+        onSubmit={async (params) => handleCreateDb({...params,ns,name})} 
+      />
 
-          {/* Instances table */}
-          <div className="lg:col-span-3 rounded-lg border bg-white p-4">
-            <h2 className="text-lg font-semibold mb-3">Instances status</h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead>
-                  <tr className="text-left text-gray-500">
-                    <th className="py-1 pr-4">Name</th>
-                    <th className="py-1 pr-4">Role</th>
-                    <th className="py-1 pr-4">Status</th>
-                    <th className="py-1 pr-4">Ready</th>
-                    <th className="py-1 pr-4">Restarts</th>
-                    <th className="py-1 pr-4">QoS</th>
-                    <th className="py-1 pr-4">Node</th>
-                    <th className="py-1 pr-4">Start Time</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {status.instancesTable.map((row: any) => (
-                    <tr key={row.name} className="border-t">
-                      <td className="py-1 pr-4 font-medium">{row.name}</td>
-                      <td className="py-1 pr-4">{row.role}</td>
-                      <td className="py-1 pr-4">
-                        <span className={row.status === 'OK' ? 'text-green-700' : 'text-red-700'}>{row.status}</span>
-                      </td>
-                      <td className="py-1 pr-4">{row.ready || '-'}</td>
-                      <td className="py-1 pr-4">{row.restarts ?? '-'}</td>
-                      <td className="py-1 pr-4">{row.qosClass || '-'}</td>
-                      <td className="py-1 pr-4">{row.node || '-'}</td>
-                      <td className="py-1 pr-4">{row.startTime || '-'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
+      <CreateBackupDialog
+        backups={backups}
+        open={showCreateBackup}
+        onOpenChange={setShowCreateBackup}
+        onSubmit={async (method) => handleCreateBackUp(method)}
+      />
+
     </div>
   );
 }
