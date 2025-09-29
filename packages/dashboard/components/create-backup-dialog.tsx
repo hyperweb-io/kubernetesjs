@@ -1,18 +1,21 @@
 
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Brain, Sparkles } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { DialogHeader, DialogFooter, Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AgentProvider } from "agentic-kit";
 
 interface CreateBackupDialogProps {
   backups: any
   open: boolean
+  databaseStatus: any
   onOpenChange: (open: boolean) => void
   onSubmit: (method?: string) => Promise<void>
 }
 
-export function CreateBackupDialog({backups, open, onOpenChange, onSubmit }: CreateBackupDialogProps) {
+export function CreateBackupDialog({backups, open, onOpenChange, onSubmit ,databaseStatus}: CreateBackupDialogProps) {
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [methodChoice, setMethodChoice] = useState<'auto'|'barmanObjectStore'|'volumeSnapshot'>('auto');
@@ -48,22 +51,36 @@ export function CreateBackupDialog({backups, open, onOpenChange, onSubmit }: Cre
           </Alert>
         )}
 
-        <div className="pt-2">
-          <div className="flex items-center gap-2">
-            <select
-              className="border rounded px-2 py-1 text-sm"
+        <div className="p-4 space-y-3">
+          <h2 className="text-lg font-semibold">Protection</h2>
+          <div>
+            <div className="text-gray-500 text-sm">Continuous Backup</div>
+            <div className="font-medium text-sm">{databaseStatus?.backups?.configured ? `Scheduled: ${databaseStatus?.backups?.scheduledCount}, last: ${databaseStatus?.backups?.lastBackupTime || 'n/a'}` : 'Not configured'}</div>
+          </div>
+          <div>
+            <div className="text-gray-500 text-sm">Streaming Replication</div>
+            <div className="font-medium text-sm">{databaseStatus?.streaming?.configured ? `${databaseStatus?.streaming?.replicas} replica(s)` : 'Not configured'}</div>
+          </div>
+          <div className="w-48">
+            <Select
               value={methodChoice}
-              onChange={(e) => setMethodChoice(e.target.value as any)}
+              onValueChange={(value) => setMethodChoice(value as any)}
             >
-              <option value="auto">Auto</option>
-              <option value="barmanObjectStore" disabled={backups.isFetched && backups.data?.methodConfigured !== 'barmanObjectStore'}>
-                barmanObjectStore
-              </option>
-              <option value="volumeSnapshot" disabled={backups.isFetched && !backups.data?.snapshotSupported}>
-                volumeSnapshot
-              </option>
-            </select>
-            
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="auto">
+                Auto
+                </SelectItem>
+                <SelectItem value="barmanObjectStore" disabled={backups.isFetched && backups.data?.methodConfigured !== 'barmanObjectStore'}>
+                BarmanObjectStore
+                </SelectItem>
+                <SelectItem value="volumeSnapshot" disabled={backups.isFetched && !backups.data?.snapshotSupported}>
+                VolumeSnapshot
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
        

@@ -225,6 +225,7 @@ export default function DatabasesPage() {
 
       <CreateBackupDialog
         backups={backups}
+        databaseStatus={status}
         open={showCreateBackup}
         onOpenChange={setShowCreateBackup}
         onSubmit={async (method) => handleCreateBackUp(method)}
