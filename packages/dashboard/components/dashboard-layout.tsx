@@ -195,7 +195,7 @@ export function DashboardLayout({
     }
   }, []);
 
-  const getNavigationItems = ():typeof smartObjectsNavigation =>{
+  const getNavigationItems = (): typeof smartObjectsNavigation => {
     if(mode === 'admin') {
       return adminNavigation;
     }
@@ -245,7 +245,7 @@ export function DashboardLayout({
   };
 
 
-  const renderHeader = (mode: string) =>{
+  const renderHeader = (mode: string) => {
     const headerProps = {
       sidebarOpen: sidebarOpen,
       onSidebarToggle: toggleSidebar,

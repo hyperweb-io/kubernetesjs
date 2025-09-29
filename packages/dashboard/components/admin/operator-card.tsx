@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 
 import { Settings, ExternalLink, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-// import type { OperatorInfo } from '@interweb/client';
 import { StatusIndicator } from './status-indicator';
 import { Switch } from '@/components/ui/switch'
 import type { OperatorInfo } from '@interweb/client';
