@@ -16,10 +16,10 @@ import {
 } from 'lucide-react'
 import { 
   useListCoreV1NamespacedEventQuery,
-  useListCoreV1EventForAllNamespacesQuery
+  useListEventsV1EventForAllNamespacesQuery
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { Event } from '@interweb/interwebjs'
+import type { Event as K8sEvent } from 'kubernetesjs'
 
 export function EventsView() {
   const [typeFilter, setTypeFilter] = useState<string>('All')
@@ -27,7 +27,7 @@ export function EventsView() {
   
   // Note: Events API has changed in newer versions, using v1 events
   const query = namespace === '_all' 
-    ? useListCoreV1EventForAllNamespacesQuery({ query: {} })
+    ? useListEventsV1EventForAllNamespacesQuery({ query: {} })
     : useListCoreV1NamespacedEventQuery({ path: { namespace }, query: {} })
     
   const { data, isLoading, error, refetch } = query
@@ -36,25 +36,25 @@ export function EventsView() {
 
   const handleRefresh = () => refetch()
 
-  const getEventType = (event: Event): string => {
+  const getEventType = (event: K8sEvent): string => {
     return event.type || 'Normal'
   }
 
-  const getEventReason = (event: Event): string => {
+  const getEventReason = (event: K8sEvent): string => {
     return event.reason || 'Unknown'
   }
 
-  const getEventMessage = (event: Event): string => {
+  const getEventMessage = (event: K8sEvent): string => {
     return event.message || 'No message'
   }
 
-  const getEventObject = (event: Event): string => {
+  const getEventObject = (event: K8sEvent): string => {
     const obj = event.involvedObject
     if (!obj) return 'Unknown'
     return `${obj.kind}/${obj.name}`
   }
 
-  const getEventTime = (event: Event): string => {
+  const getEventTime = (event: K8sEvent): string => {
     const timestamp = event.lastTimestamp || event.firstTimestamp
     if (!timestamp) return 'Unknown'
     
@@ -68,7 +68,7 @@ export function EventsView() {
     return date.toLocaleDateString()
   }
 
-  const getEventCount = (event: Event): number => {
+  const getEventCount = (event: K8sEvent): number => {
     return event.count || 1
   }
 
@@ -96,9 +96,9 @@ export function EventsView() {
 
   const filteredEvents = typeFilter === 'All' 
     ? events 
-    : events.filter((e: Event) => getEventType(e) === typeFilter)
+    : events.filter(e => getEventType(e) === typeFilter)
 
-  const sortedEvents = [...filteredEvents].sort((a: Event, b: Event) => {
+  const sortedEvents = [...filteredEvents].sort((a, b) => {
     const timeA = new Date(a.lastTimestamp || a.firstTimestamp || 0).getTime()
     const timeB = new Date(b.lastTimestamp || b.firstTimestamp || 0).getTime()
     return timeB - timeA // Most recent first
@@ -163,7 +163,7 @@ export function EventsView() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {events.filter((e: Event) => getEventType(e) === 'Normal').length}
+              {events.filter(e => getEventType(e) === 'Normal').length}
             </div>
           </CardContent>
         </Card>
@@ -173,7 +173,7 @@ export function EventsView() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">
-              {events.filter((e: Event) => getEventType(e) === 'Warning').length}
+              {events.filter(e => getEventType(e) === 'Warning').length}
             </div>
           </CardContent>
         </Card>

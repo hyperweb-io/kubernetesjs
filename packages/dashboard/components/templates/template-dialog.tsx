@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, CheckCircle, XCircle, FileJson } from 'lucide-react'
-import { type Deployment, type Service } from '@interweb/interwebjs'
+import { type Deployment, type Service } from 'kubernetesjs'
 import { useCreateAppsV1NamespacedDeployment, useCreateCoreV1NamespacedService } from '../../k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
 

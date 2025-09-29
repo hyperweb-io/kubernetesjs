@@ -22,7 +22,7 @@ import {
   useDeleteCoreV1NamespacedServiceAccount
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { ServiceAccount } from '@interweb/interwebjs'
+import type { ServiceAccount } from 'kubernetesjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 

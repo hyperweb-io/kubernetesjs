@@ -17,7 +17,7 @@ export function NamespaceSwitcher() {
   const { namespace, setNamespace } = usePreferredNamespace()
   const { data, isLoading, error, refetch } = useNamespaces()
 
-  const namespaces = (data?.items as any[])?.map((item: any) => item.metadata?.name).filter(Boolean) || []
+  const namespaces = data?.items?.map(item => item.metadata?.name).filter(Boolean) || []
 
   return (
     <div className="flex items-center gap-2">

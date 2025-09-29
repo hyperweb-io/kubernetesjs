@@ -7,7 +7,7 @@ import {
   useDeleteCoreV1NamespacedSecret,
 } from '../k8s/index'
 import { usePreferredNamespace } from '../contexts/NamespaceContext'
-import type { Secret, SecretList } from '@interweb/interwebjs'
+import type { Secret, SecretList } from 'kubernetesjs'
 
 // Query keys
 const SECRETS_KEY = ['secrets'] as const

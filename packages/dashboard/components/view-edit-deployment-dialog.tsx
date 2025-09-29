@@ -8,7 +8,7 @@ import { YAMLEditor } from '@/components/yaml-editor'
 import { AlertCircle, Eye, Edit } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import yaml from 'js-yaml'
-import type { Deployment } from '@interweb/interwebjs'
+import type { Deployment } from 'kubernetesjs'
 
 interface ViewEditDeploymentDialogProps {
   deployment: Deployment | null

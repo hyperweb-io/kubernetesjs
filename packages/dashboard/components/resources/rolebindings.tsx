@@ -24,7 +24,7 @@ import {
   useDeleteRbacAuthorizationV1ClusterRoleBinding
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { RoleBinding, ClusterRoleBinding } from '@interweb/interwebjs'
+import type { RoleBinding, ClusterRoleBinding } from 'kubernetesjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 
