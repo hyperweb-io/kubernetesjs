@@ -23,7 +23,7 @@ import {
   usePatchBatchV1NamespacedCronJob
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { CronJob } from '@interweb/interwebjs'
+import type { CronJob } from 'kubernetesjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 

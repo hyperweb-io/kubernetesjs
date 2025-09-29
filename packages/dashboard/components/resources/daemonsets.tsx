@@ -14,7 +14,7 @@ import {
   CheckCircle,
   Server
 } from 'lucide-react'
-import { type DaemonSet as K8sDaemonSet } from '@interweb/interwebjs'
+import { type DaemonSet as K8sDaemonSet } from 'kubernetesjs'
 import { useDaemonSets, useDeleteDaemonSet } from '@/hooks/useDaemonSets'
 
 import { confirmDialog } from '@/hooks/useConfirm'
@@ -54,16 +54,16 @@ export function DaemonSetsView() {
   }
   
   // Format daemon sets from query data
-  const daemonSets: DaemonSet[] = (data?.items as any[])?.map(item => {
+  const daemonSets: DaemonSet[] = data?.items?.map(item => {
     return {
-      name: item.metadata?.name || 'unknown',
-      namespace: item.metadata?.namespace || 'unknown',
+      name: item.metadata!.name!,
+      namespace: item.metadata!.namespace!,
       desiredNumberScheduled: item.status?.desiredNumberScheduled || 0,
       currentNumberScheduled: item.status?.currentNumberScheduled || 0,
       numberReady: item.status?.numberReady || 0,
       numberAvailable: item.status?.numberAvailable || 0,
-      image: item.spec?.template?.spec?.containers?.[0]?.image || 'unknown',
-      createdAt: item.metadata?.creationTimestamp || new Date().toISOString(),
+      image: item.spec?.template?.spec?.containers[0]?.image || 'unknown',
+      createdAt: item.metadata!.creationTimestamp!,
       status: determineDaemonSetStatus(item),
       k8sData: item
     }

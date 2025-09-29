@@ -22,7 +22,7 @@ import {
   ChevronDown,
   ChevronRight
 } from 'lucide-react'
-import { type ConfigMap as K8sConfigMap } from '@interweb/interwebjs'
+import { type ConfigMap as K8sConfigMap } from 'kubernetesjs'
 import { useConfigMaps, useDeleteConfigMap, useUpdateConfigMap } from '@/hooks'
 
 import { confirmDialog } from '@/hooks/useConfirm'
@@ -52,12 +52,12 @@ export function ConfigMapsView() {
   const updateConfigMapMutation = useUpdateConfigMap()
   
   // Format configmaps from query data
-  const configMaps: ConfigMap[] = (data?.items as any[])?.map((item: any) => ({
-    name: item.metadata?.name || '',
-    namespace: item.metadata?.namespace || '',
+  const configMaps: ConfigMap[] = data?.items?.map(item => ({
+    name: item.metadata!.name!,
+    namespace: item.metadata!.namespace!,
     dataKeys: Object.keys(item.data || {}),
     binaryDataKeys: Object.keys(item.binaryData || {}),
-    createdAt: item.metadata?.creationTimestamp || '',
+    createdAt: item.metadata!.creationTimestamp!,
     immutable: item.immutable,
     k8sData: item
   })) || []

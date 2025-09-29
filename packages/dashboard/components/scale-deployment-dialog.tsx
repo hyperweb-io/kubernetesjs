@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AlertCircle, Scale } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import type { Deployment } from '@interweb/interwebjs'
+import type { Deployment } from 'kubernetesjs'
 
 interface ScaleDeploymentDialogProps {
   deployment: Deployment | null

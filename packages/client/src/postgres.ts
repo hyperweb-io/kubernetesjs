@@ -1,8 +1,8 @@
 import { InterwebClient as InterwebKubernetesClient,
   Namespace,
   Secret,
-  Cluster,
-  Pooler
+  PostgresqlCnpgIoV1Cluster,
+  PostgresqlCnpgIoV1Pooler, 
 } from '@interweb/interwebjs';
 import { KubernetesResource } from '@interweb/manifests';
 import { SetupClient } from './setup';
@@ -109,7 +109,7 @@ function buildSecrets(ns: string, suUser: string, suPass: string, appUser: strin
   return [superuser, app];
 }
 
-function buildCluster(opts: Required<PostgresDeployOptions>): Cluster {
+function buildCluster(opts: Required<PostgresDeployOptions>): PostgresqlCnpgIoV1Cluster {
   const ns = opts.namespace!;
   const name = opts.name!;
   const spec = {
@@ -178,7 +178,7 @@ function buildCluster(opts: Required<PostgresDeployOptions>): Cluster {
   };
 }
 
-function buildPooler(opts: Required<PostgresDeployOptions>): Pooler {
+function buildPooler(opts: Required<PostgresDeployOptions>): PostgresqlCnpgIoV1Pooler {
   const ns = opts.namespace!;
   const poolerName = opts.poolerName!;
   return {
@@ -286,7 +286,7 @@ export class PostgresDeployer {
       this.log(`Warning: CNPG webhooks not confirmed ready: ${String(e)}`);
     });
 
-    const resources: (Namespace | Secret | Cluster | Pooler)[] = [
+    const resources: (Namespace | Secret | PostgresqlCnpgIoV1Cluster | PostgresqlCnpgIoV1Pooler)[] = [
       buildNamespace(ns),
       ...buildSecrets(ns, opts.superuserUsername, opts.superuserPassword, opts.appUsername, opts.appPassword),
       buildCluster(opts),
