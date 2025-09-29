@@ -45,10 +45,31 @@ import {
   ChevronRight,
   ChevronLeft,
   Heart,
+  Code,
+  MessageSquare,
+  CloudIcon,
+  FunctionSquare,
+  Play,
+  Code2,
+  Boxes,
+  LayoutDashboard,
+  Rocket,
+  LucideIcon,
 } from 'lucide-react';
+import { AdminHeader } from './headers/admin-header';
+
+type NavigationItem = {
+  id: string;
+  label: string;
+  icon?: LucideIcon;
+  href?: string;
+  isHeader?: boolean;
+  section?: string;
+};
+
 
 // Smart Objects navigation
-const smartObjectsNavigation = [
+const smartObjectsNavigation:NavigationItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: Home, href: '/d' },
 
   // Cloud section
@@ -122,13 +143,22 @@ const infraNavigation = [
   { id: 'events', label: 'Events', icon: Clock, href: '/i/events', section: 'cluster' },
 ];
 
+const adminNavigation = [
+  { id: 'admin-dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/admin' },
+  { id: 'admin-operators', label: 'Operators', icon: Boxes, href: '/admin/operators' },
+  { id: 'admin-databases', label: 'Cluster Summary', icon: Database, href: '/admin/databases' },
+  { id: 'admin-services', label: 'Services', icon: Server, href: '/admin/services' },
+  { id: 'admin-backups', label: 'Backups', icon: Database, href: '/admin/backups' },
+  { id: 'admin-pods', label: 'Pods', icon: Activity, href: '/admin/pods' },
+];
+
 interface DashboardLayoutProps {
   children: React.ReactNode;
   onChatToggle: () => void;
   chatVisible: boolean;
   chatLayoutMode: 'floating' | 'snapped';
   chatWidth: number;
-  mode: 'smart-objects' | 'infra';
+  mode: 'smart-objects' | 'infra' | 'admin';
 }
 
 export function DashboardLayout({
@@ -164,8 +194,21 @@ export function DashboardLayout({
     }
   }, []);
 
+  const getNavigationItems = (): typeof smartObjectsNavigation => {
+    if(mode === 'admin') {
+      return adminNavigation;
+    }
+    if(mode === 'smart-objects') {
+      return smartObjectsNavigation;
+    }
+    if(mode === 'infra') {
+      return infraNavigation;
+    }
+    return []
+  }
+
   // Choose navigation based on context
-  const navigationItems = mode === 'smart-objects' ? smartObjectsNavigation : infraNavigation;
+  const navigationItems = getNavigationItems();
 
   // Robust toggle function to prevent race conditions
   const toggleSidebar = useCallback(() => {
@@ -199,6 +242,25 @@ export function DashboardLayout({
     setExpandedSections(newExpanded);
     localStorage.setItem('hyperweb-expanded-sections', JSON.stringify(Array.from(newExpanded)));
   };
+
+
+  const renderHeader = (mode: string) => {
+    const headerProps = {
+      sidebarOpen: sidebarOpen,
+      onSidebarToggle: toggleSidebar,
+      activeSection: activeSection,
+      onChatToggle: onChatToggle,
+      chatVisible: chatVisible,
+    }
+   
+    if(mode === 'smart-objects') {
+      return <SmartObjectsHeader {...headerProps} />
+    }
+    if(mode === 'infra') {
+      return <InfraHeader {...headerProps} />
+    }
+    return <AdminHeader {...headerProps} />
+  }
 
   // Calculate if we need to adjust layout for snapped chat
   const isSnappedAndOpen = chatVisible && chatLayoutMode === 'snapped';
@@ -365,23 +427,7 @@ export function DashboardLayout({
         style={isSnappedAndOpen ? { marginRight: `${chatWidth}px` } : {}}
       >
         {/* Header - Context Specific */}
-        {mode === 'infra' ? (
-          <InfraHeader
-            sidebarOpen={sidebarOpen}
-            onSidebarToggle={toggleSidebar}
-            activeSection={activeSection}
-            onChatToggle={onChatToggle}
-            chatVisible={chatVisible}
-          />
-        ) : (
-          <SmartObjectsHeader
-            sidebarOpen={sidebarOpen}
-            onSidebarToggle={toggleSidebar}
-            activeSection={activeSection}
-            onChatToggle={onChatToggle}
-            chatVisible={chatVisible}
-          />
-        )}
+        {renderHeader(mode)}
 
         {/* Content Area */}
         <main className="flex-1 p-6 overflow-auto">{children}</main>

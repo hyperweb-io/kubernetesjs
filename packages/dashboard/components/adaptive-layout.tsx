@@ -12,12 +12,15 @@ interface AdaptiveLayoutProps {
 }
 
 // Determine layout mode purely from route
-function getModeFromRoute(pathname: string): 'smart-objects' | 'infra' {
+function getModeFromRoute(pathname: string): 'smart-objects' | 'infra' | 'admin' {
   if (pathname === '/d' || pathname.startsWith('/d/')) {
     return 'smart-objects';
   }
   if (pathname === '/i' || pathname.startsWith('/i/')) {
     return 'infra';
+  }
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    return 'admin';
   }
   // Legacy routes without prefix default to infra
   return 'infra';

@@ -34,11 +34,11 @@ interface Service {
   k8sData?: K8sService
 }
 
-export function ServicesView() {
+export function ServicesView({ namespace:defaultNamespace }: { namespace?: string }) {
   const [selectedService, setSelectedService] = useState<Service | null>(null)
   
   // Use TanStack Query hooks
-  const { data, isLoading, error, refetch } = useServices()
+  const { data, isLoading, error, refetch } = useServices(defaultNamespace)
   const deleteServiceMutation = useDeleteService()
   
   // Format services from query data
