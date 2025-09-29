@@ -60,7 +60,7 @@ CI runs two workflows:
 
 ## Local Tips
 - Verify proxy: `curl http://127.0.0.1:8001/api`
-- Inspect a bundle: `less packages/manifests/src/operators/ingress-nginx.yaml`
+- Inspect a bundle: `less packages/manifests/operators/ingress-nginx.yaml`
 - Apply just Namespaces/CRDs first if debugging timing on new clusters
 
 ## License

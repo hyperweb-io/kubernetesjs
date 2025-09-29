@@ -1,4 +1,4 @@
-import { ManifestLoader } from '@interweb/manifests';
+import { getOperatorResources } from '@interweb/manifests';
 
 jest.setTimeout(10 * 60 * 1000); // up to 10 minutes for full operator
 
@@ -15,12 +15,12 @@ describe('manifests: test manifests', () => {
 
   it('test manifests for namespaces', async () => {
     for (const operator of Object.keys(operatorNamespaceMap)) {
-      const manifests = ManifestLoader.loadOperatorManifests(operator);
+      const manifests = getOperatorResources(operator);
       // check the manifest have a valid namespace object
       expect(manifests.some((m) => m.kind === 'Namespace')).toBe(true);
       const ns = manifests.find((m) => m.kind === 'Namespace');
       expect(ns).toBeDefined();
-      expect(ns?.metadata?.name).toBe(operatorNamespaceMap[operator as keyof typeof operatorNamespaceMap]);
+      expect((ns?.metadata as any).name).toBe(operatorNamespaceMap[operator as keyof typeof operatorNamespaceMap]);
     }
   });
 });

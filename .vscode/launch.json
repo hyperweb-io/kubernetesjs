@@ -4,7 +4,7 @@
       {
         "type": "node",
         "request": "launch",
-        "name": "Jest: current file (client)",
+        "name": "Jest: (client)",
         "cwd": "${workspaceFolder}/packages/client",
         "runtimeExecutable": "node",
         "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
@@ -22,9 +22,49 @@
       },
       {
         "type": "node",
+        "request": "launch",
+        "name": "Jest: (manifests - current file)",
+        "cwd": "${workspaceFolder}/packages/manifests",
+        "runtimeExecutable": "node",
+        "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+        "args": [
+          "--runInBand",
+          "--config",
+          "${workspaceFolder}/packages/manifests/jest.config.js",
+          "${file}"
+        ],
+        "console": "integratedTerminal",
+        "internalConsoleOptions": "neverOpen"
+      },
+      {
+        "type": "node",
+        "request": "launch",
+        "name": "Jest: (manifests - all)",
+        "cwd": "${workspaceFolder}/packages/manifests",
+        "runtimeExecutable": "node",
+        "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+        "args": [
+          "--runInBand",
+          "--config",
+          "${workspaceFolder}/packages/manifests/jest.config.js",
+          "--watch"
+        ],
+        "console": "integratedTerminal",
+        "internalConsoleOptions": "neverOpen"
+      },
+      {
+        "type": "node",
         "request": "attach",
         "name": "Attach: Node 9229",
         "port": 9229
+      }
+    ],
+    "inputs": [
+      {
+        "id": "testName",
+        "type": "promptString",
+        "description": "Enter Jest test name pattern",
+        "default": "parity"
       }
     ]
 }

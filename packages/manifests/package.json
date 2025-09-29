@@ -11,19 +11,23 @@
   },
   "scripts": {
     "copy": "cpy ../../LICENSE README.md package.json dist --flat",
-    "copy:operators": "cpy \"src/operators/**\" dist/operators",
     "clean": "rimraf dist",
     "prepare": "npm run build",
-    "build": "npm run clean; tsc; tsc -p tsconfig.esm.json; npm run copy; npm run copy:operators",
+    "build": "npm run clean; tsc; tsc -p tsconfig.esm.json; npm run copy",
     "pull": "ts-node scripts/pull-manifests.ts",
     "pull:all": "ts-node scripts/pull-manifests.ts --all",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "codegen": "ts-node scripts/codegen-operators.ts"
   },
   "dependencies": {
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "@interweb/interwebjs": "workspace:*"
   },
   "devDependencies": {
-    "@types/js-yaml": "^4.0.5"
+    "@types/js-yaml": "^4.0.5",
+    "@babel/generator": "^7.25.0",
+    "@babel/types": "^7.25.0",
+    "@types/babel__generator": "^7.6.8"
   }
 }
