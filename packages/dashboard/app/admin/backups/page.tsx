@@ -70,7 +70,7 @@ export default function AdminBackupView() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {backups.filter(p => p.status === 'Running').length}
+              {backups.filter((p:any) => p.status === 'Running').length}
             </div>
           </CardContent>
         </Card>
@@ -82,7 +82,7 @@ export default function AdminBackupView() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">
-              {backups.filter(p => p.status === 'Pending').length}
+              {backups.filter((p:any) => p.status === 'Pending').length}
             </div>
           </CardContent>
         </Card>
@@ -94,7 +94,7 @@ export default function AdminBackupView() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {backups.filter(p => p.status === 'Failed').length}
+              {backups.filter((p:any) => p.status === 'Failed').length}
             </div>
           </CardContent>
         </Card>
@@ -103,7 +103,7 @@ export default function AdminBackupView() {
       {/* Pods Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Pods</CardTitle>
+          <CardTitle>All Backups</CardTitle>
           <CardDescription>
             A list of all backups in your cluster
           </CardDescription>
@@ -147,7 +147,7 @@ export default function AdminBackupView() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {backups.map((backup) => (
+                {backups.map((backup:any) => (
                   <TableRow key={`${backup.namespace}/${backup.name}`}>
                     <TableCell className="font-medium">{backup.name}</TableCell>
                     <TableCell>{backup.namespace}</TableCell>
