@@ -12,7 +12,8 @@ const KUBECTL_PROXY_URL = process.env.KUBERNETES_PROXY_URL ||
 console.log('Using kubectl proxy URL:', KUBECTL_PROXY_URL);
 
 const resolvePath = (context: any) => {
-  const rawParams = context?.params as { path?: string | string[] } | undefined;
+  const params = context?.params;
+  const rawParams = params as { path?: string | string[] } | undefined;
   const segments = Array.isArray(rawParams?.path) ? rawParams.path : rawParams?.path ? [rawParams.path] : [];
   return segments.join('/');
 };

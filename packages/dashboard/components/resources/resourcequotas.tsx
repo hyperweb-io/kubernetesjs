@@ -20,7 +20,7 @@ import {
   useDeleteCoreV1NamespacedResourceQuota
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { ResourceQuota } from 'kubernetesjs'
+import type { ResourceQuota } from '@interweb/interwebjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 

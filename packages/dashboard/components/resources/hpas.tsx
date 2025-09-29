@@ -17,31 +17,31 @@ import {
   Minus
 } from 'lucide-react'
 import { 
-  useListAutoscalingV2beta2NamespacedHorizontalPodAutoscalerQuery,
-  useListAutoscalingV2beta2HorizontalPodAutoscalerForAllNamespacesQuery,
-  useDeleteAutoscalingV2beta2NamespacedHorizontalPodAutoscaler
+  useListAutoscalingV2NamespacedHorizontalPodAutoscalerQuery,
+  useListAutoscalingV2HorizontalPodAutoscalerForAllNamespacesQuery,
+  useDeleteAutoscalingV2NamespacedHorizontalPodAutoscaler
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { HorizontalPodAutoscaler } from 'kubernetesjs'
+import type { HorizontalPodAutoscalerV2 } from '@interweb/interwebjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 
 export function HPAsView() {
-  const [selectedHPA, setSelectedHPA] = useState<HorizontalPodAutoscaler | null>(null)
+  const [selectedHPA, setSelectedHPA] = useState<HorizontalPodAutoscalerV2 | null>(null)
   const { namespace } = usePreferredNamespace()
   
   const query = namespace === '_all' 
-    ? useListAutoscalingV2beta2HorizontalPodAutoscalerForAllNamespacesQuery({ query: {} })
-    : useListAutoscalingV2beta2NamespacedHorizontalPodAutoscalerQuery({ path: { namespace }, query: {} })
+    ? useListAutoscalingV2HorizontalPodAutoscalerForAllNamespacesQuery({ query: {} })
+    : useListAutoscalingV2NamespacedHorizontalPodAutoscalerQuery({ path: { namespace }, query: {} })
     
   const { data, isLoading, error, refetch } = query
-  const deleteHPA = useDeleteAutoscalingV2beta2NamespacedHorizontalPodAutoscaler()
+  const deleteHPA = useDeleteAutoscalingV2NamespacedHorizontalPodAutoscaler()
 
   const hpas = data?.items || []
 
   const handleRefresh = () => refetch()
 
-  const handleDelete = async (hpa: HorizontalPodAutoscaler) => {
+  const handleDelete = async (hpa: HorizontalPodAutoscalerV2) => {
     const name = hpa.metadata!.name!
     const namespace = hpa.metadata!.namespace!
     
@@ -83,7 +83,7 @@ export function HPAsView() {
     }
   }
 
-  const getStatus = (hpa: HorizontalPodAutoscaler) => {
+  const getStatus = (hpa: HorizontalPodAutoscalerV2) => {
     const conditions = hpa.status?.conditions || []
     const ableToScale = conditions.find(c => c.type === 'AbleToScale')
     const scalingActive = conditions.find(c => c.type === 'ScalingActive')
@@ -110,7 +110,7 @@ export function HPAsView() {
     }
   }
 
-  const getMetrics = (hpa: HorizontalPodAutoscaler) => {
+  const getMetrics = (hpa: HorizontalPodAutoscalerV2) => {
     const metrics = hpa.spec?.metrics || []
     return metrics.map(m => {
       if (m.type === 'Resource' && m.resource) {

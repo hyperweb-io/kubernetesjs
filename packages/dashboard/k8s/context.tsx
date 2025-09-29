@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useMemo, useState } from 'react'
-import { KubernetesClient } from 'kubernetesjs'
+import { InterwebClient } from '@interweb/interwebjs'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Configuration types
@@ -11,7 +11,7 @@ export interface KubernetesConfig {
 
 // Context types
 interface KubernetesContextValue {
-  client: KubernetesClient;
+  client: InterwebClient;
   config: KubernetesConfig;
   updateConfig: (config: Partial<KubernetesConfig>) => void;
 }
@@ -53,8 +53,11 @@ export function KubernetesProvider({
 
   // Create client instance
   const client = useMemo(() => {
-    return new KubernetesClient({
+    return new InterwebClient({
       restEndpoint: config.restEndpoint,
+      kubeconfig: '',
+      namespace: 'default',
+      context: 'default'
     })
   }, [config.restEndpoint])
 
