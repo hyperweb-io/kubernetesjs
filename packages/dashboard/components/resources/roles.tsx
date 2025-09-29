@@ -23,7 +23,7 @@ import {
   useDeleteRbacAuthorizationV1ClusterRole
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { Role, ClusterRole } from '@interweb/interwebjs'
+import type { Role, ClusterRole } from 'kubernetesjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 

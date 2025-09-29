@@ -4,7 +4,7 @@ import schema from './swagger.json';
 
 const options = getDefaultSchemaSDKOptions({
   includePropertyComments: true,
-  clientName: 'InterwebClient',
+  clientName: 'KubernetesClient',
   includeSwaggerUrl: true,
   exclude: [
     '*.v1beta1.*',
@@ -64,7 +64,7 @@ const openApiOptions = {
 
 const contextCode = generateContext(
   'Kubernetes',
-  '@interweb/interwebjs'
+  'kubernetesjs'
 );
 writeFileSync(__dirname + '/../k8s/context.tsx', contextCode);
 
@@ -74,7 +74,7 @@ const reactQueryHooks = generateReactQueryHooks(
       enabled: true,
       contextHookName: 'useKubernetes',
       contextImportPath: './context',
-      typesImportPath: '@interweb/interwebjs',
+      typesImportPath: 'kubernetesjs',
     }
   },
   schema as any

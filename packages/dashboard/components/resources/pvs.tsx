@@ -20,7 +20,7 @@ import {
   useListCoreV1PersistentVolumeQuery,
   useDeleteCoreV1PersistentVolume
 } from '@/k8s'
-import type { PersistentVolume } from '@interweb/interwebjs'
+import type { PersistentVolume } from 'kubernetesjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 

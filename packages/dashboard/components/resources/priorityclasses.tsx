@@ -18,7 +18,7 @@ import {
   useListSchedulingV1PriorityClassQuery,
   useDeleteSchedulingV1PriorityClass
 } from '@/k8s'
-import type { PriorityClass } from '@interweb/interwebjs'
+import type { PriorityClass } from 'kubernetesjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 

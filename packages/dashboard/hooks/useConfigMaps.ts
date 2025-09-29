@@ -7,7 +7,7 @@ import {
   useDeleteCoreV1NamespacedConfigMap,
 } from '../k8s/index'
 import { usePreferredNamespace } from '../contexts/NamespaceContext'
-import type { ConfigMap, ConfigMapList } from '@interweb/interwebjs'
+import type { ConfigMap, ConfigMapList } from 'kubernetesjs'
 
 // Query keys
 const CONFIGMAPS_KEY = ['configmaps'] as const

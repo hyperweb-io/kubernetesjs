@@ -20,7 +20,7 @@ import {
   useListStorageV1StorageClassQuery,
   useDeleteStorageV1StorageClass
 } from '@/k8s'
-import type { StorageClass } from '@interweb/interwebjs'
+import type { StorageClass } from 'kubernetesjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 
