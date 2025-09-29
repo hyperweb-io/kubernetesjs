@@ -4,7 +4,7 @@ import {
   useCreateCoreV1Namespace,
   useDeleteCoreV1Namespace,
 } from '../k8s/index'
-import type { Namespace, NamespaceList } from 'kubernetesjs'
+import type { Namespace, NamespaceList } from '@interweb/interwebjs'
 
 // Query keys
 const NAMESPACES_KEY = ['namespaces'] as const

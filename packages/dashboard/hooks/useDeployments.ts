@@ -8,7 +8,7 @@ import {
   useReplaceAppsV1NamespacedDeploymentScale,
 } from '../k8s/index'
 import { usePreferredNamespace } from '../contexts/NamespaceContext'
-import type { Deployment, DeploymentList, Scale } from 'kubernetesjs'
+import type { Deployment, DeploymentList, Scale } from '@interweb/interwebjs'
 
 // Query keys
 const DEPLOYMENTS_KEY = ['deployments'] as const

@@ -16,7 +16,7 @@ import {
   Clock,
   XCircle
 } from 'lucide-react'
-import { type Pod as K8sPod } from 'kubernetesjs'
+import { type Pod as K8sPod } from '@interweb/interwebjs'
 import { usePods, useDeletePod, usePodLogs } from '@/hooks'
 
 import { confirmDialog } from '@/hooks/useConfirm'
