@@ -146,11 +146,10 @@ const infraNavigation = [
 const adminNavigation = [
   { id: 'admin-dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/admin' },
   { id: 'admin-operators', label: 'Operators', icon: Boxes, href: '/admin/operators' },
-  { id: 'admin-databases', label: 'Databases', icon: Database, href: '/admin/databases' },
-  { id: 'admin-applications', label: 'Applications', icon: Rocket, href: '/admin/applications' },
-  { id: 'admin-secrets', label: 'Secrets', icon: Key, href: '/admin/secrets' },
-  { id: 'admin-monitoring', label: 'Monitoring', icon: BarChart, href: '/admin/monitoring' },
-  { id: 'admin-settings', label: 'Settings', icon: Settings, href: '/admin/settings' },
+  { id: 'admin-databases', label: 'Cluster Summary', icon: Database, href: '/admin/databases' },
+  { id: 'admin-services', label: 'Services', icon: Server, href: '/admin/services' },
+  { id: 'admin-backups', label: 'Backups', icon: Database, href: '/admin/backups' },
+  { id: 'admin-pods', label: 'Pods', icon: Activity, href: '/admin/pods' },
 ];
 
 interface DashboardLayoutProps {

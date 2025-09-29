@@ -33,12 +33,12 @@ interface Pod {
   k8sData?: K8sPod
 }
 
-export function PodsView() {
+export function PodsView({ namespace:defaultNamespace }: { namespace?: string }) {
   const [selectedPod, setSelectedPod] = useState<Pod | null>(null)
   
   // Use TanStack Query hooks
   const { namespace } = usePreferredNamespace()
-  const { data, isLoading, error, refetch } = usePods()
+  const { data, isLoading, error, refetch } = usePods(defaultNamespace)
   const deletePodMutation = useDeletePod()
   
   // Helper function to determine pod status
