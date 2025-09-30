@@ -12,12 +12,10 @@ export async function GET() {
     try {
       const req = createRequire(import.meta.url);
       const clientResolved = req.resolve('@interweb/client');
-      const setupEsm = req.resolve('@interweb/client/dist/esm/setup.js');
       const manifestsPkgPath = req.resolve('@interweb/manifests/package.json');
       const operatorsDir = path.join(path.dirname(manifestsPkgPath), 'operators');
       console.debug('[operators.GET] resolve', {
         clientResolved,
-        setupEsmExists: fs.existsSync(setupEsm),
         manifestsPkgPath,
         operatorsDirExists: fs.existsSync(operatorsDir),
       });

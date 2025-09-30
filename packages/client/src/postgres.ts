@@ -1,4 +1,5 @@
-import { InterwebClient as InterwebKubernetesClient,
+import {
+  InterwebClient as InterwebKubernetesClient,
   Namespace,
   Secret,
   PostgresqlCnpgIoV1Cluster,
@@ -396,7 +397,7 @@ export class PostgresDeployer {
           break;
         }
         this.log(`... cnpg-controller-manager availableReplicas ${av}/${desired}`);
-      } catch {}
+      } catch { }
       await new Promise((r) => setTimeout(r, pollMs));
     }
 
@@ -407,7 +408,7 @@ export class PostgresDeployer {
         const hasCrt = !!sec.data?.['tls.crt'];
         const hasKey = !!sec.data?.['tls.key'];
         if (hasCrt && hasKey) break;
-      } catch {}
+      } catch { }
       await new Promise((r) => setTimeout(r, pollMs));
     }
 
@@ -419,7 +420,7 @@ export class PostgresDeployer {
         if (Array.isArray(subsets) && subsets.some(s => Array.isArray(s.addresses) && s.addresses.length > 0)) {
           break;
         }
-      } catch {}
+      } catch { }
       await new Promise(r => setTimeout(r, pollMs));
     }
 
@@ -436,7 +437,7 @@ export class PostgresDeployer {
           this.log(`✓ CNPG webhooks report CA bundle injected.`);
           return;
         }
-      } catch {}
+      } catch { }
       await new Promise(r => setTimeout(r, pollMs));
     }
     // Fallback: try to inject caBundle from the webhook secret (for CI flakiness)
@@ -448,7 +449,7 @@ export class PostgresDeployer {
         this.log('✓ Injected CNPG webhook caBundle from secret.');
         return; // consider ready after manual injection
       }
-    } catch {}
+    } catch { }
 
     throw new Error(`Timeout waiting for CNPG webhook CA bundle injection`);
   }
@@ -463,7 +464,7 @@ export class PostgresDeployer {
         ...w,
         clientConfig: { ...(w.clientConfig || {}), caBundle: caBundleB64 },
       }));
-      await this.kube.replaceAdmissionregistrationV1MutatingWebhookConfiguration({ path: { name: 'cnpg-mutating-webhook-configuration' }, query: {} , body: mwc });
+      await this.kube.replaceAdmissionregistrationV1MutatingWebhookConfiguration({ path: { name: 'cnpg-mutating-webhook-configuration' }, query: {}, body: mwc });
     }
     if (vwc?.webhooks) {
       vwc.webhooks = vwc.webhooks.map((w) => ({

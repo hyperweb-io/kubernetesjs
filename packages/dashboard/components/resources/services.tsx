@@ -16,7 +16,7 @@ import {
   Server,
   AlertCircle
 } from 'lucide-react'
-import { type Service as K8sService } from 'kubernetesjs'
+import { type Service as K8sService } from '@interweb/interwebjs'
 import { useServices, useDeleteService } from '@/hooks'
 
 import { confirmDialog } from '@/hooks/useConfirm'

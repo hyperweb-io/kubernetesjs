@@ -21,7 +21,7 @@ import {
   useDeleteCoreV1NamespacedEndpoints
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { Endpoints } from 'kubernetesjs'
+import type { Endpoints } from '@interweb/interwebjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 
