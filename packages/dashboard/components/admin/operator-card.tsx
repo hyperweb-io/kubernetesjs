@@ -26,6 +26,7 @@ const operatorIcons: Record<string, string> = {
   'knative-serving': '⚡',
   'cloudnative-pg': '🐘',
   'kube-prometheus-stack': '📊',
+  'minio-operator': '🪣',
 };
 
 export function OperatorCard({ operator, compact = false }: OperatorCardProps) {
