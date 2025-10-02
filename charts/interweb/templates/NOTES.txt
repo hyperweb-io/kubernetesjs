@@ -1,0 +1,15 @@
+{{- $needsCnpg := and .Values.cnpg.cluster.enabled (not (.Capabilities.APIVersions.Has "postgresql.cnpg.io/v1")) -}}
+{{- $needsPooler := and .Values.cnpg.pooler.enabled (not (.Capabilities.APIVersions.Has "postgresql.cnpg.io/v1")) -}}
+{{- $needsMinio := and .Values.minio.tenant.enabled (not (.Capabilities.APIVersions.Has "minio.min.io/v2")) -}}
+{{- if or $needsCnpg $needsMinio $needsPooler -}}
+The operator CRDs are still registering. Re-run your install command once the operators are up, for example:
+
+  helm upgrade --install {{ .Release.Name }} charts/interweb
+
+to create the CloudNativePG and MinIO custom resources.
+{{- else -}}
+Interweb data-plane components installed.
+
+- PostgreSQL cluster: {{ .Values.cnpg.cluster.name }} (namespace {{ .Values.cnpg.namespace.name }})
+- MinIO tenant: {{ .Values.minio.tenant.name }} (namespace {{ .Values.minio.namespace.name }})
+{{- end -}}

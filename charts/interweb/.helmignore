@@ -12,6 +12,3 @@
 *.orig
 *~
 node_modules/
-charts/
-Chart.lock
-.DS_Store

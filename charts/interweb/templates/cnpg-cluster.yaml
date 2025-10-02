@@ -1,6 +1,6 @@
 {{- $root := . -}}
 {{- $cfg := .Values.cnpg -}}
-{{- if $cfg.cluster.enabled -}}
+{{- if and $cfg.cluster.enabled ($root.Capabilities.APIVersions.Has "postgresql.cnpg.io/v1") -}}
 {{- $cluster := $cfg.cluster -}}
 {{- $superSecret := $cfg.secrets.superuser -}}
 {{- $appSecret := $cfg.secrets.app -}}

@@ -7,6 +7,8 @@ nameOverride: ""
 cnpg:
   operator:
     enabled: true
+    namespace: cnpg-system
+    createNamespace: true
   namespace:
     name: postgres-db
     create: true
@@ -149,3 +151,6 @@ minio:
         className: ""
         annotations: {}
         tlsSecretName: ""
+
+cloudnative-pg:
+  namespaceOverride: cnpg-system

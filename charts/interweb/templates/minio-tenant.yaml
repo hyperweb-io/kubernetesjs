@@ -1,6 +1,6 @@
 {{- $root := . -}}
 {{- $cfg := .Values.minio -}}
-{{- if and $cfg.tenant.enabled $cfg.credsSecret.name -}}
+{{- if and $cfg.tenant.enabled $cfg.credsSecret.name ($root.Capabilities.APIVersions.Has "minio.min.io/v2") -}}
 {{- $tenant := $cfg.tenant -}}
 {{- $image := printf "%s:%s" $tenant.image.repository $tenant.image.tag -}}
 apiVersion: minio.min.io/v2

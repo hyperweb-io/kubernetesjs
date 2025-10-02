@@ -1,6 +1,6 @@
 {{- $root := . -}}
 {{- $cfg := .Values.cnpg -}}
-{{- if and $cfg.cluster.enabled $cfg.pooler.enabled -}}
+{{- if and $cfg.cluster.enabled $cfg.pooler.enabled ($root.Capabilities.APIVersions.Has "postgresql.cnpg.io/v1") -}}
 {{- $pooler := $cfg.pooler -}}
 apiVersion: postgresql.cnpg.io/v1
 kind: Pooler
