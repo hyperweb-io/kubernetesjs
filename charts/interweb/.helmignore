@@ -1,0 +1,17 @@
+# Common Helm ignore patterns
+.DS_Store
+.git/
+.gitignore
+.svn/
+.hg/
+.idea/
+.vscode/
+*.swp
+*.bak
+*.tmp
+*.orig
+*~
+node_modules/
+charts/
+Chart.lock
+.DS_Store

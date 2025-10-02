@@ -1,0 +1,26 @@
+apiVersion: v2
+name: interweb
+description: Helm chart that installs Interweb data plane dependencies including CloudNativePG and MinIO.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - interweb
+  - cloudnativepg
+  - minio
+  - postgres
+  - object-storage
+sources:
+  - https://github.com/hyperweb-io/interweb
+  - https://cloudnative-pg.io/
+  - https://min.io/
+dependencies:
+  - name: cloudnative-pg
+    version: 0.23.0
+    repository: https://cloudnative-pg.github.io/charts
+    condition: cnpg.operator.enabled
+  - name: operator
+    alias: minioOperator
+    version: 5.0.11
+    repository: https://operator.min.io/
+    condition: minio.operator.enabled

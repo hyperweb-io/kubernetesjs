@@ -1,0 +1,80 @@
+{{- $root := . -}}
+{{- $cfg := .Values.minio -}}
+{{- if and $cfg.tenant.enabled $cfg.credsSecret.name -}}
+{{- $tenant := $cfg.tenant -}}
+{{- $image := printf "%s:%s" $tenant.image.repository $tenant.image.tag -}}
+apiVersion: minio.min.io/v2
+kind: Tenant
+metadata:
+  name: {{ $tenant.name }}
+  namespace: {{ $cfg.namespace.name }}
+  labels:
+{{- include "interweb.labels" (dict "root" $root "name" $tenant.name "component" "object-storage") | nindent 4 }}
+spec:
+  credsSecret:
+    name: {{ $cfg.credsSecret.name }}
+  image: {{ $image | quote }}
+  imagePullPolicy: {{ $tenant.image.pullPolicy | quote }}
+  requestAutoCert: {{ $tenant.requestAutoCert }}
+  exposeServices:
+    minio: {{ $tenant.exposeServices.minio }}
+    console: {{ $tenant.exposeServices.console }}
+{{- if $tenant.pools }}
+  pools:
+{{- range $pool := $tenant.pools }}
+    - name: {{ $pool.name | default (printf "%s-pool" $tenant.name) | quote }}
+      servers: {{ $pool.servers }}
+      volumesPerServer: {{ $pool.volumesPerServer }}
+      volumeClaimTemplate:
+        metadata:
+          name: data
+        spec:
+          accessModes:
+{{- range $mode := $pool.accessModes }}
+            - {{ $mode | quote }}
+{{- end }}
+          resources:
+            requests:
+              storage: {{ $pool.size | quote }}
+          {{- if $pool.storageClassName }}
+          storageClassName: {{ $pool.storageClassName | quote }}
+          {{- end }}
+      {{- if $pool.resources }}
+      resources:
+{{ toYaml $pool.resources | nindent 8 }}
+      {{- end }}
+{{- end }}
+{{- end }}
+{{- if $tenant.buckets }}
+  buckets:
+{{- range $bucket := $tenant.buckets }}
+    - name: {{ $bucket.name | quote }}
+      {{- if $bucket.region }}
+      region: {{ $bucket.region | quote }}
+      {{- end }}
+{{- end }}
+{{- end }}
+{{- if and $tenant.console $tenant.console.ingress.enabled }}
+  console:
+    ingress:
+      enabled: true
+      {{- if $tenant.console.ingress.className }}
+      ingressClassName: {{ $tenant.console.ingress.className | quote }}
+      {{- end }}
+      {{- if $tenant.console.ingress.host }}
+      host: {{ $tenant.console.ingress.host | quote }}
+      {{- end }}
+      {{- if $tenant.console.ingress.annotations }}
+      annotations:
+{{ toYaml $tenant.console.ingress.annotations | nindent 8 }}
+      {{- end }}
+      {{- if $tenant.console.ingress.tlsSecretName }}
+      tls:
+        - secretName: {{ $tenant.console.ingress.tlsSecretName | quote }}
+          {{- if $tenant.console.ingress.host }}
+          hosts:
+            - {{ $tenant.console.ingress.host | quote }}
+          {{- end }}
+      {{- end }}
+{{- end }}
+{{- end }}

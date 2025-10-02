@@ -1,0 +1,57 @@
+{{- $root := . -}}
+{{- $cfg := .Values.cnpg -}}
+{{- if and $cfg.cluster.enabled $cfg.pooler.enabled -}}
+{{- $pooler := $cfg.pooler -}}
+apiVersion: postgresql.cnpg.io/v1
+kind: Pooler
+metadata:
+  name: {{ $pooler.name }}
+  namespace: {{ $cfg.namespace.name }}
+  labels:
+{{- include "interweb.labels" (dict "root" $root "name" $pooler.name "component" "connection-pooler") | nindent 4 }}
+spec:
+  cluster:
+    name: {{ $cfg.cluster.name }}
+  instances: {{ $pooler.instances }}
+  type: rw
+  pgbouncer:
+    poolMode: {{ $pooler.mode | quote }}
+{{- if $pooler.parameters }}
+    parameters:
+{{- range $key, $value := $pooler.parameters }}
+      {{ $key }}: {{ $value | quote }}
+{{- end }}
+{{- end }}
+    template:
+      metadata:
+        labels:
+{{- include "interweb.labels" (dict "root" $root "name" $pooler.name "component" "connection-pooler" "extra" $pooler.template.labels) | nindent 10 }}
+{{- if $pooler.template.annotations }}
+        annotations:
+{{ toYaml $pooler.template.annotations | nindent 10 }}
+{{- end }}
+      spec:
+        containers:
+          - name: pgbouncer
+{{- if $pooler.resources }}
+            resources:
+{{ toYaml $pooler.resources | nindent 12 }}
+{{- end }}
+        affinity:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  labelSelector:
+                    matchLabels:
+                      cnpg.io/poolerName: {{ $pooler.name | quote }}
+                  topologyKey: kubernetes.io/hostname
+{{- if $pooler.template.nodeSelector }}
+        nodeSelector:
+{{ toYaml $pooler.template.nodeSelector | nindent 10 }}
+{{- end }}
+{{- if $pooler.template.tolerations }}
+        tolerations:
+{{ toYaml $pooler.template.tolerations | nindent 10 }}
+{{- end }}
+{{- end }}
