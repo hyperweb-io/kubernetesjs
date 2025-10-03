@@ -43,9 +43,15 @@ make -C charts/interweb install-operators
 # Step 2: once the operators are ready, install the database cluster and MinIO tenant
 make -C charts/interweb install-cluster
 
-# Optional: override the Helm release namespace (defaults to `minio-operator`)
-make -C charts/interweb install-operators NAMESPACE=my-operators
-make -C charts/interweb install-cluster NAMESPACE=my-operators
+# Optional: override the CNPG / release namespace (defaults to `cnpg-system`)
+make -C charts/interweb install-operators RELEASE_NAMESPACE=my-operators CNPG_NAMESPACE=my-operators
+make -C charts/interweb install-cluster RELEASE_NAMESPACE=my-operators CNPG_NAMESPACE=my-operators
+
+# Prefer the Helm-native flow? Use the `install-operators-helm` target instead of the script wrapper
+make -C charts/interweb install-operators-helm RELEASE_NAMESPACE=cnpg-system
+
+# Inspect the CRDs currently installed by both operators
+make -C charts/interweb check-crds
 ```
 
 ## Values Overview

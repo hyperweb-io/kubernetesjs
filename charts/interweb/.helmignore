@@ -12,3 +12,4 @@
 *.orig
 *~
 node_modules/
+scripts/
