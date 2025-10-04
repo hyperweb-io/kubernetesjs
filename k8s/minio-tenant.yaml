@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: minio
+  labels:
+    app.interweb.dev/managed: "true"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: interweb-minio-creds
+  namespace: minio
+  labels:
+    app.interweb.dev/managed: "true"
+    app.kubernetes.io/name: interweb-minio-creds
+    app.kubernetes.io/component: object-storage-credentials
+stringData:
+  accesskey: minioadmin
+  secretkey: minioadmin
+---
+apiVersion: minio.min.io/v2
+kind: Tenant
+metadata:
+  name: interweb-tenant
+  namespace: minio
+  labels:
+    app.interweb.dev/managed: "true"
+    app.kubernetes.io/name: interweb-tenant
+    app.kubernetes.io/component: object-storage
+spec:
+  credsSecret:
+    name: interweb-minio-creds
+  image: quay.io/minio/minio:RELEASE.2024-08-17T00-00-00Z
+  imagePullPolicy: IfNotPresent
+  exposeServices:
+    minio: true
+    console: true
+  requestAutoCert: false
+  pools:
+    - name: pool-0
+      servers: 1
+      volumesPerServer: 1
+      volumeClaimTemplate:
+        metadata:
+          name: data
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 2Gi
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 300m
+          memory: 256Mi
+  buckets:
+    - name: interweb-app
+      region: us-east-1
