@@ -1,8 +1,0 @@
-{{- if and .Values.cnpg.namespace.create (ne .Values.cnpg.namespace.name "") -}}
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: {{ .Values.cnpg.namespace.name }}
-  labels:
-{{- include "interweb.labels" (dict "root" . "name" .Values.cnpg.namespace.name "component" "database" "extra" .Values.cnpg.namespace.labels) | nindent 4 }}
-{{- end }}

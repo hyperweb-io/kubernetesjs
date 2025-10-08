@@ -1,8 +1,0 @@
-{{- if and .Values.minio.namespace.create (ne .Values.minio.namespace.name "") -}}
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: {{ .Values.minio.namespace.name }}
-  labels:
-{{- include "interweb.labels" (dict "root" . "name" .Values.minio.namespace.name "component" "object-storage" "extra" .Values.minio.namespace.labels) | nindent 4 }}
-{{- end }}
