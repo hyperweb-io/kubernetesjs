@@ -1,7 +1,8 @@
-import { KubernetesClient } from 'kubernetesjs'
+import { InterwebClient } from '@interweb/interwebjs'
 
 // Singleton instance
-let client: KubernetesClient | null = null
+let client: InterwebClient | null = null
+let authHeaders: any = {}
 
 export interface K8sConfig {
   endpoint: string
@@ -9,21 +10,32 @@ export interface K8sConfig {
   namespace?: string
 }
 
-export function initializeClient(config: K8sConfig): KubernetesClient {
-  client = new KubernetesClient({
+export function initializeClient(config: K8sConfig): InterwebClient {
+  client = new InterwebClient({
     restEndpoint: config.endpoint,
-    headers: config.token ? {
-      'Authorization': `Bearer ${config.token}`
-    } : undefined
+    kubeconfig: '', // Add required properties
+    namespace: config.namespace || 'default',
+    context: 'default'
   })
+  
+  // Store auth headers for later use
+  if (config.token) {
+    authHeaders = {
+      'Authorization': `Bearer ${config.token}`
+    }
+  }
+  
   return client
 }
 
-export function getClient(): KubernetesClient {
+export function getClient(): InterwebClient {
   if (!client) {
     // Default to local kubectl proxy
-    client = new KubernetesClient({
-      restEndpoint: 'http://localhost:8001'
+    client = new InterwebClient({
+      restEndpoint: 'http://localhost:8001',
+      kubeconfig: '',
+      namespace: 'default',
+      context: 'default'
     })
   }
   return client
@@ -35,8 +47,8 @@ export async function listDeployments(namespace = 'default') {
   try {
     const result = await k8s.listAppsV1NamespacedDeployment({
       path: { namespace },
-      query: {},
-    })
+      query: {}
+    }, { headers: authHeaders })
     return result.items || []
   } catch (error) {
     console.error('Error listing deployments:', error)
@@ -49,8 +61,8 @@ export async function listServices(namespace = 'default') {
   try {
     const result = await k8s.listCoreV1NamespacedService({
       path: { namespace },
-      query: {},
-    })
+      query: {}
+    }, { headers: authHeaders })
     return result.items || []
   } catch (error) {
     console.error('Error listing services:', error)
@@ -63,8 +75,8 @@ export async function listSecrets(namespace = 'default') {
   try {
     const result = await k8s.listCoreV1NamespacedSecret({
       path: { namespace },
-      query: {},
-    })
+      query: {}
+    }, { headers: authHeaders })
     return result.items || []
   } catch (error) {
     console.error('Error listing secrets:', error)
@@ -77,8 +89,8 @@ export async function listConfigMaps(namespace = 'default') {
   try {
     const result = await k8s.listCoreV1NamespacedConfigMap({
       path: { namespace },
-      query: {},
-    })
+      query: {}
+    }, { headers: authHeaders })
     return result.items || []
   } catch (error) {
     console.error('Error listing configmaps:', error)
@@ -91,8 +103,8 @@ export async function listPods(namespace = 'default') {
   try {
     const result = await k8s.listCoreV1NamespacedPod({
       path: { namespace },
-      query: {},
-    })
+      query: {}
+    }, { headers: authHeaders })
     return result.items || []
   } catch (error) {
     console.error('Error listing pods:', error)

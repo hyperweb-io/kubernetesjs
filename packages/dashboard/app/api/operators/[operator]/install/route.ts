@@ -12,12 +12,10 @@ export async function POST(
     try {
       const req = createRequire(import.meta.url);
       const clientResolved = req.resolve('@interweb/client');
-      const setupEsm = req.resolve('@interweb/client/dist/esm/setup.js');
       const manifestsPkgPath = req.resolve('@interweb/manifests/package.json');
       const operatorsDir = path.join(path.dirname(manifestsPkgPath), 'operators');
       console.debug('[operators.install] resolve', {
         clientResolved,
-        setupEsmExists: fs.existsSync(setupEsm),
         manifestsPkgPath,
         operatorsDirExists: fs.existsSync(operatorsDir),
         INTERWEB_MANIFESTS_DIR: process.env.INTERWEB_MANIFES_DIR || process.env.INTERWEB_MANIFESTS_DIR,

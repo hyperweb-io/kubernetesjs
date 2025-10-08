@@ -22,7 +22,7 @@ import {
   Upload,
   AlertCircle
 } from 'lucide-react'
-import { type Secret as K8sSecret } from 'kubernetesjs'
+import { type Secret as K8sSecret } from '@interweb/interwebjs'
 import { useSecrets, useDeleteSecret, useCreateSecret } from '@/hooks'
 
 import { confirmDialog } from '@/hooks/useConfirm'
