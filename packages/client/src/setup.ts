@@ -610,6 +610,15 @@ export class SetupClient {
 
   private getOperatorDetector(name: string): { namespaces?: string[]; labelSelectors?: string[] } {
     switch (name) {
+      case 'minio-operator':
+        return {
+          namespaces: ['minio-operator'],
+          labelSelectors: [
+            'app.kubernetes.io/instance=minio-operator',
+            'app.kubernetes.io/name=operator',
+            'app=minio-operator',
+          ],
+        };
       case 'cloudnative-pg':
         return { namespaces: ['cnpg-system'], labelSelectors: ['app.kubernetes.io/name=cloudnative-pg', 'app=cloudnative-pg'] };
       case 'cert-manager':
@@ -627,6 +636,11 @@ export class SetupClient {
 
   private getOperatorCRDHints(name: string): string[] {
     switch (name) {
+      case 'minio-operator':
+        return [
+          'tenants.minio.min.io',
+          'users.minio.min.io',
+        ];
       case 'cloudnative-pg':
         return [
           'clusters.postgresql.cnpg.io',

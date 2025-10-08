@@ -24,7 +24,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        operator: [ ingress-nginx, cert-manager, knative-serving, cloudnative-pg, kube-prometheus-stack ]
+        operator: 
+          - ingress-nginx
+          - cert-manager
+          - knative-serving
+          - cloudnative-pg
+          - kube-prometheus-stack
+          - minio-operator
 
     steps:
       - name: Checkout code

@@ -18,6 +18,7 @@ Supported operators
 - knative-serving: v1.15.0 (CRDs, core, and kourier combined)
 - cert-manager: v1.17.0 (helm-rendered with CRDs enabled)
 - ingress-nginx: 4.11.2 chart (helm-rendered)
+- minio-operator: 7.1.1 (helm-rendered)
 
 Notes
 - Only generated artifacts are included in the published package. The raw `operators/` YAML is local-only and gitignored.
