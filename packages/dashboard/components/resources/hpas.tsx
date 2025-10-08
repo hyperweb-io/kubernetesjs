@@ -17,12 +17,12 @@ import {
   Minus
 } from 'lucide-react'
 import { 
-  useListAutoscalingV2beta2NamespacedHorizontalPodAutoscalerQuery,
-  useListAutoscalingV2beta2HorizontalPodAutoscalerForAllNamespacesQuery,
-  useDeleteAutoscalingV2beta2NamespacedHorizontalPodAutoscaler
+  useListAutoscalingV2NamespacedHorizontalPodAutoscalerQuery,
+  useListAutoscalingV2HorizontalPodAutoscalerForAllNamespacesQuery,
+  useDeleteAutoscalingV2NamespacedHorizontalPodAutoscaler
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { HorizontalPodAutoscaler } from 'kubernetesjs'
+import type { HorizontalPodAutoscaler } from '@interweb/interwebjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 
@@ -31,11 +31,11 @@ export function HPAsView() {
   const { namespace } = usePreferredNamespace()
   
   const query = namespace === '_all' 
-    ? useListAutoscalingV2beta2HorizontalPodAutoscalerForAllNamespacesQuery({ query: {} })
-    : useListAutoscalingV2beta2NamespacedHorizontalPodAutoscalerQuery({ path: { namespace }, query: {} })
+    ? useListAutoscalingV2HorizontalPodAutoscalerForAllNamespacesQuery({ query: {} })
+    : useListAutoscalingV2NamespacedHorizontalPodAutoscalerQuery({ path: { namespace }, query: {} })
     
   const { data, isLoading, error, refetch } = query
-  const deleteHPA = useDeleteAutoscalingV2beta2NamespacedHorizontalPodAutoscaler()
+  const deleteHPA = useDeleteAutoscalingV2NamespacedHorizontalPodAutoscaler()
 
   const hpas = data?.items || []
 

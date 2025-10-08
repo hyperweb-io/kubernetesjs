@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@agentic-kit/ollama": "^0.1.2",
-    "@interweb/client": "workspace:^",
-    "@interweb/interwebjs": "workspace:^",
+    "@interweb/client": "workspace:^0.0.1",
+    "@interweb/interwebjs": "workspace:^0.0.1",
     "@interweb/manifests": "workspace:^",
     "@ark-ui/react": "^5.0.1",
     "@radix-ui/react-accordion": "^1.2.3",

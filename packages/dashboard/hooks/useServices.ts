@@ -7,7 +7,7 @@ import {
   useDeleteCoreV1NamespacedService,
 } from '../k8s/index'
 import { usePreferredNamespace } from '../contexts/NamespaceContext'
-import type { Service, ServiceList } from 'kubernetesjs'
+import type { Service, ServiceList } from '@interweb/interwebjs'
 
 // Query keys
 const SERVICES_KEY = ['services'] as const

@@ -15,7 +15,7 @@ import {
   AlertCircle,
   CheckCircle
 } from 'lucide-react'
-import { type Deployment as K8sDeployment } from 'kubernetesjs'
+import { type Deployment as K8sDeployment } from '@interweb/interwebjs'
 import { useDeployments, useDeleteDeployment, useScaleDeployment, useCreateDeployment } from '@/hooks'
 
 import { confirmDialog } from '@/hooks/useConfirm'
@@ -69,15 +69,15 @@ export function DeploymentsView() {
   }
   
   // Format deployments from query data
-  const deployments: Deployment[] = data?.items?.map(item => {
+  const deployments: Deployment[] = (data?.items as any[])?.map(item => {
     const status = determineStatus(item)
     return {
-      name: item.metadata!.name!,
-      namespace: item.metadata!.namespace!,
-      replicas: item.spec!.replicas!,
-      availableReplicas: item.status!.availableReplicas || 0,
-      image: item.spec!.template!.spec!.containers[0]?.image || 'unknown',
-      createdAt: item.metadata!.creationTimestamp!,
+      name: item.metadata?.name || 'unknown',
+      namespace: item.metadata?.namespace || 'unknown',
+      replicas: item.spec?.replicas || 0,
+      availableReplicas: item.status?.availableReplicas || 0,
+      image: item.spec?.template?.spec?.containers?.[0]?.image || 'unknown',
+      createdAt: item.metadata?.creationTimestamp || new Date().toISOString(),
       status,
       k8sData: item
     }
