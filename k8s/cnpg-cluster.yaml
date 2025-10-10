@@ -105,27 +105,27 @@ spec:
       query_timeout: "30"
       ignore_startup_parameters: extra_float_digits
       application_name_add_host: "1"
-    template:
-      metadata:
-        labels:
-          app.kubernetes.io/name: postgres-pooler
-          app.kubernetes.io/component: connection-pooler
-      spec:
-        containers:
-          - name: pgbouncer
-            resources:
-              requests:
-                cpu: 20m
-                memory: 32Mi
-              limits:
-                cpu: 100m
-                memory: 128Mi
-        affinity:
-          podAntiAffinity:
-            preferredDuringSchedulingIgnoredDuringExecution:
-              - weight: 100
-                podAffinityTerm:
-                  labelSelector:
-                    matchLabels:
-                      cnpg.io/poolerName: postgres-pooler
-                  topologyKey: kubernetes.io/hostname
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: postgres-pooler
+        app.kubernetes.io/component: connection-pooler
+    spec:
+      containers:
+        - name: pgbouncer
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    cnpg.io/poolerName: postgres-pooler
+                topologyKey: kubernetes.io/hostname

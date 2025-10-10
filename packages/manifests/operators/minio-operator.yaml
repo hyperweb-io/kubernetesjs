@@ -6165,7 +6165,7 @@ metadata:
     app.kubernetes.io/version: "v7.1.1"
     app.kubernetes.io/managed-by: Helm
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: operator
@@ -6185,16 +6185,7 @@ spec:
         runAsGroup: 1000
         runAsNonRoot: true
         runAsUser: 1000
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: name
-                operator: In
-                values:
-                - minio-operator
-            topologyKey: kubernetes.io/hostname
+      # Autopilot-friendly: disable pod anti-affinity to avoid 500m CPU min requirement
       containers:
         - name: operator
           image: "quay.io/minio/operator:v7.1.1"
@@ -6219,4 +6210,3 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-

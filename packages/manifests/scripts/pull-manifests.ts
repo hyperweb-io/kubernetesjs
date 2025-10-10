@@ -43,6 +43,22 @@ const OPERATORS: OperatorConfig[] = [
         repoName: 'minio-operator',
         chart: 'operator',
         namespace: 'minio-operator',
+        // Prefer Helm values over post-render patching: set replicas and resources explicitly.
+        values: {
+          replicaCount: 1,
+          resources: {
+            requests: {
+              cpu: '500m',
+              memory: '256Mi',
+              'ephemeral-storage': '500Mi',
+            },
+            limits: {
+              cpu: '500m',
+              memory: '512Mi',
+              'ephemeral-storage': '1Gi',
+            },
+          },
+        },
       },
     ],
   },
@@ -305,7 +321,7 @@ async function pullOperator(op: OperatorConfig, version?: string, outDir = path.
       const combined = outPieces.join('\n---\n') + '\n';
       writeFile(targetFile, combined);
       // Also update unversioned latest pointer (copy) if this is highest version
-    } else if (src.type === 'helm') {
+  } else if (src.type === 'helm') {
       // Ensure repo
       helmTemplate(['repo', 'add', src.repoName, src.repo]);
       helmTemplate(['repo', 'update']);
@@ -328,6 +344,8 @@ async function pullOperator(op: OperatorConfig, version?: string, outDir = path.
       if (src.namespace && !hasNamespaceDoc(rendered, src.namespace)) {
         rendered = prependNamespaceDoc(rendered, src.namespace);
       }
+
+      // No post-render mutations: rely on Helm values overrides above.
 
       writeFile(
         targetFile,
