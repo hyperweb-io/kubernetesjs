@@ -5,10 +5,10 @@ CLIENT_DIR ?= $(abspath $(K8S_DIR)/../packages/client)
 .PHONY: setup install teardown uninstall check-crds
 
 setup:
-	npm --prefix $(CLIENT_DIR) run operators:setup
+	pnpm --prefix $(CLIENT_DIR) run operators:setup
 
 teardown:
-	npm --prefix $(CLIENT_DIR) run operators:teardown
+	pnpm --prefix $(CLIENT_DIR) run operators:teardown
 
 install:
 	$(KUBECTL) apply -f $(K8S_DIR)/cnpg-cluster.yaml
@@ -17,7 +17,7 @@ install:
 uninstall:
 	$(KUBECTL) delete -f $(K8S_DIR)/minio-tenant.yaml --ignore-not-found
 	$(KUBECTL) delete -f $(K8S_DIR)/cnpg-cluster.yaml --ignore-not-found
-	npm --prefix $(CLIENT_DIR) run operators:teardown
+	pnpm --prefix $(CLIENT_DIR) run operators:teardown
 
 check-crds:
 	@echo "CloudNativePG CRDs" && \
