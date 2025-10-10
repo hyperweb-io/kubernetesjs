@@ -16,7 +16,9 @@
     "build": "npm run clean; tsc; tsc -p tsconfig.esm.json; npm run copy",
     "test": "jest",
     "test:watch": "jest --watch",
-    "proxy": "kubectl proxy --port=8001 --accept-hosts='^.*$' --address='0.0.0.0'"
+    "proxy": "kubectl proxy --port=8001 --accept-hosts='^.*$' --address='0.0.0.0'",
+    "operators:setup": "ts-node --swc scripts/setup-operators.ts setup --config __fixtures__/config/setup.cnpg-minio.yaml",
+    "operators:teardown": "ts-node --swc scripts/setup-operators.ts teardown --config __fixtures__/config/setup.cnpg-minio.yaml"
   },
   "dependencies": {
     "@interweb/interwebjs": "workspace:^",
@@ -28,6 +30,7 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.5",
-    "@types/pg": "^8.11.10"
+    "@types/pg": "^8.11.10",
+    "ts-node": "^10.9.2"
   }
 }
