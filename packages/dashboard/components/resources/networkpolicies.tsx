@@ -22,7 +22,7 @@ import {
   useDeleteNetworkingV1NamespacedNetworkPolicy
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { NetworkPolicy } from '@interweb/interwebjs'
+import { type NetworkingK8sIoV1NetworkPolicy as NetworkPolicy } from '@interweb/interwebjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 

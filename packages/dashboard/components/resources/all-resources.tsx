@@ -16,7 +16,7 @@ import {
   AlertCircle
 } from 'lucide-react'
 import { useDeployments, useServices, usePods, useDaemonSets, useReplicaSets } from '@/hooks'
-import type { Deployment, Pod, Service, DaemonSet, ReplicaSet } from '@interweb/interwebjs'
+import { type AppsV1Deployment as Deployment, type AppsV1DaemonSet as DaemonSet, type AppsV1ReplicaSet as ReplicaSet, type Pod, type Service } from '@interweb/interwebjs'
 
 interface ResourceSectionProps {
   title: string

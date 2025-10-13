@@ -21,7 +21,7 @@ import {
   useDeleteDiscoveryV1NamespacedEndpointSlice
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { EndpointSlice } from '@interweb/interwebjs'
+import { type DiscoveryK8sIoV1EndpointSlice as EndpointSlice } from '@interweb/interwebjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 

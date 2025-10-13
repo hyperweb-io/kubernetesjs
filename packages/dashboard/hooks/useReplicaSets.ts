@@ -6,7 +6,7 @@ import {
   useReplaceAppsV1NamespacedReplicaSetScale,
 } from '../k8s/index'
 import { usePreferredNamespace } from '../contexts/NamespaceContext'
-import type { ReplicaSet, ReplicaSetList, Scale } from '@interweb/interwebjs'
+import type { AppsV1ReplicaSet as ReplicaSet, AppsV1ReplicaSetList as ReplicaSetList, AutoscalingV1Scale as Scale } from '@interweb/interwebjs'
 
 // Query keys
 const REPLICASETS_KEY = ['replicasets'] as const

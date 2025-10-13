@@ -21,7 +21,7 @@ import {
   useDeletePolicyV1NamespacedPodDisruptionBudget
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { PodDisruptionBudget } from '@interweb/interwebjs'
+import { type PolicyV1PodDisruptionBudget as PodDisruptionBudget } from '@interweb/interwebjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 
