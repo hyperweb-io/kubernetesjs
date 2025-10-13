@@ -2,11 +2,14 @@ import { useKubernetes } from "./context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 // Import the types that actually exist in @interweb/interwebjs
 import {
-  HorizontalPodAutoscaler,
-  HorizontalPodAutoscalerList,
+  AutoscalingV1HorizontalPodAutoscaler as HorizontalPodAutoscaler,
+  AutoscalingV1HorizontalPodAutoscalerList as HorizontalPodAutoscalerList,
+  AutoscalingV2HorizontalPodAutoscalerList,
   APIVersions,
   Endpoints,
   Event,
+  EventsK8sIoV1Event,
+  EventsK8sIoV1EventList,
   GetServiceAccountIssuerOpenIDConfigurationRequest,
   GetCoreAPIVersionsRequest,
   GetCoreV1APIResourcesRequest,
@@ -117,13 +120,13 @@ import {
   PersistentVolume,
   PersistentVolumeList,
   APIGroup,
-  MutatingWebhookConfiguration,
-  CronJobList,
-  IngressClass,
-  NetworkPolicy,
-  PriorityClass,
-  CSIDriver,
-  CSINode,
+  AdmissionregistrationK8sIoV1MutatingWebhookConfiguration as MutatingWebhookConfiguration,
+  BatchV1CronJobList as CronJobList,
+  NetworkingK8sIoV1IngressClass as IngressClass,
+  NetworkingK8sIoV1NetworkPolicy as NetworkPolicy,
+  SchedulingK8sIoV1PriorityClass as PriorityClass,
+  StorageK8sIoV1CSIDriver as CSIDriver,
+  StorageK8sIoV1CSINode as CSINode,
   ListBatchV1CronJobForAllNamespacesRequest,
   ReadCoreV1PersistentVolumeStatusRequest,
   ReplaceCoreV1PersistentVolumeStatusRequest,
@@ -148,11 +151,11 @@ import {
   WatchCoreV1NamespacedLimitRangeListRequest,
   WatchCoreV1NamespacedLimitRangeRequest,
   WatchCoreV1NamespacedPersistentVolumeClaimListRequest,
-  DaemonSet,
-  Deployment,
-  DeploymentList,
-  ReplicaSet,
-  ReplicaSetList,
+  AppsV1DaemonSet as DaemonSet,
+  AppsV1Deployment as Deployment,
+  AppsV1DeploymentList as DeploymentList,
+  AppsV1ReplicaSet as ReplicaSet,
+  AppsV1ReplicaSetList as ReplicaSetList,
   ListAppsV1ReplicaSetForAllNamespacesRequest,
   ListAppsV1NamespacedDaemonSetRequest,
   ListAppsV1NamespacedDeploymentRequest,
@@ -193,8 +196,8 @@ import {
   WatchAppsV1DeploymentListForAllNamespacesRequest,
   WatchAppsV1ReplicaSetListForAllNamespacesRequest,
   // StatefulSet types
-  StatefulSet,
-  StatefulSetList,
+  AppsV1StatefulSet as StatefulSet,
+  AppsV1StatefulSetList as StatefulSetList,
   // StatefulSet request types
   ListAppsV1NamespacedStatefulSetRequest,
   CreateAppsV1NamespacedStatefulSetRequest,
@@ -213,14 +216,14 @@ import {
   GetStorageAPIGroupRequest,
 
   // Additional core types
-  CertificateSigningRequestList,
-  LeaseList,
-  EndpointSliceList,
+  CertificatesK8sIoV1CertificateSigningRequestList as CertificateSigningRequestList,
+  CoordinationK8sIoV1LeaseList as LeaseList,
+  DiscoveryK8sIoV1EndpointSliceList as EndpointSliceList,
 
   // Authentication API types
   GetAuthenticationAPIGroupRequest,
   GetAuthenticationV1APIResourcesRequest,
-  TokenReview,
+  AuthenticationK8sIoV1TokenReview as TokenReview,
   TokenReviewSpec,
   TokenReviewStatus,
   CreateAuthenticationV1TokenReviewRequest,
@@ -228,14 +231,14 @@ import {
   // Authorization API types
   GetAuthorizationAPIGroupRequest,
   GetAuthorizationV1APIResourcesRequest,
-  LocalSubjectAccessReview,
+  AuthorizationK8sIoV1LocalSubjectAccessReview as LocalSubjectAccessReview,
   CreateAuthorizationV1NamespacedLocalSubjectAccessReviewRequest,
-  SelfSubjectAccessReview,
+  AuthorizationK8sIoV1SelfSubjectAccessReview as SelfSubjectAccessReview,
   SelfSubjectAccessReviewSpec,
   CreateAuthorizationV1SelfSubjectAccessReviewRequest,
-  SelfSubjectRulesReview,
+  AuthorizationK8sIoV1SelfSubjectRulesReview as SelfSubjectRulesReview,
   CreateAuthorizationV1SelfSubjectRulesReviewRequest,
-  SubjectAccessReview,
+  AuthorizationK8sIoV1SubjectAccessReview as SubjectAccessReview,
   SubjectAccessReviewSpec,
   SubjectAccessReviewStatus,
   CreateAuthorizationV1SubjectAccessReviewRequest,
@@ -262,9 +265,9 @@ import {
   WatchAppsV1NamespacedDeploymentRequest,
   WatchAppsV1NamespacedReplicaSetRequest,
   // Batch API types
-  CronJob,
-  Job,
-  JobList,
+  BatchV1CronJob as CronJob,
+  BatchV1Job as Job,
+  BatchV1JobList as JobList,
   ListBatchV1JobForAllNamespacesRequest,
   ListBatchV1NamespacedCronJobRequest,
   CreateBatchV1NamespacedCronJobRequest,
@@ -293,9 +296,9 @@ import {
   WatchBatchV1NamespacedJobListRequest,
   WatchBatchV1NamespacedJobRequest,
   // Networking API types
-  Ingress,
-  IngressList,
-  NetworkPolicyList,
+  NetworkingK8sIoV1Ingress as Ingress,
+  NetworkingK8sIoV1IngressList as IngressList,
+  NetworkingK8sIoV1NetworkPolicyList as NetworkPolicyList,
 
   // Autoscaling v1 API types
   GetAutoscalingAPIGroupRequest,
@@ -317,25 +320,20 @@ import {
   WatchEvent,
   ListNetworkingV1IngressClassRequest,
   CreateNetworkingV1IngressClassRequest,
-  // Node API types
-  RuntimeClass,
-  RuntimeClassList,
-  // Policy API types
-  PodDisruptionBudget,
-  PodDisruptionBudgetList,
-  // RBAC API types
-  ClusterRole,
-  ClusterRoleBinding,
-  ClusterRoleBindingList,
-  ClusterRoleList,
-  Role,
-  RoleBinding,
-  RoleBindingList,
-  RoleList,
-  // Scheduling API types
-  PriorityClassList,
-  // Storage API types
-  CSIDriverList,
+  NodeK8sIoV1RuntimeClass as RuntimeClass,
+  NodeK8sIoV1RuntimeClassList as RuntimeClassList,
+  PolicyV1PodDisruptionBudget as PodDisruptionBudget,
+  PolicyV1PodDisruptionBudgetList as PodDisruptionBudgetList,
+  RbacAuthorizationK8sIoV1ClusterRole as ClusterRole,
+  RbacAuthorizationK8sIoV1ClusterRoleBinding as ClusterRoleBinding,
+  RbacAuthorizationK8sIoV1ClusterRoleBindingList as ClusterRoleBindingList,
+  RbacAuthorizationK8sIoV1ClusterRoleList as ClusterRoleList,
+  RbacAuthorizationK8sIoV1Role as Role,
+  RbacAuthorizationK8sIoV1RoleBinding as RoleBinding,
+  RbacAuthorizationK8sIoV1RoleBindingList as RoleBindingList,
+  RbacAuthorizationK8sIoV1RoleList as RoleList,
+  SchedulingK8sIoV1PriorityClassList as PriorityClassList,
+  StorageK8sIoV1CSIDriverList as CSIDriverList,
   WatchCoreV1NamespacedPersistentVolumeClaimRequest,
   WatchCoreV1NamespacedPodListRequest,
   WatchCoreV1NamespacedPodRequest,
@@ -376,15 +374,15 @@ import {
   CreateCoreV1NamespacedReplicationControllerRequest,
   Status,
   Binding,
-  Eviction,
+  PolicyV1Eviction as Eviction,
   Info,
   GetServiceAccountIssuerOpenIDKeysetRequest,
   GetCodeVersionRequest,
-  Scale,
+  AutoscalingV1Scale as Scale,
   ResourceQuota,
   ResourceQuotaList,
   // CSI-related types
-  CSINodeList,
+  StorageK8sIoV1CSINodeList as CSINodeList,
   ListStorageV1CSINodeRequest,
   CreateStorageV1CSINodeRequest,
   DeleteStorageV1CollectionCSINodeRequest,
@@ -400,7 +398,7 @@ import {
   ReplaceAdmissionregistrationV1MutatingWebhookConfigurationRequest,
   DeleteAdmissionregistrationV1MutatingWebhookConfigurationRequest,
   PatchAdmissionregistrationV1MutatingWebhookConfigurationRequest,
-  ValidatingWebhookConfigurationList,
+  AdmissionregistrationK8sIoV1ValidatingWebhookConfigurationList as ValidatingWebhookConfigurationList,
   ListAdmissionregistrationV1ValidatingWebhookConfigurationRequest,
   CreateAdmissionregistrationV1ValidatingWebhookConfigurationRequest,
   DeleteAdmissionregistrationV1CollectionValidatingWebhookConfigurationRequest,
@@ -413,8 +411,8 @@ import {
   GetApiextensionsAPIGroupRequest,
   GetApiextensionsV1APIResourcesRequest,
   ListApiextensionsV1CustomResourceDefinitionRequest,
-  CustomResourceDefinition,
-  CustomResourceDefinitionList,
+  ApiextensionsK8sIoV1CustomResourceDefinition as CustomResourceDefinition,
+  ApiextensionsK8sIoV1CustomResourceDefinitionList as CustomResourceDefinitionList,
   CreateApiextensionsV1CustomResourceDefinitionRequest,
   DeleteApiextensionsV1CollectionCustomResourceDefinitionRequest,
   ReadApiextensionsV1CustomResourceDefinitionRequest,
@@ -430,8 +428,8 @@ import {
   GetApiregistrationAPIGroupRequest,
   GetApiregistrationV1APIResourcesRequest,
   ListApiregistrationV1APIServiceRequest,
-  APIServiceList,
-  APIService,
+  ApiregistrationK8sIoV1APIServiceList as APIServiceList,
+  ApiregistrationK8sIoV1APIService as APIService,
   CreateApiregistrationV1APIServiceRequest,
   DeleteApiregistrationV1CollectionAPIServiceRequest,
   ReadApiregistrationV1APIServiceRequest,
@@ -447,12 +445,12 @@ import {
   GetAppsAPIGroupRequest,
   GetAppsV1APIResourcesRequest,
   ListAppsV1ControllerRevisionForAllNamespacesRequest,
-  ControllerRevisionList,
+  AppsV1ControllerRevisionList as ControllerRevisionList,
   ListAppsV1DaemonSetForAllNamespacesRequest,
-  DaemonSetList,
+  AppsV1DaemonSetList as DaemonSetList,
   ListAppsV1DeploymentForAllNamespacesRequest,
   ListAppsV1NamespacedControllerRevisionRequest,
-  ControllerRevision,
+  AppsV1ControllerRevision as ControllerRevision,
   CreateAppsV1NamespacedControllerRevisionRequest,
   DeleteAppsV1CollectionNamespacedControllerRevisionRequest,
   ReadAppsV1NamespacedControllerRevisionRequest,
@@ -505,8 +503,8 @@ import {
   ReplaceCoreV1NamespacedSecretRequest,
   DeleteCoreV1NamespacedSecretRequest,
   PatchCoreV1NamespacedSecretRequest,
-  VolumeAttachment,
-  VolumeAttachmentList,
+  StorageK8sIoV1VolumeAttachment as VolumeAttachment,
+  StorageK8sIoV1VolumeAttachmentList as VolumeAttachmentList,
   CreateStorageV1VolumeAttachmentRequest,
   DeleteStorageV1CollectionVolumeAttachmentRequest,
   ReadStorageV1VolumeAttachmentRequest,
@@ -541,8 +539,8 @@ import {
   ReplaceCoreV1NamespaceFinalizeRequest,
   ReadCoreV1NamespaceStatusRequest,
   ReplaceCoreV1NamespaceStatusRequest,
-  StorageClass,
-  StorageClassList,
+  StorageK8sIoV1StorageClass as StorageClass,
+  StorageK8sIoV1StorageClassList as StorageClassList,
   ListStorageV1StorageClassRequest,
   CreateStorageV1StorageClassRequest,
   DeleteStorageV1CollectionStorageClassRequest,
@@ -553,7 +551,7 @@ import {
   ListStorageV1VolumeAttachmentRequest,
   ServiceAccount,
   ServiceAccountList,
-  TokenRequest,
+  AuthenticationK8sIoV1TokenRequest as TokenRequest,
   ListCoreV1NamespacedServiceAccountRequest,
   CreateCoreV1NamespacedServiceAccountRequest,
   DeleteCoreV1CollectionNamespacedServiceAccountRequest,
@@ -588,13 +586,13 @@ import {
   WatchCoreV1NamespaceRequest,
   GetAdmissionregistrationAPIGroupRequest,
   DeleteAdmissionregistrationV1CollectionMutatingWebhookConfigurationRequest,
-  MutatingWebhookConfigurationList,
-  ValidatingWebhookConfiguration,
+  AdmissionregistrationK8sIoV1MutatingWebhookConfigurationList as MutatingWebhookConfigurationList,
+  AdmissionregistrationK8sIoV1ValidatingWebhookConfiguration as ValidatingWebhookConfiguration,
   ReplaceAdmissionregistrationV1ValidatingWebhookConfigurationRequest,
   DeleteAdmissionregistrationV1ValidatingWebhookConfigurationRequest,
   PatchAdmissionregistrationV1ValidatingWebhookConfigurationRequest,
   GetBatchV1APIResourcesRequest,
-  CertificateSigningRequest,
+  CertificatesK8sIoV1CertificateSigningRequest as CertificateSigningRequest,
   GetCertificatesV1APIResourcesRequest,
   ListCertificatesV1CertificateSigningRequestRequest,
   CreateCertificatesV1CertificateSigningRequestRequest,
@@ -626,7 +624,7 @@ import {
   WatchAutoscalingV2HorizontalPodAutoscalerListForAllNamespacesRequest,
   WatchAutoscalingV2NamespacedHorizontalPodAutoscalerListRequest,
   WatchAutoscalingV2NamespacedHorizontalPodAutoscalerRequest,
-  Lease,
+  CoordinationK8sIoV1Lease as Lease,
   GetCoordinationV1APIResourcesRequest,
   ListCoordinationV1LeaseForAllNamespacesRequest,
   ListCoordinationV1NamespacedLeaseRequest,
@@ -639,7 +637,7 @@ import {
   WatchCoordinationV1LeaseListForAllNamespacesRequest,
   WatchCoordinationV1NamespacedLeaseListRequest,
   WatchCoordinationV1NamespacedLeaseRequest,
-  EndpointSlice,
+  DiscoveryK8sIoV1EndpointSlice as EndpointSlice,
   GetDiscoveryV1APIResourcesRequest,
   ListDiscoveryV1EndpointSliceForAllNamespacesRequest,
   ListDiscoveryV1NamespacedEndpointSliceRequest,
@@ -769,7 +767,7 @@ import {
   WatchNetworkingV1NamespacedNetworkPolicyListRequest,
   WatchNetworkingV1NamespacedIngressRequest,
   WatchNetworkingV1NamespacedIngressListRequest,
-  IngressClassList,
+  NetworkingK8sIoV1IngressClassList as IngressClassList,
   GetEventsV1APIResourcesRequest,
   ListEventsV1EventForAllNamespacesRequest,
   ListEventsV1NamespacedEventRequest,
@@ -782,8 +780,6 @@ import {
   WatchEventsV1EventListForAllNamespacesRequest,
   WatchEventsV1NamespacedEventListRequest,
   WatchEventsV1NamespacedEventRequest,
-  LogFileListHandlerRequest,
-  LogFileHandlerRequest
 } from "@interweb/interwebjs";
 const WELL_KNOWN_OPENID_CONFIGURATION_KEY = ["well_known_openid_configuration"];
 const API_KEY = ["api"];
@@ -5758,7 +5754,7 @@ export function useGetAutoscalingV2APIResourcesQuery(params: GetAutoscalingV2API
 
 export function useListAutoscalingV2HorizontalPodAutoscalerForAllNamespacesQuery(params: ListAutoscalingV2HorizontalPodAutoscalerForAllNamespacesRequest) {
   const client = useKubernetes().client;
-  return useQuery<HorizontalPodAutoscalerList, Error>({
+  return useQuery<AutoscalingV2HorizontalPodAutoscalerList, Error>({
     queryKey: [...APIS_AUTOSCALING_V2_HORIZONTALPODAUTOSCALERS_KEY],
     queryFn: async () => {
       return await client.listAutoscalingV2HorizontalPodAutoscalerForAllNamespaces(params);
@@ -5769,7 +5765,7 @@ export function useListAutoscalingV2HorizontalPodAutoscalerForAllNamespacesQuery
 
 export function useListAutoscalingV2NamespacedHorizontalPodAutoscalerQuery(params: ListAutoscalingV2NamespacedHorizontalPodAutoscalerRequest) {
   const client = useKubernetes().client;
-  return useQuery<HorizontalPodAutoscalerList, Error>({
+  return useQuery<AutoscalingV2HorizontalPodAutoscalerList, Error>({
     queryKey: [...APIS_AUTOSCALING_V2_NAMESPACES_NAMESPACE_HORIZONTALPODAUTOSCALERS_KEY, params.path.namespace],
     queryFn: async () => {
       return await client.listAutoscalingV2NamespacedHorizontalPodAutoscaler(params);
@@ -6822,7 +6818,7 @@ export function useGetEventsV1APIResourcesQuery(params: GetEventsV1APIResourcesR
 }
 export function useListEventsV1EventForAllNamespacesQuery(params: ListEventsV1EventForAllNamespacesRequest) {
   const client = useKubernetes().client;
-  return useQuery<EventList, Error>({
+  return useQuery<EventsK8sIoV1EventList, Error>({
     queryKey: [...APIS_EVENTS_K8S_IO_V1_EVENTS_KEY],
     queryFn: async () => {
       return await client.listEventsV1EventForAllNamespaces(params);
@@ -6832,7 +6828,7 @@ export function useListEventsV1EventForAllNamespacesQuery(params: ListEventsV1Ev
 }
 export function useListEventsV1NamespacedEventQuery(params: ListEventsV1NamespacedEventRequest) {
   const client = useKubernetes().client;
-  return useQuery<EventList, Error>({
+  return useQuery<EventsK8sIoV1EventList, Error>({
     queryKey: [...APIS_EVENTS_K8S_IO_V1_NAMESPACES_NAMESPACE_EVENTS_KEY, params.path.namespace],
     queryFn: async () => {
       return await client.listEventsV1NamespacedEvent(params);
@@ -6843,7 +6839,7 @@ export function useListEventsV1NamespacedEventQuery(params: ListEventsV1Namespac
 export function useCreateEventsV1NamespacedEvent() {
   const client = useKubernetes().client;
   const queryClient = useQueryClient();
-  return useMutation({
+  return useMutation<EventsK8sIoV1Event, Error, CreateEventsV1NamespacedEventRequest>({
     mutationFn: async (request: CreateEventsV1NamespacedEventRequest) => {
       return client.createEventsV1NamespacedEvent(request);
     },
@@ -6881,7 +6877,7 @@ export function useReadEventsV1NamespacedEventQuery(params: ReadEventsV1Namespac
 export function useReplaceEventsV1NamespacedEvent() {
   const client = useKubernetes().client;
   const queryClient = useQueryClient();
-  return useMutation({
+  return useMutation<EventsK8sIoV1Event, Error, ReplaceEventsV1NamespacedEventRequest>({
     mutationFn: async (request: ReplaceEventsV1NamespacedEventRequest) => {
       return client.replaceEventsV1NamespacedEvent(request);
     },
@@ -6909,7 +6905,7 @@ export function useDeleteEventsV1NamespacedEvent() {
 export function usePatchEventsV1NamespacedEvent() {
   const client = useKubernetes().client;
   const queryClient = useQueryClient();
-  return useMutation<Event, Error, PatchEventsV1NamespacedEventRequest>({
+  return useMutation<EventsK8sIoV1Event, Error, PatchEventsV1NamespacedEventRequest>({
     mutationFn: async request => {
       return client.patchEventsV1NamespacedEvent(request);
     },
@@ -8826,26 +8822,27 @@ export function useWatchStorageV1VolumeAttachmentQuery(params: WatchStorageV1Vol
   });
 }
 
-export function useLogFileListHandlerQuery(params: LogFileListHandlerRequest) {
-  const client = useKubernetes().client;
-  return useQuery<any, Error>({
-    queryKey: [...LOGS_KEY],
-    queryFn: async () => {
-      return await client.logFileListHandler(params);
-    },
-    enabled: true
-  });
-}
-export function useLogFileHandlerQuery(params: LogFileHandlerRequest) {
-  const client = useKubernetes().client;
-  return useQuery<any, Error>({
-    queryKey: [...LOGS_LOGPATH_KEY, params.path.logpath],
-    queryFn: async () => {
-      return await client.logFileHandler(params);
-    },
-    enabled: params.path.logpath !== undefined
-  });
-}
+// The interwebjs client and type declarations are generated entirely from scripts/swagger.json via schema-sdk. Those log endpoints are not present in the swagger.json
+// export function useLogFileListHandlerQuery(params: LogFileListHandlerRequest) {
+//   const client = useKubernetes().client;
+//   return useQuery<any, Error>({
+//     queryKey: [...LOGS_KEY],
+//     queryFn: async () => {
+//       return await client.logFileListHandler(params);
+//     },
+//     enabled: true
+//   });
+// }
+// export function useLogFileHandlerQuery(params: LogFileHandlerRequest) {
+//   const client = useKubernetes().client;
+//   return useQuery<any, Error>({
+//     queryKey: [...LOGS_LOGPATH_KEY, params.path.logpath],
+//     queryFn: async () => {
+//       return await client.logFileHandler(params);
+//     },
+//     enabled: params.path.logpath !== undefined
+//   });
+// }
 export function useGetServiceAccountIssuerOpenIDKeysetQuery(params: GetServiceAccountIssuerOpenIDKeysetRequest) {
   const client = useKubernetes().client;
   return useQuery<string, Error>({

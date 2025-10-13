@@ -5,7 +5,6 @@ import {
   useDeleteAppsV1NamespacedDaemonSet,
 } from '../k8s/index'
 import { usePreferredNamespace } from '../contexts/NamespaceContext'
-import type { DaemonSet, DaemonSetList } from '@interweb/interwebjs'
 
 // Query keys
 const DAEMONSETS_KEY = ['daemonsets'] as const

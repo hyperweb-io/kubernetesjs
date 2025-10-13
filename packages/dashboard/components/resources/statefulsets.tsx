@@ -22,7 +22,7 @@ import {
   useReplaceAppsV1NamespacedStatefulSetScale
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { StatefulSet } from '@interweb/interwebjs'
+import { type AppsV1StatefulSet as StatefulSet } from '@interweb/interwebjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 

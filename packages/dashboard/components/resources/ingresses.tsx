@@ -22,7 +22,7 @@ import {
   useDeleteNetworkingV1NamespacedIngress
 } from '@/k8s'
 import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { Ingress } from '@interweb/interwebjs'
+import { type NetworkingK8sIoV1Ingress as Ingress } from '@interweb/interwebjs'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 

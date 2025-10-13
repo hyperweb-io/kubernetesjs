@@ -26,10 +26,10 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       retry: 3,
       staleTime: 30 * 1000, // 30 seconds
-      cacheTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 5 * 60 * 1000, // 5 minutes (renamed from cacheTime in React Query v5)
       // Use background fetching to prevent UI blocking
       refetchOnMount: 'always',
-      keepPreviousData: true,
+      placeholderData: (previousData) => previousData, // Replaced keepPreviousData in React Query v5
     },
   },
 })
