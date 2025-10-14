@@ -1,14 +1,19 @@
-import chalk from 'chalk';
-import { InterwebClient as InterwebKubernetesClient } from '@interweb/interwebjs';
-import { ConfigLoader } from './config-loader';
-import { SetupClient } from './setup';
-import { PostgresDeployer, PostgresDeployOptions, DeployResult, connectionInfo } from './postgres';
+import chalk from "chalk";
+import { InterwebClient as InterwebKubernetesClient } from "@interweb/interwebjs";
+import { ConfigLoader } from "./config-loader";
+import { SetupClient } from "./setup";
+import {
+  PostgresDeployer,
+  PostgresDeployOptions,
+  DeployResult,
+  connectionInfo,
+} from "./postgres";
 import {
   ClusterSetupConfig,
   ApplicationConfig,
   DeploymentStatus,
-  InterwebClientConfig
-} from './types';
+  InterwebClientConfig,
+} from "./types";
 
 export interface InterwebContext {
   namespace?: string;
@@ -24,17 +29,22 @@ export class Client {
   private ctx: InterwebContext;
   private kubeClient: InterwebKubernetesClient;
   private pg?: PostgresDeployer;
-  
+
   constructor(ctx: InterwebContext = {}) {
     this.ctx = ctx;
     this.kubeClient = new InterwebKubernetesClient({
       kubeconfig: ctx.kubeconfig,
       namespace: ctx.namespace,
       context: ctx.context,
-      restEndpoint: ctx.restEndpoint
+      restEndpoint: ctx.restEndpoint,
     });
-    this.setupClient = new SetupClient(this.kubeClient, ctx.namespace || 'default');
-    this.pg = new PostgresDeployer(this.kubeClient, this.setupClient, (m) => this.log(m));
+    this.setupClient = new SetupClient(
+      this.kubeClient,
+      ctx.namespace || "default"
+    );
+    this.pg = new PostgresDeployer(this.kubeClient, this.setupClient, (m) =>
+      this.log(m)
+    );
   }
 
   /**
@@ -42,23 +52,23 @@ export class Client {
    */
   async setupCluster(configPath: string): Promise<void> {
     try {
-      this.log('Loading cluster setup configuration...');
+      this.log("Loading cluster setup configuration...");
       const config = ConfigLoader.loadClusterSetup(configPath);
-      
+
       this.log(`Setting up cluster: ${config.metadata.name}`);
-      
+
       // Check Kubernetes connection
       const connected = await this.setupClient.checkConnection();
       if (!connected) {
-        throw new Error('Unable to connect to Kubernetes cluster');
+        throw new Error("Unable to connect to Kubernetes cluster");
       }
-      
-      this.log('✓ Kubernetes cluster connection verified');
-      
+
+      this.log("✓ Kubernetes cluster connection verified");
+
       // Install operators
       await this.setupClient.installOperators(config);
-      
-      this.log('✓ Cluster setup completed successfully');
+
+      this.log("✓ Cluster setup completed successfully");
     } catch (error) {
       this.log(`✗ Cluster setup failed: ${error}`);
       throw error;
@@ -69,13 +79,21 @@ export class Client {
    * Deploy a PostgreSQL database using CloudNativePG (operator must be installed).
    * Returns connection endpoints once ready.
    */
-  async deployPostgres(options: PostgresDeployOptions = {}): Promise<DeployResult> {
+  async deployPostgres(
+    options: PostgresDeployOptions = {}
+  ): Promise<DeployResult> {
     if (!this.pg) {
-      this.pg = new PostgresDeployer(this.kubeClient, this.setupClient, (m) => this.log(m));
+      this.pg = new PostgresDeployer(this.kubeClient, this.setupClient, (m) =>
+        this.log(m)
+      );
     }
     const res = await this.pg.deploy(options);
-    const info = connectionInfo(res, options.appUsername ?? 'appuser', options.appPassword ?? 'appuser123!');
-    this.log('PostgreSQL connection info:');
+    const info = connectionInfo(
+      res,
+      options.appUsername ?? "appuser",
+      options.appPassword ?? "appuser123!"
+    );
+    this.log("PostgreSQL connection info:");
     this.log(`  Direct: ${info.direct.url}`);
     if (info.pooled?.url) this.log(`  Pooled: ${info.pooled.url}`);
     return res;
@@ -84,28 +102,31 @@ export class Client {
   /**
    * Deploy an application with the specified configuration
    */
-  // async deployApplication(configPath: string): Promise<void> {
-  //   try {
-  //     this.log('Loading application configuration...');
-  //     const config = ConfigLoader.loadApplication(configPath);
-      
-  //     this.log(`Deploying application: ${config.metadata.name}`);
-      
-  //     // Check Kubernetes connection
-  //     const connected = await this.setupClient.checkConnection();
-  //     if (!connected) {
-  //       throw new Error('Unable to connect to Kubernetes cluster');
-  //     }
-      
-  //     // Deploy application
-  //     await this.setupClient.installOperators(config);
-      
-  //     this.log('✓ Application deployed successfully');
-  //   } catch (error) {
-  //     this.log(`✗ Application deployment failed: ${error}`);
-  //     throw error;
-  //   }
-  // }
+  async deployApplication(configPath: string): Promise<void> {
+    try {
+      this.log("Loading application configuration...");
+      const config = ConfigLoader.loadApplication(configPath);
+
+      this.log(`Deploying application: ${config.metadata.name}`);
+
+      const connected = await this.setupClient.checkConnection();
+      if (!connected) {
+        throw new Error("Unable to connect to Kubernetes cluster");
+      }
+
+      await this.provisionApplicationDatabase(config.spec.database);
+
+      await this.setupClient.deployApplicationResources(config, {
+        continueOnError: false,
+        log: (msg) => this.log(msg),
+      });
+
+      this.log("✓ Application deployed successfully");
+    } catch (error) {
+      this.log(`✗ Application deployment failed: ${error}`);
+      throw error;
+    }
+  }
 
   /**
    * Get the status of a cluster setup
@@ -114,8 +135,8 @@ export class Client {
     try {
       const config = ConfigLoader.loadClusterSetup(configPath);
       const status = await this.setupClient.getClusterSetupStatus(config);
-      
-      this.displayStatus('Cluster Setup', status);
+
+      this.displayStatus("Cluster Setup", status);
       return status;
     } catch (error) {
       this.log(`✗ Failed to get cluster status: ${error}`);
@@ -130,8 +151,8 @@ export class Client {
     try {
       const config = ConfigLoader.loadApplication(configPath);
       const status = await this.setupClient.getApplicationStatus(config);
-      
-      this.displayStatus('Application', status);
+
+      this.displayStatus("Application", status);
       return status;
     } catch (error) {
       this.log(`✗ Failed to get application status: ${error}`);
@@ -142,57 +163,63 @@ export class Client {
   /**
    * Wait for a cluster setup to be ready
    */
-  async waitForCluster(configPath: string, timeoutMs: number = 600000): Promise<void> {
+  async waitForCluster(
+    configPath: string,
+    timeoutMs: number = 600000
+  ): Promise<void> {
     const startTime = Date.now();
     const config = ConfigLoader.loadClusterSetup(configPath);
-    
+
     this.log(`Waiting for cluster ${config.metadata.name} to be ready...`);
-    
+
     while (Date.now() - startTime < timeoutMs) {
       const status = await this.setupClient.getClusterSetupStatus(config);
-      
-      if (status.phase === 'ready') {
-        this.log(chalk.green('✓ Cluster is ready!'));
+
+      if (status.phase === "ready") {
+        this.log(chalk.green("✓ Cluster is ready!"));
         return;
       }
-      
-      if (status.phase === 'failed') {
+
+      if (status.phase === "failed") {
         throw new Error(`Cluster setup failed: ${status.message}`);
       }
-      
+
       this.log(`Cluster status: ${status.phase} - ${status.message}`);
       await this.sleep(5000); // Wait 5 seconds before checking again
     }
-    
-    throw new Error('Timeout waiting for cluster to be ready');
+
+    throw new Error("Timeout waiting for cluster to be ready");
   }
 
   /**
    * Wait for an application to be ready
    */
-  async waitForApplication(configPath: string, timeoutMs: number = 300000): Promise<void> {
+  async waitForApplication(
+    configPath: string,
+    timeoutMs: number = 300000
+  ): Promise<void> {
     const startTime = Date.now();
     const config = ConfigLoader.loadApplication(configPath);
-    
+
     this.log(`Waiting for application ${config.metadata.name} to be ready...`);
-    
+
     while (Date.now() - startTime < timeoutMs) {
       const status = await this.setupClient.getApplicationStatus(config);
-      
-      if (status.phase === 'ready') {
-        this.log(chalk.green('✓ Application is ready!'));
+
+      if (status.phase === "ready") {
+        this.log(chalk.green("✓ Application is ready!"));
         return;
       }
-      
-      if (status.phase === 'failed') {
+
+      if (status.phase === "failed") {
         throw new Error(`Application deployment failed: ${status.message}`);
       }
-      
+
       this.log(`Application status: ${status.phase} - ${status.message}`);
       await this.sleep(5000); // Wait 5 seconds before checking again
     }
-    
-    throw new Error('Timeout waiting for application to be ready');
+
+    throw new Error("Timeout waiting for application to be ready");
   }
 
   /**
@@ -200,14 +227,14 @@ export class Client {
    */
   async deleteCluster(configPath: string): Promise<void> {
     try {
-      this.log('Loading cluster setup configuration...');
+      this.log("Loading cluster setup configuration...");
       const config = ConfigLoader.loadClusterSetup(configPath);
-      
+
       this.log(`Deleting cluster: ${config.metadata.name}`);
-      
+
       await this.setupClient.deleteClusterSetup(config);
-      
-      this.log(chalk.green('✓ Cluster deleted successfully'));
+
+      this.log(chalk.green("✓ Cluster deleted successfully"));
     } catch (error) {
       this.log(chalk.red(`✗ Cluster deletion failed: ${error}`));
       throw error;
@@ -217,34 +244,40 @@ export class Client {
   /**
    * Delete an application and all its resources
    */
-  // async deleteApplication(configPath: string): Promise<void> {
-  //   try {
-  //     this.log('Loading application configuration...');
-  //     const config = ConfigLoader.loadApplication(configPath);
-      
-  //     this.log(`Deleting application: ${config.metadata.name}`);
-      
-  //     await this.setupClient.deleteApplication(config);
-      
-  //     this.log(chalk.green('✓ Application deleted successfully'));
-  //   } catch (error) {
-  //     this.log(chalk.red(`✗ Application deletion failed: ${error}`));
-  //     throw error;
-  //   }
-  // }
+  async deleteApplication(configPath: string): Promise<void> {
+    try {
+      this.log("Loading application configuration...");
+      const config = ConfigLoader.loadApplication(configPath);
+
+      this.log(`Deleting application: ${config.metadata.name}`);
+
+      await this.setupClient.deleteApplicationResources(config, {
+        continueOnError: true,
+        log: (msg) => this.log(msg),
+      });
+
+      this.log(chalk.green("✓ Application deleted successfully"));
+    } catch (error) {
+      this.log(chalk.red(`✗ Application deletion failed: ${error}`));
+      throw error;
+    }
+  }
 
   /**
    * Validate a configuration file
    */
-  validateConfig(configPath: string, type: 'cluster' | 'application' = 'cluster'): boolean {
+  validateConfig(
+    configPath: string,
+    type: "cluster" | "application" = "cluster"
+  ): boolean {
     try {
-      if (type === 'cluster') {
+      if (type === "cluster") {
         ConfigLoader.loadClusterSetup(configPath);
       } else {
         ConfigLoader.loadApplication(configPath);
       }
-      
-      this.log(chalk.green('✓ Configuration is valid'));
+
+      this.log(chalk.green("✓ Configuration is valid"));
       return true;
     } catch (error) {
       this.log(chalk.red(`✗ Configuration validation failed: ${error}`));
@@ -255,50 +288,57 @@ export class Client {
   /**
    * Generate a sample configuration file
    */
-  generateSampleConfig(outputPath: string, type: 'cluster' | 'application' = 'cluster'): void {
+  generateSampleConfig(
+    outputPath: string,
+    type: "cluster" | "application" = "cluster"
+  ): void {
     try {
-      if (type === 'cluster') {
+      if (type === "cluster") {
         const defaultConfig = ConfigLoader.getDefaultClusterSetup();
         ConfigLoader.saveConfig(defaultConfig, outputPath);
       } else {
         // Generate sample application config
         const sampleAppConfig = {
-          apiVersion: 'interweb.dev/v1',
-          kind: 'Application',
+          apiVersion: "interweb.dev/v1",
+          kind: "Application",
           metadata: {
-            name: 'sample-app'
+            name: "sample-app",
           },
           spec: {
             database: {
-              type: 'postgresql' as const,
-              name: 'postgres-cluster',
-              namespace: 'postgres-db',
+              type: "postgresql" as const,
+              name: "postgres-cluster",
+              namespace: "postgres-db",
               config: {
                 instances: 3,
-                storage: '10Gi'
-              }
+                storage: "10Gi",
+              },
             },
-            services: [{
-              name: 'api-server',
-              image: 'nginx:latest',
-              port: 80,
-              replicas: 2,
-              env: {
-                'NODE_ENV': 'production'
-              }
-            }],
+            services: [
+              {
+                name: "api-server",
+                image: "nginx:latest",
+                port: 80,
+                replicas: 2,
+                env: {
+                  NODE_ENV: "production",
+                },
+              },
+            ],
             ingress: {
               enabled: true,
-              host: 'api.example.com',
-              path: '/',
-              tls: true
-            }
-          }
+              host: "api.example.com",
+              path: "/",
+              tls: true,
+            },
+          },
         };
         ConfigLoader.saveConfig(sampleAppConfig as any, outputPath);
       }
-      
-      this.log(chalk.green(`✓ Sample ${type} configuration saved to ${outputPath}`));
+
+      this.log(
+        chalk.green(`✓ Sample ${type} configuration saved to ${outputPath}`)
+      );
     } catch (error) {
       this.log(chalk.red(`✗ Failed to generate sample config: ${error}`));
       throw error;
@@ -311,9 +351,9 @@ export class Client {
   async listResources(): Promise<void> {
     try {
       // This would list all interweb-managed resources
-      this.log('Listing interweb resources...');
+      this.log("Listing interweb resources...");
       // Implementation would query Kubernetes for resources with interweb labels
-      this.log('No resources found or feature not yet implemented');
+      this.log("No resources found or feature not yet implemented");
     } catch (error) {
       this.log(chalk.red(`✗ Failed to list resources: ${error}`));
       throw error;
@@ -321,20 +361,28 @@ export class Client {
   }
 
   private displayStatus(resourceType: string, status: DeploymentStatus): void {
-    const phaseColor = status.phase === 'ready' ? 'green' : 
-                      status.phase === 'failed' ? 'red' : 'yellow';
-    
-    this.log(`${resourceType} Status: ${chalk[phaseColor](status.phase.toUpperCase())}`);
-    
+    const phaseColor =
+      status.phase === "ready"
+        ? "green"
+        : status.phase === "failed"
+          ? "red"
+          : "yellow";
+
+    this.log(
+      `${resourceType} Status: ${chalk[phaseColor](status.phase.toUpperCase())}`
+    );
+
     if (status.message) {
       this.log(`Message: ${status.message}`);
     }
-    
+
     if (status.conditions && status.conditions.length > 0) {
-      this.log('Conditions:');
-      status.conditions.forEach(condition => {
-        const conditionColor = condition.status === 'True' ? 'green' : 'red';
-        this.log(`  ${condition.type}: ${chalk[conditionColor](condition.status)} - ${condition.message}`);
+      this.log("Conditions:");
+      status.conditions.forEach((condition) => {
+        const conditionColor = condition.status === "True" ? "green" : "red";
+        this.log(
+          `  ${condition.type}: ${chalk[conditionColor](condition.status)} - ${condition.message}`
+        );
       });
     }
   }
@@ -345,7 +393,30 @@ export class Client {
     }
   }
 
+  private async provisionApplicationDatabase(
+    database?: ApplicationConfig["spec"]["database"]
+  ): Promise<void> {
+    if (!database) {
+      return;
+    }
+
+    if (database.type !== "postgresql") {
+      this.log(
+        `Database type "${database.type}" is not supported for automatic provisioning. Skipping.`
+      );
+      return;
+    }
+
+    this.log("Provisioning PostgreSQL database for application...");
+    await this.deployPostgres({
+      name: database.name,
+      namespace: database.namespace,
+      instances: database.config.instances,
+      storage: database.config.storage,
+    });
+  }
+
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

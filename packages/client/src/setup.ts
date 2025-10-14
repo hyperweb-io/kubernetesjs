@@ -1,5 +1,13 @@
-import { InterwebClient as InterwebKubernetesClient, KubernetesResource } from '@interweb/interwebjs';
-import { getOperatorIds, getOperatorResources, getOperatorVersions, getOperatorInfo } from '@interweb/manifests';
+import {
+  InterwebClient as InterwebKubernetesClient,
+  KubernetesResource,
+} from "@interweb/interwebjs";
+import {
+  getOperatorIds,
+  getOperatorResources,
+  getOperatorVersions,
+  getOperatorInfo,
+} from "@interweb/manifests";
 import {
   ClusterSetupConfig,
   ApplicationConfig,
@@ -9,17 +17,25 @@ import {
   OperatorInfo,
   ClusterOverview,
   SecretConfig,
-} from './types';
-import axios from 'axios';
-import { applyKubernetesResource, applyKubernetesResources, deleteKubernetesResource, deleteKubernetesResources } from './apply';
+} from "./types";
+import axios from "axios";
+import {
+  applyKubernetesResource,
+  applyKubernetesResources,
+  deleteKubernetesResource,
+  deleteKubernetesResources,
+} from "./apply";
 
 export class SetupClient {
   private client: InterwebKubernetesClient;
   private defaultNamespace: string;
 
-  constructor(client: InterwebKubernetesClient, defaultNamespace: string = 'default') {
+  constructor(
+    client: InterwebKubernetesClient,
+    defaultNamespace: string = "default"
+  ) {
     this.client = client;
-    this.defaultNamespace = defaultNamespace || 'default';
+    this.defaultNamespace = defaultNamespace || "default";
   }
 
   /**
@@ -28,16 +44,19 @@ export class SetupClient {
   async checkConnection(): Promise<boolean> {
     try {
       await this.client.listCoreV1Node({
-        query: {}
+        query: {},
       });
       return true;
     } catch (error) {
-      console.error('Failed to connect to Kubernetes cluster:', error);
+      console.error("Failed to connect to Kubernetes cluster:", error);
       return false;
     }
   }
 
-  public async applyManifest(manifest: KubernetesResource, options?: { continueOnError?: boolean; log?: (msg: string) => void }): Promise<void> {
+  public async applyManifest(
+    manifest: KubernetesResource,
+    options?: { continueOnError?: boolean; log?: (msg: string) => void }
+  ): Promise<void> {
     await applyKubernetesResource(this.client, manifest, {
       defaultNamespace: this.defaultNamespace,
       continueOnError: options?.continueOnError ?? true,
@@ -45,7 +64,10 @@ export class SetupClient {
     });
   }
 
-  public async applyManifests(manifests: KubernetesResource[], options?: { continueOnError?: boolean; log?: (msg: string) => void }): Promise<void> {
+  public async applyManifests(
+    manifests: KubernetesResource[],
+    options?: { continueOnError?: boolean; log?: (msg: string) => void }
+  ): Promise<void> {
     await applyKubernetesResources(this.client, manifests, {
       defaultNamespace: this.defaultNamespace,
       continueOnError: options?.continueOnError ?? true,
@@ -53,7 +75,40 @@ export class SetupClient {
     });
   }
 
-  public async deleteManifest(manifest: KubernetesResource, options?: { continueOnError?: boolean; log?: (msg: string) => void }): Promise<void> {
+  public async deployApplicationResources(
+    config: ApplicationConfig,
+    options?: { continueOnError?: boolean; log?: (msg: string) => void }
+  ): Promise<void> {
+    const manifests = this.buildApplicationManifests(config);
+    if (manifests.length === 0) {
+      return;
+    }
+    await this.applyManifests(manifests, {
+      continueOnError: options?.continueOnError ?? false,
+      log: options?.log ?? ((m) => console.log(m)),
+    });
+  }
+
+  public async deleteApplicationResources(
+    config: ApplicationConfig,
+    options?: { continueOnError?: boolean; log?: (msg: string) => void }
+  ): Promise<void> {
+    const manifests = this.buildApplicationManifests(config).filter(
+      (manifest) => manifest.kind !== "Namespace"
+    );
+    if (manifests.length === 0) {
+      return;
+    }
+    await this.deleteManifests(manifests, {
+      continueOnError: options?.continueOnError ?? true,
+      log: options?.log ?? ((m) => console.log(m)),
+    });
+  }
+
+  public async deleteManifest(
+    manifest: KubernetesResource,
+    options?: { continueOnError?: boolean; log?: (msg: string) => void }
+  ): Promise<void> {
     await deleteKubernetesResource(this.client, manifest, {
       defaultNamespace: this.defaultNamespace,
       continueOnError: options?.continueOnError ?? true,
@@ -61,7 +116,10 @@ export class SetupClient {
     });
   }
 
-  public async deleteManifests(manifests: KubernetesResource[], options?: { continueOnError?: boolean; log?: (msg: string) => void }): Promise<void> {
+  public async deleteManifests(
+    manifests: KubernetesResource[],
+    options?: { continueOnError?: boolean; log?: (msg: string) => void }
+  ): Promise<void> {
     await deleteKubernetesResources(this.client, manifests, {
       defaultNamespace: this.defaultNamespace,
       continueOnError: options?.continueOnError ?? true,
@@ -98,7 +156,10 @@ export class SetupClient {
   /**
    * Delete operators based on cluster setup configuration
    */
-  public async deleteOperators(config: ClusterSetupConfig, options?: { continueOnError?: boolean }): Promise<void> {
+  public async deleteOperators(
+    config: ClusterSetupConfig,
+    options?: { continueOnError?: boolean }
+  ): Promise<void> {
     // check config.spec.operators are in the SUPPORTED_OPERATORS
     for (const operator of config.spec.operators) {
       if (!getOperatorIds().includes(operator.name as any)) {
@@ -108,7 +169,7 @@ export class SetupClient {
 
     // Process operators in reverse order for safer deletion
     const operatorsToDelete = config.spec.operators
-      .filter(op => op.enabled)
+      .filter((op) => op.enabled)
       .reverse();
 
     for (const operator of operatorsToDelete) {
@@ -134,35 +195,39 @@ export class SetupClient {
   /**
    * Get deployment status for a cluster setup
    */
-  async getClusterSetupStatus(config: ClusterSetupConfig): Promise<DeploymentStatus> {
-    const namespace = config.metadata.namespace || 'interweb-system';
-    
+  async getClusterSetupStatus(
+    config: ClusterSetupConfig
+  ): Promise<DeploymentStatus> {
+    const namespace = config.metadata.namespace || "interweb-system";
+
     try {
       // Check if all operators are running
       const operatorStatuses = await Promise.all(
         config.spec.operators
-          .filter(op => op.enabled)
-          .map(op => this.getOperatorStatus(op.name, namespace))
+          .filter((op) => op.enabled)
+          .map((op) => this.getOperatorStatus(op.name, namespace))
       );
 
-      const allReady = operatorStatuses.every(status => status);
-      
+      const allReady = operatorStatuses.every((status) => status);
+
       return {
-        phase: allReady ? 'ready' : 'installing',
-        message: allReady ? 'All operators are ready' : 'Some operators are still installing',
+        phase: allReady ? "ready" : "installing",
+        message: allReady
+          ? "All operators are ready"
+          : "Some operators are still installing",
         conditions: operatorStatuses.map((ready, index) => ({
-          type: 'OperatorReady',
-          status: ready ? 'True' : 'False',
-          reason: ready ? 'Ready' : 'Installing',
-          message: `Operator ${config.spec.operators[index].name} is ${ready ? 'ready' : 'installing'}`,
-          lastTransitionTime: new Date().toISOString()
-        }))
+          type: "OperatorReady",
+          status: ready ? "True" : "False",
+          reason: ready ? "Ready" : "Installing",
+          message: `Operator ${config.spec.operators[index].name} is ${ready ? "ready" : "installing"}`,
+          lastTransitionTime: new Date().toISOString(),
+        })),
       };
     } catch (error) {
       return {
-        phase: 'failed',
+        phase: "failed",
         message: `Failed to get cluster setup status: ${error}`,
-        conditions: []
+        conditions: [],
       };
     }
   }
@@ -170,46 +235,56 @@ export class SetupClient {
   /**
    * Get deployment status for an application
    */
-  async getApplicationStatus(config: ApplicationConfig): Promise<DeploymentStatus> {
-    const namespace = config.metadata.namespace || 'default';
-    
+  async getApplicationStatus(
+    config: ApplicationConfig
+  ): Promise<DeploymentStatus> {
+    const namespace = config.metadata.namespace || "default";
+
     try {
       const deployments = await this.client.listAppsV1NamespacedDeployment({
         path: { namespace },
-        query: {}
+        query: {},
       });
       const appDeployments = deployments.items.filter(
-        (dep: any) => dep.metadata?.labels?.['app.interweb.dev/instance'] === config.metadata.name
+        (dep: any) =>
+          dep.metadata?.labels?.["app.interweb.dev/instance"] ===
+          config.metadata.name
       );
 
       if (appDeployments.length === 0) {
         return {
-          phase: 'pending',
-          message: 'No deployments found'
+          phase: "pending",
+          message: "No deployments found",
         };
       }
 
-      const allReady = appDeployments.every((dep: any) => 
-        dep.status?.readyReplicas === dep.status?.replicas && 
-        dep.status?.replicas > 0
+      const allReady = appDeployments.every(
+        (dep: any) =>
+          dep.status?.readyReplicas === dep.status?.replicas &&
+          dep.status?.replicas > 0
       );
 
       return {
-        phase: allReady ? 'ready' : 'installing',
-        message: allReady ? 'Application is ready' : 'Application is still deploying',
+        phase: allReady ? "ready" : "installing",
+        message: allReady
+          ? "Application is ready"
+          : "Application is still deploying",
         conditions: appDeployments.map((dep: any) => ({
-          type: 'DeploymentReady',
-          status: (dep.status?.readyReplicas === dep.status?.replicas) ? 'True' : 'False',
-          reason: 'Deployment',
+          type: "DeploymentReady",
+          status:
+            dep.status?.readyReplicas === dep.status?.replicas
+              ? "True"
+              : "False",
+          reason: "Deployment",
           message: `${dep.metadata?.name}: ${dep.status?.readyReplicas}/${dep.status?.replicas} replicas ready`,
-          lastTransitionTime: new Date().toISOString()
-        }))
+          lastTransitionTime: new Date().toISOString(),
+        })),
       };
     } catch (error) {
       return {
-        phase: 'failed',
+        phase: "failed",
         message: `Failed to get application status: ${error}`,
-        conditions: []
+        conditions: [],
       };
     }
   }
@@ -218,13 +293,13 @@ export class SetupClient {
    * Delete resources for a cluster setup
    */
   async deleteClusterSetup(config: ClusterSetupConfig): Promise<void> {
-    const namespace = config.metadata.namespace || 'interweb-system';
-    
+    const namespace = config.metadata.namespace || "interweb-system";
+
     try {
       // Delete namespace which will cascade delete all resources
       await this.client.deleteCoreV1Namespace({
         path: { name: String(namespace) },
-        query: {}
+        query: {},
       });
       console.log(`Deleted namespace: ${namespace}`);
     } catch (error: any) {
@@ -234,14 +309,17 @@ export class SetupClient {
     }
   }
 
-  private async getOperatorStatus(operatorName: string, namespace: string): Promise<boolean> {
+  private async getOperatorStatus(
+    operatorName: string,
+    namespace: string
+  ): Promise<boolean> {
     try {
       // Check if operator pods are running
       const pods = await this.client.listCoreV1NamespacedPod({
         path: { namespace },
-        query: { labelSelector: `app=${operatorName}` }
+        query: { labelSelector: `app=${operatorName}` },
       });
-      return pods.items.every((pod: any) => pod.status?.phase === 'Running');
+      return pods.items.every((pod: any) => pod.status?.phase === "Running");
     } catch (error) {
       return false;
     }
@@ -252,7 +330,10 @@ export class SetupClient {
   /**
    * Install a single operator by name (optional version).
    */
-  public async installOperatorByName(name: string, version?: string): Promise<void> {
+  public async installOperatorByName(
+    name: string,
+    version?: string
+  ): Promise<void> {
     const manifests = getOperatorResources(name, version);
     await this.applyManifests(manifests, {
       continueOnError: false,
@@ -263,7 +344,10 @@ export class SetupClient {
   /**
    * Uninstall a single operator by name (optional version).
    */
-  public async uninstallOperatorByName(name: string, version?: string): Promise<void> {
+  public async uninstallOperatorByName(
+    name: string,
+    version?: string
+  ): Promise<void> {
     const manifests = getOperatorResources(name, version);
     await this.deleteManifests(manifests, {
       continueOnError: true,
@@ -277,16 +361,43 @@ export class SetupClient {
   public async listOperatorsInfo(): Promise<OperatorInfo[]> {
     const results: OperatorInfo[] = [];
     for (const name of getOperatorIds()) {
-      const meta = getOperatorInfo(name) || { name, displayName: name, description: '', docsUrl: undefined };
-      const entry = { name, displayName: meta.displayName, description: meta.description, docsUrl: meta.docsUrl } as Pick<OperatorInfo, 'name' | 'displayName' | 'description' | 'docsUrl'>;
+      const meta = getOperatorInfo(name) || {
+        name,
+        displayName: name,
+        description: "",
+        docsUrl: undefined,
+      };
+      const entry = {
+        name,
+        displayName: meta.displayName,
+        description: meta.description,
+        docsUrl: meta.docsUrl,
+      } as Pick<
+        OperatorInfo,
+        "name" | "displayName" | "description" | "docsUrl"
+      >;
       const installs = await this.getOperatorInstallations(entry.name);
       // Derive summary
-      const installed = installs.find(i => i.status === 'installed');
-      const installing = installs.find(i => i.status === 'installing');
-      const status = installed ? 'installed' : installing ? 'installing' : 'not-installed';
-      const version = installed?.version || installing?.version || 'unknown';
-      const namespace = installed?.namespace || installing?.namespace || this.getOperatorDetector(entry.name).namespaces?.[0] || (getOperatorInfo(name)?.namespaces?.[0]);
-      results.push({ ...entry, status, version, namespace, installations: installs });
+      const installed = installs.find((i) => i.status === "installed");
+      const installing = installs.find((i) => i.status === "installing");
+      const status = installed
+        ? "installed"
+        : installing
+          ? "installing"
+          : "not-installed";
+      const version = installed?.version || installing?.version || "unknown";
+      const namespace =
+        installed?.namespace ||
+        installing?.namespace ||
+        this.getOperatorDetector(entry.name).namespaces?.[0] ||
+        getOperatorInfo(name)?.namespaces?.[0];
+      results.push({
+        ...entry,
+        status,
+        version,
+        namespace,
+        installations: installs,
+      });
     }
     return results;
   }
@@ -298,12 +409,16 @@ export class SetupClient {
     // Nodes
     const nodesResp = await this.client.listCoreV1Node({ query: {} as any });
     const nodes = (nodesResp?.items || []).map((node: any) => ({
-      name: node?.metadata?.name || '',
-      status: (node?.status?.conditions || []).find((c: any) => c.type === 'Ready')?.status === 'True' ? 'Ready' : 'NotReady',
-      version: node?.status?.nodeInfo?.kubeletVersion || '',
+      name: node?.metadata?.name || "",
+      status:
+        (node?.status?.conditions || []).find((c: any) => c.type === "Ready")
+          ?.status === "True"
+          ? "Ready"
+          : "NotReady",
+      version: node?.status?.nodeInfo?.kubeletVersion || "",
       roles: Object.keys(node?.metadata?.labels || {})
-        .filter((k) => k.includes('node-role.kubernetes.io'))
-        .map((k) => k.replace('node-role.kubernetes.io/', '')),
+        .filter((k) => k.includes("node-role.kubernetes.io"))
+        .map((k) => k.replace("node-role.kubernetes.io/", "")),
     }));
 
     // Pods/services across all namespaces
@@ -314,31 +429,39 @@ export class SetupClient {
       const nsName = ns?.metadata?.name;
       if (!nsName) continue;
       try {
-        const pods = await this.client.listCoreV1NamespacedPod({ path: { namespace: nsName }, query: {} as any });
+        const pods = await this.client.listCoreV1NamespacedPod({
+          path: { namespace: nsName },
+          query: {} as any,
+        });
         podCount += (pods?.items || []).length;
       } catch {}
       try {
-        const svcs = await this.client.listCoreV1NamespacedService({ path: { namespace: nsName }, query: {} as any });
+        const svcs = await this.client.listCoreV1NamespacedService({
+          path: { namespace: nsName },
+          query: {} as any,
+        });
         serviceCount += (svcs?.items || []).length;
       } catch {}
     }
 
     // Server version
-    let version = 'unknown';
+    let version = "unknown";
     try {
       const v = await this.client.getCodeVersion({} as any);
-      version = String(v?.gitVersion || 'unknown');
+      version = String(v?.gitVersion || "unknown");
     } catch {}
 
     // Operators
     let operatorCount = 0;
     try {
       const ops = await this.listOperatorsInfo();
-      operatorCount = ops.filter((o) => o.status === 'installed' || o.status === 'installing').length;
+      operatorCount = ops.filter(
+        (o) => o.status === "installed" || o.status === "installing"
+      ).length;
     } catch {}
 
     return {
-      healthy: nodes.every((n) => n.status === 'Ready'),
+      healthy: nodes.every((n) => n.status === "Ready"),
       nodeCount: nodes.length,
       podCount,
       serviceCount,
@@ -353,11 +476,14 @@ export class SetupClient {
    */
   public async createSecret(secret: SecretConfig): Promise<void> {
     const encoded = Object.fromEntries(
-      Object.entries(secret.data).map(([k, v]) => [k, Buffer.from(String(v), 'utf8').toString('base64')])
+      Object.entries(secret.data).map(([k, v]) => [
+        k,
+        Buffer.from(String(v), "utf8").toString("base64"),
+      ])
     );
     const manifest: KubernetesResource = {
-      apiVersion: 'v1',
-      kind: 'Secret',
+      apiVersion: "v1",
+      kind: "Secret",
       metadata: { name: secret.name, namespace: secret.namespace },
       // @ts-ignore
       type: secret.type,
@@ -369,19 +495,40 @@ export class SetupClient {
   /**
    * List secrets in one or all namespaces (name/namespace/type/age/keys).
    */
-  public async listSecrets(namespace?: string): Promise<Array<{ name: string; namespace: string; type: string; age: string; keys: string[] }>> {
-    const out: Array<{ name: string; namespace: string; type: string; age: string; keys: string[] }> = [];
-    const namespaces = namespace ? [{ metadata: { name: namespace } }] : await this.safeListNamespaces();
+  public async listSecrets(
+    namespace?: string
+  ): Promise<
+    Array<{
+      name: string;
+      namespace: string;
+      type: string;
+      age: string;
+      keys: string[];
+    }>
+  > {
+    const out: Array<{
+      name: string;
+      namespace: string;
+      type: string;
+      age: string;
+      keys: string[];
+    }> = [];
+    const namespaces = namespace
+      ? [{ metadata: { name: namespace } }]
+      : await this.safeListNamespaces();
     for (const ns of namespaces) {
       const nsName = ns?.metadata?.name;
       if (!nsName) continue;
       try {
-        const secrets = await this.client.listCoreV1NamespacedSecret({ path: { namespace: nsName }, query: {} as any });
+        const secrets = await this.client.listCoreV1NamespacedSecret({
+          path: { namespace: nsName },
+          query: {} as any,
+        });
         (secrets?.items || []).forEach((s: any) => {
           out.push({
-            name: s?.metadata?.name || '',
+            name: s?.metadata?.name || "",
             namespace: s?.metadata?.namespace || nsName,
-            type: s?.type || '',
+            type: s?.type || "",
             age: this.formatAge(s?.metadata?.creationTimestamp),
             keys: Object.keys(s?.data || {}),
           });
@@ -389,6 +536,162 @@ export class SetupClient {
       } catch {}
     }
     return out;
+  }
+
+  private buildApplicationManifests(
+    config: ApplicationConfig
+  ): KubernetesResource[] {
+    const namespace = config.metadata.namespace || "default";
+    const appName = config.metadata.name;
+    const manifests: KubernetesResource[] = [];
+
+    if (namespace !== "default") {
+      manifests.push({
+        apiVersion: "v1",
+        kind: "Namespace",
+        metadata: {
+          name: namespace,
+          labels: {
+            "app.interweb.dev/managed": "true",
+            "app.interweb.dev/application": appName,
+          },
+        },
+      });
+    }
+
+    const services = config.spec.services ?? [];
+    const baseAppLabels = {
+      "app.interweb.dev/instance": appName,
+      "app.kubernetes.io/part-of": appName,
+    } as Record<string, string>;
+
+    services.forEach((svc, idx) => {
+      const serviceName = svc.name || `${appName}-svc-${idx}`;
+      const labels = {
+        ...baseAppLabels,
+        "app.kubernetes.io/name": serviceName,
+        app: serviceName,
+      };
+
+      const env = svc.env
+        ? Object.entries(svc.env).map(([name, value]) => ({ name, value }))
+        : undefined;
+
+      const container: any = {
+        name: serviceName,
+        image: svc.image,
+        ports: [
+          {
+            containerPort: svc.port,
+          },
+        ],
+      };
+
+      if (env && env.length > 0) {
+        container.env = env;
+      }
+
+      if (svc.resources) {
+        container.resources = svc.resources;
+      }
+
+      manifests.push({
+        apiVersion: "apps/v1",
+        kind: "Deployment",
+        metadata: {
+          name: serviceName,
+          namespace,
+          labels,
+        },
+        spec: {
+          replicas: svc.replicas ?? 1,
+          selector: {
+            matchLabels: labels,
+          },
+          template: {
+            metadata: {
+              labels,
+            },
+            spec: {
+              containers: [container],
+            },
+          },
+        },
+      } as KubernetesResource);
+
+      manifests.push({
+        apiVersion: "v1",
+        kind: "Service",
+        metadata: {
+          name: serviceName,
+          namespace,
+          labels,
+        },
+        spec: {
+          selector: labels,
+          ports: [
+            {
+              port: svc.port,
+              targetPort: svc.port,
+              protocol: "TCP",
+            },
+          ],
+        },
+      } as KubernetesResource);
+    });
+
+    if (config.spec.ingress?.enabled && services.length > 0) {
+      const primaryService = services[0];
+      const host = config.spec.ingress.host;
+      const ingressManifest: KubernetesResource = {
+        apiVersion: "networking.k8s.io/v1",
+        kind: "Ingress",
+        metadata: {
+          name: `${appName}-ingress`,
+          namespace,
+          labels: baseAppLabels,
+          annotations: {
+            "app.interweb.dev/managed": "true",
+          },
+        },
+        spec: {
+          rules: [
+            {
+              ...(host ? { host } : {}),
+              http: {
+                paths: [
+                  {
+                    path: config.spec.ingress.path || "/",
+                    pathType: "Prefix",
+                    backend: {
+                      service: {
+                        name: primaryService.name,
+                        port: {
+                          number: primaryService.port,
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      };
+
+      if (config.spec.ingress.tls && host) {
+        (ingressManifest.spec as any).tls = [
+          {
+            hosts: [host],
+            secretName: `${appName}-tls`,
+          },
+        ];
+      }
+
+      manifests.push(ingressManifest);
+    }
+
+    return manifests;
   }
 
   // ----- internal helpers -----
@@ -401,15 +704,22 @@ export class SetupClient {
     }
   }
 
-  private async findOperatorDeployment(namespaces: any[], operatorName: string): Promise<{ deployment: any; namespace: string } | null> {
+  private async findOperatorDeployment(
+    namespaces: any[],
+    operatorName: string
+  ): Promise<{ deployment: any; namespace: string } | null> {
     for (const ns of namespaces) {
       const nsName = ns?.metadata?.name;
       if (!nsName) continue;
       try {
-        const deployments = await this.client.listAppsV1NamespacedDeployment({ path: { namespace: nsName }, query: {} as any });
-        const found = (deployments?.items || []).find((d: any) =>
-          String(d?.metadata?.name || '').includes(operatorName) ||
-          d?.metadata?.labels?.['app.kubernetes.io/name'] === operatorName
+        const deployments = await this.client.listAppsV1NamespacedDeployment({
+          path: { namespace: nsName },
+          query: {} as any,
+        });
+        const found = (deployments?.items || []).find(
+          (d: any) =>
+            String(d?.metadata?.name || "").includes(operatorName) ||
+            d?.metadata?.labels?.["app.kubernetes.io/name"] === operatorName
         );
         if (found) return { deployment: found, namespace: nsName };
       } catch {}
@@ -421,16 +731,33 @@ export class SetupClient {
    * Return best-effort install state for a known operator.
    * Uses deployment label selectors and defaults per operator, then falls back to a cluster-wide search.
    */
-  public async getOperatorInstallations(name: string): Promise<Array<{ namespace: string; status: OperatorInfo['status']; version: string }>> {
+  public async getOperatorInstallations(
+    name: string
+  ): Promise<
+    Array<{
+      namespace: string;
+      status: OperatorInfo["status"];
+      version: string;
+    }>
+  > {
     const detector = this.getOperatorDetector(name);
     const namespaces = await this.safeListNamespaces();
     // If we have canonical namespaces, scan only those. Otherwise scan all.
-    const nsOrder = (detector.namespaces && detector.namespaces.length > 0)
-      ? detector.namespaces
-      : (namespaces.map((n) => n?.metadata?.name).filter(Boolean) as string[]);
+    const nsOrder =
+      detector.namespaces && detector.namespaces.length > 0
+        ? detector.namespaces
+        : (namespaces
+            .map((n) => n?.metadata?.name)
+            .filter(Boolean) as string[]);
     const seen = new Set<string>();
-    const results: Array<{ namespace: string; status: OperatorInfo['status']; version: string }> = [];
-    const trySelectors = detector.labelSelectors?.length ? detector.labelSelectors : [];
+    const results: Array<{
+      namespace: string;
+      status: OperatorInfo["status"];
+      version: string;
+    }> = [];
+    const trySelectors = detector.labelSelectors?.length
+      ? detector.labelSelectors
+      : [];
 
     for (const nsName of nsOrder) {
       if (!nsName || seen.has(nsName)) continue;
@@ -439,13 +766,25 @@ export class SetupClient {
       // Try known deployment selectors
       for (const sel of trySelectors) {
         try {
-          const dpls = await this.client.listAppsV1NamespacedDeployment({ path: { namespace: nsName }, query: { labelSelector: sel } as any });
+          const dpls = await this.client.listAppsV1NamespacedDeployment({
+            path: { namespace: nsName },
+            query: { labelSelector: sel } as any,
+          });
           const d = (dpls?.items || [])[0];
           if (d) {
             const ready = Number(d?.status?.readyReplicas || 0);
             const desired = Number(d?.spec?.replicas || 0);
-            const status: OperatorInfo['status'] = desired > 0 ? (ready === desired ? 'installed' : 'installing') : 'error';
-            const version = String(d?.metadata?.labels?.['app.kubernetes.io/version'] || d?.metadata?.annotations?.['version'] || 'unknown');
+            const status: OperatorInfo["status"] =
+              desired > 0
+                ? ready === desired
+                  ? "installed"
+                  : "installing"
+                : "error";
+            const version = String(
+              d?.metadata?.labels?.["app.kubernetes.io/version"] ||
+                d?.metadata?.annotations?.["version"] ||
+                "unknown"
+            );
             results.push({ namespace: nsName, status, version });
             found = true;
             break;
@@ -455,17 +794,30 @@ export class SetupClient {
       if (found) continue;
       // Fallback: any deployment with matching name/label
       try {
-        const dpls = await this.client.listAppsV1NamespacedDeployment({ path: { namespace: nsName }, query: {} as any });
-        const d = (dpls?.items || []).find((dep: any) =>
-          String(dep?.metadata?.name || '').includes(name) ||
-          dep?.metadata?.labels?.['app.kubernetes.io/name'] === name ||
-          dep?.metadata?.labels?.['app'] === name
+        const dpls = await this.client.listAppsV1NamespacedDeployment({
+          path: { namespace: nsName },
+          query: {} as any,
+        });
+        const d = (dpls?.items || []).find(
+          (dep: any) =>
+            String(dep?.metadata?.name || "").includes(name) ||
+            dep?.metadata?.labels?.["app.kubernetes.io/name"] === name ||
+            dep?.metadata?.labels?.["app"] === name
         );
         if (d) {
           const ready = Number(d?.status?.readyReplicas || 0);
           const desired = Number(d?.spec?.replicas || 0);
-          const status: OperatorInfo['status'] = desired > 0 ? (ready === desired ? 'installed' : 'installing') : 'error';
-          const version = String(d?.metadata?.labels?.['app.kubernetes.io/version'] || d?.metadata?.annotations?.['version'] || 'unknown');
+          const status: OperatorInfo["status"] =
+            desired > 0
+              ? ready === desired
+                ? "installed"
+                : "installing"
+              : "error";
+          const version = String(
+            d?.metadata?.labels?.["app.kubernetes.io/version"] ||
+              d?.metadata?.annotations?.["version"] ||
+              "unknown"
+          );
           results.push({ namespace: nsName, status, version });
           continue;
         }
@@ -474,11 +826,14 @@ export class SetupClient {
       if (trySelectors.length > 0) {
         for (const sel of trySelectors) {
           try {
-            const pods = await this.client.listCoreV1NamespacedPod({ path: { namespace: nsName }, query: { labelSelector: sel } as any });
+            const pods = await this.client.listCoreV1NamespacedPod({
+              path: { namespace: nsName },
+              query: { labelSelector: sel } as any,
+            });
             const p = (pods?.items || [])[0];
             if (p) {
-              const status: OperatorInfo['status'] = 'installing';
-              results.push({ namespace: nsName, status, version: 'unknown' });
+              const status: OperatorInfo["status"] = "installing";
+              results.push({ namespace: nsName, status, version: "unknown" });
               break;
             }
           } catch {}
@@ -490,10 +845,21 @@ export class SetupClient {
     try {
       const crdNames = this.getOperatorCRDHints(name);
       if (crdNames.length > 0) {
-        const crds = await this.client.listApiextensionsV1CustomResourceDefinition({ query: {} as any });
-        const present = crdNames.every((n) => crds?.items?.some((c: any) => c?.metadata?.name === n));
+        const crds =
+          await this.client.listApiextensionsV1CustomResourceDefinition({
+            query: {} as any,
+          });
+        const present = crdNames.every((n) =>
+          crds?.items?.some((c: any) => c?.metadata?.name === n)
+        );
         if (present) {
-          return [{ namespace: detector.namespaces?.[0] || 'default', status: 'installing', version: 'unknown' }];
+          return [
+            {
+              namespace: detector.namespaces?.[0] || "default",
+              status: "installing",
+              version: "unknown",
+            },
+          ];
         }
       }
     } catch {}
@@ -503,14 +869,20 @@ export class SetupClient {
   /**
    * Wait until the operator reports 'installed' or timeout.
    */
-  public async waitForOperator(name: string, timeoutMs = 300_000, pollMs = 5_000): Promise<void> {
+  public async waitForOperator(
+    name: string,
+    timeoutMs = 300_000,
+    pollMs = 5_000
+  ): Promise<void> {
     const start = Date.now();
     for (;;) {
       const installs = await this.getOperatorInstallations(name);
-      const installed = installs.find(i => i.status === 'installed');
+      const installed = installs.find((i) => i.status === "installed");
       if (installed) return;
       if (Date.now() - start > timeoutMs) {
-        throw new Error(`Timeout waiting for operator '${name}' to be installed`);
+        throw new Error(
+          `Timeout waiting for operator '${name}' to be installed`
+        );
       }
       await new Promise((r) => setTimeout(r, pollMs));
     }
@@ -519,18 +891,29 @@ export class SetupClient {
   /**
    * Wait until the operator is fully removed from its canonical namespaces (and CRDs absent if hinted).
    */
-  public async waitForOperatorDeletion(name: string, timeoutMs = 300_000, pollMs = 5_000): Promise<void> {
+  public async waitForOperatorDeletion(
+    name: string,
+    timeoutMs = 300_000,
+    pollMs = 5_000
+  ): Promise<void> {
     const start = Date.now();
     const detector = this.getOperatorDetector(name);
     for (;;) {
       const installs = await this.getOperatorInstallations(name);
-      const stillPresent = installs.filter(i => detector.namespaces?.includes(i.namespace));
+      const stillPresent = installs.filter((i) =>
+        detector.namespaces?.includes(i.namespace)
+      );
       let crdsPresent = false;
       try {
         const hints = this.getOperatorCRDHints(name);
         if (hints.length > 0) {
-          const crds = await this.client.listApiextensionsV1CustomResourceDefinition({ query: {} as any });
-          crdsPresent = hints.some((n) => crds?.items?.some((c: any) => c?.metadata?.name === n));
+          const crds =
+            await this.client.listApiextensionsV1CustomResourceDefinition({
+              query: {} as any,
+            });
+          crdsPresent = hints.some((n) =>
+            crds?.items?.some((c: any) => c?.metadata?.name === n)
+          );
         }
       } catch {}
       if (stillPresent.length === 0 && !crdsPresent) return;
@@ -547,9 +930,12 @@ export class SetupClient {
   public async getOperatorDebug(name: string): Promise<any> {
     const detector = this.getOperatorDetector(name);
     const namespaces = await this.safeListNamespaces();
-    const nsOrder = (detector.namespaces && detector.namespaces.length > 0)
-      ? detector.namespaces
-      : (namespaces.map((n) => n?.metadata?.name).filter(Boolean) as string[]);
+    const nsOrder =
+      detector.namespaces && detector.namespaces.length > 0
+        ? detector.namespaces
+        : (namespaces
+            .map((n) => n?.metadata?.name)
+            .filter(Boolean) as string[]);
     const trySelectors = detector.labelSelectors || [];
     const matches: Record<string, any> = {};
 
@@ -559,7 +945,10 @@ export class SetupClient {
       // Deployments by selectors
       for (const sel of trySelectors) {
         try {
-          const dpls = await this.client.listAppsV1NamespacedDeployment({ path: { namespace: nsName }, query: { labelSelector: sel } as any });
+          const dpls = await this.client.listAppsV1NamespacedDeployment({
+            path: { namespace: nsName },
+            query: { labelSelector: sel } as any,
+          });
           (dpls?.items || []).forEach((d: any) => {
             matches[nsName].deployments.push({
               name: d?.metadata?.name,
@@ -572,10 +961,20 @@ export class SetupClient {
       }
       // Fallback deployments by name/labels
       try {
-        const dpls = await this.client.listAppsV1NamespacedDeployment({ path: { namespace: nsName }, query: {} as any });
+        const dpls = await this.client.listAppsV1NamespacedDeployment({
+          path: { namespace: nsName },
+          query: {} as any,
+        });
         (dpls?.items || []).forEach((d: any) => {
-          const lname = String(d?.metadata?.labels?.['app.kubernetes.io/name'] || d?.metadata?.labels?.['app'] || '');
-          if (String(d?.metadata?.name || '').includes(name) || lname === name) {
+          const lname = String(
+            d?.metadata?.labels?.["app.kubernetes.io/name"] ||
+              d?.metadata?.labels?.["app"] ||
+              ""
+          );
+          if (
+            String(d?.metadata?.name || "").includes(name) ||
+            lname === name
+          ) {
             matches[nsName].deployments.push({
               name: d?.metadata?.name,
               labels: d?.metadata?.labels,
@@ -588,9 +987,16 @@ export class SetupClient {
       // Pods by selectors
       for (const sel of trySelectors) {
         try {
-          const pods = await this.client.listCoreV1NamespacedPod({ path: { namespace: nsName }, query: { labelSelector: sel } as any });
+          const pods = await this.client.listCoreV1NamespacedPod({
+            path: { namespace: nsName },
+            query: { labelSelector: sel } as any,
+          });
           (pods?.items || []).forEach((p: any) => {
-            matches[nsName].pods.push({ name: p?.metadata?.name, phase: p?.status?.phase, labels: p?.metadata?.labels });
+            matches[nsName].pods.push({
+              name: p?.metadata?.name,
+              phase: p?.status?.phase,
+              labels: p?.metadata?.labels,
+            });
           });
         } catch {}
       }
@@ -600,35 +1006,71 @@ export class SetupClient {
     let crdsPresent: string[] = [];
     try {
       if (crdHints.length > 0) {
-        const crds = await this.client.listApiextensionsV1CustomResourceDefinition({ query: {} as any });
-        crdsPresent = crdHints.filter((n) => crds?.items?.some((c: any) => c?.metadata?.name === n));
+        const crds =
+          await this.client.listApiextensionsV1CustomResourceDefinition({
+            query: {} as any,
+          });
+        crdsPresent = crdHints.filter((n) =>
+          crds?.items?.some((c: any) => c?.metadata?.name === n)
+        );
       }
     } catch {}
 
     return { detector, matches, crdHints, crdsPresent };
   }
 
-  private getOperatorDetector(name: string): { namespaces?: string[]; labelSelectors?: string[] } {
+  private getOperatorDetector(name: string): {
+    namespaces?: string[];
+    labelSelectors?: string[];
+  } {
     switch (name) {
-      case 'minio-operator':
+      case "minio-operator":
         return {
-          namespaces: ['minio-operator'],
+          namespaces: ["minio-operator"],
           labelSelectors: [
-            'app.kubernetes.io/instance=minio-operator',
-            'app.kubernetes.io/name=operator',
-            'app=minio-operator',
+            "app.kubernetes.io/instance=minio-operator",
+            "app.kubernetes.io/name=operator",
+            "app=minio-operator",
           ],
         };
-      case 'cloudnative-pg':
-        return { namespaces: ['cnpg-system'], labelSelectors: ['app.kubernetes.io/name=cloudnative-pg', 'app=cloudnative-pg'] };
-      case 'cert-manager':
-        return { namespaces: ['cert-manager'], labelSelectors: ['app.kubernetes.io/name=cert-manager', 'app.kubernetes.io/instance=cert-manager', 'app=cert-manager'] };
-      case 'ingress-nginx':
-        return { namespaces: ['ingress-nginx'], labelSelectors: ['app.kubernetes.io/name=ingress-nginx', 'app=ingress-nginx'] };
-      case 'knative-serving':
-        return { namespaces: ['knative-serving', 'kourier-system'], labelSelectors: ['app.kubernetes.io/part-of=knative-serving'] };
-      case 'kube-prometheus-stack':
-        return { namespaces: ['monitoring'], labelSelectors: ['app.kubernetes.io/name=kube-prometheus-stack', 'app.kubernetes.io/instance=kube-prometheus-stack'] };
+      case "cloudnative-pg":
+        return {
+          namespaces: ["cnpg-system"],
+          labelSelectors: [
+            "app.kubernetes.io/name=cloudnative-pg",
+            "app=cloudnative-pg",
+          ],
+        };
+      case "cert-manager":
+        return {
+          namespaces: ["cert-manager"],
+          labelSelectors: [
+            "app.kubernetes.io/name=cert-manager",
+            "app.kubernetes.io/instance=cert-manager",
+            "app=cert-manager",
+          ],
+        };
+      case "ingress-nginx":
+        return {
+          namespaces: ["ingress-nginx"],
+          labelSelectors: [
+            "app.kubernetes.io/name=ingress-nginx",
+            "app=ingress-nginx",
+          ],
+        };
+      case "knative-serving":
+        return {
+          namespaces: ["knative-serving", "kourier-system"],
+          labelSelectors: ["app.kubernetes.io/part-of=knative-serving"],
+        };
+      case "kube-prometheus-stack":
+        return {
+          namespaces: ["monitoring"],
+          labelSelectors: [
+            "app.kubernetes.io/name=kube-prometheus-stack",
+            "app.kubernetes.io/instance=kube-prometheus-stack",
+          ],
+        };
       default:
         return {};
     }
@@ -636,27 +1078,21 @@ export class SetupClient {
 
   private getOperatorCRDHints(name: string): string[] {
     switch (name) {
-      case 'minio-operator':
-        return [
-          'tenants.minio.min.io',
-          'users.minio.min.io',
-        ];
-      case 'cloudnative-pg':
-        return [
-          'clusters.postgresql.cnpg.io',
-          'backups.postgresql.cnpg.io',
-        ];
-      case 'cert-manager':
-        return ['certificates.cert-manager.io', 'issuers.cert-manager.io'];
-      case 'knative-serving':
-        return ['services.serving.knative.dev'];
+      case "minio-operator":
+        return ["tenants.minio.min.io", "users.minio.min.io"];
+      case "cloudnative-pg":
+        return ["clusters.postgresql.cnpg.io", "backups.postgresql.cnpg.io"];
+      case "cert-manager":
+        return ["certificates.cert-manager.io", "issuers.cert-manager.io"];
+      case "knative-serving":
+        return ["services.serving.knative.dev"];
       default:
         return [];
     }
   }
 
   private formatAge(timestamp?: string): string {
-    if (!timestamp) return 'unknown';
+    if (!timestamp) return "unknown";
     const now = Date.now();
     const created = new Date(timestamp).getTime();
     const diff = Math.max(0, now - created);
