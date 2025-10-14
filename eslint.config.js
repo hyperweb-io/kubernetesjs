@@ -6,7 +6,7 @@ const simpleImportSort = require("eslint-plugin-simple-import-sort");
 const unusedImports = require("eslint-plugin-unused-imports");
 
 module.exports = [
-  { ignores: ["**/dist/**", "**/node_modules/**"] },
+  { ignores: ["**/dist/**", "**/node_modules/**", "**/.next/**"] },
   js.configs.recommended,
   {
     languageOptions: {
