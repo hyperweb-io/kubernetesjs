@@ -23,3 +23,7 @@ Supported operators
 Notes
 - Only generated artifacts are included in the published package. The raw `operators/` YAML is local-only and gitignored.
 - To bump versions, update the sources in `scripts/pull-manifests.ts`, run `pnpm pull` (or `pull:all`) which writes to `operators/`, then run `pnpm codegen` to refresh `src/generated/*`.
+
+## Credits
+
+🛠 Built by [Interweb](https://interweb.co) — if you like our tools, please checkout and contribute [https://interweb.co](https://interweb.co)

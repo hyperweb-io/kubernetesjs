@@ -76,7 +76,7 @@ Contributions are welcome! Feel free to open issues or submit pull requests on t
 
 ## Credits
 
-🛠 Built by Hyperweb — if you like our tools, please check out and contribute to [our GitHub ⚛️](https://github.com/hyperweb-io).
+🛠 Built by [Interweb](https://interweb.co) — if you like our tools, please checkout and contribute [https://interweb.co](https://interweb.co)
 
 ## Disclaimer
 

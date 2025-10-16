@@ -47,3 +47,7 @@ These manifests assume the corresponding operators (CloudNativePG and MinIO) are
 - `make setup` delegates to `packages/client/scripts/setup-operators.ts`, which ensures the CloudNativePG operator is applied via manifests and installs the MinIO operator via Helm.
 - Secrets included in the manifests (`postgres*` and `interweb-minio-creds`) contain development defaults—replace them or source from a secret manager for production environments.
 - The legacy Helm chart files remain for reference but are no longer used in this workflow.
+
+## Credits
+
+🛠 Built by [Interweb](https://interweb.co) — if you like our tools, please checkout and contribute [https://interweb.co](https://interweb.co)
