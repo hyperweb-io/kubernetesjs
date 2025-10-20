@@ -1,8 +1,8 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import * as yaml from 'js-yaml';
-import { InterwebClient as InterwebKubernetesClient } from '@interweb/interwebjs';
-import { SetupClient } from '../src/setup';
+import * as fs from "fs";
+import * as path from "path";
+import * as yaml from "js-yaml";
+import { InterwebClient as InterwebKubernetesClient } from "@interweb/interwebjs";
+import { SetupClient } from "../../src/setup";
 
 // Assumes a local cluster is reachable via kubectl proxy.
 // Start proxy before running: pnpm --filter @interweb/client proxy
@@ -10,12 +10,12 @@ import { SetupClient } from '../src/setup';
 
 jest.setTimeout(120_000);
 
-const K8S_API = process.env.K8S_API || 'http://127.0.0.1:8001';
+const K8S_API = process.env.K8S_API || "http://127.0.0.1:8001";
 const KEEP = process.env.KEEP || process.env.KEEP_APPLY_RESOURCES;
-const NS = 'interweb-apply-test';
-const CM_NAME = 'apply-test-config';
+const NS = "interweb-apply-test";
+const CM_NAME = "apply-test-config";
 
-describe('apply: custom manifest create/replace', () => {
+describe("apply: custom manifest create/replace", () => {
   const api = new InterwebKubernetesClient({ restEndpoint: K8S_API } as any);
   const setup = new SetupClient(api as any);
 
@@ -25,7 +25,7 @@ describe('apply: custom manifest create/replace', () => {
       // give the API a moment to process delete
       await new Promise((r) => setTimeout(r, 1500));
     } catch (err: any) {
-      const msg = String(err?.message || '');
+      const msg = String(err?.message || "");
       if (!/404/.test(msg)) throw err;
     }
   }
@@ -39,22 +39,32 @@ describe('apply: custom manifest create/replace', () => {
     if (!KEEP) await ensureNamespaceAbsent(NS);
   });
 
-  it('applies Namespace and ConfigMap via SetupClient.applyManifest', async () => {
+  it("applies Namespace and ConfigMap via SetupClient.applyManifest", async () => {
     const connected = await setup.checkConnection();
     if (!connected) {
-      console.warn('Kubernetes cluster not reachable; skipping test.');
+      console.warn("Kubernetes cluster not reachable; skipping test.");
       return;
     }
     // Load fixture YAML (multi-doc)
-    const file = path.join(__dirname, '..', '__fixtures__', 'manifests', 'apply.configmap.yaml');
-    const docs = yaml.loadAll(fs.readFileSync(file, 'utf8')) as any[];
+    const file = path.join(
+      __dirname,
+      "..",
+      "..",
+      "__fixtures__",
+      "manifests",
+      "apply.configmap.yaml"
+    );
+    const docs = yaml.loadAll(fs.readFileSync(file, "utf8")) as any[];
 
     for (const doc of docs) {
       await setup.applyManifest(doc as any);
     }
 
     // Verify namespace exists
-    const ns = await api.readCoreV1Namespace({ path: { name: NS }, query: {} as any });
+    const ns = await api.readCoreV1Namespace({
+      path: { name: NS },
+      query: {} as any,
+    });
     expect(ns?.metadata?.name).toBe(NS);
 
     // Verify configmap exists

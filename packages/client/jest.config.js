@@ -1,15 +1,32 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-
-  // Match both __tests__ and colocated test files
-  testMatch: ['**/?(*.)+(test|spec).{ts,tsx,js,jsx}'],
-    
-  // Ignore build artifacts and type declarations
-  testPathIgnorePatterns: ['/dist/', '\\.d\\.ts$'],
-  modulePathIgnorePatterns: ['<rootDir>/dist/'],
-  watchPathIgnorePatterns: ['/dist/'],
-  
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  projects: [
+    {
+      displayName: 'unit',
+      preset: 'ts-jest',
+      testEnvironment: 'node',
+      testMatch: ['<rootDir>/__tests__/unit/**/*.test.[tj]s?(x)', '<rootDir>/__tests__/unit/**/*.spec.[tj]s?(x)'],
+      testPathIgnorePatterns: ['/dist/'],
+      modulePathIgnorePatterns: ['<rootDir>/dist/'],
+      watchPathIgnorePatterns: ['/dist/'],
+    },
+    {
+      displayName: 'integration',
+      preset: 'ts-jest',
+      testEnvironment: 'node',
+      testMatch: ['<rootDir>/__tests__/integration/**/*.test.[tj]s?(x)', '<rootDir>/__tests__/integration/**/*.spec.[tj]s?(x)'],
+      testPathIgnorePatterns: ['/dist/'],
+      modulePathIgnorePatterns: ['<rootDir>/dist/'],
+      watchPathIgnorePatterns: ['/dist/'],
+    },
+    {
+      displayName: 'e2e',
+      preset: 'ts-jest',
+      testEnvironment: 'node',
+      testMatch: ['<rootDir>/__tests__/e2e/**/*.test.[tj]s?(x)', '<rootDir>/__tests__/e2e/**/*.spec.[tj]s?(x)'],
+      testPathIgnorePatterns: ['/dist/'],
+      modulePathIgnorePatterns: ['<rootDir>/dist/'],
+      watchPathIgnorePatterns: ['/dist/'],
+    },
+  ],
 };

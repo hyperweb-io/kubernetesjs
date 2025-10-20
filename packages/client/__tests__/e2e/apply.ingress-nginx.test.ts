@@ -1,13 +1,13 @@
-import { InterwebClient as InterwebKubernetesClient } from '@interweb/interwebjs';
-import { getOperatorResources } from '@interweb/manifests';
-import { SetupClient } from '../src/setup';
+import { InterwebClient as InterwebKubernetesClient } from "@interweb/interwebjs";
+import { getOperatorResources } from "@interweb/manifests";
+import { SetupClient } from "../../src/setup";
 
 jest.setTimeout(10 * 60 * 1000); // up to 10 minutes for full operator
 
-const K8S_API = process.env.K8S_API || 'http://127.0.0.1:8001';
-const nsName = 'ingress-nginx';
+const K8S_API = process.env.K8S_API || "http://127.0.0.1:8001";
+const nsName = "ingress-nginx";
 
-describe('FULL APPLY: ingress-nginx operator', () => {
+describe("FULL APPLY: ingress-nginx operator", () => {
   const api = new InterwebKubernetesClient({ restEndpoint: K8S_API } as any);
   const setup = new SetupClient(api as any);
 
@@ -16,7 +16,7 @@ describe('FULL APPLY: ingress-nginx operator', () => {
       await api.deleteCoreV1Namespace({ path: { name }, query: {} as any });
       await new Promise((r) => setTimeout(r, 2000));
     } catch (err: any) {
-      const msg = String(err?.message || '');
+      const msg = String(err?.message || "");
       if (!/404/.test(msg)) throw err;
     }
   }
@@ -29,17 +29,20 @@ describe('FULL APPLY: ingress-nginx operator', () => {
   //   await ensureNamespaceAbsent(nsName);
   // });
 
-  it('applies all ingress-nginx manifests', async () => {
+  it("applies all ingress-nginx manifests", async () => {
     const connected = await setup.checkConnection();
     if (!connected) {
-      console.warn('Kubernetes cluster not reachable; skipping test.');
+      console.warn("Kubernetes cluster not reachable; skipping test.");
       return;
     }
 
-    const manifests = getOperatorResources('ingress-nginx');
+    const manifests = getOperatorResources("ingress-nginx");
     await setup.applyManifests(manifests);
 
-    const ns = await api.readCoreV1Namespace({ path: { name: nsName }, query: {} as any });
+    const ns = await api.readCoreV1Namespace({
+      path: { name: nsName },
+      query: {} as any,
+    });
     expect(ns?.metadata?.name).toBe(nsName);
   });
 });
