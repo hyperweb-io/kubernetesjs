@@ -3,22 +3,31 @@ import { Client, ConfigLoader } from '@interweb/client';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import * as path from 'path';
+import { 
+  getApiEndpoint, 
+  getOperatorNamespaces, 
+  waitForNamespacesDeletion, 
+  deleteNamespace,
+  checkNamespaceStatus 
+} from '../utils/k8s-utils';
 
 export function createSetupCommand(): Command {
   const command = new Command('setup');
   
   command
     .description('Set up a Kubernetes cluster with interweb operators')
-    .option('-c, --config <path>', 'Path to cluster setup configuration file', 'interweb.setup.yaml')
+    .option('-c, --config <path>', 'Path to cluster setup configuration file', '__fixtures__/config/setup.config.yaml')
     .option('-n, --namespace <namespace>', 'Kubernetes namespace to use')
     .option('--kubeconfig <path>', 'Path to kubeconfig file')
     .option('--context <context>', 'Kubernetes context to use')
     .option('-v, --verbose', 'Enable verbose logging')
     .option('--generate-config', 'Generate a sample configuration file')
+    .option('-f, --force', 'Skip confirmation prompts')
     .action(async (options) => {
       try {
         if (options.generateConfig) {
           await generateConfig(options);
+          process.exit(0);
           return;
         }
 
@@ -78,20 +87,25 @@ async function setupCluster(options: any): Promise<void> {
     console.log(`  Monitoring: ${chalk.green('enabled')}`);
   }
 
-  console.log(`  Domain: ${config.spec.networking.domain}`);
-  console.log(`  Ingress Class: ${config.spec.networking.ingressClass}\n`);
+  if (config.spec.networking) {
+    console.log(`  Domain: ${config.spec.networking.domain || 'not specified'}`);
+    console.log(`  Ingress Class: ${config.spec.networking.ingressClass || 'not specified'}`);
+  }
 
   // Confirm before proceeding
-  const { shouldProceed } = await inquirer.prompt([{
-    type: 'confirm',
-    name: 'shouldProceed',
-    message: 'Proceed with cluster setup?',
-    default: true
-  }]);
+  if (!options.force) {
+    const { shouldProceed } = await inquirer.prompt([{
+      type: 'confirm',
+      name: 'shouldProceed',
+      message: 'Proceed with cluster setup?',
+      default: true
+    }]);
 
-  if (!shouldProceed) {
-    console.log(chalk.yellow('Setup cancelled'));
-    return;
+    if (!shouldProceed) {
+      console.log(chalk.yellow('Setup cancelled'));
+      process.exit(0);
+      return;
+    }
   }
 
   // Create client and setup cluster
@@ -99,8 +113,17 @@ async function setupCluster(options: any): Promise<void> {
     namespace: options.namespace || config.metadata.namespace,
     kubeconfig: options.kubeconfig,
     context: options.context,
-    verbose: options.verbose
+    verbose: options.verbose,
+    restEndpoint: getApiEndpoint(options.restEndpoint)
   });
+
+  // Check for and wait for any terminating namespaces to be fully deleted
+  console.log(chalk.blue('\nChecking for terminating namespaces...'));
+  await waitForTerminatingNamespaces(client, config, options.restEndpoint);
+
+  // Force delete any existing operator namespaces to avoid conflicts
+  console.log(chalk.blue('\nCleaning up existing operator namespaces...'));
+  await forceDeleteOperatorNamespaces(config, options.restEndpoint);
 
   console.log(chalk.blue('\nSetting up cluster...'));
   await client.setupCluster(options.config);
@@ -109,10 +132,9 @@ async function setupCluster(options: any): Promise<void> {
   await client.waitForCluster(options.config);
 
   console.log(chalk.green('\n🎉 Cluster setup completed successfully!'));
-  console.log(chalk.blue('\nNext steps:'));
-  console.log('  1. Deploy applications using: interweb deploy -c your-app.yaml');
-  console.log('  2. Check cluster status: interweb status -c ' + options.config);
-  console.log('  3. View resources: interweb list');
+  
+  // Explicitly exit to ensure the process terminates properly
+  process.exit(0);
 }
 
 async function generateConfig(options: any): Promise<void> {
@@ -211,4 +233,86 @@ async function generateConfig(options: any): Promise<void> {
   console.log(chalk.green(`✓ Configuration saved to ${outputPath}`));
   console.log(chalk.blue('\nTo set up the cluster, run:'));
   console.log(`  interweb setup -c ${outputPath}`);
+}
+
+async function forceDeleteOperatorNamespaces(config: any, restEndpoint?: string): Promise<void> {
+  const operatorNamespaces = getOperatorNamespaces(config);
+  const apiEndpoint = getApiEndpoint(restEndpoint);
+
+  for (const namespace of operatorNamespaces) {
+    try {
+      // Check if namespace exists first
+      const status = await checkNamespaceStatus(namespace, apiEndpoint);
+      
+      if (!status.exists) {
+        // Namespace doesn't exist, skip
+        continue;
+      }
+      
+      if (status.phase === 'Terminating') {
+        console.log(chalk.yellow(`⏳ Namespace ${namespace} is already terminating, waiting...`));
+        continue;
+      }
+      
+      // Delete the namespace
+      console.log(chalk.yellow(`Deleting existing namespace: ${namespace}`));
+      await deleteNamespace(namespace, apiEndpoint);
+      console.log(chalk.green(`✓ Namespace ${namespace} deletion initiated`));
+    } catch (error: any) {
+      console.log(chalk.yellow(`Warning: Error checking/deleting namespace ${namespace}: ${error.message}`));
+    }
+  }
+
+  // Wait for all namespaces to be fully deleted
+  console.log(chalk.blue('Waiting for namespace cleanup to complete...'));
+  await waitForNamespacesDeletion(operatorNamespaces, apiEndpoint);
+}
+
+
+async function waitForTerminatingNamespaces(client: Client, config: any, restEndpoint?: string): Promise<void> {
+  const operatorNamespaces = getOperatorNamespaces(config);
+  const apiEndpoint = getApiEndpoint(restEndpoint);
+
+  for (const namespace of operatorNamespaces) {
+    let attempts = 0;
+    const maxAttempts = 60; // 5 minutes with 5-second intervals
+    
+    while (attempts < maxAttempts) {
+      try {
+        // Use fetch to check namespace status via Kubernetes API
+        const response = await fetch(`${apiEndpoint}/api/v1/namespaces/${namespace}`);
+        
+        if (response.status === 404) {
+          // Namespace doesn't exist, which is what we want
+          break;
+        }
+        
+        if (response.ok) {
+          const ns = await response.json();
+          
+          if (ns.status?.phase === 'Terminating') {
+            console.log(chalk.yellow(`⏳ Waiting for namespace ${namespace} to finish terminating... (${attempts + 1}/${maxAttempts})`));
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+            attempts++;
+            continue;
+          }
+          
+          // Namespace exists and is not terminating, break out of loop
+          break;
+        }
+        
+        // Other HTTP errors, log and continue
+        console.log(chalk.yellow(`Warning: Error checking namespace ${namespace}: HTTP ${response.status}`));
+        break;
+      } catch (error: any) {
+        // Network or other errors, log and continue
+        console.log(chalk.yellow(`Warning: Error checking namespace ${namespace}: ${error.message}`));
+        break;
+      }
+    }
+    
+    if (attempts >= maxAttempts) {
+      throw new Error(`Timeout waiting for namespace ${namespace} to finish terminating. Please manually clean up the namespace and try again.`);
+    }
+  }
 }

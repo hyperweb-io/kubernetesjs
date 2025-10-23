@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { Client, ConfigLoader } from '@interweb/client';
 import chalk from 'chalk';
+import { getApiEndpoint } from '../utils/k8s-utils';
 
 export function createStatusCommand(): Command {
   const command = new Command('status');
@@ -33,14 +34,14 @@ async function checkStatus(options: any): Promise<void> {
 
   if (!configPath) {
     // Try to auto-detect config file
-    if (ConfigLoader.configExists('interweb.setup.yaml')) {
-      configPath = 'interweb.setup.yaml';
+    if (ConfigLoader.configExists('__fixtures__/config/setup.config.yaml')) {
+      configPath = '__fixtures__/config/setup.config.yaml';
       configType = 'cluster';
-    } else if (ConfigLoader.configExists('interweb.deploy.yaml')) {
-      configPath = 'interweb.deploy.yaml';
+    } else if (ConfigLoader.configExists('__fixtures__/config/deploy.config.yaml')) {
+      configPath = '__fixtures__/config/deploy.config.yaml';
       configType = 'application';
     } else {
-      throw new Error('No configuration file found. Please specify -c <config-file> or ensure interweb.setup.yaml or interweb.deploy.yaml exists.');
+      throw new Error('No configuration file found. Please specify -c <config-file> or ensure __fixtures__/config/setup.config.yaml or interweb.setup.yaml exists.');
     }
   }
 
@@ -74,7 +75,8 @@ async function checkStatus(options: any): Promise<void> {
     namespace: options.namespace,
     kubeconfig: options.kubeconfig,
     context: options.context,
-    verbose: options.verbose
+    verbose: options.verbose,
+    restEndpoint: getApiEndpoint(options.restEndpoint)
   });
 
   if (options.watch) {
@@ -134,6 +136,9 @@ async function checkStatus(options: any): Promise<void> {
       } else if (status.phase === 'installing') {
         console.log(chalk.yellow('\n⏳ Cluster setup is in progress...'));
         console.log(chalk.blue('Tip: Use --watch to monitor progress in real-time'));
+      } else if (status.phase === 'pending') {
+        console.log(chalk.gray('\n⭕ Cluster operators are not installed'));
+        console.log(chalk.blue('Run: interweb setup -c <config-file> to install operators'));
       } else if (status.phase === 'failed') {
         console.log(chalk.red('\n❌ Cluster setup has failed'));
         console.log(chalk.blue('Check the conditions above for more details'));

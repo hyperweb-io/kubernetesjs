@@ -165,30 +165,65 @@ export class Client {
    */
   async waitForCluster(
     configPath: string,
-    timeoutMs: number = 600000
+    timeoutMs: number = 600000,
+    pollMs: number = 5000
   ): Promise<void> {
     const startTime = Date.now();
     const config = ConfigLoader.loadClusterSetup(configPath);
+    const maxRetries = 3;
+    let consecutiveFailures = 0;
 
     this.log(`Waiting for cluster ${config.metadata.name} to be ready...`);
 
     while (Date.now() - startTime < timeoutMs) {
-      const status = await this.setupClient.getClusterSetupStatus(config);
+      try {
+        const status = await this.setupClient.getClusterSetupStatus(config);
+        consecutiveFailures = 0;
 
-      if (status.phase === "ready") {
-        this.log(chalk.green("✓ Cluster is ready!"));
-        return;
+        if (status.phase === "ready") {
+          this.log(chalk.green("✓ Cluster is ready!"));
+          return;
+        }
+
+        if (status.phase === "failed") {
+          throw new Error(`Cluster setup failed: ${status.message}`);
+        }
+
+        this.log(`Cluster status: ${status.phase} - ${status.message}`);
+        
+        // Check if we're approaching timeout
+        const elapsed = Date.now() - startTime;
+        const remaining = timeoutMs - elapsed;
+        if (remaining < 60000 && remaining > 55000) {
+          this.log(chalk.yellow(`⚠ Warning: Only ${Math.round(remaining / 1000)}s remaining before timeout`));
+        }
+        
+        await this.sleep(pollMs);
+      } catch (error) {
+        consecutiveFailures++;
+        this.log(chalk.yellow(`Warning: Error checking cluster status (attempt ${consecutiveFailures}/${maxRetries}): ${error}`));
+        
+        if (consecutiveFailures >= maxRetries) {
+          throw new Error(`Failed to check cluster status after ${maxRetries} consecutive attempts. Last error: ${error}`);
+        }
+        
+        await this.sleep(pollMs * 2);
       }
-
-      if (status.phase === "failed") {
-        throw new Error(`Cluster setup failed: ${status.message}`);
-      }
-
-      this.log(`Cluster status: ${status.phase} - ${status.message}`);
-      await this.sleep(5000); // Wait 5 seconds before checking again
     }
 
-    throw new Error("Timeout waiting for cluster to be ready");
+    // If we reach here, we've timed out
+    try {
+      const finalStatus = await this.setupClient.getClusterSetupStatus(config);
+      throw new Error(
+        `Cluster setup timed out after ${timeoutMs / 1000} seconds. Final status: ${finalStatus.phase} - ${finalStatus.message}. ` +
+        `Consider running 'teardown' and trying again, or check your cluster resources.`
+      );
+    } catch (statusError) {
+      throw new Error(
+        `Cluster setup timed out after ${timeoutMs / 1000} seconds and failed to get final status. ` +
+        `Consider running 'teardown' and trying again, or check your cluster resources.`
+      );
+    }
   }
 
   /**
