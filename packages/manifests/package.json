@@ -18,6 +18,7 @@
     "pull:all": "ts-node scripts/pull-manifests.ts --all",
     "test": "jest",
     "test:watch": "jest --watch",
+    "tests:unit": "jest --selectProjects unit",
     "codegen": "ts-node scripts/codegen-operators.ts"
   },
   "dependencies": {

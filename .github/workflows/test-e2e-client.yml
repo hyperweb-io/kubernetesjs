@@ -2,19 +2,19 @@ name: Test Client E2E (Per Operator)
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'packages/client/**'
-      - 'packages/interwebjs/**'
-      - 'packages/manifests/**'
-      - '.github/workflows/test-e2e-client.yml'
+      - "packages/client/**"
+      - "packages/interwebjs/**"
+      - "packages/manifests/**"
+      - ".github/workflows/test-e2e-client.yml"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'packages/client/**'
-      - 'packages/interwebjs/**'
-      - 'packages/manifests/**'
-      - '.github/workflows/test-e2e-client.yml'
+      - "packages/client/**"
+      - "packages/interwebjs/**"
+      - "packages/manifests/**"
+      - ".github/workflows/test-e2e-client.yml"
   workflow_dispatch:
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        operator: 
+        operator:
           - ingress-nginx
           - cert-manager
           - knative-serving
@@ -56,8 +56,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'pnpm'
+          node-version: "20.x"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -81,7 +81,7 @@ jobs:
       - name: Run e2e per-operator test
         run: |
           cd packages/client
-          pnpm test -- __tests__/e2e.setup.operator.test.ts --verbose
+          pnpm run tests:e2e -- --runInBand --testPathPattern e2e.setup.operator.test.ts
         env:
           K8S_API: http://127.0.0.1:8001
           OPERATOR: ${{ matrix.operator }}
@@ -122,8 +122,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'pnpm'
+          node-version: "20.x"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -147,7 +147,7 @@ jobs:
       - name: Run Postgres E2E
         run: |
           cd packages/client
-          pnpm test -- __tests__/e2e.postgres.test.ts --verbose
+          pnpm run tests:e2e -- --runInBand --testPathPattern e2e.postgres.test.ts
         env:
           K8S_API: http://127.0.0.1:8001
           NODE_ENV: test
