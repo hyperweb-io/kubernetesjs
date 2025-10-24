@@ -49,12 +49,15 @@ export function CreateDatabasesDialog({ open, onOpenChange, onSubmit }: CreateDa
       // Basic validation
       if (!appUsername.trim()) {
         setError('App username is required')
+        return
       }
       if (!appPassword.trim()) {
         setError('App password is required')
+        return
       }
       if (!superuserPassword.trim()) {
         setError('Superuser password is required')
+        return
       }
       
       await onSubmit({
