@@ -22,11 +22,11 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@interweb/client": ["../client/dist/index.d.ts"],
+
       "@interweb/client/*": ["../client/dist/*"],
-      "@interweb/interwebjs": ["../interwebjs/dist/index.d.ts"],
+
       "@interweb/interwebjs/*": ["../interwebjs/dist/*"],
-      "@interweb/manifests": ["../manifests/dist/index.d.ts"],
+
       "@interweb/manifests/*": ["../manifests/dist/*"]
     }
   },
