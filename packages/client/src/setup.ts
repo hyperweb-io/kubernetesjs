@@ -167,13 +167,22 @@ export class SetupClient {
       })();
 
       // Add overall timeout for the entire installation process
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => {
+      // Use managed timeout that is cleared when install completes to avoid lingering timers/open handles
+      return new Promise<void>((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
           reject(new Error(`Timeout: Operator ${operator.name} installation took longer than 5 minutes`));
         }, 300_000); // 5 minutes total timeout per operator
-      });
 
-      return Promise.race([installPromise, timeoutPromise]);
+        installPromise
+          .then(() => {
+            clearTimeout(timeoutId);
+            resolve();
+          })
+          .catch((err) => {
+            clearTimeout(timeoutId);
+            reject(err);
+          });
+      });
     });
 
     try {
