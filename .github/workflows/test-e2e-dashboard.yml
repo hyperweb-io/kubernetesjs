@@ -1,0 +1,322 @@
+name: Dashboard E2E Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/dashboard/**"
+      - ".github/workflows/test-e2e-dashboard.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "packages/dashboard/**"
+      - ".github/workflows/test-e2e-dashboard.yml"
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of tests to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - workflow
+          - component
+          - accessibility
+  workflow_call:
+    inputs:
+      test_type:
+        description: 'Type of tests to run'
+        required: false
+        default: 'all'
+        type: string
+
+jobs:
+  setup-cluster:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      cluster-name: ${{ steps.setup.outputs.cluster_name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.31.3
+
+      - name: Setup Kind cluster
+        id: setup
+        uses: helm/kind-action@v1.12.0
+        with:
+          cluster_name: dashboard-e2e-${{ github.run_id }}
+          kubectl_version: v1.31.3
+          wait: 300s
+
+      - name: Verify cluster connection
+        run: |
+          kubectl cluster-info
+          kubectl get nodes -o wide
+          kubectl get namespaces
+
+      - name: Setup cluster context
+        run: |
+          echo "CLUSTER_NAME=dashboard-e2e-${{ github.run_id }}" >> $GITHUB_ENV
+          kubectl config current-context
+
+  e2e-workflow-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: setup-cluster
+    if: ${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'workflow' || github.event.inputs.test_type == '' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        test-suite:
+          - name: "Operator Database Workflow"
+            test-pattern: "workflow-operator-database-focused"
+          - name: "Deployment Lifecycle Workflow"
+            test-pattern: "workflow-deployment-lifecycle"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.31.3
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.12.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build dashboard
+        run: |
+          cd packages/dashboard
+          pnpm build
+
+      - name: Install Playwright browsers
+        run: |
+          cd packages/dashboard
+          npx playwright install --with-deps
+
+      - name: Start kubectl proxy
+        run: |
+          kubectl proxy --port=8001 --accept-hosts='^.*$' --address='0.0.0.0' &
+          echo "PROXY_PID=$!" >> $GITHUB_ENV
+          sleep 5
+          curl -f http://127.0.0.1:8001/api || (echo 'proxy failed' && exit 1)
+
+      - name: Run workflow tests
+        run: |
+          cd packages/dashboard
+          pnpm test:e2e -- --grep "${{ matrix.test-suite.name }}"
+        env:
+          K8S_API: http://127.0.0.1:8001
+          NODE_ENV: test
+          CI: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.test-suite.name }}
+          path: packages/dashboard/test-results/
+          retention-days: 7
+
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ matrix.test-suite.name }}
+          path: packages/dashboard/test-results/screenshots/
+          retention-days: 7
+
+      - name: Cluster state after workflow tests
+        if: always()
+        run: |
+          echo '=== Namespaces ==='
+          kubectl get namespaces
+          echo '=== Deployments ==='
+          kubectl get deployments -A
+          echo '=== Pods ==='
+          kubectl get pods -A -o wide
+          echo '=== Services ==='
+          kubectl get services -A
+
+  e2e-component-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: setup-cluster
+    if: ${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'component' || github.event.inputs.test_type == '' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        test-suite:
+          - name: "Deployments"
+            test-pattern: "deployments.spec"
+          - name: "Operators"
+            test-pattern: "operators.spec"
+          - name: "Databases"
+            test-pattern: "databases.spec"
+          - name: "Namespaces"
+            test-pattern: "namespaces.spec"
+          - name: "Admin"
+            test-pattern: "admin.spec"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.31.3
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.12.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build dashboard
+        run: |
+          cd packages/dashboard
+          pnpm build
+
+      - name: Install Playwright browsers
+        run: |
+          cd packages/dashboard
+          npx playwright install --with-deps
+
+      - name: Start kubectl proxy
+        run: |
+          kubectl proxy --port=8001 --accept-hosts='^.*$' --address='0.0.0.0' &
+          echo "PROXY_PID=$!" >> $GITHUB_ENV
+          sleep 5
+          curl -f http://127.0.0.1:8001/api || (echo 'proxy failed' && exit 1)
+
+      - name: Run component tests
+        run: |
+          cd packages/dashboard
+          pnpm test:e2e -- --grep "${{ matrix.test-suite.name }}"
+        env:
+          K8S_API: http://127.0.0.1:8001
+          NODE_ENV: test
+          CI: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: component-test-results-${{ matrix.test-suite.name }}
+          path: packages/dashboard/test-results/
+          retention-days: 7
+
+  e2e-accessibility-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: setup-cluster
+    if: ${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'accessibility' || github.event.inputs.test_type == '' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.31.3
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.12.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build dashboard
+        run: |
+          cd packages/dashboard
+          pnpm build
+
+      - name: Install Playwright browsers
+        run: |
+          cd packages/dashboard
+          npx playwright install --with-deps
+
+      - name: Start kubectl proxy
+        run: |
+          kubectl proxy --port=8001 --accept-hosts='^.*$' --address='0.0.0.0' &
+          echo "PROXY_PID=$!" >> $GITHUB_ENV
+          sleep 5
+          curl -f http://127.0.0.1:8001/api || (echo 'proxy failed' && exit 1)
+
+      - name: Run accessibility tests
+        run: |
+          cd packages/dashboard
+          pnpm test:e2e -- --grep "Accessibility"
+        env:
+          K8S_API: http://127.0.0.1:8001
+          NODE_ENV: test
+          CI: true
+
+      - name: Upload accessibility test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-test-results
+          path: packages/dashboard/test-results/
+          retention-days: 7
+
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [setup-cluster, e2e-workflow-tests, e2e-component-tests, e2e-accessibility-tests]
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.31.3
+
+      - name: Clean up Kind cluster
+        run: |
+          kind delete cluster --name dashboard-e2e-${{ github.run_id }} || true
+
+      - name: Final cluster state
+        if: always()
+        run: |
+          echo "=== Final cleanup ==="
+          kind get clusters || echo "No kind clusters found"
