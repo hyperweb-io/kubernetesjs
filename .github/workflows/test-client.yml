@@ -82,16 +82,15 @@ jobs:
       env:
         K8S_API: http://127.0.0.1:8001
 
-    - name: Run specific manifest application tests
+    - name: Run unit tests
       run: |
         cd packages/client
-        pnpm test -- \
-          __tests__/apply.manifests.test.ts \
-          __tests__/config-loader.test.ts \
-          __tests__/apply.test.ts \
-          __tests__/apply.cert-manager.test.ts \
-          __tests__/apply.ingress-nginx.full.test.ts \
-          --verbose
+        pnpm run tests:unit
+
+    - name: Run integration tests
+      run: |
+        cd packages/client
+        pnpm run tests:integration
       env:
         K8S_API: http://127.0.0.1:8001
         NODE_ENV: test

@@ -1,29 +1,35 @@
-import fs from 'fs';
-import path from 'path';
-import * as yaml from 'js-yaml';
+import fs from "fs";
+import path from "path";
+import * as yaml from "js-yaml";
 
 import {
   OPERATOR_OBJECTS,
   OPERATOR_IDS,
   OPERATOR_VERSIONS,
   OPERATOR_MAP,
-} from '../src/generated';
+} from "../../src/generated";
 
-type K8s = { apiVersion?: string; kind?: string; metadata?: { name?: string; namespace?: string } };
+type K8s = {
+  apiVersion?: string;
+  kind?: string;
+  metadata?: { name?: string; namespace?: string };
+};
 
 function loadYamlDocsIfExists(file: string): K8s[] | undefined {
   if (!fs.existsSync(file)) return undefined;
   try {
-    const raw = fs.readFileSync(file, 'utf8');
-    const docs = (yaml.loadAll(raw) as K8s[]).filter((d) => d && typeof d === 'object');
+    const raw = fs.readFileSync(file, "utf8");
+    const docs = (yaml.loadAll(raw) as K8s[]).filter(
+      (d) => d && typeof d === "object"
+    );
     return docs;
   } catch {
     return undefined;
   }
 }
 
-describe('@interweb/manifests generated artifacts', () => {
-  it('exports consistent IDs and map shape', () => {
+describe("@interweb/manifests generated artifacts", () => {
+  it("exports consistent IDs and map shape", () => {
     const idsFromObjects = Object.keys(OPERATOR_OBJECTS).sort();
     const idsFromIds = (OPERATOR_IDS || []).slice().sort();
     expect(idsFromIds).toEqual(idsFromObjects);
@@ -31,7 +37,9 @@ describe('@interweb/manifests generated artifacts', () => {
     for (const id of idsFromObjects) {
       const mod = (OPERATOR_OBJECTS as any)[id];
       expect(mod).toBeDefined();
-      expect(Array.isArray(mod.resources) || mod.resources === undefined).toBe(true);
+      expect(Array.isArray(mod.resources) || mod.resources === undefined).toBe(
+        true
+      );
       const mapEntry = (OPERATOR_MAP as any)[id];
       expect(mapEntry).toBeDefined();
       if (mod.resources) {
@@ -43,7 +51,7 @@ describe('@interweb/manifests generated artifacts', () => {
     }
   });
 
-  it('generated.resources items have apiVersion/kind/metadata.name', () => {
+  it("generated.resources items have apiVersion/kind/metadata.name", () => {
     for (const id of Object.keys(OPERATOR_OBJECTS)) {
       const mod = (OPERATOR_OBJECTS as any)[id];
       if (!mod.resources) continue;
@@ -55,12 +63,12 @@ describe('@interweb/manifests generated artifacts', () => {
     }
   });
 
-  it('parity with YAML (if operators/ is present)', () => {
-    const operatorsDir = path.resolve(__dirname, '..', 'operators');
+  it("parity with YAML (if operators/ is present)", () => {
+    const operatorsDir = path.resolve(__dirname, "..", "..", "operators");
     const hasOperators = fs.existsSync(operatorsDir);
     if (!hasOperators) {
-      console.info('operators/ not found; YAML parity checks failed.');
-      throw new Error('operators/ not found');
+      console.info("operators/ not found; YAML parity checks failed.");
+      throw new Error("operators/ not found");
     }
 
     for (const id of Object.keys(OPERATOR_OBJECTS)) {
@@ -68,18 +76,18 @@ describe('@interweb/manifests generated artifacts', () => {
       const docs = loadYamlDocsIfExists(unversioned);
       if (!docs) continue; // skip if not available
       const mod = (OPERATOR_OBJECTS as any)[id];
-      const genCount = (mod.resources ? mod.resources.length : 0);
+      const genCount = mod.resources ? mod.resources.length : 0;
       expect(genCount).toBeGreaterThan(0);
       expect(genCount).toBe(docs.length);
     }
   });
 
-  it('each YAML object exists in generated.resources by (apiVersion, kind, metadata.name)', () => {
-    const operatorsDir = path.resolve(__dirname, '..', 'operators');
+  it("each YAML object exists in generated.resources by (apiVersion, kind, metadata.name)", () => {
+    const operatorsDir = path.resolve(__dirname, "..", "..", "operators");
     const hasOperators = fs.existsSync(operatorsDir);
     if (!hasOperators) {
-      console.info('operators/ not found; YAML membership checks failed.');
-      throw new Error('operators/ not found');
+      console.info("operators/ not found; YAML membership checks failed.");
+      throw new Error("operators/ not found");
     }
     const keyOf = (d: K8s) => `${d.apiVersion}|${d.kind}|${d.metadata?.name}`;
     for (const id of Object.keys(OPERATOR_OBJECTS)) {
