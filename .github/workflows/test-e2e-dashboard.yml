@@ -104,7 +104,7 @@ jobs:
         run: |
           kubectl proxy --port=8001 --accept-hosts='^.*$' --address='0.0.0.0' &
           echo "PROXY_PID=$!" >> $GITHUB_ENV
-          sleep 5
+          sleep 10
           curl -f http://127.0.0.1:8001/api || (echo 'proxy failed' && exit 1)
 
       - name: Run E2E test
