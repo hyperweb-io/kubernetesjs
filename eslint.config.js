@@ -7,7 +7,7 @@ const unusedImports = require("eslint-plugin-unused-imports");
 const jestPlugin = require("eslint-plugin-jest");
 
 module.exports = [
-  { ignores: ["**/dist/**", "**/node_modules/**", "**/.next/**"] },
+  { ignores: ["**/dist/**", "**/node_modules/**", "**/.next/**", "**/playwright-report/**", "**/jest.config.js","**/jest.polyfills.js","**/jest.setup.js"] },
   js.configs.recommended,
   {
     languageOptions: {
