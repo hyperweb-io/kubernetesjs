@@ -11,7 +11,6 @@ import {
   OPERATOR_CLUSTER_RESOURCES
 } from '../src/utils/k8s-utils';
 
-// Mock axios
 // Mock global fetch
 global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 

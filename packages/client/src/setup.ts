@@ -18,7 +18,6 @@ import {
   ClusterOverview,
   SecretConfig,
 } from "./types";
-import axios from "axios";
 import {
   applyKubernetesResource,
   applyKubernetesResources,
