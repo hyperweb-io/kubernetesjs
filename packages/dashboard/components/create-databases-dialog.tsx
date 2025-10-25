@@ -3,6 +3,9 @@
 import React, { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
@@ -109,46 +112,104 @@ export function CreateDatabasesDialog({ open, onOpenChange, onSubmit }: CreateDa
           </Alert>
         )}
 
+        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-          <label className="flex flex-col gap-1">
-            <span className="text-gray-600">Instances</span>
-            <input type="number" min={1} max={5} value={instances} onChange={(e) => setInstances(parseInt(e.target.value || '1', 10))} className="border rounded px-2 py-1" />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-gray-600">Storage</span>
-            <input value={storage} onChange={(e) => setStorage(e.target.value)} placeholder="10Gi" className="border rounded px-2 py-1" />
-          </label>
-          <label className="flex flex-col gap-1 sm:col-span-2">
-            <span className="text-gray-600">Storage Class (optional)</span>
-            <input value={storageClass} onChange={(e) => setStorageClass(e.target.value)} placeholder="standard" className="border rounded px-2 py-1" />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-gray-600">App Username</span>
-            <input value={appUsername} onChange={(e) => setAppUsername(e.target.value)} className="border rounded px-2 py-1" />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-gray-600">App Password</span>
-            <input type="password" value={appPassword} onChange={(e) => setAppPassword(e.target.value)} className="border rounded px-2 py-1" />
-          </label>
-          <label className="flex flex-col gap-1 sm:col-span-2">
-            <span className="text-gray-600">Superuser Password</span>
-            <input type="password" value={superuserPassword} onChange={(e) => setSuperuserPassword(e.target.value)} className="border rounded px-2 py-1" />
-          </label>
-          <label className="flex items-center gap-2 sm:col-span-2">
-            <input type="checkbox" checked={enablePooler} onChange={(e) => setEnablePooler(e.target.checked)} />
-            <span className="text-gray-700">Enable PgBouncer Pooler</span>
-          </label>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="instances" className="text-gray-600">Instances</Label>
+            <Input
+              id="instances"
+              type="number"
+              min={1}
+              max={5}
+              value={instances}
+              onChange={(e) => setInstances(parseInt(e.target.value || '1', 10))}
+            />
+          </div>
+          
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="storage" className="text-gray-600">Storage</Label>
+            <Input
+              id="storage"
+              value={storage}
+              onChange={(e) => setStorage(e.target.value)}
+              placeholder="10Gi"
+            />
+          </div>
+          
+          <div className="flex flex-col gap-1 sm:col-span-2">
+            <Label htmlFor="storageClass" className="text-gray-600">Storage Class (optional)</Label>
+            <Input
+              id="storageClass"
+              value={storageClass}
+              onChange={(e) => setStorageClass(e.target.value)}
+              placeholder="standard"
+            />
+          </div>
+          
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="appUsername" className="text-gray-600">App Username</Label>
+            <Input
+              required={true}
+              id="appUsername"
+              value={appUsername}
+              onChange={(e) => setAppUsername(e.target.value)}
+            />
+          </div>
+          
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="appPassword" className="text-gray-600">App Password</Label>
+            <Input
+              required={true}
+              id="appPassword"
+              type="password"
+              value={appPassword}
+              onChange={(e) => setAppPassword(e.target.value)}
+            />
+          </div>
+          
+          <div className="flex flex-col gap-1 sm:col-span-2">
+            <Label htmlFor="superuserPassword" className="text-gray-600">Superuser Password</Label>
+            <Input
+              required={true}
+              id="superuserPassword"
+              type="password"
+              value={superuserPassword}
+              onChange={(e) => setSuperuserPassword(e.target.value)}
+            />
+          </div>
+          
+          <div className="flex items-center gap-2 sm:col-span-2">
+            <Checkbox
+              id="enablePooler"
+              checked={enablePooler}
+              onCheckedChange={(checked) => setEnablePooler(checked as boolean)}
+            />
+            <Label htmlFor="enablePooler" className="text-gray-700">Enable PgBouncer Pooler</Label>
+          </div>
 
           {enablePooler && (
             <>
-              <label className="flex flex-col gap-1">
-                <span className="text-gray-600">Pooler Name</span>
-                <input value={poolerName} onChange={(e) => setPoolerName(e.target.value)} className="border rounded px-2 py-1" />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-gray-600">Pooler Instances</span>
-                <input type="number" min={1} max={5} value={poolerInstances} onChange={(e) => setPoolerInstances(parseInt(e.target.value || '1', 10))} className="border rounded px-2 py-1" />
-              </label>
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="poolerName" className="text-gray-600">Pooler Name</Label>
+                <Input
+                  id="poolerName"
+                  value={poolerName}
+                  onChange={(e) => setPoolerName(e.target.value)}
+                />
+              </div>
+              
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="poolerInstances" className="text-gray-600">Pooler Instances</Label>
+                <Input
+                  id="poolerInstances"
+                  type="number"
+                  min={1}
+                  max={5}
+                  value={poolerInstances}
+                  onChange={(e) => setPoolerInstances(parseInt(e.target.value || '1', 10))}
+                />
+              </div>
             </>
           )}
         </div>
