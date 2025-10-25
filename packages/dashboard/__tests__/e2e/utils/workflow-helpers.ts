@@ -433,11 +433,19 @@ export async function checkNamespaceHasDeployments(page: Page, namespace: string
   // Set namespace to the specific namespace
   await setNamespaceTo(page, namespace);
   
+  // Wait for the table to load after namespace change
+  await page.waitForLoadState('networkidle');
+  
   // Check if there are any deployments in the table
+  // Since we've set the namespace filter, all visible rows should be from that namespace
   const deploymentRows = page.locator('tbody tr');
   const rowCount = await deploymentRows.count();
   
   console.log(`Found ${rowCount} deployments in namespace "${namespace}"`);
+  
+  // Use expect to assert that there are deployments in this namespace
+  expect(rowCount).toBeGreaterThan(0);
+  
   return rowCount > 0;
 }
 
@@ -454,11 +462,19 @@ export async function checkNamespaceHasServices(page: Page, namespace: string) {
   // Set namespace to the specific namespace
   await setNamespaceTo(page, namespace);
   
+  // Wait for the table to load after namespace change
+  await page.waitForLoadState('networkidle');
+  
   // Check if there are any services in the table
+  // Since we've set the namespace filter, all visible rows should be from that namespace
   const serviceRows = page.locator('tbody tr');
   const rowCount = await serviceRows.count();
   
   console.log(`Found ${rowCount} services in namespace "${namespace}"`);
+  
+  // Use expect to assert that there are services in this namespace
+  expect(rowCount).toBeGreaterThan(0);
+  
   return rowCount > 0;
 }
 
@@ -475,11 +491,19 @@ export async function checkNamespaceHasPods(page: Page, namespace: string) {
   // Set namespace to the specific namespace
   await setNamespaceTo(page, namespace);
   
+  // Wait for the table to load after namespace change
+  await page.waitForLoadState('networkidle');
+  
   // Check if there are any pods in the table
+  // Since we've set the namespace filter, all visible rows should be from that namespace
   const podRows = page.locator('tbody tr');
   const rowCount = await podRows.count();
   
   console.log(`Found ${rowCount} pods in namespace "${namespace}"`);
+  
+  // Use expect to assert that there are pods in this namespace
+  expect(rowCount).toBeGreaterThan(0);
+  
   return rowCount > 0;
 }
 
@@ -496,11 +520,19 @@ export async function checkNamespaceHasConfigMaps(page: Page, namespace: string)
   // Set namespace to the specific namespace
   await setNamespaceTo(page, namespace);
   
+  // Wait for the table to load after namespace change
+  await page.waitForLoadState('networkidle');
+  
   // Check if there are any configMaps in the table
+  // Since we've set the namespace filter, all visible rows should be from that namespace
   const configMapRows = page.locator('tbody tr');
   const rowCount = await configMapRows.count();
   
   console.log(`Found ${rowCount} configMaps in namespace "${namespace}"`);
+  
+  // Use expect to assert that there are configMaps in this namespace
+  expect(rowCount).toBeGreaterThan(0);
+  
   return rowCount > 0;
 }
 
