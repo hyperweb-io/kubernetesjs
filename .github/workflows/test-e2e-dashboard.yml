@@ -28,37 +28,6 @@ jobs:
   e2e-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 120
-    strategy:
-      fail-fast: false
-      matrix:
-        test-suite:
-          # Workflow tests
-          - name: "Operator Database Workflow"
-            type: workflow
-            test-pattern: "workflow-operator-database-focused"
-          - name: "Deployment Lifecycle Workflow"
-            type: workflow
-            test-pattern: "workflow-deployment-lifecycle"
-          # Component tests
-          - name: "Deployments"
-            type: component
-            test-pattern: "deployments.spec"
-          - name: "Operators"
-            type: component
-            test-pattern: "operators.spec"
-          - name: "Databases"
-            type: component
-            test-pattern: "databases.spec"
-          - name: "Namespaces"
-            type: component
-            test-pattern: "namespaces.spec"
-          - name: "Admin"
-            type: component
-            test-pattern: "admin.spec"
-          # Accessibility tests
-          - name: "Accessibility"
-            type: accessibility
-            test-pattern: "Accessibility"
 
     steps:
       - name: Checkout code
@@ -104,13 +73,13 @@ jobs:
         run: |
           kubectl proxy --port=8001 --accept-hosts='^.*$' --address='0.0.0.0' &
           echo "PROXY_PID=$!" >> $GITHUB_ENV
-          sleep 10
+          sleep 5
           curl -f http://127.0.0.1:8001/api || (echo 'proxy failed' && exit 1)
 
-      - name: Run E2E test
+      - name: Run all E2E tests
         run: |
           cd packages/dashboard
-          pnpm test:e2e -- --grep "${{ matrix.test-suite.name }}"
+          pnpm run e2e
         env:
           K8S_API: http://127.0.0.1:8001
           NODE_ENV: test
@@ -120,7 +89,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ matrix.test-suite.name }}
+          name: test-results
           path: packages/dashboard/test-results/
           retention-days: 7
 
@@ -128,7 +97,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: screenshots-${{ matrix.test-suite.name }}
+          name: screenshots
           path: packages/dashboard/test-results/screenshots/
           retention-days: 7
 
