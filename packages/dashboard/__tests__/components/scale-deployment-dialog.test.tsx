@@ -41,10 +41,12 @@ const mockDeployment: Deployment = {
 
 describe('ScaleDeploymentDialog', () => {
   const user = userEvent.setup()
-  const mockOnOpenChange = jest.fn()
-  const mockOnScale = jest.fn()
+  let mockOnOpenChange: jest.Mock
+  let mockOnScale: jest.Mock
 
   beforeEach(() => {
+    mockOnOpenChange = jest.fn()
+    mockOnScale = jest.fn()
     jest.clearAllMocks()
   })
 
@@ -377,10 +379,17 @@ describe('ScaleDeploymentDialog', () => {
       const scaleButton = screen.getByRole('button', { name: 'Scale' })
       await user.click(scaleButton)
       
+      // Wait for error message to appear and ensure all async operations complete
       await waitFor(() => {
         expect(screen.getByText(errorMessage)).toBeInTheDocument()
       })
       
+      // Wait a bit more to ensure the error handling is completely finished
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Scale' })).not.toBeDisabled()
+      })
+      
+      // Verify that onOpenChange was not called (dialog should remain open)
       expect(mockOnOpenChange).not.toHaveBeenCalled()
     })
 
@@ -403,9 +412,18 @@ describe('ScaleDeploymentDialog', () => {
       const scaleButton = screen.getByRole('button', { name: 'Scale' })
       await user.click(scaleButton)
       
+      // Wait for error message to appear and ensure all async operations complete
       await waitFor(() => {
         expect(screen.getByText('Failed to scale deployment')).toBeInTheDocument()
       })
+      
+      // Wait a bit more to ensure the error handling is completely finished
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Scale' })).not.toBeDisabled()
+      })
+      
+      // Verify that onOpenChange was not called (dialog should remain open)
+      expect(mockOnOpenChange).not.toHaveBeenCalled()
     })
   })
 
