@@ -168,7 +168,8 @@ async function generateConfig(options: any): Promise<void> {
         { name: 'Knative Serving', value: 'knative-serving', checked: true },
         { name: 'CloudNative-PG', value: 'cloudnative-pg', checked: true },
         { name: 'Cert Manager', value: 'cert-manager', checked: true },
-        { name: 'Ingress NGINX', value: 'ingress-nginx', checked: true }
+        { name: 'Ingress NGINX', value: 'ingress-nginx', checked: true },
+        { name: 'Kube Prometheus Stack', value: 'kube-prometheus-stack', checked: true }
       ]
     },
     {
@@ -207,6 +208,11 @@ async function generateConfig(options: any): Promise<void> {
         {
           name: 'ingress-nginx',
           enabled: answers.operators.includes('ingress-nginx')
+        },
+        {
+          name: 'kube-prometheus-stack',
+          version: '77.5.0',
+          enabled: answers.operators.includes('kube-prometheus-stack')
         }
       ],
       monitoring: {

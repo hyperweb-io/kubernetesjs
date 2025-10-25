@@ -8,7 +8,8 @@ export const OPERATOR_NAMESPACES: Record<string, string[]> = {
   'knative-serving': ['knative-serving', 'kourier-system'],
   'cert-manager': ['cert-manager'],
   'ingress-nginx': ['ingress-nginx'],
-  'cloudnative-pg': ['cnpg-system']
+  'cloudnative-pg': ['cnpg-system'],
+  'kube-prometheus-stack': ['monitoring']
 };
 
 // Operator cluster-scoped resources
@@ -135,6 +136,12 @@ export const OPERATOR_CLUSTER_RESOURCES: Record<string, {
       'cnpg-validating-webhook-configuration',
       'cnpg-mutating-webhook-configuration'
     ]
+  },
+  'kube-prometheus-stack': {
+    crds: [],
+    clusterRoles: [],
+    clusterRoleBindings: [],
+    webhooks: []
   }
 };
 
@@ -202,8 +209,8 @@ export async function waitForNamespaceDeletion(
   }
   
   // If we reach here, we've exceeded max attempts
-  console.log(chalk.yellow(`⚠️  Timeout waiting for namespace ${namespace} to be deleted. It may still be terminating.`));
-  console.log(chalk.blue(`You may need to manually clean up namespace ${namespace} before running setup again.`));
+  const timeoutMs = maxAttempts * intervalMs;
+  throw new Error(`Timeout waiting for namespace ${namespace} to be deleted after ${timeoutMs}ms`);
 }
 
 /**

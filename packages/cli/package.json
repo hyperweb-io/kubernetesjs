@@ -25,7 +25,9 @@
     "inquirer": "^9.2.0"
   },
   "devDependencies": {
-    "@types/inquirer": "^9.0.3"
+    "@types/axios": "^0.14.4",
+    "@types/inquirer": "^9.0.3",
+    "axios": "^1.12.2"
   },
   "bin": {
     "interweb": "./index.js"
