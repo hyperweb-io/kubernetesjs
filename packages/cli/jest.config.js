@@ -7,7 +7,7 @@ module.exports = {
   testMatch: ['**/?(*.)+(test|spec).{ts,tsx,js,jsx}'],
       
   // Ignore build artifacts and type declarations
-  testPathIgnorePatterns: ['/dist/', '\.d\.ts$'],
+  testPathIgnorePatterns: ['/dist/', '\\.d\\.ts$'],
   modulePathIgnorePatterns: ['<rootDir>/dist/'],
   watchPathIgnorePatterns: ['/dist/'],
     
