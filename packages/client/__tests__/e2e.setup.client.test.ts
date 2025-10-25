@@ -18,6 +18,7 @@ describe('SetupClient: basic flow with config', () => {
 
   const cfgPath = path.join(__dirname, '..', '__fixtures__', 'config', 'setup.config.yaml');
   let cfg: ClusterSetupConfig;
+  let connected = false;
 
   it('loads config and connects to cluster', async () => {
     cfg = ConfigLoader.loadClusterSetup(cfgPath);
@@ -25,6 +26,7 @@ describe('SetupClient: basic flow with config', () => {
 
     const ok = await setup.checkConnection();
     expect(typeof ok).toBe('boolean');
+    connected = ok;
     // Don’t fail the suite if cluster is unavailable
     if (!ok) {
       console.warn('Kubernetes cluster not reachable; skipping remaining tests.');
@@ -33,7 +35,7 @@ describe('SetupClient: basic flow with config', () => {
   });
 
   it('runs installOperators on config', async () => {
-    if (!cfg) return;
+    if (!cfg || !connected) return;
     await setup.installOperators(cfg);
     const status = await setup.getClusterSetupStatus(cfg);
     expect(status.phase === 'ready' || status.phase === 'installing').toBe(true);
