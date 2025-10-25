@@ -5,8 +5,6 @@ const createJestConfig = nextJest({ dir: './' });
 // 扩展 esModules，包含 MSW 相关（until-async 是其子依赖）
 const esModules = ['until-async', 'msw', '@mswjs', 'remark-gfm', 'mdast-util-gfm', 'micromark-extension-gfm', 'micromark-extension-gfm-strikethrough', 'micromark-extension-gfm-table', 'micromark-extension-gfm-task-list-item', 'micromark-extension-gfm-autolink-literal', 'micromark-extension-gfm-footnote', 'micromark-extension-gfm-tagfilter', 'micromark-extension-gfm-autolink-literal', 'micromark-extension-gfm-footnote', 'micromark-extension-gfm-tagfilter', 'react-syntax-highlighter', 'ccount', 'mdast-util-gfm-autolink-literal', 'mdast-util-gfm-footnote', 'mdast-util-gfm-strikethrough', 'mdast-util-gfm-table', 'mdast-util-gfm-task-list-item', 'mdast-util-gfm-tagfilter', 'micromark-extension-gfm-autolink-literal', 'micromark-extension-gfm-footnote', 'micromark-extension-gfm-strikethrough', 'micromark-extension-gfm-table', 'micromark-extension-gfm-task-list-item', 'micromark-extension-gfm-tagfilter', '.*\\.mjs$'].join('|');
 
-const tsconfig = require('./tsconfig.json');
-
 const customJestConfig = {
   rootDir: './',
   testEnvironment: 'jsdom',
@@ -47,7 +45,7 @@ const customJestConfig = {
   transformIgnorePatterns: [
     `node_modules/(?!(\\.pnpm|${esModules}))`,  // 加括号确保分组；不忽略 .pnpm/until-async 等和 @interweb 包
   ],
-  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/', '<rootDir>/dist/','<rootDir>/__tests__/utils', '<rootDir>/__tests__/lib/setup.ts'],
+  testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/', '<rootDir>/dist/','<rootDir>/__tests__/utils', '<rootDir>/__tests__/lib/setup.ts', '<rootDir>/__tests__/e2e/'],
   testEnvironmentOptions: {
     customExportConditions: ['node', 'default'],  // 增强 ESM 加载
   }
