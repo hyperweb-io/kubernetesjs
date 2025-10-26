@@ -341,22 +341,4 @@ test.describe('Workflow 2: Deployment Lifecycle Management', () => {
       console.log('Final cleanup completed');
     });
   });
-
-  // Quick test for deployment creation only
-  test('Deployment Creation Quick Test', async ({ page }) => {
-    const timestamp = Date.now();
-    const deploymentName = `quick-test-deployment-${timestamp}`;
-    const namespace = 'default';
-
-    await page.goto('/i/deployments');
-    await setNamespaceTo(page, namespace);
-    await createDeployment(page, deploymentName, {
-      image: 'nginx:latest',
-      replicas: 1,
-      port: 80
-    });
-    
-    // Clean up
-    await deleteDeployment(page, deploymentName, namespace);
-  });
 });
