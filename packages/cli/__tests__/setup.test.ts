@@ -112,6 +112,7 @@ describe('Setup Command', () => {
       expect(optionFlags).toContain('--context <context>');
       expect(optionFlags).toContain('-v, --verbose');
       expect(optionFlags).toContain('--generate-config');
++      expect(optionFlags).toContain('--default');
       expect(optionFlags).toContain('-f, --force');
     });
   });
@@ -307,7 +308,6 @@ describe('Setup Command', () => {
       expect(mockConsoleError).toBeDefined();
     });
 
-    // ... existing code ...
     // Removed separate tests for kubeconfig/context and namespace options; consolidated below
     it('should expose CLI options for kubeconfig, context, namespace, verbose, and force', async () => {
       mockInquirer.prompt.mockResolvedValue({ shouldProceed: true });

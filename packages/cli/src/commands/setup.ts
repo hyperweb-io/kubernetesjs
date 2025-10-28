@@ -3,6 +3,7 @@ import { Client, ConfigLoader } from '@interweb/client';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import * as path from 'path';
+import * as fs from 'fs';
 import { 
   getApiEndpoint, 
   getOperatorNamespaces, 
@@ -16,21 +17,21 @@ export function createSetupCommand(): Command {
   
   command
     .description('Set up a Kubernetes cluster with interweb operators')
-    .option('-c, --config <path>', 'Path to cluster setup configuration file', '__fixtures__/config/setup.config.yaml')
+    .option('-c, --config <path>', 'Path to cluster setup configuration file')
     .option('-n, --namespace <namespace>', 'Kubernetes namespace to use')
     .option('--kubeconfig <path>', 'Path to kubeconfig file')
     .option('--context <context>', 'Kubernetes context to use')
     .option('-v, --verbose', 'Enable verbose logging')
     .option('--generate-config', 'Generate a sample configuration file')
+    .option('--default', 'Use default fixture configuration without prompts')
     .option('-f, --force', 'Skip confirmation prompts')
-    .action(async (options) => {
+    .action(async (options: any) => {
       try {
         if (options.generateConfig) {
-          await generateConfig(options);
-          process.exit(0);
-          return;
+          const generatedPath = await generateConfig(options);
+          options.config = generatedPath;
+          options.default = false;
         }
-
         await setupCluster(options);
       } catch (error) {
         console.error(chalk.red('Setup failed:'), error);
@@ -45,30 +46,97 @@ async function setupCluster(options: any): Promise<void> {
   console.log(chalk.blue('🚀 Interweb Cluster Setup'));
   console.log('==========================\n');
 
-  // Check if config file exists
-  if (!ConfigLoader.configExists(options.config)) {
-    console.log(chalk.yellow(`Configuration file not found: ${options.config}`));
-    
-    const { shouldGenerate } = await inquirer.prompt([{
-      type: 'confirm',
-      name: 'shouldGenerate',
-      message: 'Would you like to generate a sample configuration file?',
-      default: true
-    }]);
+  // Resolve config path, honoring --default to use fixture config
+  let configPath = options.config;
+  if (options.default) {
+    const fixturePath = path.resolve(__dirname, '../../__fixtures__/config/setup.config.yaml');
+    configPath = fixturePath;
+    options.config = configPath;
+    console.log(chalk.blue(`Using default fixture configuration: ${configPath}`));
+  }
 
-    if (shouldGenerate) {
-      ConfigLoader.saveConfig(ConfigLoader.getDefaultClusterSetup(), options.config);
-      console.log(chalk.green(`✓ Sample configuration saved to ${options.config}`));
-      console.log(chalk.yellow('Please review and modify the configuration before running setup again.'));
-      return;
-    } else {
-      throw new Error('Configuration file is required for setup');
+  // If config file does not exist and --default is NOT used, collect config via inquirer
+  if (!ConfigLoader.configExists(configPath)) {
+    if (options.default) {
+      throw new Error(`Default fixture configuration not found at: ${configPath}`);
     }
+
+    console.log(chalk.yellow(`Configuration file not found: ${configPath}`));
+    console.log(chalk.blue('Let\'s create one interactively...'));
+
+    const answers = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'name',
+        message: 'Cluster name:',
+        default: 'dev-cluster'
+      },
+      {
+        type: 'input',
+        name: 'namespace',
+        message: 'Namespace:',
+        default: 'interweb-system'
+      },
+      {
+        type: 'input',
+        name: 'domain',
+        message: 'Domain for ingress:',
+        default: '127.0.0.1.nip.io'
+      },
+      {
+        type: 'checkbox',
+        name: 'operators',
+        message: 'Select operators to install:',
+        choices: [
+          { name: 'Knative Serving', value: 'knative-serving', checked: true },
+          { name: 'CloudNative-PG', value: 'cloudnative-pg', checked: true },
+          { name: 'Cert Manager', value: 'cert-manager', checked: true },
+          { name: 'Ingress NGINX', value: 'ingress-nginx', checked: true },
+          { name: 'Kube Prometheus Stack', value: 'kube-prometheus-stack', checked: true }
+        ]
+      },
+      {
+        type: 'confirm',
+        name: 'monitoring',
+        message: 'Enable monitoring (Prometheus & Grafana)?',
+        default: false
+      }
+    ]);
+
+    const generatedConfig = {
+      apiVersion: 'interweb.dev/v1',
+      kind: 'ClusterSetup',
+      metadata: {
+        name: answers.name,
+        namespace: answers.namespace
+      },
+      spec: {
+        operators: [
+          { name: 'knative-serving', version: 'v1.15.0', enabled: answers.operators.includes('knative-serving') },
+          { name: 'cloudnative-pg', version: '1.25.2', enabled: answers.operators.includes('cloudnative-pg') },
+          { name: 'cert-manager', version: 'v1.17.0', enabled: answers.operators.includes('cert-manager') },
+          { name: 'ingress-nginx', enabled: answers.operators.includes('ingress-nginx') },
+          { name: 'kube-prometheus-stack', version: '77.5.0', enabled: answers.operators.includes('kube-prometheus-stack') }
+        ],
+        monitoring: {
+          enabled: answers.monitoring,
+          prometheus: { retention: '7d', storage: '10Gi' },
+          grafana: { adminPassword: 'admin', persistence: '5Gi' }
+        },
+        networking: { ingressClass: 'nginx', domain: answers.domain }
+      }
+    };
+
+    const outputPath = options.config || 'interweb.setup.yaml';
+    ConfigLoader.saveConfig(generatedConfig as any, outputPath);
+    options.config = outputPath;
+    configPath = outputPath;
+    console.log(chalk.green(`✓ Configuration saved to ${outputPath}`));
   }
 
   // Validate configuration
   console.log(chalk.blue('Validating configuration...'));
-  const config = ConfigLoader.loadClusterSetup(options.config);
+  const config = ConfigLoader.loadClusterSetup(configPath);
   console.log(chalk.green(`✓ Configuration loaded: ${config.metadata.name}`));
 
   // Show configuration summary
@@ -77,7 +145,7 @@ async function setupCluster(options: any): Promise<void> {
   console.log(`  Namespace: ${config.metadata.namespace || 'interweb-system'}`);
   console.log(`  Operators to install:`);
   
-  config.spec.operators.forEach(op => {
+  config.spec.operators.forEach((op: any) => {
     const status = op.enabled ? chalk.green('✓') : chalk.gray('○');
     const version = op.version ? ` (${op.version})` : '';
     console.log(`    ${status} ${op.name}${version}`);
@@ -137,9 +205,25 @@ async function setupCluster(options: any): Promise<void> {
   process.exit(0);
 }
 
-async function generateConfig(options: any): Promise<void> {
+async function generateConfig(options: any): Promise<string> {
   console.log(chalk.blue('📝 Generate Cluster Setup Configuration'));
   console.log('=====================================\n');
+
+  // If --default is passed, copy the fixture config and skip prompts
+  if (options?.default) {
+    const fixturePath = path.resolve(__dirname, '../../__fixtures__/config/setup.config.yaml');
+    let outputPath = options.config;
+    if (!outputPath || path.resolve(outputPath) === fixturePath || outputPath === '__fixtures__/config/setup.config.yaml') {
+      outputPath = path.resolve(process.cwd(), 'config/interweb.setup.yaml');
+    }
+    const dir = path.dirname(outputPath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.copyFileSync(fixturePath, outputPath);
+    console.log(chalk.green(`✓ Default configuration copied to ${outputPath}`));
+    return outputPath;
+  }
 
   const answers = await inquirer.prompt([
     {
@@ -233,12 +317,14 @@ async function generateConfig(options: any): Promise<void> {
     }
   };
 
-  const outputPath = options.config || 'interweb.setup.yaml';
+  const outputPath = options.config || path.resolve(process.cwd(), 'config/interweb.setup.yaml');
+  const outDir = path.dirname(outputPath);
+  if (!fs.existsSync(outDir)) {
+    fs.mkdirSync(outDir, { recursive: true });
+  }
   ConfigLoader.saveConfig(config as any, outputPath);
-  
   console.log(chalk.green(`✓ Configuration saved to ${outputPath}`));
-  console.log(chalk.blue('\nTo set up the cluster, run:'));
-  console.log(`  interweb setup -c ${outputPath}`);
+  return outputPath;
 }
 
 async function forceDeleteOperatorNamespaces(config: any, restEndpoint?: string): Promise<void> {
