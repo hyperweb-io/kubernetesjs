@@ -17,7 +17,11 @@ export function createSetupCommand(): Command {
   
   command
     .description('Set up a Kubernetes cluster with interweb operators')
+<<<<<<< Updated upstream
     .option('-c, --config <path>', 'Path to cluster setup configuration file')
+=======
+    .option('-c, --config <path>', 'Path to cluster setup configuration file', '__fixtures__/config/setup.config.yaml')
+>>>>>>> Stashed changes
     .option('-n, --namespace <namespace>', 'Kubernetes namespace to use')
     .option('--kubeconfig <path>', 'Path to kubeconfig file')
     .option('--context <context>', 'Kubernetes context to use')
@@ -187,11 +191,15 @@ async function setupCluster(options: any): Promise<void> {
 
   // Check for and wait for any terminating namespaces to be fully deleted
   console.log(chalk.blue('\nChecking for terminating namespaces...'));
+<<<<<<< Updated upstream
   await waitForTerminatingNamespaces(client, config, options.restEndpoint);
 
   // Force delete any existing operator namespaces to avoid conflicts
   console.log(chalk.blue('\nCleaning up existing operator namespaces...'));
   await forceDeleteOperatorNamespaces(config, options.restEndpoint);
+=======
+  await waitForTerminatingNamespaces(client, config);
+>>>>>>> Stashed changes
 
   console.log(chalk.blue('\nSetting up cluster...'));
   await client.setupCluster(options.config);
@@ -373,6 +381,69 @@ async function waitForTerminatingNamespaces(client: Client, config: any, restEnd
       try {
         // Use fetch to check namespace status via Kubernetes API
         const response = await fetch(`${apiEndpoint}/api/v1/namespaces/${namespace}`);
+        
+        if (response.status === 404) {
+          // Namespace doesn't exist, which is what we want
+          break;
+        }
+        
+        if (response.ok) {
+          const ns = await response.json();
+          
+          if (ns.status?.phase === 'Terminating') {
+            console.log(chalk.yellow(`⏳ Waiting for namespace ${namespace} to finish terminating... (${attempts + 1}/${maxAttempts})`));
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+            attempts++;
+            continue;
+          }
+          
+          // Namespace exists and is not terminating, break out of loop
+          break;
+        }
+        
+        // Other HTTP errors, log and continue
+        console.log(chalk.yellow(`Warning: Error checking namespace ${namespace}: HTTP ${response.status}`));
+        break;
+      } catch (error: any) {
+        // Network or other errors, log and continue
+        console.log(chalk.yellow(`Warning: Error checking namespace ${namespace}: ${error.message}`));
+        break;
+      }
+    }
+    
+    if (attempts >= maxAttempts) {
+      throw new Error(`Timeout waiting for namespace ${namespace} to finish terminating. Please manually clean up the namespace and try again.`);
+    }
+  }
+}
+
+async function waitForTerminatingNamespaces(client: Client, config: any): Promise<void> {
+  const operatorNamespaces = config.spec.operators
+    .filter((op: any) => op.enabled)
+    .map((op: any) => {
+      switch (op.name) {
+        case 'knative-serving':
+          return ['knative-serving', 'kourier-system'];
+        case 'cert-manager':
+          return ['cert-manager'];
+        case 'ingress-nginx':
+          return ['ingress-nginx'];
+        case 'cloudnative-pg':
+          return ['cnpg-system'];
+        default:
+          return [];
+      }
+    })
+    .flat();
+
+  for (const namespace of operatorNamespaces) {
+    let attempts = 0;
+    const maxAttempts = 60; // 5 minutes with 5-second intervals
+    
+    while (attempts < maxAttempts) {
+      try {
+        // Use fetch to check namespace status via Kubernetes API
+        const response = await fetch(`http://127.0.0.1:8001/api/v1/namespaces/${namespace}`);
         
         if (response.status === 404) {
           // Namespace doesn't exist, which is what we want

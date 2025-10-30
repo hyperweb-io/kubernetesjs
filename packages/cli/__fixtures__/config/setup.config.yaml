@@ -24,4 +24,8 @@ spec:
     - name: kube-prometheus-stack
       namespace: monitoring
       version: 77.5.0
+<<<<<<< Updated upstream
       enabled: true
+=======
+      enabled: false
+>>>>>>> Stashed changes

@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { Client, ConfigLoader } from '@interweb/client';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
+<<<<<<< Updated upstream
 import { 
   getApiEndpoint, 
   getOperatorNamespaces, 
@@ -9,6 +10,8 @@ import {
   deleteNamespace,
   OPERATOR_CLUSTER_RESOURCES 
 } from '../utils/k8s-utils';
+=======
+>>>>>>> Stashed changes
 
 export function createTeardownCommand(): Command {
   const command = new Command('teardown');
@@ -82,6 +85,7 @@ async function teardownOperators(options: any): Promise<void> {
     namespace: options.namespace || config.metadata.namespace, 
     kubeconfig: options.kubeconfig, 
     context: options.context, 
+<<<<<<< Updated upstream
     verbose: options.verbose,
     restEndpoint: getApiEndpoint(options.restEndpoint)
   });
@@ -94,11 +98,23 @@ async function teardownOperators(options: any): Promise<void> {
   
   // Use .catch() pattern similar to Starship CLI for better error handling
   await client.deleteCluster(options.config).catch((err: any) => {
+=======
+    verbose: options.verbose 
+  });
+
+  console.log(chalk.blue('\nUninstalling operators...'));
+  
+  // Use .catch() pattern similar to Starship CLI for better error handling
+  await client.teardownOperators(options.config, { 
+    continueOnError: true // Always continue on error for teardown to clean up as much as possible
+  }).catch((err: any) => {
+>>>>>>> Stashed changes
     console.error(chalk.red('An error occurred during teardown:'), err);
     console.log(chalk.yellow('Continuing with teardown despite errors...'));
     // Don't throw error to allow teardown to continue
   });
 
+<<<<<<< Updated upstream
   // Explicitly delete operator namespaces
   console.log(chalk.blue('\nDeleting operator namespaces...'));
   await deleteOperatorNamespaces(config, options.continueOnError, options.restEndpoint);
@@ -354,4 +370,80 @@ async function waitForNamespaceDeletion(config: any, restEndpoint?: string): Pro
   const apiEndpoint = getApiEndpoint(restEndpoint);
   
   await waitForNamespacesDeletion(operatorNamespaces, apiEndpoint);
+=======
+  // Wait for namespaces to be fully deleted
+  console.log(chalk.blue('\nWaiting for namespaces to be fully deleted...'));
+  await waitForNamespaceDeletion(config);
+
+  console.log(chalk.green('\n✅ Operators teardown completed!'));
+  console.log(chalk.blue('\nNext steps:'));
+  console.log('  1. Reinstall operators if needed: interweb setup -c ' + options.config);
+  console.log('  2. Check cluster status: interweb status -c ' + options.config);
+}
+
+async function waitForNamespaceDeletion(config: any): Promise<void> {
+  const operatorNamespaces = config.spec.operators
+    .filter((op: any) => op.enabled)
+    .map((op: any) => {
+      switch (op.name) {
+        case 'knative-serving':
+          return ['knative-serving', 'kourier-system'];
+        case 'cert-manager':
+          return ['cert-manager'];
+        case 'ingress-nginx':
+          return ['ingress-nginx'];
+        case 'cloudnative-pg':
+          return ['cnpg-system'];
+        default:
+          return [];
+      }
+    })
+    .flat();
+
+  for (const namespace of operatorNamespaces) {
+    let attempts = 0;
+    const maxAttempts = 60; // 5 minutes with 5-second intervals
+    
+    while (attempts < maxAttempts) {
+      try {
+        // Use fetch to check namespace status via Kubernetes API
+        const response = await fetch(`http://127.0.0.1:8001/api/v1/namespaces/${namespace}`);
+        
+        if (response.status === 404) {
+          // Namespace doesn't exist, which means it's been successfully deleted
+          console.log(chalk.green(`✓ Namespace ${namespace} successfully deleted`));
+          break;
+        }
+        
+        if (response.ok) {
+          const ns = await response.json();
+          
+          if (ns.status?.phase === 'Terminating') {
+            console.log(chalk.yellow(`⏳ Waiting for namespace ${namespace} to be deleted... (${attempts + 1}/${maxAttempts})`));
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+            attempts++;
+            continue;
+          }
+          
+          // Namespace still exists and is not terminating - this shouldn't happen after teardown
+          console.log(chalk.yellow(`Warning: Namespace ${namespace} still exists but is not terminating`));
+          break;
+        }
+        
+        // Other HTTP errors, log and continue
+        console.log(chalk.yellow(`Warning: Error checking namespace ${namespace}: HTTP ${response.status}`));
+        break;
+      } catch (error: any) {
+        // Network or other errors, log and continue
+        console.log(chalk.yellow(`Warning: Error checking namespace ${namespace}: ${error.message}`));
+        break;
+      }
+    }
+    
+    if (attempts >= maxAttempts) {
+      console.log(chalk.red(`⚠️  Timeout waiting for namespace ${namespace} to be deleted. It may still be terminating.`));
+      console.log(chalk.yellow(`You may need to manually clean up namespace ${namespace} before running setup again.`));
+    }
+  }
+>>>>>>> Stashed changes
 }
