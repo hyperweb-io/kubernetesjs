@@ -36,11 +36,7 @@ export class Client {
       kubeconfig: ctx.kubeconfig,
       namespace: ctx.namespace,
       context: ctx.context,
-<<<<<<< Updated upstream
-      restEndpoint: ctx.restEndpoint,
-=======
       restEndpoint: ctx.restEndpoint || 'http://127.0.0.1:8001'
->>>>>>> Stashed changes
     });
     this.setupClient = new SetupClient(
       this.kubeClient,
