@@ -108,26 +108,6 @@ export class Client {
    */
   async deployApplication(configPath: string): Promise<void> {
     try {
-<<<<<<< Updated upstream
-      this.log("Loading application configuration...");
-      const config = ConfigLoader.loadApplication(configPath);
-
-      this.log(`Deploying application: ${config.metadata.name}`);
-
-      const connected = await this.setupClient.checkConnection();
-      if (!connected) {
-        throw new Error("Unable to connect to Kubernetes cluster");
-      }
-
-      await this.provisionApplicationDatabase(config.spec.database);
-
-      await this.setupClient.deployApplicationResources(config, {
-        continueOnError: false,
-        log: (msg) => this.log(msg),
-      });
-
-      this.log("✓ Application deployed successfully");
-=======
       this.log('Loading application configuration...');
       const config = ConfigLoader.loadApplication(configPath);
       
@@ -156,7 +136,6 @@ export class Client {
       });
       
       this.log('✓ Application deployed successfully');
->>>>>>> Stashed changes
     } catch (error) {
       this.log(`✗ Application deployment failed: ${error}`);
       throw error;
@@ -314,26 +293,6 @@ export class Client {
   /**
    * Teardown (uninstall) operators defined in the cluster setup configuration
    */
-<<<<<<< Updated upstream
-  async deleteApplication(configPath: string): Promise<void> {
-    try {
-      this.log("Loading application configuration...");
-      const config = ConfigLoader.loadApplication(configPath);
-
-      this.log(`Deleting application: ${config.metadata.name}`);
-
-      await this.setupClient.deleteApplicationResources(config, {
-        continueOnError: true,
-        log: (msg) => this.log(msg),
-      });
-
-      this.log(chalk.green("✓ Application deleted successfully"));
-    } catch (error) {
-      this.log(chalk.red(`✗ Application deletion failed: ${error}`));
-      throw error;
-    }
-  }
-=======
   async teardownOperators(configPath: string, options?: { continueOnError?: boolean }): Promise<void> {
     try {
       this.log('Loading cluster setup configuration...');
@@ -599,7 +558,6 @@ export class Client {
 
     return manifests;
   }
->>>>>>> Stashed changes
 
   /**
    * Validate a configuration file
