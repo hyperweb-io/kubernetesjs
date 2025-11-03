@@ -27,7 +27,7 @@ const defaultOpts: Required<Pick<MinioDeployOptions,
   namespace: 'default',
   storage: '10Gi',
   accessKey: 'minioadmin',
-  secretKey: 'minioadmin123',
+  secretKey: 'minioadmin',
   replicas: 1,
   imageName: 'minio/minio:latest',
 };

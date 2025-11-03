@@ -17,7 +17,7 @@ export const postgresTemplateMetadata: TemplateMetadata = {
   description: 'PostgreSQL database with pgvector extension for vector storage',
   icon: 'Database',
   details: {
-    image: 'pyramation/pgvector:13.3-alpine',
+    image: 'ghcr.io/cloudnative-pg/postgresql:16.4',
     ports: [5432],
     environment: [
       { name: 'POSTGRES_USER', description: 'PostgreSQL username' },
