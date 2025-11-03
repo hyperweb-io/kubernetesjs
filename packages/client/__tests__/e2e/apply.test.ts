@@ -31,12 +31,15 @@ describe("apply: custom manifest create/replace", () => {
   }
 
   beforeAll(async () => {
-    // Clean slate
-    if (!KEEP) await ensureNamespaceAbsent(NS);
+    // Clean slate - only if cluster is available
+    const connected = await setup.checkConnection();
+    if (connected && !KEEP) await ensureNamespaceAbsent(NS);
   });
 
   afterAll(async () => {
-    if (!KEEP) await ensureNamespaceAbsent(NS);
+    // Cleanup - only if cluster is available
+    const connected = await setup.checkConnection();
+    if (connected && !KEEP) await ensureNamespaceAbsent(NS);
   });
 
   it("applies Namespace and ConfigMap via SetupClient.applyManifest", async () => {
@@ -61,10 +64,9 @@ describe("apply: custom manifest create/replace", () => {
     }
 
     // Verify namespace exists
-    const ns = await api.readCoreV1Namespace({
-      path: { name: NS },
-      query: {} as any,
-    });
+    const res = await api.listCoreV1Namespace({ query: {} as any });
+    const namespaces = res?.items || [];
+    const ns = namespaces.find((n: any) => n?.metadata?.name === NS);
     expect(ns?.metadata?.name).toBe(NS);
 
     // Verify configmap exists

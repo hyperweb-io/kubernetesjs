@@ -6,7 +6,7 @@ import {
   PostgresqlCnpgIoV1Pooler,
   KubernetesResource,
 } from '@interweb/interwebjs';
-import { SetupClient } from './setup';
+import { SetupClient } from '../setup';
 
 import { escapeIdentifier, escapeLiteral } from 'pg';
 
@@ -146,8 +146,9 @@ function buildCluster(opts: Required<PostgresDeployOptions>): PostgresqlCnpgIoV1
         owner: opts.superuserUsername,
         dataChecksums: true,
         encoding: 'UTF8',
-        localeCollate: 'en_US.UTF-8',
-        localeCType: 'en_US.UTF-8',
+        // Use C.UTF-8 to avoid locale generation issues in minimal container images
+        localeCollate: 'C.UTF-8',
+        localeCType: 'C.UTF-8',
         postInitSQL: [
           `CREATE USER ${escapeIdentifier(opts.appUsername)} WITH PASSWORD ${escapeLiteral(opts.appPassword)} CREATEDB;`,
           `GRANT CREATE ON DATABASE postgres TO ${escapeIdentifier(opts.appUsername)};`,
@@ -286,6 +287,39 @@ export class PostgresDeployer {
     await this.waitForCnpgWebhooksReady(options.operatorNamespace || 'cnpg-system', 180_000).catch((e) => {
       this.log(`Warning: CNPG webhooks not confirmed ready: ${String(e)}`);
     });
+
+    // If a Cluster already exists, delete and recreate to avoid immutable field update errors (e.g., postgresUID/GID, locales)
+    try {
+      const existing = await this.kube.readPostgresqlCnpgIoV1NamespacedCluster({
+        path: { namespace: ns, name: clusterName },
+        query: {},
+      });
+      if (existing) {
+        this.log(`Existing CNPG Cluster ${clusterName} detected in ${ns}; deleting for clean reapply...`);
+        await this.setup.deleteManifest({
+          apiVersion: 'postgresql.cnpg.io/v1',
+          kind: 'Cluster',
+          metadata: { name: clusterName, namespace: ns },
+        } as any, { continueOnError: true });
+        // Optional: delete pooler if present to ensure a clean redeploy
+        try {
+          await this.setup.deleteManifest({
+            apiVersion: 'postgresql.cnpg.io/v1',
+            kind: 'Pooler',
+            metadata: { name: opts.poolerName, namespace: ns },
+          } as any, { continueOnError: true });
+        } catch {}
+        const deadline = Date.now() + 180_000; // wait up to 3 minutes for deletion
+        while (Date.now() < deadline) {
+          const gone = await this.kube
+            .readPostgresqlCnpgIoV1NamespacedCluster({ path: { namespace: ns, name: clusterName }, query: {} })
+            .then(() => false)
+            .catch(() => true);
+          if (gone) break;
+          await new Promise((r) => setTimeout(r, 3000));
+        }
+      }
+    } catch {}
 
     const resources: (Namespace | Secret | PostgresqlCnpgIoV1Cluster | PostgresqlCnpgIoV1Pooler)[] = [
       buildNamespace(ns),
@@ -498,3 +532,5 @@ export function connectionInfo(res: DeployResult, appUser = 'appuser', appPass =
     notes: 'Change default passwords in production.',
   };
 }
+
+// Note: Template metadata is now exported from ./metadata.ts to avoid Node.js dependencies in browser environments

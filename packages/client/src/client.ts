@@ -7,7 +7,17 @@ import {
   PostgresDeployOptions,
   DeployResult,
   connectionInfo,
-} from "./postgres";
+} from "./deployers/postgres";
+import {
+  BaseTemplateDeployer,
+  TemplateDeployOptions,
+  TemplateDeployResult,
+  TemplateUninstallOptions,
+  TemplateUninstallResult,
+} from "./deployers/presets/base";
+import { MinioDeployer } from "./deployers/presets/minio";
+import { OllamaDeployer } from "./deployers/presets/ollama";
+import { PostgresTemplateWrapper } from "./deployers/presets/postgres";
 import {
   ClusterSetupConfig,
   ApplicationConfig,
@@ -29,6 +39,7 @@ export class Client {
   private ctx: InterwebContext;
   private kubeClient: InterwebKubernetesClient;
   private pg?: PostgresDeployer;
+  private templateDeployers: Map<string, BaseTemplateDeployer> = new Map();
 
   constructor(ctx: InterwebContext = {}) {
     this.ctx = ctx;
@@ -97,6 +108,153 @@ export class Client {
     this.log(`  Direct: ${info.direct.url}`);
     if (info.pooled?.url) this.log(`  Pooled: ${info.pooled.url}`);
     return res;
+  }
+
+  /**
+   * Deploy a template (minio, ollama, postgres)
+   */
+  async deployTemplate(
+    templateId: string,
+    options: TemplateDeployOptions = {}
+  ): Promise<TemplateDeployResult> {
+    try {
+      this.log(`Deploying template: ${templateId}`);
+      
+      const deployer = this.getTemplateDeployer(templateId);
+      const result = await deployer.deploy(options);
+      
+      if (result.status === 'deployed') {
+        this.log(`✓ Template ${templateId} deployed successfully`);
+        if (result.endpoints) {
+          this.log("Endpoints:");
+          Object.entries(result.endpoints).forEach(([name, endpoint]) => {
+            this.log(`  ${name}: ${endpoint.url || `${endpoint.host}:${endpoint.port}`}`);
+          });
+        }
+      } else {
+        this.log(`✗ Template ${templateId} deployment failed: ${result.message}`);
+      }
+      
+      return result;
+    } catch (error) {
+      this.log(`✗ Template deployment failed: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Uninstall a template
+   */
+  async uninstallTemplate(
+    templateId: string,
+    options: TemplateUninstallOptions = {}
+  ): Promise<TemplateUninstallResult> {
+    try {
+      this.log(`Uninstalling template: ${templateId}`);
+      
+      const deployer = this.getTemplateDeployer(templateId);
+      const result = await deployer.uninstall(options);
+      
+      if (result.status === 'uninstalled') {
+        this.log(`✓ Template ${templateId} uninstalled successfully`);
+      } else {
+        this.log(`✗ Template ${templateId} uninstall failed: ${result.message}`);
+      }
+      
+      return result;
+    } catch (error) {
+      this.log(`✗ Template uninstall failed: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if a template is deployed
+   */
+  async isTemplateDeployed(
+    templateId: string,
+    name?: string,
+    namespace?: string
+  ): Promise<boolean> {
+    try {
+      const deployer = this.getTemplateDeployer(templateId);
+      return await deployer.isDeployed(
+        name || templateId,
+        namespace || 'default'
+      );
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Get template deployment status
+   */
+  async getTemplateStatus(
+    templateId: string,
+    name?: string,
+    namespace?: string
+  ): Promise<'deployed' | 'deploying' | 'failed' | 'not-found'> {
+    try {
+      const deployer = this.getTemplateDeployer(templateId);
+      return await deployer.getStatus(
+        name || templateId,
+        namespace || 'default'
+      );
+    } catch (error) {
+      return 'not-found';
+    }
+  }
+
+  /**
+   * Wait for template to be ready
+   */
+  async waitForTemplate(
+    templateId: string,
+    name?: string,
+    namespace?: string,
+    timeoutMs: number = 300000
+  ): Promise<void> {
+    try {
+      const deployer = this.getTemplateDeployer(templateId);
+      await deployer.waitForReady(
+        name || templateId,
+        namespace || 'default',
+        timeoutMs
+      );
+    } catch (error) {
+      this.log(`✗ Template wait failed: ${error}`);
+      throw error;
+    }
+  }
+
+  private getTemplateDeployer(templateId: string): BaseTemplateDeployer {
+    if (!this.templateDeployers.has(templateId)) {
+      let deployer: BaseTemplateDeployer;
+      
+      switch (templateId) {
+        case 'minio':
+          deployer = new MinioDeployer(this.kubeClient, (m) => this.log(m));
+          break;
+        case 'ollama':
+          deployer = new OllamaDeployer(this.kubeClient, (m) => this.log(m));
+          break;
+        case 'postgres':
+          // Use existing PostgresDeployer wrapped in template interface
+          if (!this.pg) {
+            this.pg = new PostgresDeployer(this.kubeClient, this.setupClient, (m) => this.log(m));
+          }
+          // Create a wrapper for postgres deployer to match template interface
+          deployer = new PostgresTemplateWrapper(this.pg, this.kubeClient, (m) => this.log(m));
+          break;
+        default:
+          throw new Error(`Unknown template: ${templateId}`);
+      }
+      
+      this.templateDeployers.set(templateId, deployer);
+    }
+    
+    return this.templateDeployers.get(templateId)!;
   }
 
   /**

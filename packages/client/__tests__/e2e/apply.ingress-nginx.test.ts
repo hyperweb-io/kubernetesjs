@@ -1,6 +1,8 @@
 import { InterwebClient as InterwebKubernetesClient } from "@interweb/interwebjs";
 import { getOperatorResources } from "@interweb/manifests";
 import { SetupClient } from "../../src/setup";
+import { ensureNamespaceReady, ensureNamespaceExists, forceDeleteNamespace } from "../utils/test-utils";
+import { globalCleanup } from "../setup/e2e-setup";
 
 jest.setTimeout(10 * 60 * 1000); // up to 10 minutes for full operator
 
@@ -11,23 +13,24 @@ describe("FULL APPLY: ingress-nginx operator", () => {
   const api = new InterwebKubernetesClient({ restEndpoint: K8S_API } as any);
   const setup = new SetupClient(api as any);
 
-  async function ensureNamespaceAbsent(name: string) {
+  beforeAll(async () => {
+    // Ensure namespace exists before starting tests
+    await ensureNamespaceExists(api as any, nsName);
+    
+    // Register cleanup for the namespace
+    globalCleanup.register(async () => {
+      await forceDeleteNamespace(api as any, nsName);
+    });
+  });
+
+  afterAll(async () => {
+    // Clean up the namespace after tests
     try {
-      await api.deleteCoreV1Namespace({ path: { name }, query: {} as any });
-      await new Promise((r) => setTimeout(r, 2000));
+      await forceDeleteNamespace(api as any, nsName);
     } catch (err: any) {
-      const msg = String(err?.message || "");
-      if (!/404/.test(msg)) throw err;
+      console.warn(`Failed to cleanup namespace ${nsName}:`, err.message);
     }
-  }
-
-  // beforeAll(async () => {
-  //   await ensureNamespaceAbsent(nsName);
-  // });
-
-  // afterAll(async () => {
-  //   await ensureNamespaceAbsent(nsName);
-  // });
+  });
 
   it("applies all ingress-nginx manifests", async () => {
     const connected = await setup.checkConnection();
@@ -39,10 +42,15 @@ describe("FULL APPLY: ingress-nginx operator", () => {
     const manifests = getOperatorResources("ingress-nginx");
     await setup.applyManifests(manifests);
 
-    const ns = await api.readCoreV1Namespace({
-      path: { name: nsName },
-      query: {} as any,
-    });
+    // Wait a moment for namespace to be created by manifests
+    await new Promise(r => setTimeout(r, 2000));
+
+    // Ensure namespace exists after applying manifests
+    await ensureNamespaceExists(api as any, nsName);
+
+    const res = await api.listCoreV1Namespace({ query: {} as any });
+    const namespaces = res?.items || [];
+    const ns = namespaces.find((n: any) => n?.metadata?.name === nsName);
     expect(ns?.metadata?.name).toBe(nsName);
   });
 });

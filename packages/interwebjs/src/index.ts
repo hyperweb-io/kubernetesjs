@@ -39098,7 +39098,7 @@ export class InterwebClient extends APIClient {
   }
   async listCoreV1NamespacedService(params: ListCoreV1NamespacedServiceRequest, opts?: APIClientRequestOpts): Promise<ServiceList> {
     const path = `/api/v1/namespaces/${params.path.namespace}/services`;
-    return await this.get<ServiceList>(path, null, null, opts);
+    return await this.get<ServiceList>(path, params.query, null, opts);
   }
   async createCoreV1NamespacedService(params: CreateCoreV1NamespacedServiceRequest, opts?: APIClientRequestOpts): Promise<Service> {
     const path = `/api/v1/namespaces/${params.path.namespace}/services`;
@@ -39986,7 +39986,7 @@ export class InterwebClient extends APIClient {
   }
   async listAppsV1NamespacedDeployment(params: ListAppsV1NamespacedDeploymentRequest, opts?: APIClientRequestOpts): Promise<AppsV1DeploymentList> {
     const path = `/apis/apps/v1/namespaces/${params.path.namespace}/deployments`;
-    return await this.get<AppsV1DeploymentList>(path, null, null, opts);
+    return await this.get<AppsV1DeploymentList>(path, params.query, null, opts);
   }
   async createAppsV1NamespacedDeployment(params: CreateAppsV1NamespacedDeploymentRequest, opts?: APIClientRequestOpts): Promise<AppsV1Deployment> {
     const path = `/apis/apps/v1/namespaces/${params.path.namespace}/deployments`;

@@ -1,8 +1,9 @@
 export * from './types';
 export * from './config-loader';
 export * from './setup';
-export * from './postgres';
+export * from './deployers/postgres';
 export * from './client';
+export * from './deployers';
 
 // Re-export main classes for convenience
 export { Client } from './client';

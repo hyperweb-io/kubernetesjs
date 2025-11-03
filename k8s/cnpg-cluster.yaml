@@ -60,8 +60,8 @@ spec:
       database: postgres
       owner: postgres
       encoding: UTF8
-      localeCollate: en_US.UTF-8
-      localeCType: en_US.UTF-8
+      localeCollate: C.UTF-8
+      localeCType: C.UTF-8
       postInitSQL:
         - "CREATE USER appuser WITH PASSWORD 'appuser123!' CREATEDB;"
         - "GRANT CREATE ON DATABASE postgres TO appuser;"

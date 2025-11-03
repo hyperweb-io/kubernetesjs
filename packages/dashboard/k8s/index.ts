@@ -2685,7 +2685,7 @@ export function useCreateCoreV1NamespacedServiceAccountToken() {
 export function useListCoreV1NamespacedServiceQuery(params: ListCoreV1NamespacedServiceRequest) {
   const client = useKubernetes().client;
   return useQuery<ServiceList, Error>({
-    queryKey: [...API_V1_NAMESPACES_NAMESPACE_SERVICES_KEY, params.path.namespace],
+    queryKey: [...API_V1_NAMESPACES_NAMESPACE_SERVICES_KEY, params.path.namespace, params.query],
     queryFn: async () => {
       return await client.listCoreV1NamespacedService(params);
     },
@@ -4777,7 +4777,7 @@ export function usePatchAppsV1NamespacedDaemonSetStatus() {
 export function useListAppsV1NamespacedDeploymentQuery(params: ListAppsV1NamespacedDeploymentRequest) {
   const client = useKubernetes().client;
   return useQuery<DeploymentList, Error>({
-    queryKey: [...APIS_APPS_V1_NAMESPACES_NAMESPACE_DEPLOYMENTS_KEY, params.path.namespace],
+    queryKey: [...APIS_APPS_V1_NAMESPACES_NAMESPACE_DEPLOYMENTS_KEY, params.path.namespace, params.query],
     queryFn: async () => {
       return await client.listAppsV1NamespacedDeployment(params);
     },
