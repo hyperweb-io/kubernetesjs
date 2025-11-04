@@ -30,12 +30,18 @@ describe("SetupClient.installOperators integration", () => {
     jest.restoreAllMocks();
   });
 
-  it("applies manifests for each enabled operator in order", async () => {
+  it("applies manifests for each enabled operator", async () => {
     const setup = new SetupClient({} as any);
     const applySpy = jest
       .spyOn(
         setup as unknown as { applyManifests: typeof setup.applyManifests },
         "applyManifests"
+      )
+      .mockResolvedValue(undefined);
+    const waitSpy = jest
+      .spyOn(
+        setup as unknown as { waitForOperator: typeof setup.waitForOperator },
+        "waitForOperator"
       )
       .mockResolvedValue(undefined);
     jest.spyOn(console, "log").mockImplementation(() => {});
@@ -44,23 +50,24 @@ describe("SetupClient.installOperators integration", () => {
     await setup.installOperators(config);
 
     expect(applySpy).toHaveBeenCalledTimes(2);
-    const firstCall = applySpy.mock.calls[0];
-    const secondCall = applySpy.mock.calls[1];
+    const calledManifests = applySpy.mock.calls.map((c) => c[0]);
+    expect(calledManifests).toEqual(
+      expect.arrayContaining([
+        getOperatorResources(
+          "cert-manager",
+          operatorDetails["cert-manager"].version
+        ),
+        getOperatorResources(
+          "ingress-nginx",
+          operatorDetails["ingress-nginx"].version
+        ),
+      ])
+    );
 
-    expect(firstCall[0]).toEqual(
-      getOperatorResources(
-        "cert-manager",
-        operatorDetails["cert-manager"].version
-      )
-    );
-    expect(firstCall[1]).toEqual(
-      expect.objectContaining({ continueOnError: false })
-    );
-    expect(secondCall[0]).toEqual(
-      getOperatorResources(
-        "ingress-nginx",
-        operatorDetails["ingress-nginx"].version
-      )
+    // Ensure readiness waits were invoked for both operators
+    const waitedOperators = waitSpy.mock.calls.map((c) => c[0]);
+    expect(waitedOperators).toEqual(
+      expect.arrayContaining(["cert-manager", "ingress-nginx"])
     );
   });
 

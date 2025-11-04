@@ -1,0 +1,28 @@
+apiVersion: interweb.dev/v1
+kind: ClusterSetup
+metadata:
+  name: dev-cluster
+spec:
+  operators:
+    - name: knative-serving
+      version: v1.15.0
+      enabled: true
+    - name: cloudnative-pg
+      version: 1.25.2
+      enabled: true
+    - name: cert-manager
+      version: v1.17.0
+      enabled: true
+    - name: ingress-nginx
+      enabled: true
+  monitoring:
+    enabled: false
+    prometheus:
+      retention: 7d
+      storage: 1Gi
+    grafana:
+      adminPassword: admin
+      persistence: 1Gi
+  networking:
+    ingressClass: nginx
+    domain: 127.0.0.1.nip.io

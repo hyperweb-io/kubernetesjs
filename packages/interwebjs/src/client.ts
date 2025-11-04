@@ -112,6 +112,11 @@ export class APIClient {
   }
 
   private buildFullPath(endpoint: string, query?: { [key: string]: any }): string {
+    // Check if baseUrl is defined
+    if (!this.baseUrl) {
+      throw new Error('APIClient: restEndpoint is required but was not provided in options');
+    }
+    
     // If baseUrl is a relative proxy path (e.g. '/api/k8s'), build manually
     if (this.baseUrl.startsWith('/')) {
       // Remove any trailing slash from baseUrl, ensure endpoint starts with '/'
