@@ -10,6 +10,7 @@ import { StatusIndicator } from './status-indicator'
 import { TemplateDialog } from '@/components/templates/template-dialog'
 import { useTemplateInstalled } from '@/hooks/use-templates'
 import type { Template } from '@/components/templates/templates'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 type TemplateStatus = 'all' | 'installed' | 'not-installed' | 'installing' | 'error'
 
@@ -22,6 +23,8 @@ export function TemplateCard({ template, onStatusChange }: TemplateCardProps) {
   const [showDialog, setShowDialog] = useState(false)
   const [isToggling, setIsToggling] = useState(false)
   const { isInstalled, isLoading, status, refetch, namespace } = useTemplateInstalled(template.id)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [confirmAction, setConfirmAction] = useState<'install' | 'uninstall' | null>(null)
 
   // Notify parent component of status changes
   useEffect(() => {
@@ -32,36 +35,53 @@ export function TemplateCard({ template, onStatusChange }: TemplateCardProps) {
 
   const handleToggle = async (checked: boolean) => {
     console.log(`[TemplateCard] ${template.id} - Toggle clicked:`, { checked, isInstalled, isToggling })
-    setIsToggling(true)
+    if (isToggling) return
+    // Removed pendingChecked to avoid unused variable
+
+    if (checked && !isInstalled) {
+      // Ask for confirmation before opening deployment dialog
+      setConfirmAction('install')
+      setConfirmOpen(true)
+    } else if (!checked && isInstalled) {
+      // Ask for confirmation before uninstalling
+      setConfirmAction('uninstall')
+      setConfirmOpen(true)
+    }
+  }
+
+  const handleConfirm = async () => {
+    if (!confirmAction) return
+
     try {
-      if (checked && !isInstalled) {
-        console.log(`[TemplateCard] ${template.id} - Opening deployment dialog`)
+      if (confirmAction === 'install') {
+        // Show a brief processing state and then open the setup dialog
+        setIsToggling(true)
         setShowDialog(true)
-      } else if (!checked && isInstalled) {
+        await new Promise(resolve => setTimeout(resolve, 300))
+        setIsToggling(false)
+      } else if (confirmAction === 'uninstall' && isInstalled) {
+        setIsToggling(true)
         console.log(`[TemplateCard] ${template.id} - Starting uninstall`)
-        // Handle uninstall using new API with correct deployment name
         const deploymentName = `${template.id}-deployment`
         const response = await fetch(`/api/templates/${template.id}?namespace=${namespace}&name=${deploymentName}`, {
           method: 'DELETE',
         })
         if (response.ok) {
           console.log(`[TemplateCard] ${template.id} - Uninstall successful, refetching status`)
-          // Add a delay to allow backend to process the deletion
-          // before refetching the status
           await new Promise(resolve => setTimeout(resolve, 1000))
           await refetch()
         } else {
           console.error(`[TemplateCard] ${template.id} - Uninstall failed:`, response.status, response.statusText)
-          // Handle error response
           const errorData = await response.json().catch(() => ({}))
           throw new Error(errorData.message || 'Failed to uninstall template')
         }
       }
     } catch (error) {
-      console.error(`[TemplateCard] ${template.id} - Failed to toggle template:`, error)
-      // Keep the toggle in loading state a bit longer on error to show something went wrong
+      console.error(`[TemplateCard] ${template.id} - Confirmation action failed:`, error)
       await new Promise(resolve => setTimeout(resolve, 500))
     } finally {
+      setConfirmOpen(false)
+      setConfirmAction(null)
       setIsToggling(false)
     }
   }
@@ -151,6 +171,15 @@ export function TemplateCard({ template, onStatusChange }: TemplateCardProps) {
             refetch()
           }
         }}
+      />
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={confirmAction === 'uninstall' ? `Uninstall ${template.name}?` : `Install ${template.name}?`}
+        description={confirmAction === 'uninstall' ? 'This will remove the deployment and its resources. You can reinstall later.' : 'We will open the setup dialog to configure deployment options.'}
+        confirmText={confirmAction === 'uninstall' ? 'Uninstall' : 'Continue'}
+        confirmVariant={confirmAction === 'uninstall' ? 'destructive' : 'default'}
+        onConfirm={handleConfirm}
       />
     </>
   )
