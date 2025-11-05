@@ -481,7 +481,13 @@ export class K8sApplier {
         msg.includes('connect: connection refused') ||
         msg.includes('context deadline exceeded') ||
         msg.includes('no endpoints available for service') ||
-        /status:\s*500/.test(msg)
+        msg.includes('connection reset by peer') ||
+        msg.includes('i/o timeout') ||
+        msg.includes('tls handshake timeout') ||
+        /status:\s*500/.test(msg) ||
+        /status:\s*502/.test(msg) ||
+        /status:\s*503/.test(msg) ||
+        /status:\s*504/.test(msg)
       )
     );
   }

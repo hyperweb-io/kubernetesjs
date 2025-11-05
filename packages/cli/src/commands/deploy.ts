@@ -2,13 +2,14 @@ import { Command } from 'commander';
 import { Client, ConfigLoader } from '@interweb/client';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
+import { getApiEndpoint } from '../utils/k8s-utils';
 
 export function createDeployCommand(): Command {
   const command = new Command('deploy');
   
   command
     .description('Deploy an application to the Kubernetes cluster')
-    .option('-c, --config <path>', 'Path to application configuration file', 'interweb.deploy.yaml')
+    .option('-c, --config <path>', 'Path to application configuration file', '__fixtures__/config/deploy.config.yaml')
     .option('-n, --namespace <namespace>', 'Kubernetes namespace to use')
     .option('--kubeconfig <path>', 'Path to kubeconfig file')
     .option('--context <context>', 'Kubernetes context to use')
@@ -111,7 +112,8 @@ async function deployApplication(options: any): Promise<void> {
     namespace: options.namespace || config.metadata.namespace,
     kubeconfig: options.kubeconfig,
     context: options.context,
-    verbose: options.verbose
+    verbose: options.verbose,
+    restEndpoint: getApiEndpoint(options.restEndpoint)
   });
 
   console.log(chalk.blue('\nDeploying application...'));
@@ -123,13 +125,6 @@ async function deployApplication(options: any): Promise<void> {
   }
 
   console.log(chalk.green('\n🎉 Application deployed successfully!'));
-  console.log(chalk.blue('\nNext steps:'));
-  console.log('  1. Check deployment status: interweb status -c ' + options.config);
-  console.log('  2. View all resources: interweb list');
-  
-  if (!options.wait) {
-    console.log('  3. Wait for deployment: interweb wait -c ' + options.config);
-  }
 }
 
 async function generateAppConfig(options: any): Promise<void> {

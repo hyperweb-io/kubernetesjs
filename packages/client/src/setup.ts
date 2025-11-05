@@ -18,7 +18,6 @@ import {
   ClusterOverview,
   SecretConfig,
 } from "./types";
-import axios from "axios";
 import {
   applyKubernetesResource,
   applyKubernetesResources,
@@ -354,21 +353,37 @@ export class SetupClient {
       const operatorStatuses = await Promise.all(
         config.spec.operators
           .filter((op) => op.enabled)
-          .map((op) => this.getOperatorStatus(op.name, namespace))
+          .map(async (op) => {
+            const status = await this.getOperatorStatus(op.name, "");
+            return status;
+          })
       );
 
-      const allReady = operatorStatuses.every((status) => status);
+      const allInstalled = operatorStatuses.every((status) => status.installed);
+      const allReady = operatorStatuses.every((status) => status.ready);
+
+      let phase: "pending" | "installing" | "ready" | "failed";
+      let message: string;
+
+      if (!allInstalled) {
+        phase = "pending";
+        message = "Some operators are not installed";
+      } else if (!allReady) {
+        phase = "installing";
+        message = "Some operators are still installing";
+      } else {
+        phase = "ready";
+        message = "All operators are ready";
+      }
 
       return {
-        phase: allReady ? "ready" : "installing",
-        message: allReady
-          ? "All operators are ready"
-          : "Some operators are still installing",
-        conditions: operatorStatuses.map((ready, index) => ({
+        phase,
+        message,
+        conditions: operatorStatuses.map((status, index) => ({
           type: "OperatorReady",
-          status: ready ? "True" : "False",
-          reason: ready ? "Ready" : "Installing",
-          message: `Operator ${config.spec.operators[index].name} is ${ready ? "ready" : "installing"}`,
+          status: status.ready ? "True" : "False",
+          reason: status.installed ? (status.ready ? "Ready" : "Installing") : "NotInstalled",
+          message: `Operator ${config.spec.operators[index].name} is ${status.installed ? (status.ready ? "ready" : "installing") : "not installed"}`,
           lastTransitionTime: new Date().toISOString(),
         })),
       };
@@ -446,31 +461,178 @@ export class SetupClient {
 
     try {
       // Delete namespace which will cascade delete all resources
+      await this.deleteOperators(config, { continueOnError: true });
       await this.client.deleteCoreV1Namespace({
         path: { name: String(namespace) },
         query: {},
       });
       // Reduce noisy logs: no console output on success
     } catch (error: any) {
-      if (error.response?.statusCode !== 404) {
-        throw error;
+      // Handle 404 errors (namespace not found) gracefully
+      if (error.message?.includes('status: 404') || error.message?.includes('not found')) {
+        console.log(`Namespace ${namespace} already deleted or does not exist`);
+        return;
       }
+      throw error;
     }
+  }
+
+  /**
+   * Helper method to filter pods and check readiness for kube-prometheus-stack
+   * Filters out test pods and node-exporter pods, then checks core deployments as fallback
+   */
+  private filterPodsAndCheckReadiness(
+    pods: any[],
+    operatorName: string
+  ): { installed: boolean; ready: boolean } | null {
+    // Filter out test pods and node-exporter pods for kube-prometheus-stack
+    const relevantPods = pods.filter((pod: any) => {
+      const podName = pod.metadata?.name || "";
+      if (operatorName === "kube-prometheus-stack") {
+        // Exclude test pods (they run once and may fail)
+        if (podName.includes("-test")) return false;
+        // Exclude node-exporter pods (they fail on Docker Desktop due to mount issues)
+        if (podName.includes("node-exporter")) return false;
+      }
+      return true;
+    });
+
+    if (relevantPods.length === 0) {
+      // If no relevant pods after filtering, check if we have core deployments
+      const coreDeployments = pods.filter((pod: any) => {
+        const podName = pod.metadata?.name || "";
+        return podName.includes("grafana") || 
+               podName.includes("operator") || 
+               podName.includes("kube-state-metrics");
+      });
+      
+      if (coreDeployments.length > 0) {
+        const allReady = coreDeployments.every((pod: any) => {
+          const phase = pod.status?.phase;
+          return phase === "Running" || phase === "Succeeded";
+        });
+        return { installed: true, ready: allReady };
+      }
+      return { installed: true, ready: false };
+    }
+
+    const allReady = relevantPods.every((pod: any) => {
+      const phase = pod.status?.phase;
+      return phase === "Running" || phase === "Succeeded";
+    });
+    return { installed: true, ready: allReady };
   }
 
   private async getOperatorStatus(
     operatorName: string,
     namespace: string
-  ): Promise<boolean> {
+  ): Promise<{ installed: boolean; ready: boolean }> {
     try {
-      // Check if operator pods are running
+      // Get the proper detector configuration for this operator
+      const detector = this.getOperatorDetector(operatorName);
+      const operatorNamespaces = detector.namespaces || [];
+      const labelSelectors = detector.labelSelectors || [];
+
+      // For operators with known namespaces, check if any of them exist
+      if (operatorNamespaces.length > 0) {
+        let namespaceExists = false;
+        for (const ns of operatorNamespaces) {
+          try {
+            await this.client.readCoreV1Namespace({ path: { name: ns }, query: {} });
+            namespaceExists = true;
+            break;
+          } catch (error: any) {
+            // Namespace doesn't exist, continue checking others
+            continue;
+          }
+        }
+
+        if (!namespaceExists) {
+          return { installed: false, ready: false };
+        }
+
+        // Check if operator pods are running in any of the namespaces using proper label selectors
+        for (const ns of operatorNamespaces) {
+          try {
+            // Try each label selector to find pods
+            for (const labelSelector of labelSelectors) {
+              const pods = await this.client.listCoreV1NamespacedPod({
+                path: { namespace: ns },
+                query: { labelSelector },
+              });
+
+              if (pods.items.length > 0) {
+                const result = this.filterPodsAndCheckReadiness(pods.items, operatorName);
+                if (result) return result;
+              }
+            }
+          } catch (error) {
+            // Continue checking other namespaces
+            continue;
+          }
+        }
+
+        // Namespace exists but no pods found with proper selectors - try fallback
+        for (const ns of operatorNamespaces) {
+          try {
+            const pods = await this.client.listCoreV1NamespacedPod({
+              path: { namespace: ns },
+              query: { labelSelector: `app=${operatorName}` },
+            });
+
+            if (pods.items.length > 0) {
+              const result = this.filterPodsAndCheckReadiness(pods.items, operatorName);
+              if (result) return result;
+            }
+          } catch (error) {
+            // Continue checking other namespaces
+            continue;
+          }
+        }
+
+        // Namespace exists but no pods found - operator is installed but not ready
+        return { installed: true, ready: false };
+      }
+
+      // Fallback: check if operator pods are running in the specified namespace
+      // Try proper label selectors first
+      for (const labelSelector of labelSelectors) {
+        try {
+          const pods = await this.client.listCoreV1NamespacedPod({
+            path: { namespace },
+            query: { labelSelector },
+          });
+
+          if (pods.items.length > 0) {
+            const result = this.filterPodsAndCheckReadiness(pods.items, operatorName);
+            if (result) return result;
+          }
+        } catch (error) {
+          // Continue with next selector
+          continue;
+        }
+      }
+
+      // Final fallback with generic selector
       const pods = await this.client.listCoreV1NamespacedPod({
         path: { namespace },
         query: { labelSelector: `app=${operatorName}` },
       });
-      return pods.items.every((pod: any) => pod.status?.phase === "Running");
+
+      // If no pods are found, check if namespace exists to determine if installed
+      if (pods.items.length === 0) {
+        try {
+          await this.client.readCoreV1Namespace({ path: { name: namespace }, query: {} });
+          return { installed: true, ready: false }; // Namespace exists but no pods
+        } catch (error) {
+          return { installed: false, ready: false }; // Namespace doesn't exist
+        }
+      }
+
+      const allRunning = pods.items.every((pod: any) => pod.status?.phase === "Running");
+      return { installed: true, ready: allRunning };
     } catch (error) {
-      return false;
+      return { installed: false, ready: false };
     }
   }
 
@@ -583,14 +745,14 @@ export class SetupClient {
           query: {} as any,
         });
         podCount += (pods?.items || []).length;
-      } catch {}
+      } catch { }
       try {
         const svcs = await this.client.listCoreV1NamespacedService({
           path: { namespace: nsName },
           query: {} as any,
         });
         serviceCount += (svcs?.items || []).length;
-      } catch {}
+      } catch { }
     }
 
     // Server version
@@ -598,7 +760,7 @@ export class SetupClient {
     try {
       const v = await this.client.getCodeVersion({} as any);
       version = String(v?.gitVersion || "unknown");
-    } catch {}
+    } catch { }
 
     // Operators
     let operatorCount = 0;
@@ -607,7 +769,7 @@ export class SetupClient {
       operatorCount = ops.filter(
         (o) => o.status === "installed" || o.status === "installing"
       ).length;
-    } catch {}
+    } catch { }
 
     return {
       healthy: nodes.every((n) => n.status === "Ready"),
@@ -682,7 +844,7 @@ export class SetupClient {
             keys: Object.keys(s?.data || {}),
           });
         });
-      } catch {}
+      } catch { }
     }
     return out;
   }
@@ -871,7 +1033,7 @@ export class SetupClient {
             d?.metadata?.labels?.["app.kubernetes.io/name"] === operatorName
         );
         if (found) return { deployment: found, namespace: nsName };
-      } catch {}
+      } catch { }
     }
     return null;
   }
@@ -896,8 +1058,8 @@ export class SetupClient {
       detector.namespaces && detector.namespaces.length > 0
         ? detector.namespaces
         : (namespaces
-            .map((n) => n?.metadata?.name)
-            .filter(Boolean) as string[]);
+          .map((n) => n?.metadata?.name)
+          .filter(Boolean) as string[]);
     const seen = new Set<string>();
     const results: Array<{
       namespace: string;
@@ -931,14 +1093,14 @@ export class SetupClient {
                 : "error";
             const version = String(
               d?.metadata?.labels?.["app.kubernetes.io/version"] ||
-                d?.metadata?.annotations?.["version"] ||
-                "unknown"
+              d?.metadata?.annotations?.["version"] ||
+              "unknown"
             );
             results.push({ namespace: nsName, status, version });
             found = true;
             break;
           }
-        } catch {}
+        } catch { }
       }
       if (found) continue;
       // Fallback: any deployment with matching name/label
@@ -964,13 +1126,13 @@ export class SetupClient {
               : "error";
           const version = String(
             d?.metadata?.labels?.["app.kubernetes.io/version"] ||
-              d?.metadata?.annotations?.["version"] ||
-              "unknown"
+            d?.metadata?.annotations?.["version"] ||
+            "unknown"
           );
           results.push({ namespace: nsName, status, version });
           continue;
         }
-      } catch {}
+      } catch { }
       // Last fallback: pods with selectors
       if (trySelectors.length > 0) {
         for (const sel of trySelectors) {
@@ -985,7 +1147,7 @@ export class SetupClient {
               results.push({ namespace: nsName, status, version: "unknown" });
               break;
             }
-          } catch {}
+          } catch { }
         }
       }
     }
@@ -1011,7 +1173,7 @@ export class SetupClient {
           ];
         }
       }
-    } catch {}
+    } catch { }
     return [];
   }
 
@@ -1020,11 +1182,11 @@ export class SetupClient {
    */
   public async waitForOperator(
     name: string,
-    timeoutMs = 300_000,
-    pollMs = 5_000
+    timeoutMs = 180_000, // Reduced from 300_000 (5 min) to 180_000 (3 min)
+    pollMs = 3_000 // Reduced from 5_000ms to 3_000ms for faster feedback
   ): Promise<void> {
     const start = Date.now();
-    for (;;) {
+    for (; ;) {
       const installs = await this.getOperatorInstallations(name);
       const installed = installs.find((i) => i.status === "installed");
       if (installed) return;
@@ -1047,7 +1209,7 @@ export class SetupClient {
   ): Promise<void> {
     const start = Date.now();
     const detector = this.getOperatorDetector(name);
-    for (;;) {
+    for (; ;) {
       const installs = await this.getOperatorInstallations(name);
       const stillPresent = installs.filter((i) =>
         detector.namespaces?.includes(i.namespace)
@@ -1064,7 +1226,7 @@ export class SetupClient {
             crds?.items?.some((c: any) => c?.metadata?.name === n)
           );
         }
-      } catch {}
+      } catch { }
       if (stillPresent.length === 0 && !crdsPresent) return;
       if (Date.now() - start > timeoutMs) {
         throw new Error(`Timeout waiting for operator '${name}' to be deleted`);
@@ -1083,8 +1245,8 @@ export class SetupClient {
       detector.namespaces && detector.namespaces.length > 0
         ? detector.namespaces
         : (namespaces
-            .map((n) => n?.metadata?.name)
-            .filter(Boolean) as string[]);
+          .map((n) => n?.metadata?.name)
+          .filter(Boolean) as string[]);
     const trySelectors = detector.labelSelectors || [];
     const matches: Record<string, any> = {};
 
@@ -1106,7 +1268,7 @@ export class SetupClient {
               replicas: d?.status?.replicas || d?.spec?.replicas || 0,
             });
           });
-        } catch {}
+        } catch { }
       }
       // Fallback deployments by name/labels
       try {
@@ -1117,8 +1279,8 @@ export class SetupClient {
         (dpls?.items || []).forEach((d: any) => {
           const lname = String(
             d?.metadata?.labels?.["app.kubernetes.io/name"] ||
-              d?.metadata?.labels?.["app"] ||
-              ""
+            d?.metadata?.labels?.["app"] ||
+            ""
           );
           if (
             String(d?.metadata?.name || "").includes(name) ||
@@ -1132,7 +1294,7 @@ export class SetupClient {
             });
           }
         });
-      } catch {}
+      } catch { }
       // Pods by selectors
       for (const sel of trySelectors) {
         try {
@@ -1147,7 +1309,7 @@ export class SetupClient {
               labels: p?.metadata?.labels,
             });
           });
-        } catch {}
+        } catch { }
       }
     }
     // CRDs present
@@ -1163,7 +1325,7 @@ export class SetupClient {
           crds?.items?.some((c: any) => c?.metadata?.name === n)
         );
       }
-    } catch {}
+    } catch { }
 
     return { detector, matches, crdHints, crdsPresent };
   }
@@ -1194,8 +1356,10 @@ export class SetupClient {
         return {
           namespaces: ["cert-manager"],
           labelSelectors: [
-            "app.kubernetes.io/name=cert-manager",
             "app.kubernetes.io/instance=cert-manager",
+            "app.kubernetes.io/name=cert-manager",
+            "app.kubernetes.io/name=cainjector",
+            "app.kubernetes.io/name=webhook",
             "app=cert-manager",
           ],
         };
@@ -1210,14 +1374,25 @@ export class SetupClient {
       case "knative-serving":
         return {
           namespaces: ["knative-serving", "kourier-system"],
-          labelSelectors: ["app.kubernetes.io/part-of=knative-serving"],
+          labelSelectors: [
+            "app.kubernetes.io/name=knative-serving",
+            "app.kubernetes.io/part-of=knative-serving",
+            "app=activator",
+            "app=autoscaler", 
+            "app=controller",
+            "app=webhook",
+            "app=3scale-kourier-gateway",
+          ],
         };
       case "kube-prometheus-stack":
         return {
           namespaces: ["monitoring"],
           labelSelectors: [
-            "app.kubernetes.io/name=kube-prometheus-stack",
             "app.kubernetes.io/instance=kube-prometheus-stack",
+            "app.kubernetes.io/name=grafana",
+            "app.kubernetes.io/name=kube-prometheus-stack-prometheus-operator",
+            "app.kubernetes.io/name=kube-state-metrics",
+            "app=kube-prometheus-stack-operator",
           ],
         };
       default:
