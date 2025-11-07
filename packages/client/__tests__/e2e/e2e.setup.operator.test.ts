@@ -106,10 +106,9 @@ describe("SetupClient E2E (matrix): install operators", () => {
     // Verify namespaces exist for each operator
     for (const op of operators) {
       const ns = DEFAULT_NAMESPACES[op.name] || op.namespace || op.name;
-      const got = await api.readCoreV1Namespace({
-        path: { name: ns },
-        query: {} as any,
-      });
+      const res = await api.listCoreV1Namespace({ query: {} as any });
+      const namespaces = res?.items || [];
+      const got = namespaces.find((n: any) => n?.metadata?.name === ns);
       expect(got?.metadata?.name).toBe(ns);
     }
   });

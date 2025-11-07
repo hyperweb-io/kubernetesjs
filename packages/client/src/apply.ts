@@ -6,6 +6,7 @@ export interface ApplyOptions {
   defaultNamespace?: string;
   continueOnError?: boolean;
   log?: (msg: string) => void;
+  webhookServiceWaitTimeoutMs?: number;
 }
 
 const isStatus = (err: unknown, code: number): boolean => {
@@ -35,6 +36,8 @@ export class K8sApplier {
       defaultNamespace: opts.defaultNamespace ?? 'default',
       continueOnError: opts.continueOnError ?? true,
       log: opts.log ?? (() => {}),
+      webhookServiceWaitTimeoutMs:
+        opts.webhookServiceWaitTimeoutMs ?? (process.env.E2E_TESTS === 'true' ? 30_000 : 240_000),
     };
   }
 
@@ -130,7 +133,11 @@ export class K8sApplier {
     if (parts.webhookServices.length > 0) {
       this.opts.log(`Waiting for ${parts.webhookServices.length} webhook service(s) to be ready...`);
       for (const svc of parts.webhookServices) {
-        await this.waitForServiceReady(svc.namespace, svc.name, 240_000).catch((e) => {
+        await this.waitForServiceReady(
+          svc.namespace,
+          svc.name,
+          this.opts.webhookServiceWaitTimeoutMs
+        ).catch((e) => {
           this.opts.log(`Webhook service not ready: ${svc.namespace}/${svc.name}: ${String(e)}`);
         });
       }

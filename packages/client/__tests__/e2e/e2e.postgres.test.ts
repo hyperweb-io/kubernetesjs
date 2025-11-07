@@ -1,13 +1,15 @@
 import { InterwebClient as InterwebKubernetesClient } from "@interweb/interwebjs";
 import { SetupClient } from "../../src/setup";
 import { Client } from "../../src/client";
-import { PostgresDeployer } from "../../src/postgres";
+import { PostgresDeployer } from "../../src/deployers/postgres";
 import type { ClusterSetupConfig, OperatorConfig } from "../../src/types";
+import { ensureNamespaceReady, ensureNamespaceExists, forceDeleteNamespace, cleanupNamespaces } from "../utils/test-utils";
+import { globalCleanup } from "../setup/e2e-setup";
 
 // E2E for deploying a PostgreSQL database using CloudNativePG via @client
 // Requires a running kubectl proxy or direct API; CI sets K8S_API
 
-jest.setTimeout(20 * 60 * 1000);
+jest.setTimeout(15 * 60 * 1000); // 15 minutes for postgres tests
 
 const K8S_API = process.env.K8S_API || "http://127.0.0.1:8001";
 
@@ -26,6 +28,45 @@ describe("Postgres deploy (CloudNativePG) end-to-end", () => {
   const dbNs = "postgres-db";
   const clusterName = "postgres-cluster";
   const poolerName = "postgres-pooler";
+
+  // Configuration for CNPG operator installation
+  const cfg: ClusterSetupConfig = {
+    apiVersion: "interweb.dev/v1",
+    kind: "ClusterSetup",
+    metadata: { name: "e2e-cnpg-install", namespace: "interweb-system" },
+    spec: {
+      operators: [{
+        name: "cloudnative-pg",
+        version: CNPG_VERSION,
+        enabled: true,
+        namespace: CNPG_NAMESPACE,
+      } as OperatorConfig],
+      networking: { ingressClass: "nginx", domain: "127.0.0.1.nip.io" },
+    },
+  };
+
+  beforeAll(async () => {
+    // Ensure namespaces exist and are ready
+    await ensureNamespaceExists(api as any, CNPG_NAMESPACE);
+    await ensureNamespaceExists(api as any, dbNs);
+    
+    // Register cleanup for both namespaces
+    globalCleanup.register(async () => {
+      await cleanupNamespaces(api as any, [CNPG_NAMESPACE, dbNs]);
+    });
+
+    // Install operators (now handles namespace readiness internally)
+    await setup.installOperators(cfg);
+  });
+
+  afterAll(async () => {
+    // Clean up test resources
+    try {
+      await forceDeleteNamespace(api as any, dbNs);
+    } catch (err: any) {
+      console.warn(`Failed to cleanup namespace ${dbNs}:`, err.message);
+    }
+  });
 
   it("installs CNPG operator and deploys Postgres (basic readiness)", async () => {
     const connected = await setup.checkConnection();
@@ -50,7 +91,15 @@ describe("Postgres deploy (CloudNativePG) end-to-end", () => {
         networking: { ingressClass: "nginx", domain: "127.0.0.1.nip.io" },
       },
     };
+    // Ensure namespace is ready right before operator installation
+    console.log("Ensuring CNPG namespace is ready before operator installation...");
+    await ensureNamespaceExists(api as any, CNPG_NAMESPACE);
+    
     await setup.installOperators(cfg);
+
+    // Wait for operator to be fully ready and CRDs to be registered
+    console.log("Waiting for CNPG operator to be ready...");
+    await new Promise(resolve => setTimeout(resolve, 30000)); // 30 second delay
 
     // Deploy Postgres (Cluster + Secrets + Pooler) and wait for readiness
     const res = await client.deployPostgres({
@@ -128,7 +177,7 @@ describe("Postgres deploy (CloudNativePG) end-to-end", () => {
     }
 
     const method = hasBarman ? "barmanObjectStore" : "volumeSnapshot";
-    const pg = new PostgresDeployer(api as any, setup as any, (m) =>
+    const pg = new PostgresDeployer(api as any, setup as any, (m: string) =>
       console.log(m)
     );
     const created = await pg.createBackup({

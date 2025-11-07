@@ -82,7 +82,10 @@ export function confirmDialog(options?: ConfirmOptions): Promise<boolean> {
         root.unmount()
         delete (window as any).__confirmDialogRoot
       }
-      document.body.removeChild(container)
+      // Safety check: only remove if container is still a child of document.body
+      if (container.parentNode === document.body) {
+        document.body.removeChild(container)
+      }
     }
 
     const handleConfirm = () => {

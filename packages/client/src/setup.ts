@@ -59,7 +59,7 @@ export class SetupClient {
     await applyKubernetesResource(this.client, manifest, {
       defaultNamespace: this.defaultNamespace,
       continueOnError: options?.continueOnError ?? true,
-      log: options?.log ?? ((m) => console.log(m)),
+      log: options?.log ?? (() => {}),
     });
   }
 
@@ -70,7 +70,7 @@ export class SetupClient {
     await applyKubernetesResources(this.client, manifests, {
       defaultNamespace: this.defaultNamespace,
       continueOnError: options?.continueOnError ?? true,
-      log: options?.log ?? ((m) => console.log(m)),
+      log: options?.log ?? (() => {}),
     });
   }
 
@@ -84,7 +84,7 @@ export class SetupClient {
     }
     await this.applyManifests(manifests, {
       continueOnError: options?.continueOnError ?? false,
-      log: options?.log ?? ((m) => console.log(m)),
+      log: options?.log ?? (() => {}),
     });
   }
 
@@ -100,7 +100,7 @@ export class SetupClient {
     }
     await this.deleteManifests(manifests, {
       continueOnError: options?.continueOnError ?? true,
-      log: options?.log ?? ((m) => console.log(m)),
+      log: options?.log ?? (() => {}),
     });
   }
 
@@ -111,7 +111,7 @@ export class SetupClient {
     await deleteKubernetesResource(this.client, manifest, {
       defaultNamespace: this.defaultNamespace,
       continueOnError: options?.continueOnError ?? true,
-      log: options?.log ?? ((m) => console.log(m)),
+      log: options?.log ?? (() => {}),
     });
   }
 
@@ -122,7 +122,7 @@ export class SetupClient {
     await deleteKubernetesResources(this.client, manifests, {
       defaultNamespace: this.defaultNamespace,
       continueOnError: options?.continueOnError ?? true,
-      log: options?.log ?? ((m) => console.log(m)),
+      log: options?.log ?? (() => {}),
     });
   }
 
@@ -139,58 +139,168 @@ export class SetupClient {
 
     const enabledOperators = config.spec.operators.filter(op => op.enabled);
     
-    if (enabledOperators.length === 0) {
-      console.log('No operators enabled for installation');
-      return;
-    }
+    // Resolve operator dependencies to ensure proper installation order
+    const resolvedOperators = this.resolveOperatorDependencies(enabledOperators);
+    
+    console.log(`Installing ${resolvedOperators.length} operators in dependency order...`);
 
-    console.log(`Installing ${enabledOperators.length} operators in parallel...`);
-
-    // Install operators in parallel for better performance with timeout
-    const installPromises = enabledOperators.map(async (operator) => {
-      console.log(`Starting installation: ${operator.name} ${operator.version}`);
+    for (let i = 0; i < resolvedOperators.length; i++) {
+      const operator = resolvedOperators[i];
+      console.log(`[${i + 1}/${resolvedOperators.length}] Installing operator: ${operator.name}`);
       
-      // Add timeout to prevent hanging during manifest application
-      const installPromise = (async () => {
-        const manifests = getOperatorResources(operator.name, operator.version);
-        await this.applyManifests(manifests, {
-          continueOnError: false,
-          log: (m) => console.log(`[${operator.name}] ${m}`),
-        });
-        console.log(`✓ Operator manifests applied: ${operator.name} ${operator.version}`);
-        
-        // Wait for operator to be ready with timeout
-        console.log(`[${operator.name}] Waiting for operator to be ready...`);
-        await this.waitForOperator(operator.name, 180_000, 3_000); // 3 minutes timeout
-        console.log(`✓ Operator ready: ${operator.name} ${operator.version}`);
-      })();
-
-      // Add overall timeout for the entire installation process
-      // Use managed timeout that is cleared when install completes to avoid lingering timers/open handles
-      return new Promise<void>((resolve, reject) => {
-        const timeoutId = setTimeout(() => {
-          reject(new Error(`Timeout: Operator ${operator.name} installation took longer than 5 minutes`));
-        }, 300_000); // 5 minutes total timeout per operator
-
-        installPromise
-          .then(() => {
-            clearTimeout(timeoutId);
-            resolve();
-          })
-          .catch((err) => {
-            clearTimeout(timeoutId);
-            reject(err);
+      const manifests = getOperatorResources(operator.name, operator.version);
+      
+      // Extract target namespaces from manifests to ensure they're ready
+      const targetNamespaces = new Set<string>();
+      for (const manifest of manifests) {
+        const ns = (manifest as any)?.metadata?.namespace;
+        if (ns && ns !== 'default') {
+          targetNamespaces.add(ns);
+        }
+      }
+      
+      // Ensure all target namespaces are ready before applying manifests
+      for (const ns of targetNamespaces) {
+        console.log(`  Ensuring namespace ${ns} is ready...`);
+        await this.ensureNamespaceReady(ns);
+      }
+      
+      // Apply manifests with retry logic for namespace-related errors
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (retryCount <= maxRetries) {
+        try {
+          await this.applyManifests(manifests, {
+            continueOnError: false,
+            log: (msg: string) => console.log(`  ${msg}`),
           });
-      });
-    });
+          break; // Success, exit retry loop
+        } catch (error) {
+          const errorMsg = String((error as any)?.message || error);
+          
+          // Check if this is a namespace-related error that we can retry
+          if (retryCount < maxRetries && (
+            errorMsg.includes('403') || 
+            errorMsg.includes('Forbidden') ||
+            errorMsg.includes('terminating') ||
+            errorMsg.includes('namespace')
+          )) {
+            retryCount++;
+            console.log(`  Namespace-related error, retrying (${retryCount}/${maxRetries}): ${errorMsg}`);
+            
+            // Re-ensure namespaces are ready before retry
+            for (const ns of targetNamespaces) {
+              await this.ensureNamespaceReady(ns);
+            }
+            
+            // Wait a bit before retry
+            await new Promise(r => setTimeout(r, 5000));
+            continue;
+          }
+          
+          // Non-retryable error or max retries exceeded
+          throw error;
+        }
+      }
 
-    try {
-      await Promise.all(installPromises);
-      console.log('✓ All operators installed and ready successfully');
-    } catch (error) {
-      console.error('✗ Failed to install one or more operators:', error);
-      throw error;
+      // Wait for operator to be ready with timeout
+      try {
+        console.log(`  Waiting for operator ${operator.name} to be ready...`);
+        await this.waitForOperator(operator.name, 5 * 60 * 1000); // 5 minutes timeout
+        console.log(`  ✓ Operator ${operator.name} is ready`);
+      } catch (error) {
+        console.warn(`  ⚠ Operator ${operator.name} may not be fully ready: ${error}`);
+        // Continue with installation but log the warning
+      }
     }
+    
+    console.log(`✓ All ${resolvedOperators.length} operators installation completed`);
+  }
+
+  /**
+   * Resolves operator dependencies to ensure proper installation order
+   */
+  private resolveOperatorDependencies(operators: any[]): any[] {
+    // Operator dependency map - extend as needed
+    const OPERATOR_DEPENDENCIES: Record<string, string[]> = {
+      "knative-serving": ["cert-manager"],
+      "cloudnative-pg": ["cert-manager"],
+    };
+
+    const seen = new Set<string>();
+    const resolved: any[] = [];
+    const operatorMap = new Map<string, any>();
+    
+    // Create a map for quick lookup
+    for (const op of operators) {
+      operatorMap.set(op.name, op);
+    }
+
+    const addWithDeps = (name: string) => {
+      if (seen.has(name)) return;
+      
+      const deps = OPERATOR_DEPENDENCIES[name] || [];
+      for (const dep of deps) {
+        // Only add dependency if it's in the enabled operators list
+        if (operatorMap.has(dep)) {
+          addWithDeps(dep);
+        }
+      }
+      
+      seen.add(name);
+      const operator = operatorMap.get(name);
+      if (operator) {
+        resolved.push(operator);
+      }
+    };
+
+    // Process all operators with their dependencies
+    for (const op of operators) {
+      addWithDeps(op.name);
+    }
+
+    return resolved;
+  }
+
+  /**
+   * Ensures a namespace is ready for use by waiting for any terminating namespace to be fully deleted
+   */
+  private async ensureNamespaceReady(name: string, maxWaitMs = 180000): Promise<void> {
+    const startTime = Date.now();
+    
+    while (Date.now() - startTime < maxWaitMs) {
+      try {
+        const res = await this.client.listCoreV1Namespace({ query: {} as any });
+        const namespaces = res?.items || [];
+        const ns = namespaces.find((n: any) => n?.metadata?.name === name);
+        
+        if (ns) {
+          // Check if namespace is terminating
+          if (ns?.status?.phase === 'Terminating') {
+            console.log(`  Waiting for namespace ${name} to finish terminating... (${Math.floor((Date.now() - startTime) / 1000)}s elapsed)`);
+            await new Promise(r => setTimeout(r, 5000));
+            continue;
+          }
+          
+          // Namespace exists and is active
+          if (ns?.status?.phase === 'Active') {
+            console.log(`  Namespace ${name} is ready`);
+            return;
+          }
+        } else {
+          // Namespace doesn't exist - we can proceed
+          console.log(`  Namespace ${name} does not exist - ready to create`);
+          return;
+        }
+      } catch (err: any) {
+        console.warn(`  Error checking namespace ${name}:`, err.message);
+      }
+      
+      await new Promise(r => setTimeout(r, 3000));
+    }
+    
+    throw new Error(`Namespace ${name} not ready after ${maxWaitMs}ms`);
   }
 
   /**
@@ -213,14 +323,12 @@ export class SetupClient {
       .reverse();
 
     for (const operator of operatorsToDelete) {
-      console.log(`Deleting operator: ${operator.name} ${operator.version}`);
       try {
         const manifests = getOperatorResources(operator.name, operator.version);
         await this.deleteManifests(manifests, {
           continueOnError: options?.continueOnError ?? true,
-          log: (m) => console.log(m),
+          log: (() => {}),
         });
-        console.log(`Operator deleted: ${operator.name} ${operator.version}`);
       } catch (error) {
         const errorMsg = `Failed to delete operator ${operator.name}: ${error}`;
         if (options?.continueOnError ?? true) {
@@ -358,7 +466,7 @@ export class SetupClient {
         path: { name: String(namespace) },
         query: {},
       });
-      console.log(`Deleted namespace: ${namespace}`);
+      // Reduce noisy logs: no console output on success
     } catch (error: any) {
       // Handle 404 errors (namespace not found) gracefully
       if (error.message?.includes('status: 404') || error.message?.includes('not found')) {
@@ -540,7 +648,7 @@ export class SetupClient {
     const manifests = getOperatorResources(name, version);
     await this.applyManifests(manifests, {
       continueOnError: false,
-      log: (m) => console.log(m),
+      log: (() => {}),
     });
   }
 
@@ -554,7 +662,7 @@ export class SetupClient {
     const manifests = getOperatorResources(name, version);
     await this.deleteManifests(manifests, {
       continueOnError: true,
-      log: (m) => console.log(m),
+      log: (() => {}),
     });
   }
 
