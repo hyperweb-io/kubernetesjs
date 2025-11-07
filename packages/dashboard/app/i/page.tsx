@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { Package, Server, Key, Settings, FileCode2, Copy, Activity, ArrowRight, Layers } from 'lucide-react';
+import { Package, Server, Key, Settings, Copy, Activity, ArrowRight, Layers } from 'lucide-react';
 
 const resources = [
   {
@@ -46,14 +46,7 @@ const resources = [
     href: '/i/configmaps',
     color: 'text-purple-600',
   },
-  {
-    id: 'templates',
-    title: 'Templates',
-    description: 'Manage and deploy resource templates',
-    icon: FileCode2,
-    href: '/i/templates',
-    color: 'text-indigo-600',
-  },
+  // removed Templates card from infra overview
   {
     id: 'replicasets',
     title: 'ReplicaSets',

@@ -14,8 +14,6 @@ import {
   Plus, 
   Trash2, 
   Edit, 
-  Eye,
-  EyeOff,
   Key,
   FileText,
   Lock,
@@ -39,12 +37,14 @@ interface Secret {
 
 export function SecretsView() {
   const [selectedSecret, setSelectedSecret] = useState<Secret | null>(null)
-  const [showValues, setShowValues] = useState<Set<string>>(new Set())
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [editingSecret, setEditingSecret] = useState<Secret | null>(null)
   const [secretName, setSecretName] = useState('')
   const [secretContent, setSecretContent] = useState('')
   const [uploadMethod, setUploadMethod] = useState<'text' | 'file'>('text')
   const [creating, setCreating] = useState(false)
+  const [editing, setEditing] = useState(false)
   
   // Use TanStack Query hooks
   const { data, isLoading, error, refetch } = useSecrets()
@@ -168,6 +168,77 @@ export function SecretsView() {
     }
   }
 
+  const handleEditSecret = async () => {
+    if (!editingSecret) return
+    
+    if (!secretName.trim()) {
+      alert('Please provide a secret name')
+      return
+    }
+    
+    if (!secretContent.trim()) {
+      alert('Please provide secret content')
+      return
+    }
+    
+    setEditing(true)
+    try {
+      const parsedData = parseEnvContent(secretContent)
+      
+      if (Object.keys(parsedData).length === 0) {
+        alert('No valid key-value pairs found in the content')
+        return
+      }
+      
+      // First delete the old secret
+      await deleteSecretMutation.mutateAsync({
+        name: editingSecret.name,
+        namespace: editingSecret.namespace
+      })
+      
+      // Convert to base64 for Kubernetes
+      const data: Record<string, string> = {}
+      for (const [key, value] of Object.entries(parsedData)) {
+        data[key] = btoa(value) // Base64 encode
+      }
+      
+      // Then create the new secret with the same name
+      const secret: K8sSecret = {
+        metadata: {
+          name: secretName,
+          namespace: editingSecret.namespace,
+          creationTimestamp: new Date().toISOString()
+        },
+        type: 'Opaque',
+        data
+      }
+      
+      await createSecretMutation.mutateAsync({
+        secret,
+        namespace: editingSecret.namespace
+      })
+      
+      // Reset form and close dialog
+      setSecretName('')
+      setSecretContent('')
+      setEditDialogOpen(false)
+      setEditingSecret(null)
+    } catch (err) {
+      console.error('Failed to edit secret:', err)
+      alert(`Failed to edit secret: ${err instanceof Error ? err.message : 'Unknown error'}`)
+    } finally {
+      setEditing(false)
+    }
+  }
+
+  const handleOpenEditDialog = (secret: Secret) => {
+    setEditingSecret(secret)
+    setSecretName(secret.name)
+    setSecretContent('') // Start with empty content for security
+    setUploadMethod('text')
+    setEditDialogOpen(true)
+  }
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
@@ -178,16 +249,6 @@ export function SecretsView() {
       }
       reader.readAsText(file)
     }
-  }
-
-  const toggleShowValue = (secretName: string) => {
-    const newShowValues = new Set(showValues)
-    if (showValues.has(secretName)) {
-      newShowValues.delete(secretName)
-    } else {
-      newShowValues.add(secretName)
-    }
-    setShowValues(newShowValues)
   }
 
   const getTypeBadge = (type: string) => {
@@ -336,6 +397,106 @@ export function SecretsView() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          
+          {/* Edit Secret Dialog */}
+          <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+            <DialogContent className="sm:max-w-[625px]">
+              <DialogHeader>
+                <DialogTitle>Edit Secret: {editingSecret?.name}</DialogTitle>
+                <DialogDescription>
+                  Replace the existing secret with new environment variables. The old secret will be deleted and replaced with the new one.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-secret-name">Secret Name</Label>
+                  <Input
+                    id="edit-secret-name"
+                    placeholder="my-app-secrets"
+                    value={secretName}
+                    onChange={(e) => setSecretName(e.target.value)}
+                    disabled={true} // Name should not be editable to maintain consistency
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Secret name cannot be changed during edit. A new secret will replace the existing one.
+                  </p>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Method</Label>
+                  <div className="flex gap-4">
+                    <Button
+                      variant={uploadMethod === 'text' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setUploadMethod('text')}
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Paste Text
+                    </Button>
+                    <Button
+                      variant={uploadMethod === 'file' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setUploadMethod('file')}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload File
+                    </Button>
+                  </div>
+                </div>
+                {uploadMethod === 'text' ? (
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-secret-content">Environment Variables</Label>
+                    <Textarea
+                      id="edit-secret-content"
+                      placeholder="DATABASE_URL=postgres://user:pass@host:5432/db\nAPI_KEY=your-api-key\nSECRET_TOKEN=your-secret-token"
+                      className="h-48 font-mono text-sm"
+                      value={secretContent}
+                      onChange={(e) => setSecretContent(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Enter key=value pairs, one per line. Comments starting with # are ignored.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-env-file">Upload .env File</Label>
+                    <Input
+                      id="edit-env-file"
+                      type="file"
+                      accept=".env,.txt"
+                      onChange={handleFileUpload}
+                    />
+                    {secretContent && (
+                      <div className="mt-2">
+                        <Label>Preview</Label>
+                        <pre className="mt-1 p-2 bg-muted rounded text-xs overflow-auto max-h-32">
+                          {secretContent}
+                        </pre>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setEditDialogOpen(false)}
+                  disabled={editing}
+                >
+                  Cancel
+                </Button>
+                <Button onClick={handleEditSecret} disabled={editing} variant="destructive">
+                  {editing ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Replacing...
+                    </>
+                  ) : (
+                    <>Replace Secret</>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -462,18 +623,7 @@ export function SecretsView() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => toggleShowValue(secret.name)}
-                        >
-                          {showValues.has(secret.name) ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => console.log('Edit', secret.name)}
+                          onClick={() => handleOpenEditDialog(secret)}
                           disabled={secret.immutable}
                         >
                           <Edit className="h-4 w-4" />

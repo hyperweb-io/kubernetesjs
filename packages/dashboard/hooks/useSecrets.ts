@@ -7,6 +7,7 @@ import {
   useDeleteCoreV1NamespacedSecret,
 } from '../k8s/index'
 import { usePreferredNamespace } from '../contexts/NamespaceContext'
+import { useQueryClient } from '@tanstack/react-query'
 import type { Secret, SecretList } from '@interweb/interwebjs'
 
 // Query keys
@@ -31,6 +32,7 @@ export function useSecret(name: string, namespace?: string) {
 
 export function useCreateSecret() {
   const { namespace: defaultNamespace } = usePreferredNamespace()
+  const queryClient = useQueryClient()
   const base = useCreateCoreV1NamespacedSecret()
   return {
     ...base,
@@ -40,7 +42,19 @@ export function useCreateSecret() {
     ) =>
       base.mutate(
         { path: { namespace: namespace || defaultNamespace }, query: {}, body: secret },
-        opts
+        {
+          ...opts,
+          onSuccess: (data, variables, onMutateResult, context) => {
+            // Invalidate the secrets list queries
+            queryClient.invalidateQueries({
+              queryKey: ['api_v1_namespaces_namespace_secrets', namespace || defaultNamespace]
+            })
+            queryClient.invalidateQueries({
+              queryKey: ['api_v1_secrets']
+            })
+            opts?.onSuccess?.(data, variables, onMutateResult, context)
+          }
+        }
       ),
     mutateAsync: (
       { secret, namespace }: { secret: Secret; namespace?: string },
@@ -48,7 +62,19 @@ export function useCreateSecret() {
     ) =>
       base.mutateAsync(
         { path: { namespace: namespace || defaultNamespace }, query: {}, body: secret },
-        opts
+        {
+          ...opts,
+          onSuccess: (data, variables, onMutateResult, context) => {
+            // Invalidate the secrets list queries
+            queryClient.invalidateQueries({
+              queryKey: ['api_v1_namespaces_namespace_secrets', namespace || defaultNamespace]
+            })
+            queryClient.invalidateQueries({
+              queryKey: ['api_v1_secrets']
+            })
+            opts?.onSuccess?.(data, variables, onMutateResult, context)
+          }
+        }
       ),
   }
 }
@@ -79,6 +105,7 @@ export function useUpdateSecret() {
 
 export function useDeleteSecret() {
   const { namespace: defaultNamespace } = usePreferredNamespace()
+  const queryClient = useQueryClient()
   const base = useDeleteCoreV1NamespacedSecret()
   return {
     ...base,
@@ -88,7 +115,19 @@ export function useDeleteSecret() {
     ) =>
       base.mutate(
         { path: { namespace: namespace || defaultNamespace, name }, query: {} },
-        opts
+        {
+          ...opts,
+          onSuccess: (data, variables, onMutateResult, context) => {
+            // Invalidate the secrets list queries
+            queryClient.invalidateQueries({
+              queryKey: ['api_v1_namespaces_namespace_secrets', namespace || defaultNamespace]
+            })
+            queryClient.invalidateQueries({
+              queryKey: ['api_v1_secrets']
+            })
+            opts?.onSuccess?.(data, variables, onMutateResult, context)
+          }
+        }
       ),
     mutateAsync: (
       { name, namespace }: { name: string; namespace?: string },
@@ -96,7 +135,19 @@ export function useDeleteSecret() {
     ) =>
       base.mutateAsync(
         { path: { namespace: namespace || defaultNamespace, name }, query: {} },
-        opts
+        {
+          ...opts,
+          onSuccess: (data, variables, onMutateResult, context) => {
+            // Invalidate the secrets list queries
+            queryClient.invalidateQueries({
+              queryKey: ['api_v1_namespaces_namespace_secrets', namespace || defaultNamespace]
+            })
+            queryClient.invalidateQueries({
+              queryKey: ['api_v1_secrets']
+            })
+            opts?.onSuccess?.(data, variables, onMutateResult, context)
+          }
+        }
       ),
   }
 }

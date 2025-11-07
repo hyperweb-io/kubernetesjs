@@ -1,0 +1,31 @@
+apiVersion: interweb.dev/v1
+kind: ClusterSetup
+metadata:
+  name: dev-cluster
+  namespace: interweb-system
+spec:
+  operators:
+    - name: knative-serving
+      enabled: true
+      namespace: knative-serving
+      version: v1.15.0
+    - name: cloudnative-pg
+      namespace: cloudnative-pg
+      version: 1.25.2
+      enabled: true
+    - name: cert-manager
+      namespace: cert-manager
+      version: v1.17.0
+      enabled: true
+    - name: ingress-nginx
+      namespace: ingress-nginx
+      version: 4.11.2
+      enabled: true
+    - name: kube-prometheus-stack
+      namespace: monitoring
+      version: 77.5.0
+<<<<<<< Updated upstream
+      enabled: true
+=======
+      enabled: false
+>>>>>>> Stashed changes

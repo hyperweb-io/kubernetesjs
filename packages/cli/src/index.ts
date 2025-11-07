@@ -2,7 +2,7 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { createSetupCommand, createDeployCommand, createStatusCommand, createDeleteCommand } from './commands';
+import { createSetupCommand, createDeployCommand, createStatusCommand, createDeleteCommand, createTeardownCommand } from './commands';
 
 const program = new Command();
 
@@ -16,6 +16,7 @@ program
 
 // Add commands
 program.addCommand(createSetupCommand());
+program.addCommand(createTeardownCommand());
 program.addCommand(createDeployCommand());
 program.addCommand(createStatusCommand());
 program.addCommand(createDeleteCommand());

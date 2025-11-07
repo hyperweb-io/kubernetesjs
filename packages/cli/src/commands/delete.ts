@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { Client, ConfigLoader } from '@interweb/client';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
+import { getApiEndpoint } from '../utils/k8s-utils';
 
 export function createDeleteCommand(): Command {
   const command = new Command('delete');
@@ -155,7 +156,8 @@ async function deleteResources(options: any): Promise<void> {
     namespace: options.namespace || config.metadata.namespace,
     kubeconfig: options.kubeconfig,
     context: options.context,
-    verbose: options.verbose
+    verbose: options.verbose,
+    restEndpoint: getApiEndpoint(options.restEndpoint)
   });
 
   console.log(chalk.blue(`\nDeleting ${configType}...`));
