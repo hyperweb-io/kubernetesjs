@@ -1,0 +1,18 @@
+apiVersion: interweb.dev/v1
+kind: ClusterSetup
+metadata:
+  name: interweb-data-plane
+  namespace: interweb-system
+spec:
+  operators:
+    - name: cloudnative-pg
+      enabled: true
+      namespace: cnpg-system
+      version: 1.25.2
+    - name: minio-operator
+      enabled: true
+      namespace: minio-operator
+      version: 5.0.11
+  networking:
+    ingressClass: kourier
+    domain: 127.0.0.1.nip.io

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: interweb-apply-test
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apply-test-config
+  namespace: interweb-apply-test
+data:
+  foo: bar
+
