@@ -53,9 +53,11 @@ export function ScaleDeploymentDialog({
     
     try {
       await onScale(replicaCount)
+      // Only close dialog on successful scaling
       onOpenChange(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to scale deployment')
+      // Don't close dialog on error - let user see the error message
     } finally {
       setIsSubmitting(false)
     }

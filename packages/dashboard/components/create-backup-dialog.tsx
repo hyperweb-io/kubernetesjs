@@ -29,9 +29,11 @@ export function CreateBackupDialog({backups, open, onOpenChange, onSubmit ,datab
     setIsSubmitting(true)
     try {
       await onSubmit(methodParam)
+      // Only close dialog on successful submission
       onOpenChange(false)
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to create backup')
+      // Don't close dialog on error - let user see the error message
     } finally {
       setIsSubmitting(false)
     }

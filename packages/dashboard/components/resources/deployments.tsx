@@ -16,7 +16,7 @@ import {
   CheckCircle
 } from 'lucide-react'
 import { type AppsV1Deployment as K8sDeployment } from '@interweb/interwebjs'
-import { useDeployments, useDeleteDeployment, useScaleDeployment, useCreateDeployment } from '@/hooks'
+import { useDeployments, useDeleteDeployment, useScaleDeployment, useCreateDeployment, useUpdateDeployment } from '@/hooks'
 
 import { confirmDialog } from '@/hooks/useConfirm'
 
@@ -52,6 +52,7 @@ export function DeploymentsView() {
   const deleteDeploymentMutation = useDeleteDeployment()
   const scaleDeploymentMutation = useScaleDeployment()
   const createDeploymentMutation = useCreateDeployment()
+  const updateDeploymentMutation = useUpdateDeployment()
   // Helper function to determine deployment status
   function determineStatus(deployment: K8sDeployment): 'Running' | 'Pending' | 'Failed' {
     const conditions = deployment.status!.conditions || []
@@ -367,18 +368,11 @@ export function DeploymentsView() {
             const deploymentObj = yaml.load(yamlContent) as any
             
             // Update deployment using PUT request
-            const response = await fetch(`/api/k8s/apis/apps/v1/namespaces/${selectedDeployment.namespace}/deployments/${selectedDeployment.name}`, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(deploymentObj),
+            await updateDeploymentMutation.mutateAsync({
+              name: selectedDeployment.name,
+              deployment: deploymentObj,
+              namespace: selectedDeployment.namespace
             })
-            
-            if (!response.ok) {
-              const error = await response.text()
-              throw new Error(error || 'Failed to update deployment')
-            }
             
             // Refresh the deployments list
             refetch()

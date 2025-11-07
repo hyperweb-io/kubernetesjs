@@ -4,9 +4,10 @@ const tsParser = require("@typescript-eslint/parser");
 const prettier = require("eslint-config-prettier");
 const simpleImportSort = require("eslint-plugin-simple-import-sort");
 const unusedImports = require("eslint-plugin-unused-imports");
+const jestPlugin = require("eslint-plugin-jest");
 
 module.exports = [
-  { ignores: ["**/dist/**", "**/node_modules/**", "**/.next/**"] },
+  { ignores: ["**/dist/**", "**/node_modules/**", "**/.next/**", "**/playwright-report/**", "**/jest.config.js","**/jest.polyfills.js","**/jest.setup.js"] },
   js.configs.recommended,
   {
     languageOptions: {
@@ -17,7 +18,8 @@ module.exports = [
     plugins: {
       "@typescript-eslint": tsPlugin,
       "simple-import-sort": simpleImportSort,
-      "unused-imports": unusedImports
+      "unused-imports": unusedImports,
+      "jest": jestPlugin
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,

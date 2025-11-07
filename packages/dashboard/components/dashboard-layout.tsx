@@ -58,6 +58,29 @@ import {
 } from 'lucide-react';
 import { AdminHeader } from './headers/admin-header';
 
+interface DashboardLayoutHeaderProps {
+  mode: 'smart-objects' | 'infra' | 'admin';
+  sidebarOpen: boolean;
+  activeSection: string;
+  onChatToggle: () => void;
+  chatVisible: boolean;
+  onSidebarToggle: () => void;
+}
+
+export function DashboardLayoutHeader(props: DashboardLayoutHeaderProps) {
+  
+  const { mode,...restProps } = props
+ 
+  if(mode === 'smart-objects') {
+    return <SmartObjectsHeader {...restProps} />
+  }
+  if(mode === 'infra') {
+    return <InfraHeader {...restProps} />
+  }
+  return <AdminHeader {...restProps} />
+}
+
+
 type NavigationItem = {
   id: string;
   label: string;
@@ -66,7 +89,6 @@ type NavigationItem = {
   isHeader?: boolean;
   section?: string;
 };
-
 
 // Smart Objects navigation
 const smartObjectsNavigation:NavigationItem[] = [
@@ -180,18 +202,23 @@ export function DashboardLayout({
 
   // Load preferences from localStorage on mount
   useEffect(() => {
-    const savedSidebarOpen = localStorage.getItem('hyperweb-sidebar-open');
-    const savedSidebarCompact = localStorage.getItem('hyperweb-sidebar-compact');
-    const savedExpandedSections = localStorage.getItem('hyperweb-expanded-sections');
+    try {
+      const savedSidebarOpen = localStorage.getItem('hyperweb-sidebar-open');
+      const savedSidebarCompact = localStorage.getItem('hyperweb-sidebar-compact');
+      const savedExpandedSections = localStorage.getItem('hyperweb-expanded-sections');
 
-    if (savedSidebarOpen !== null) {
-      setSidebarOpen(JSON.parse(savedSidebarOpen));
-    }
-    if (savedSidebarCompact !== null) {
-      setSidebarCompact(JSON.parse(savedSidebarCompact));
-    }
-    if (savedExpandedSections !== null) {
-      setExpandedSections(new Set(JSON.parse(savedExpandedSections)));
+      if (savedSidebarOpen !== null) {
+        setSidebarOpen(JSON.parse(savedSidebarOpen));
+      }
+      if (savedSidebarCompact !== null) {
+        setSidebarCompact(JSON.parse(savedSidebarCompact));
+      }
+      if (savedExpandedSections !== null) {
+        setExpandedSections(new Set(JSON.parse(savedExpandedSections)));
+      }
+    } catch (error) {
+      // Handle invalid JSON gracefully - use default values
+      console.warn('Failed to parse localStorage data:', error);
     }
   }, []);
 
@@ -244,25 +271,6 @@ export function DashboardLayout({
     localStorage.setItem('hyperweb-expanded-sections', JSON.stringify(Array.from(newExpanded)));
   };
 
-
-  const renderHeader = (mode: string) => {
-    const headerProps = {
-      sidebarOpen: sidebarOpen,
-      onSidebarToggle: toggleSidebar,
-      activeSection: activeSection,
-      onChatToggle: onChatToggle,
-      chatVisible: chatVisible,
-    }
-   
-    if(mode === 'smart-objects') {
-      return <SmartObjectsHeader {...headerProps} />
-    }
-    if(mode === 'infra') {
-      return <InfraHeader {...headerProps} />
-    }
-    return <AdminHeader {...headerProps} />
-  }
-
   // Calculate if we need to adjust layout for snapped chat
   const isSnappedAndOpen = chatVisible && chatLayoutMode === 'snapped';
 
@@ -270,6 +278,7 @@ export function DashboardLayout({
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <div
+        role="complementary"
         className={`${
           sidebarOpen ? (sidebarCompact ? 'w-16' : 'w-64') : 'w-0'
         } transition-all duration-300 overflow-hidden bg-card border-r flex flex-col h-screen`}
@@ -312,6 +321,7 @@ export function DashboardLayout({
                 onClick={toggleSidebarCompact}
                 className="w-6 h-6 p-0 opacity-60 hover:opacity-100"
                 title="Expand sidebar"
+                aria-label="Expand sidebar"
               >
                 <ChevronRight className="h-3 w-3" />
               </Button>
@@ -349,6 +359,7 @@ export function DashboardLayout({
               size="sm"
               onClick={toggleSidebarCompact}
               className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 opacity-60 hover:opacity-100"
+              aria-label="Collapse sidebar"
             >
               <ChevronLeft className="h-3 w-3" />
             </Button>
@@ -428,8 +439,14 @@ export function DashboardLayout({
         style={isSnappedAndOpen ? { marginRight: `${chatWidth}px` } : {}}
       >
         {/* Header - Context Specific */}
-        {renderHeader(mode)}
-
+        <DashboardLayoutHeader
+          mode={mode}
+          sidebarOpen={sidebarOpen}
+          activeSection={activeSection}
+          onChatToggle={onChatToggle}
+          chatVisible={chatVisible}
+          onSidebarToggle={toggleSidebar}
+        />
         {/* Content Area */}
         <main className="flex-1 p-6 overflow-auto">{children}</main>
       </div>

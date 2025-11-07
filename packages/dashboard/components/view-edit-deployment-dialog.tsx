@@ -8,6 +8,7 @@ import { YAMLEditor } from '@/components/yaml-editor'
 import { AlertCircle, Eye, Edit } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import yaml from 'js-yaml'
+import { useReadAppsV1NamespacedDeploymentQuery } from '@/k8s'
 import type { AppsV1Deployment as Deployment } from '@interweb/interwebjs'
 
 interface ViewEditDeploymentDialogProps {
@@ -29,39 +30,44 @@ export function ViewEditDeploymentDialog({
   const [yamlContent, setYamlContent] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
 
+  // Use React Query hook to fetch deployment data
+  const deploymentQuery = useReadAppsV1NamespacedDeploymentQuery({
+    path: {
+      namespace: deployment?.metadata?.namespace || 'default',
+      name: deployment?.metadata?.name
+    },
+    query: {}
+  })
+
+  const isLoading = deploymentQuery.isLoading
+  const queryError = deploymentQuery.error
+
+  // Convert deployment data to YAML when it's loaded
   useEffect(() => {
-    if (deployment && open) {
-      setIsLoading(true)
-      setError(null)
-      
-      // Fetch the deployment YAML
-      const namespace = deployment.metadata?.namespace || 'default'
-      const name = deployment.metadata?.name
-      
-      if (name) {
-        fetch(`/api/k8s/apis/apps/v1/namespaces/${namespace}/deployments/${name}`)
-          .then(res => res.json())
-          .then(data => {
-            // Convert JSON to YAML
-            const yamlStr = yaml.dump(data, {
-              skipInvalid: true,
-              noRefs: true,
-              sortKeys: false
-            })
-            setYamlContent(yamlStr)
-          })
-          .catch(err => {
-            console.error('Failed to fetch deployment:', err)
-            setError('Failed to load deployment data')
-          })
-          .finally(() => {
-            setIsLoading(false)
-          })
+    if (deploymentQuery.data && open) {
+      try {
+        const yamlStr = yaml.dump(deploymentQuery.data, {
+          skipInvalid: true,
+          noRefs: true,
+          sortKeys: false
+        })
+        setYamlContent(yamlStr)
+        setError(null)
+      } catch (err) {
+        console.error('Failed to convert deployment to YAML:', err)
+        setError('Failed to convert deployment data to YAML')
       }
     }
-  }, [deployment, open])
+  }, [deploymentQuery.data, open])
+
+  // Handle query errors
+  useEffect(() => {
+    if (queryError && open) {
+      console.error('Failed to fetch deployment:', queryError)
+      setError('Failed to load deployment data')
+    }
+  }, [queryError, open])
 
   useEffect(() => {
     setMode(initialMode)

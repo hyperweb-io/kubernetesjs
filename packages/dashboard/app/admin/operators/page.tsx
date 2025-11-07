@@ -12,12 +12,12 @@ export default function OperatorsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const { data: operators, isLoading, error } = useOperators();
 
-  const filteredOperators = operators?.filter(op => {
-    const matchesSearch = op.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         op.description.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredOperators = Array.isArray(operators) ? operators.filter(op => {
+    const matchesSearch = (op.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+                         (op.description?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
     const matchesStatus = statusFilter === 'all' || op.status === statusFilter;
     return matchesSearch && matchesStatus;
-  });
+  }) : [];
 
   return (
     <div className="space-y-6">

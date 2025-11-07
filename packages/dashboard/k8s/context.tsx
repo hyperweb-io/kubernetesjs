@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 export interface KubernetesConfig {
   restEndpoint: string
   headers?: Record<string, string>
+  queryClient?: QueryClient
 }
 
 // Context types
@@ -73,7 +74,7 @@ export function KubernetesProvider({
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={initialConfig?.queryClient ?? queryClient}>
       <KubernetesContext.Provider value={contextValue}>
         {children}
       </KubernetesContext.Provider>
