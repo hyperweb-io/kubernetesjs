@@ -1,12 +1,12 @@
-# Interweb: Design Document
+# KubernetesJS: Design Document
 
 ## Overview
 
-Interweb is a JavaScript-native Kubernetes developer toolkit that simplifies cluster setup, operator management, and application deployment. It replaces bash-script-based workflows with a modern CLI and programmatic API.
+KubernetesJS is a JavaScript‑native Kubernetes toolkit that combines a fully‑typed client, CLIs, and opinionated ops tooling for cluster setup, operator management, and application deployment. It replaces brittle bash workflows with modern CLIs and a programmatic API.
 
 ## Core Principles
 
-- **JavaScript-Native**: Use kubernetesjs directly instead of wrapping kubectl/helm
+- **JavaScript‑Native**: Use `kubernetesjs` directly instead of wrapping kubectl/helm
 - **Configuration-Driven**: Simple YAML/JSON configs for setup and deployment
 - **Developer-Focused**: Optimized for development workflows
 - **Minimal Input**: Sensible defaults with override capabilities
@@ -16,30 +16,37 @@ Interweb is a JavaScript-native Kubernetes developer toolkit that simplifies clu
 
 ### Project Structure
 ```
-interweb/
+kubernetesjs/
 ├── packages/
-│   ├── cli/                    # Main CLI package
-│   ├── client/                 # Kubernetes client wrapper
-│   ├── interwebjs/            # Core library (from starshipjs)
-│   ├── operators/             # Operator management
-│   ├── config/                # Configuration management
-│   └── templates/             # Deployment templates
+│   ├── cli/            # Low‑level CLI for typed K8s ops
+│   ├── ops-cli/        # Ops CLI (formerly interweb CLI)
+│   ├── client/         # Higher‑level client wrapper
+│   ├── ops/            # Ops library (formerly interwebjs)
+│   ├── manifests/      # Curated operator manifests/bundles
+│   └── kubernetesjs/   # Core fully‑typed K8s client (SDK)
 ├── docs/
 ├── examples/
-└── templates/                 # Project scaffolding
+└── templates/         # Project scaffolding
 ```
 
 ### Core Components
 
-#### 1. CLI Package (`@interweb/cli`)
+#### 1. CLI Package (`@kubernetesjs/cli`)
 - **Commands:**
-  - `interweb setup` - Initialize cluster with operators
-  - `interweb deploy` - Deploy applications
-  - `interweb status` - Cluster and app status
-  - `interweb destroy` - Cleanup resources
-  - `interweb scaffold` - Generate project templates
+  - Resource‑centric helpers around the typed client (e.g., inspect, diff, apply)
+  - Codegen utilities and developer ergonomics
+  - Focused on low‑level Kubernetes actions and DX
 
-#### 2. Client Package (`@interweb/client`)
+#### 2. Ops CLI (`@kubernetesjs/ops-cli`)
+- **Purpose:** Higher‑level operational workflows (migrated from Interweb CLI)
+- **Commands:**
+  - `kjs setup` – Initialize cluster with operators
+  - `kjs deploy` – Deploy applications
+  - `kjs status` – Cluster and app status
+  - `kjs destroy` – Cleanup resources
+  - `kjs scaffold` – Generate project templates
+
+#### 3. Client Package (`@kubernetesjs/client`)
 - **Purpose:** Enhanced kubernetesjs wrapper
 - **Features:**
   - Connection management
@@ -48,16 +55,16 @@ interweb/
   - Custom resource definitions
   - Helm-like templating
 
-#### 3. InterwebJS Package (`@interweb/interwebjs`)
-- **Purpose:** Core library (evolved from starshipjs)
+#### 4. Ops Package (`@kubernetesjs/ops`)
+- **Purpose:** Core ops library (migrated from InterwebJS)
 - **Features:**
   - Resource management
   - Deployment orchestration
   - Configuration validation
   - Template rendering
 
-#### 4. Operators Package (`@interweb/operators`)
-- **Purpose:** Operator lifecycle management
+#### 5. Manifests Package (`@kubernetesjs/manifests`)
+- **Purpose:** Curated operator and platform manifests
 - **Features:**
   - CloudNativePG management
   - Knative Serving setup
@@ -65,19 +72,15 @@ interweb/
   - Ingress controller setup
   - Monitoring stack deployment
 
-#### 5. Config Package (`@interweb/config`)
-- **Purpose:** Configuration management
-- **Features:**
-  - Schema validation
-  - Environment interpolation
-  - Multi-environment support
-  - Secret management
+#### 6. KubernetesJS SDK (`kubernetesjs`)
+- **Purpose:** Fully‑typed core client and SDK
+- **Features:** Typed API surface, discovery, watch, codegen
 
 ## Configuration Files
 
-### 1. Cluster Setup Config (`interweb.setup.yaml`)
+### 1. Cluster Setup Config (`kjs.setup.yaml`)
 ```yaml
-apiVersion: interweb.dev/v1
+apiVersion: kjs.dev/v1
 kind: ClusterSetup
 metadata:
   name: dev-cluster
@@ -109,9 +112,9 @@ spec:
     domain: "127.0.0.1.nip.io"  # Default for development
 ```
 
-### 2. Application Deploy Config (`interweb.deploy.yaml`)
+### 2. Application Deploy Config (`kjs.deploy.yaml`)
 ```yaml
-apiVersion: interweb.dev/v1
+apiVersion: kjs.dev/v1
 kind: Application
 metadata:
   name: postgres-api-app
@@ -265,14 +268,14 @@ spec:
 
 ## Migration Path from Current Scripts
 
-### Current → Interweb Mapping
+### Current → KubernetesJS (ops-cli) Mapping
 
-| Current Script | Interweb Command | Configuration |
+| Current Script | kjs Command | Configuration |
 |---|---|---|
-| `00-setup-cluster.sh` | `interweb setup --infrastructure` | `interweb.setup.yaml` (infrastructure section) |
-| `01-install-operators.sh` | `interweb setup --operators` | `interweb.setup.yaml` (operators section) |
-| `02-deploy-postgres.sh` | `interweb deploy --database` | `interweb.deploy.yaml` (database section) |
-| `03-deploy-knative-app.sh` | `interweb deploy --services` | `interweb.deploy.yaml` (services section) |
+| `00-setup-cluster.sh` | `kjs setup --infrastructure` | `kjs.setup.yaml` (infrastructure section) |
+| `01-install-operators.sh` | `kjs setup --operators` | `kjs.setup.yaml` (operators section) |
+| `02-deploy-postgres.sh` | `kjs deploy --database` | `kjs.deploy.yaml` (database section) |
+| `03-deploy-knative-app.sh` | `kjs deploy --services` | `kjs.deploy.yaml` (services section) |
 
 ### Migration Benefits
 1. **Declarative**: Configuration over imperative scripts
@@ -284,26 +287,14 @@ spec:
 ## Example Usage
 
 ```bash
-# Initialize a new project
-interweb init my-app
+# Low-level typed client CLI
+k8s get pods -n default
 
-# Setup cluster with operators
-interweb setup
-
-# Deploy application
-interweb deploy
-
-# Check status
-interweb status
-
-# Scale service
-interweb scale backend-api --min 2 --max 20
-
-# View logs
-interweb logs backend-api --follow
-
-# Destroy everything
-interweb destroy --confirm
+# Ops CLI (higher-level workflows)
+kjs setup
+kjs deploy
+kjs status
+kjs destroy --confirm
 ```
 
 ## Next Steps
@@ -316,4 +307,4 @@ interweb destroy --confirm
 6. **Testing**: Setup CI/CD and testing framework
 7. **Documentation**: Usage guides and API documentation
 
-This design provides a solid foundation for building Interweb as a modern, JavaScript-native alternative to your current bash scripts while maintaining the same functionality and improving developer experience.
+This design aligns the KubernetesJS monorepo around a clear split between the core typed client (SDK + `@kubernetesjs/cli`) and opinionated operational tooling (`@kubernetesjs/ops-cli`, `@kubernetesjs/ops`, and `@kubernetesjs/manifests`) for a better developer experience.
