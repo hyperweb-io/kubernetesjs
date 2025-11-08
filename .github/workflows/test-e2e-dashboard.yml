@@ -84,6 +84,10 @@ jobs:
           K8S_API: http://127.0.0.1:8001
           NODE_ENV: test
           CI: true
+      
+      - name: Log kubectl
+        run: |
+          kubectl get all -A
 
       - name: Upload test results
         if: always()
