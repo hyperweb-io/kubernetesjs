@@ -86,6 +86,7 @@ jobs:
           CI: true
       
       - name: Log kubectl
+        if: always()
         run: |
           kubectl get all -A
 
