@@ -4,12 +4,12 @@ on:
   push:
     branches: [main]
     paths:
-      - "packages/dashboard/**"
+      - "apps/ops-dashboard/**"
       - ".github/workflows/test-e2e-dashboard.yml"
   pull_request:
     branches: [main]
     paths:
-      - "packages/dashboard/**"
+      - "apps/ops-dashboard/**"
       - ".github/workflows/test-e2e-dashboard.yml"
   workflow_dispatch:
     inputs:
@@ -54,12 +54,12 @@ jobs:
 
       - name: Build dashboard
         run: |
-          cd packages/dashboard
+          cd apps/ops-dashboard
           pnpm build
 
       - name: Install Playwright browsers
         run: |
-          cd packages/dashboard
+          cd apps/ops-dashboard
           npx playwright install --with-deps
 
       - name: Setup Kind cluster
@@ -78,7 +78,7 @@ jobs:
 
       - name: Run all E2E tests
         run: |
-          cd packages/dashboard
+          cd apps/ops-dashboard
           pnpm run test:e2e
         env:
           K8S_API: http://127.0.0.1:8001
@@ -90,7 +90,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: packages/dashboard/test-results/
+          path: apps/ops-dashboard/test-results/
           retention-days: 7
 
       - name: Upload screenshots on failure
@@ -98,7 +98,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: screenshots
-          path: packages/dashboard/test-results/screenshots/
+          path: apps/ops-dashboard/test-results/screenshots/
           retention-days: 7
 
       - name: Cleanup Kind cluster

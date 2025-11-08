@@ -5,14 +5,14 @@ on:
     branches: [main]
     paths:
       - "packages/client/**"
-      - "packages/interwebjs/**"
+      - "packages/ops/**"
       - "packages/manifests/**"
       - ".github/workflows/test-e2e-client.yml"
   pull_request:
     branches: [main]
     paths:
       - "packages/client/**"
-      - "packages/interwebjs/**"
+      - "packages/ops/**"
       - "packages/manifests/**"
       - ".github/workflows/test-e2e-client.yml"
   workflow_dispatch:
@@ -62,8 +62,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build packages (excluding dashboard - TEMP)
-        run: pnpm --filter='!@interweb/dashboard' build
+      - name: Build packages (excluding ops dashboard)
+        run: pnpm --filter='!@kubernetesjs/ops-dashboard' build
 
       - name: Verify cluster connection
         run: |
@@ -128,8 +128,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build packages (excluding dashboard - TEMP)
-        run: pnpm --filter='!@interweb/dashboard' build
+      - name: Build packages (excluding ops dashboard)
+        run: pnpm --filter='!@kubernetesjs/ops-dashboard' build
 
       - name: Verify cluster connection
         run: |
