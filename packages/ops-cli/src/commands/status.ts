@@ -41,7 +41,7 @@ async function checkStatus(options: any): Promise<void> {
       configPath = '__fixtures__/config/deploy.config.yaml';
       configType = 'application';
     } else {
-      throw new Error('No configuration file found. Please specify -c <config-file> or ensure __fixtures__/config/setup.config.yaml or kjs.setup.yaml exists.');
+      throw new Error('No configuration file found. Please specify -c <config-file> or ensure __fixtures__/config/setup.config.yaml or k8sops.setup.yaml exists.');
     }
   }
 
@@ -68,7 +68,7 @@ async function checkStatus(options: any): Promise<void> {
     }
   }
 
-  console.log(chalk.blue(`📊 Interweb ${configType === 'cluster' ? 'Cluster' : 'Application'} Status`));
+  console.log(chalk.blue(`📊 KubernetesJS Ops ${configType === 'cluster' ? 'Cluster' : 'Application'} Status`));
   console.log('=====================================\n');
 
   const client = new Client({
@@ -86,7 +86,7 @@ async function checkStatus(options: any): Promise<void> {
     const checkInterval = setInterval(async () => {
       try {
         console.clear();
-        console.log(chalk.blue(`📊 Interweb ${configType === 'cluster' ? 'Cluster' : 'Application'} Status`));
+        console.log(chalk.blue(`📊 KubernetesJS Ops ${configType === 'cluster' ? 'Cluster' : 'Application'} Status`));
         console.log('=====================================\n');
         console.log(chalk.gray(`Last updated: ${new Date().toLocaleTimeString()}\n`));
         
@@ -138,7 +138,7 @@ async function checkStatus(options: any): Promise<void> {
         console.log(chalk.blue('Tip: Use --watch to monitor progress in real-time'));
       } else if (status.phase === 'pending') {
         console.log(chalk.gray('\n⭕ Cluster operators are not installed'));
-        console.log(chalk.blue('Run: kjs setup -c <config-file> to install operators'));
+        console.log(chalk.blue('Run: k8sops setup -c <config-file> to install operators'));
       } else if (status.phase === 'failed') {
         console.log(chalk.red('\n❌ Cluster setup has failed'));
         console.log(chalk.blue('Check the conditions above for more details'));

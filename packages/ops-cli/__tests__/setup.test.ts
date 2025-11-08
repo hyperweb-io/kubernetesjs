@@ -99,7 +99,7 @@ describe('Setup Command', () => {
   describe('Command Configuration', () => {
     it('should create setup command with correct configuration', () => {
       expect(command.name()).toBe('setup');
-      expect(command.description()).toBe('Set up a Kubernetes cluster with interweb operators');
+      expect(command.description()).toBe('Set up a Kubernetes cluster with KubernetesJS operators');
       
       // Check options
       const options = command.options;
@@ -177,7 +177,7 @@ describe('Setup Command', () => {
 
   describe('Setup Cluster', () => {
     const mockConfig = {
-      apiVersion: 'interweb.dev/v1',
+      apiVersion: 'kubernetesjs.dev/v1',
       kind: 'ClusterSetup',
       metadata: {
         name: 'test-cluster',
@@ -336,7 +336,7 @@ describe('Setup Command', () => {
 
     it('should handle complex setup with all options', async () => {
       const complexConfig = {
-        apiVersion: 'interweb.dev/v1',
+        apiVersion: 'kubernetesjs.dev/v1',
         kind: 'ClusterSetup',
         metadata: {
           name: 'complex-cluster',
@@ -392,7 +392,7 @@ describe('Setup Command', () => {
   describe('Namespace Management', () => {
     it('should wait for namespace deletion before setup', async () => {
       const mockConfig = {
-        apiVersion: 'interweb.dev/v1',
+        apiVersion: 'kubernetesjs.dev/v1',
         kind: 'ClusterSetup',
         metadata: { name: 'test', namespace: 'test' },
         spec: { operators: [] as any[] }
@@ -414,7 +414,7 @@ describe('Setup Command', () => {
 
     it('should force delete operator namespaces before setup', async () => {
       const mockConfig = {
-        apiVersion: 'interweb.dev/v1',
+        apiVersion: 'kubernetesjs.dev/v1',
         kind: 'ClusterSetup',
         metadata: { name: 'test', namespace: 'test' },
         spec: { operators: [] as any[] }

@@ -92,7 +92,7 @@ describe('Teardown Command', () => {
 
   describe('Teardown Cluster', () => {
     const mockConfig = {
-      apiVersion: 'interweb.dev/v1',
+      apiVersion: 'kubernetesjs.dev/v1',
       kind: 'ClusterSetup',
       metadata: {
         name: 'test-cluster',
@@ -245,7 +245,7 @@ describe('Teardown Command', () => {
   describe('Namespace Cleanup', () => {
     it('should wait for namespace deletion after teardown', async () => {
       const mockConfig = {
-        apiVersion: 'interweb.dev/v1',
+        apiVersion: 'kubernetesjs.dev/v1',
         kind: 'ClusterSetup',
         metadata: { name: 'test', namespace: 'test' },
         spec: { operators: [] as any[], networking: { ingressClass: 'nginx', domain: 'test.local' } }
@@ -263,7 +263,7 @@ describe('Teardown Command', () => {
 
     it('should handle namespace deletion timeout gracefully', async () => {
       const mockConfig = {
-        apiVersion: 'interweb.dev/v1',
+        apiVersion: 'kubernetesjs.dev/v1',
         kind: 'ClusterSetup',
         metadata: { name: 'test', namespace: 'test' },
         spec: { operators: [] as any[], networking: { ingressClass: 'nginx', domain: 'test.local' } }
@@ -297,7 +297,7 @@ describe('Teardown Command', () => {
 
     it('should handle config with missing metadata', async () => {
       const invalidConfig = {
-        apiVersion: 'interweb.dev/v1',
+        apiVersion: 'kubernetesjs.dev/v1',
         kind: 'ClusterSetup',
         metadata: undefined as any,
         spec: {

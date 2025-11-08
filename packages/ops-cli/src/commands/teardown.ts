@@ -28,7 +28,7 @@ export function createTeardownCommand(): Command {
 }
 
 async function teardownOperators(options: any): Promise<void> {
-  console.log(chalk.blue('🧹 Interweb Operators Teardown'));
+  console.log(chalk.blue('🧹 KubernetesJS Ops Operators Teardown'));
   console.log('================================\n');
 
   // Check if config file exists
@@ -95,8 +95,8 @@ async function teardownOperators(options: any): Promise<void> {
 
   console.log(chalk.green('\n✅ Operators teardown completed!'));
   console.log(chalk.blue('\nNext steps:'));
-  console.log('  1. Reinstall operators if needed: kjs setup -c ' + options.config);
-  console.log('  2. Check cluster status: kjs status -c ' + options.config);
+  console.log('  1. Reinstall operators if needed: k8sops setup -c ' + options.config);
+  console.log('  2. Check cluster status: k8sops status -c ' + options.config);
 }
 
 async function waitForNamespaceDeletion(config: any): Promise<void> {

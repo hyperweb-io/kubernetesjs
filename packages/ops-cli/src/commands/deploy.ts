@@ -34,7 +34,7 @@ export function createDeployCommand(): Command {
 }
 
 async function deployApplication(options: any): Promise<void> {
-  console.log(chalk.blue('🚀 Interweb Application Deployment'));
+  console.log(chalk.blue('🚀 KubernetesJS Ops Application Deployment'));
   console.log('==================================\n');
 
   // Check if config file exists
@@ -215,7 +215,7 @@ async function generateAppConfig(options: any): Promise<void> {
 
   // Create configuration based on answers
   const config: any = {
-    apiVersion: 'interweb.dev/v1',
+    apiVersion: 'kubernetesjs.dev/v1',
     kind: 'Application',
     metadata: {
       name: answers.name,
@@ -257,10 +257,10 @@ async function generateAppConfig(options: any): Promise<void> {
     };
   }
 
-  const outputPath = options.config || 'kjs.deploy.yaml';
+  const outputPath = options.config || 'k8sops.deploy.yaml';
   ConfigLoader.saveConfig(config, outputPath);
   
   console.log(chalk.green(`✓ Configuration saved to ${outputPath}`));
   console.log(chalk.blue('\nTo deploy the application, run:'));
-  console.log(`  kjs deploy -c ${outputPath}`);
+  console.log(`  k8sops deploy -c ${outputPath}`);
 }

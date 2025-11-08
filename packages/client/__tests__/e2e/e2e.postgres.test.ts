@@ -31,7 +31,7 @@ describe("Postgres deploy (CloudNativePG) end-to-end", () => {
 
   // Configuration for CNPG operator installation
   const cfg: ClusterSetupConfig = {
-    apiVersion: "interweb.dev/v1",
+    apiVersion: "kubernetesjs.dev/v1",
     kind: "ClusterSetup",
     metadata: { name: "e2e-cnpg-install", namespace: "interweb-system" },
     spec: {
@@ -83,7 +83,7 @@ describe("Postgres deploy (CloudNativePG) end-to-end", () => {
       namespace: CNPG_NAMESPACE,
     } as OperatorConfig;
     const cfg: ClusterSetupConfig = {
-      apiVersion: "interweb.dev/v1",
+      apiVersion: "kubernetesjs.dev/v1",
       kind: "ClusterSetup",
       metadata: { name: "e2e-cnpg-install", namespace: "interweb-system" },
       spec: {

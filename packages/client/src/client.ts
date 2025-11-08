@@ -749,7 +749,7 @@ export class Client {
       } else {
         // Generate sample application config
         const sampleAppConfig = {
-          apiVersion: "interweb.dev/v1",
+          apiVersion: "kubernetesjs.dev/v1",
           kind: "Application",
           metadata: {
             name: "sample-app",

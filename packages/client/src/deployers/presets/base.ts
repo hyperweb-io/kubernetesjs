@@ -102,7 +102,7 @@ export abstract class BaseTemplateDeployer {
       'app.kubernetes.io/name': name,
       'app.kubernetes.io/component': templateId,
       'app.kubernetes.io/managed-by': 'interweb-client',
-      'interweb.dev/template': templateId,
+      'kubernetesjs.dev/template': templateId,
     };
   }
 }

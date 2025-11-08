@@ -22,7 +22,7 @@ describe("ConfigLoader", () => {
     it("should return a valid default cluster setup configuration", () => {
       const config = ConfigLoader.getDefaultClusterSetup();
 
-      expect(config.apiVersion).toBe("interweb.dev/v1");
+      expect(config.apiVersion).toBe("kubernetesjs.dev/v1");
       expect(config.kind).toBe("ClusterSetup");
       expect(config.metadata.name).toBe("dev-cluster");
       expect(config.spec.operators).toHaveLength(4);
@@ -58,7 +58,7 @@ describe("ConfigLoader", () => {
   describe("validation", () => {
     it("should throw error for invalid cluster setup config", () => {
       const invalidConfig = {
-        apiVersion: "interweb.dev/v1",
+        apiVersion: "kubernetesjs.dev/v1",
         kind: "ClusterSetup",
         metadata: {
           // Missing name

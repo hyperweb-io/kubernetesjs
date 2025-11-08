@@ -40,11 +40,11 @@ kubernetesjs/
 #### 2. Ops CLI (`@kubernetesjs/ops-cli`)
 - **Purpose:** Higher‑level operational workflows (migrated from Interweb CLI)
 - **Commands:**
-  - `kjs setup` – Initialize cluster with operators
-  - `kjs deploy` – Deploy applications
-  - `kjs status` – Cluster and app status
-  - `kjs destroy` – Cleanup resources
-  - `kjs scaffold` – Generate project templates
+  - `k8sops setup` – Initialize cluster with operators
+  - `k8sops deploy` – Deploy applications
+  - `k8sops status` – Cluster and app status
+  - `k8sops destroy` – Cleanup resources
+  - `k8sops scaffold` – Generate project templates
 
 #### 3. Client Package (`@kubernetesjs/client`)
 - **Purpose:** Enhanced kubernetesjs wrapper
@@ -78,9 +78,9 @@ kubernetesjs/
 
 ## Configuration Files
 
-### 1. Cluster Setup Config (`kjs.setup.yaml`)
+### 1. Cluster Setup Config (`k8sops.setup.yaml`)
 ```yaml
-apiVersion: kjs.dev/v1
+apiVersion: kubernetesjs.dev/v1
 kind: ClusterSetup
 metadata:
   name: dev-cluster
@@ -112,9 +112,9 @@ spec:
     domain: "127.0.0.1.nip.io"  # Default for development
 ```
 
-### 2. Application Deploy Config (`kjs.deploy.yaml`)
+### 2. Application Deploy Config (`k8sops.deploy.yaml`)
 ```yaml
-apiVersion: kjs.dev/v1
+apiVersion: kubernetesjs.dev/v1
 kind: Application
 metadata:
   name: postgres-api-app
@@ -270,12 +270,12 @@ spec:
 
 ### Current → KubernetesJS (ops-cli) Mapping
 
-| Current Script | kjs Command | Configuration |
+| Current Script | k8sops Command | Configuration |
 |---|---|---|
-| `00-setup-cluster.sh` | `kjs setup --infrastructure` | `kjs.setup.yaml` (infrastructure section) |
-| `01-install-operators.sh` | `kjs setup --operators` | `kjs.setup.yaml` (operators section) |
-| `02-deploy-postgres.sh` | `kjs deploy --database` | `kjs.deploy.yaml` (database section) |
-| `03-deploy-knative-app.sh` | `kjs deploy --services` | `kjs.deploy.yaml` (services section) |
+| `00-setup-cluster.sh` | `k8sops setup --infrastructure` | `k8sops.setup.yaml` (infrastructure section) |
+| `01-install-operators.sh` | `k8sops setup --operators` | `k8sops.setup.yaml` (operators section) |
+| `02-deploy-postgres.sh` | `k8sops deploy --database` | `k8sops.deploy.yaml` (database section) |
+| `03-deploy-knative-app.sh` | `k8sops deploy --services` | `k8sops.deploy.yaml` (services section) |
 
 ### Migration Benefits
 1. **Declarative**: Configuration over imperative scripts
@@ -291,10 +291,10 @@ spec:
 k8s get pods -n default
 
 # Ops CLI (higher-level workflows)
-kjs setup
-kjs deploy
-kjs status
-kjs destroy --confirm
+k8sops setup
+k8sops deploy
+k8sops status
+k8sops destroy --confirm
 ```
 
 ## Next Steps

@@ -35,14 +35,14 @@ async function deleteResources(options: any): Promise<void> {
 
   if (!configPath) {
     // Try to auto-detect config file
-    if (ConfigLoader.configExists('kjs.setup.yaml')) {
-      configPath = 'kjs.setup.yaml';
+    if (ConfigLoader.configExists('k8sops.setup.yaml')) {
+      configPath = 'k8sops.setup.yaml';
       configType = 'cluster';
-    } else if (ConfigLoader.configExists('kjs.deploy.yaml')) {
-      configPath = 'kjs.deploy.yaml';
+    } else if (ConfigLoader.configExists('k8sops.deploy.yaml')) {
+      configPath = 'k8sops.deploy.yaml';
       configType = 'application';
     } else {
-      throw new Error('No configuration file found. Please specify -c <config-file> or ensure kjs.setup.yaml or kjs.deploy.yaml exists.');
+      throw new Error('No configuration file found. Please specify -c <config-file> or ensure k8sops.setup.yaml or k8sops.deploy.yaml exists.');
     }
   }
 
@@ -69,7 +69,7 @@ async function deleteResources(options: any): Promise<void> {
     }
   }
 
-  console.log(chalk.red(`🗑️  Delete Interweb ${configType === 'cluster' ? 'Cluster' : 'Application'}`));
+  console.log(chalk.red(`🗑️  Delete KubernetesJS Ops ${configType === 'cluster' ? 'Cluster' : 'Application'}`));
   console.log('=====================================\n');
 
   // Load and display configuration
@@ -172,9 +172,9 @@ async function deleteResources(options: any): Promise<void> {
   
   if (configType === 'cluster') {
     console.log(chalk.blue('\nThe cluster setup has been completely removed.'));
-    console.log(chalk.blue('You can set up a new cluster using: kjs setup -c ' + configPath));
+    console.log(chalk.blue('You can set up a new cluster using: k8sops setup -c ' + configPath));
   } else {
     console.log(chalk.blue('\nThe application has been completely removed.'));
-    console.log(chalk.blue('You can redeploy the application using: kjs deploy -c ' + configPath));
+    console.log(chalk.blue('You can redeploy the application using: k8sops deploy -c ' + configPath));
   }
 }

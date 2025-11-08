@@ -12,7 +12,7 @@ describe("SetupClient.installOperators integration", () => {
   };
 
   const createConfig = (names: string[]): ClusterSetupConfig => ({
-    apiVersion: "interweb.dev/v1",
+    apiVersion: "kubernetesjs.dev/v1",
     kind: "ClusterSetup",
     metadata: { name: "test-cluster", namespace: "interweb-system" },
     spec: {

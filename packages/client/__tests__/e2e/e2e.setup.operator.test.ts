@@ -83,7 +83,7 @@ describe("SetupClient E2E (matrix): install operators", () => {
   const operators: OperatorConfig[] = resolvedNames.map(buildOperator);
 
   const cfg: ClusterSetupConfig = {
-    apiVersion: "interweb.dev/v1",
+    apiVersion: "kubernetesjs.dev/v1",
     kind: "ClusterSetup",
     metadata: { name: `e2e-${requested[0]}`, namespace: "interweb-system" },
     spec: {

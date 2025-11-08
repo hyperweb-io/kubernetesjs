@@ -28,6 +28,6 @@
     "@types/inquirer": "^9.0.3"
   },
   "bin": {
-    "kjs": "./index.js"
+    "k8sops": "./index.js"
   }
 }

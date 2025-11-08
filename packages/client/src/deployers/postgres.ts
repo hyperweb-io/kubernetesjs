@@ -65,7 +65,7 @@ function buildNamespace(ns: string): Namespace {
   return {
     apiVersion: 'v1',
     kind: 'Namespace',
-    metadata: { name: ns, labels: { 'app.interweb.dev/managed': 'true' } },
+    metadata: { name: ns, labels: { 'app.kubernetesjs.dev/managed': 'true' } },
   };
 }
 
@@ -79,7 +79,7 @@ function buildSecrets(ns: string, suUser: string, suPass: string, appUser: strin
       labels: {
         'app.kubernetes.io/name': 'postgres-superuser',
         'app.kubernetes.io/component': 'database',
-        'app.interweb.dev/managed': 'true',
+        'app.kubernetesjs.dev/managed': 'true',
       },
     },
     // Use base64 data to avoid type friction with stringData
@@ -98,7 +98,7 @@ function buildSecrets(ns: string, suUser: string, suPass: string, appUser: strin
       labels: {
         'app.kubernetes.io/name': 'postgres-app-user',
         'app.kubernetes.io/component': 'database',
-        'app.interweb.dev/managed': 'true',
+        'app.kubernetesjs.dev/managed': 'true',
       },
     },
     data: {
@@ -173,7 +173,7 @@ function buildCluster(opts: Required<PostgresDeployOptions>): PostgresqlCnpgIoV1
       labels: {
         'app.kubernetes.io/name': name,
         'app.kubernetes.io/component': 'database',
-        'app.interweb.dev/managed': 'true',
+        'app.kubernetesjs.dev/managed': 'true',
       },
     },
     spec,
@@ -192,7 +192,7 @@ function buildPooler(opts: Required<PostgresDeployOptions>): PostgresqlCnpgIoV1P
       labels: {
         'app.kubernetes.io/name': poolerName,
         'app.kubernetes.io/component': 'connection-pooler',
-        'app.interweb.dev/managed': 'true',
+        'app.kubernetesjs.dev/managed': 'true',
       },
     },
     spec: {

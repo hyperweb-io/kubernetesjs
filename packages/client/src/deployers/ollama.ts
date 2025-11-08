@@ -45,7 +45,7 @@ function buildDeployment(opts: Required<OllamaDeployOptions>): AppsV1Deployment 
         app: opts.name,
         'app.kubernetes.io/name': opts.name,
         'app.kubernetes.io/component': 'llm-server',
-        'app.interweb.dev/managed': 'true',
+        'app.kubernetesjs.dev/managed': 'true',
       },
     },
     spec: {
@@ -115,7 +115,7 @@ function buildService(opts: Required<OllamaDeployOptions>): Service {
         app: opts.name,
         'app.kubernetes.io/name': opts.name,
         'app.kubernetes.io/component': 'llm-server',
-        'app.interweb.dev/managed': 'true',
+        'app.kubernetesjs.dev/managed': 'true',
       },
     },
     spec: {

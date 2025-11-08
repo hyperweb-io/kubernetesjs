@@ -179,7 +179,7 @@ export class ConfigLoader {
    */
   static getDefaultClusterSetup(): ClusterSetupConfig {
     return {
-      apiVersion: 'interweb.dev/v1',
+      apiVersion: 'kubernetesjs.dev/v1',
       kind: 'ClusterSetup',
       metadata: {
         name: 'dev-cluster'

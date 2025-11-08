@@ -10,7 +10,7 @@ const program = new Command();
 const version = '0.0.1';
 
 program
-  .name('kjs')
+  .name('k8sops')
   .description('KubernetesJS Ops CLI - Kubernetes cluster management and application deployment')
   .version(version, '-v, --version', 'Display version number');
 
@@ -24,14 +24,14 @@ program.addCommand(createDeleteCommand());
 // Add additional utility commands
 program
   .command('list')
-  .description('List all interweb resources in the cluster')
+  .description('List cluster resources managed by KubernetesJS Ops')
   .option('--kubeconfig <path>', 'Path to kubeconfig file')
   .option('--context <context>', 'Kubernetes context to use')
   .action(async (options: any) => {
-    console.log(chalk.blue('📋 Interweb Resources'));
+    console.log(chalk.blue('📋 Cluster Resources'));
     console.log('====================\n');
     console.log(chalk.yellow('Feature not yet implemented'));
-    console.log('This will list all interweb-managed resources in the cluster');
+    console.log('This will list resources managed by KubernetesJS Ops in the cluster');
   });
 
 program
@@ -75,16 +75,16 @@ program.exitOverride((err: any) => {
 program.on('--help', () => {
   console.log('');
   console.log(chalk.blue('Examples:'));
-  console.log('  $ kjs setup                    # Set up cluster with kjs.setup.yaml');
-  console.log('  $ kjs setup --generate-config  # Generate sample cluster config');
-  console.log('  $ kjs deploy -c app.yaml       # Deploy application');
-  console.log('  $ kjs status                   # Check cluster status');
-  console.log('  $ kjs status -t application    # Check application status');
-  console.log('  $ kjs delete -c app.yaml       # Delete application');
+  console.log('  $ k8sops setup                    # Set up cluster with k8sops.setup.yaml');
+  console.log('  $ k8sops setup --generate-config  # Generate sample cluster config');
+  console.log('  $ k8sops deploy -c app.yaml       # Deploy application');
+  console.log('  $ k8sops status                   # Check cluster status');
+  console.log('  $ k8sops status -t application    # Check application status');
+  console.log('  $ k8sops delete -c app.yaml       # Delete application');
   console.log('');
   console.log(chalk.blue('Configuration Files:'));
-  console.log('  kjs.setup.yaml  - Cluster setup configuration');
-  console.log('  kjs.deploy.yaml - Application deployment configuration');
+  console.log('  k8sops.setup.yaml  - Cluster setup configuration');
+  console.log('  k8sops.deploy.yaml - Application deployment configuration');
   console.log('');
   console.log(chalk.blue('Documentation:'));
   console.log('  https://docs.kubernetesjs.dev');

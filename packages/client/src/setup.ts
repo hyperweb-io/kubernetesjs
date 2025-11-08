@@ -411,7 +411,7 @@ export class SetupClient {
       });
       const appDeployments = deployments.items.filter(
         (dep: any) =>
-          dep.metadata?.labels?.["app.interweb.dev/instance"] ===
+          dep.metadata?.labels?.["app.kubernetesjs.dev/instance"] ===
           config.metadata.name
       );
 
@@ -863,8 +863,8 @@ export class SetupClient {
         metadata: {
           name: namespace,
           labels: {
-            "app.interweb.dev/managed": "true",
-            "app.interweb.dev/application": appName,
+            "app.kubernetesjs.dev/managed": "true",
+            "app.kubernetesjs.dev/application": appName,
           },
         },
       });
@@ -872,7 +872,7 @@ export class SetupClient {
 
     const services = config.spec.services ?? [];
     const baseAppLabels = {
-      "app.interweb.dev/instance": appName,
+      "app.kubernetesjs.dev/instance": appName,
       "app.kubernetes.io/part-of": appName,
     } as Record<string, string>;
 
@@ -962,7 +962,7 @@ export class SetupClient {
           namespace,
           labels: baseAppLabels,
           annotations: {
-            "app.interweb.dev/managed": "true",
+            "app.kubernetesjs.dev/managed": "true",
           },
         },
         spec: {

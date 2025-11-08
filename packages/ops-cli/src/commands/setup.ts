@@ -16,7 +16,7 @@ export function createSetupCommand(): Command {
   const command = new Command('setup');
   
   command
-    .description('Set up a Kubernetes cluster with interweb operators')
+    .description('Set up a Kubernetes cluster with KubernetesJS operators')
     .option('-c, --config <path>', 'Path to cluster setup configuration file', '__fixtures__/config/setup.config.yaml')
     .option('-n, --namespace <namespace>', 'Kubernetes namespace to use')
     .option('--kubeconfig <path>', 'Path to kubeconfig file')
@@ -43,7 +43,7 @@ export function createSetupCommand(): Command {
 }
 
 async function setupCluster(options: any): Promise<void> {
-  console.log(chalk.blue('🚀 Interweb Cluster Setup'));
+  console.log(chalk.blue('🚀 KubernetesJS Ops Cluster Setup'));
   console.log('==========================\n');
 
   // Resolve config path, honoring --default to use fixture config
@@ -104,7 +104,7 @@ async function setupCluster(options: any): Promise<void> {
     ]);
 
     const generatedConfig = {
-      apiVersion: 'interweb.dev/v1',
+      apiVersion: 'kubernetesjs.dev/v1',
       kind: 'ClusterSetup',
       metadata: {
         name: answers.name,
@@ -127,7 +127,7 @@ async function setupCluster(options: any): Promise<void> {
       }
     };
 
-    const outputPath = options.config || 'kjs.setup.yaml';
+    const outputPath = options.config || 'k8sops.setup.yaml';
     ConfigLoader.saveConfig(generatedConfig as any, outputPath);
     options.config = outputPath;
     configPath = outputPath;
@@ -210,7 +210,7 @@ async function generateConfig(options: any): Promise<string> {
     const fixturePath = path.resolve(__dirname, '../../__fixtures__/config/setup.config.yaml');
     let outputPath = options.config;
     if (!outputPath || path.resolve(outputPath) === fixturePath || outputPath === '__fixtures__/config/setup.config.yaml') {
-      outputPath = path.resolve(process.cwd(), 'config/kjs.setup.yaml');
+      outputPath = path.resolve(process.cwd(), 'config/k8sops.setup.yaml');
     }
     const dir = path.dirname(outputPath);
     if (!fs.existsSync(dir)) {
@@ -262,7 +262,7 @@ async function generateConfig(options: any): Promise<string> {
 
   // Create configuration based on answers
   const config = {
-    apiVersion: 'interweb.dev/v1',
+    apiVersion: 'kubernetesjs.dev/v1',
     kind: 'ClusterSetup',
     metadata: {
       name: answers.name,
@@ -313,7 +313,7 @@ async function generateConfig(options: any): Promise<string> {
     }
   };
 
-  const outputPath = options.config || path.resolve(process.cwd(), 'config/kjs.setup.yaml');
+  const outputPath = options.config || path.resolve(process.cwd(), 'config/k8sops.setup.yaml');
   const outDir = path.dirname(outputPath);
   if (!fs.existsSync(outDir)) {
     fs.mkdirSync(outDir, { recursive: true });

@@ -40,7 +40,7 @@ function buildNamespace(ns: string): Namespace {
   return {
     apiVersion: 'v1',
     kind: 'Namespace',
-    metadata: { name: ns, labels: { 'app.interweb.dev/managed': 'true' } },
+    metadata: { name: ns, labels: { 'app.kubernetesjs.dev/managed': 'true' } },
   };
 }
 
@@ -54,7 +54,7 @@ function buildSecret(opts: Required<MinioDeployOptions>): Secret {
       labels: {
         'app.kubernetes.io/name': opts.name,
         'app.kubernetes.io/component': 'object-storage',
-        'app.interweb.dev/managed': 'true',
+        'app.kubernetesjs.dev/managed': 'true',
       },
     },
     data: {
@@ -75,7 +75,7 @@ function buildDeployment(opts: Required<MinioDeployOptions>): AppsV1Deployment {
         app: opts.name,
         'app.kubernetes.io/name': opts.name,
         'app.kubernetes.io/component': 'object-storage',
-        'app.interweb.dev/managed': 'true',
+        'app.kubernetesjs.dev/managed': 'true',
       },
     },
     spec: {
@@ -160,7 +160,7 @@ function buildService(opts: Required<MinioDeployOptions>): Service {
         app: opts.name,
         'app.kubernetes.io/name': opts.name,
         'app.kubernetes.io/component': 'object-storage',
-        'app.interweb.dev/managed': 'true',
+        'app.kubernetesjs.dev/managed': 'true',
       },
     },
     spec: {
@@ -187,7 +187,7 @@ function buildPVC(opts: Required<MinioDeployOptions>): KubernetesResource {
         app: opts.name,
         'app.kubernetes.io/name': opts.name,
         'app.kubernetes.io/component': 'object-storage',
-        'app.interweb.dev/managed': 'true',
+        'app.kubernetesjs.dev/managed': 'true',
       },
     },
     spec: {
