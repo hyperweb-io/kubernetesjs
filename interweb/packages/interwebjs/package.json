@@ -1,0 +1,25 @@
+{
+  "name": "@interweb/interwebjs",
+  "version": "0.0.1",
+  "description": "InterwebJS",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "module": "./esm/index.js",
+  "publishConfig": {
+    "access": "restricted",
+    "directory": "dist"
+  },
+  "scripts": {
+    "copy": "cpy ../../LICENSE README.md package.json dist --flat",
+    "clean": "rimraf dist",
+    "prepare": "pnpm run build",
+    "build": "pnpm run clean && tsc && tsc -p tsconfig.esm.json && pnpm run copy",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "codegen": "ts-node ./scripts/codegen.ts",
+    "openapi:fetch": "ts-node ./scripts/fetch-swagger.ts --out ./scripts/swagger.json"
+  },
+  "devDependencies": {
+    "schema-sdk": "^0.15.0"
+  }
+}
