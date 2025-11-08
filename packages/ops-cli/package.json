@@ -10,7 +10,7 @@
     "directory": "dist"
   },
   "scripts": {
-    "copy": "cpy ../../LICENSE README.md package.json dist --flat",
+    "copy": "copyfiles -f ../../LICENSE README.md package.json dist",
     "clean": "rimraf dist",
     "prepare": "pnpm run build",
     "build": "pnpm run clean && tsc && tsc -p tsconfig.esm.json && pnpm run copy",
