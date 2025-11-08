@@ -99,7 +99,12 @@ export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogP
       try {
         const error = await response.json();
         errorMessage = error.message || error.error || errorMessage;
-      } catch {}
+      } catch (e) {
+        // Fallback if response is not JSON; keep previous message but record parser error
+        if (e && (e as Error).message) {
+          errorMessage = errorMessage + ` (${(e as Error).message})`;
+        }
+      }
       throw new Error(errorMessage);
     }
 

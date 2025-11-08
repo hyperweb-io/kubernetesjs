@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint --max-warnings=0 .",
+    "lint": "eslint --max-warnings=0 . --fix",
     "codegen": "ts-node ./scripts/codegen.ts",
     "test": "jest",
     "test:watch": "jest --watch",
