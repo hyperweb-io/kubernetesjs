@@ -1,5 +1,5 @@
-import { VolumeAttachmentsView } from '@/components/resources/volumeattachments'
+import { VolumeAttachmentsView } from '@/components/resources/volumeattachments';
 
 export default function VolumeAttachmentsPage() {
-  return <VolumeAttachmentsView />
+  return <VolumeAttachmentsView />;
 }

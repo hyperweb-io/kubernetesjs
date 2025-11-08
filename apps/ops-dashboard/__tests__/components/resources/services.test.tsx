@@ -1,16 +1,13 @@
 import userEvent from '@testing-library/user-event';
-import { render, screen, waitFor, fireEvent } from '@/__tests__/utils/test-utils';
-import { server } from '@/__mocks__/server';
+
 import { 
-  createServicesList, 
-  createServicesListError,
   createAllServicesList,
-  deleteServiceHandler,
+  createServicesList,
+  createServicesListError,
   deleteServiceErrorHandler,
-  createServiceHandler,
-  createServiceErrorHandler,
-  createServicesListData
-} from '@/__mocks__/handlers/services';
+  deleteServiceHandler} from '@/__mocks__/handlers/services';
+import { server } from '@/__mocks__/server';
+import { fireEvent,render, screen, waitFor } from '@/__tests__/utils/test-utils';
 
 // Mock window.alert for testing
 const mockAlert = jest.spyOn(window, 'alert').mockImplementation(() => {});

@@ -1,31 +1,30 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
+import { type ConfigMap as K8sConfigMap } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
+  AlertCircle,
+  ChevronDown,
+  ChevronRight,
+  Database,
   Edit, 
   Eye,
   FileCode,
   FileText,
-  Database,
+  Plus, 
+  RefreshCw, 
   Save,
-  AlertCircle,
-  ChevronDown,
-  ChevronRight
-} from 'lucide-react'
-import { type ConfigMap as K8sConfigMap } from '@kubernetesjs/ops'
-import { useConfigMaps, useDeleteConfigMap, useUpdateConfigMap } from '@/hooks'
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
+import { useConfigMaps, useDeleteConfigMap, useUpdateConfigMap } from '@/hooks';
+import { confirmDialog } from '@/hooks/useConfirm';
 
 interface ConfigMap {
   name: string
@@ -38,18 +37,18 @@ interface ConfigMap {
 }
 
 export function ConfigMapsView() {
-  const [selectedConfigMap, setSelectedConfigMap] = useState<ConfigMap | null>(null)
-  const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const [editingConfigMap, setEditingConfigMap] = useState<ConfigMap | null>(null)
-  const [editedData, setEditedData] = useState<Record<string, string>>({})
-  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set())
-  const [saving, setSaving] = useState(false)
-  const [createDialogOpen, setCreateDialogOpen] = useState(false)
+  const [selectedConfigMap, setSelectedConfigMap] = useState<ConfigMap | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingConfigMap, setEditingConfigMap] = useState<ConfigMap | null>(null);
+  const [editedData, setEditedData] = useState<Record<string, string>>({});
+  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
+  const [saving, setSaving] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   
   // Use TanStack Query hooks
-  const { data, isLoading, error, refetch } = useConfigMaps()
-  const deleteConfigMapMutation = useDeleteConfigMap()
-  const updateConfigMapMutation = useUpdateConfigMap()
+  const { data, isLoading, error, refetch } = useConfigMaps();
+  const deleteConfigMapMutation = useDeleteConfigMap();
+  const updateConfigMapMutation = useUpdateConfigMap();
   
   // Format configmaps from query data
   const configMaps: ConfigMap[] = (data?.items as any[])?.map((item: any) => ({
@@ -60,11 +59,11 @@ export function ConfigMapsView() {
     createdAt: item.metadata?.creationTimestamp || '',
     immutable: item.immutable,
     k8sData: item
-  })) || []
+  })) || [];
 
   const handleRefresh = () => {
-    refetch()
-  }
+    refetch();
+  };
 
   const handleDelete = async (configMap: ConfigMap) => {
     const confirmed = await confirmDialog({
@@ -72,98 +71,98 @@ export function ConfigMapsView() {
       description: `Are you sure you want to delete ${configMap.name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteConfigMapMutation.mutateAsync({
           name: configMap.name,
           namespace: configMap.namespace
-        })
+        });
       } catch (err) {
-        console.error('Failed to delete configmap:', err)
-        alert(`Failed to delete configmap: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete configmap:', err);
+        alert(`Failed to delete configmap: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const handleEdit = (configMap: ConfigMap) => {
-    setEditingConfigMap(configMap)
-    setEditedData((configMap.k8sData?.data as Record<string, string>) || {})
-    setExpandedKeys(new Set())
-    setEditDialogOpen(true)
-  }
+    setEditingConfigMap(configMap);
+    setEditedData((configMap.k8sData?.data as Record<string, string>) || {});
+    setExpandedKeys(new Set());
+    setEditDialogOpen(true);
+  };
 
   const toggleKeyExpansion = (key: string) => {
-    const newExpanded = new Set(expandedKeys)
+    const newExpanded = new Set(expandedKeys);
     if (expandedKeys.has(key)) {
-      newExpanded.delete(key)
+      newExpanded.delete(key);
     } else {
-      newExpanded.add(key)
+      newExpanded.add(key);
     }
-    setExpandedKeys(newExpanded)
-  }
+    setExpandedKeys(newExpanded);
+  };
 
   const handleSaveConfigMap = async () => {
-    if (!editingConfigMap || !editingConfigMap.k8sData) return
+    if (!editingConfigMap || !editingConfigMap.k8sData) return;
     
-    setSaving(true)
+    setSaving(true);
     try {
       const updatedConfigMap: K8sConfigMap = {
         ...editingConfigMap.k8sData,
         data: editedData
-      }
+      };
       
       await updateConfigMapMutation.mutateAsync({
         name: editingConfigMap.name,
         configMap: updatedConfigMap,
         namespace: editingConfigMap.namespace
-      })
+      });
       
-      setEditDialogOpen(false)
+      setEditDialogOpen(false);
     } catch (err) {
-      console.error('Failed to update configmap:', err)
-      alert(`Failed to update configmap: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      console.error('Failed to update configmap:', err);
+      alert(`Failed to update configmap: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const getDataTypeBadge = (key: string, isBinary: boolean = false) => {
     if (isBinary) {
       return <Badge variant="secondary" className="flex items-center gap-1">
         <Database className="w-3 h-3" />
         Binary
-      </Badge>
+      </Badge>;
     }
     
-    const extension = key.split('.').pop()?.toLowerCase()
+    const extension = key.split('.').pop()?.toLowerCase();
     switch (extension) {
-      case 'yaml':
-      case 'yml':
-      case 'json':
-      case 'xml':
-        return <Badge variant="outline" className="flex items-center gap-1">
-          <FileCode className="w-3 h-3" />
+    case 'yaml':
+    case 'yml':
+    case 'json':
+    case 'xml':
+      return <Badge variant="outline" className="flex items-center gap-1">
+        <FileCode className="w-3 h-3" />
           Config
-        </Badge>
-      case 'conf':
-      case 'properties':
-      case 'ini':
-        return <Badge className="flex items-center gap-1">
-          <FileText className="w-3 h-3" />
+      </Badge>;
+    case 'conf':
+    case 'properties':
+    case 'ini':
+      return <Badge className="flex items-center gap-1">
+        <FileText className="w-3 h-3" />
           Settings
-        </Badge>
-      case 'sh':
-      case 'bash':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <FileCode className="w-3 h-3" />
+      </Badge>;
+    case 'sh':
+    case 'bash':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <FileCode className="w-3 h-3" />
           Script
-        </Badge>
-      default:
-        return <Badge variant="secondary">Text</Badge>
+      </Badge>;
+    default:
+      return <Badge variant="secondary">Text</Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -368,9 +367,9 @@ export function ConfigMapsView() {
           </DialogHeader>
           <div className="flex-1 overflow-auto space-y-4 py-4">
             {editingConfigMap && Object.entries(editedData).map(([key, value]) => {
-              const isExpanded = expandedKeys.has(key)
-              const lines = value.split('\n').length
-              const isLarge = lines > 3 || value.length > 200
+              const isExpanded = expandedKeys.has(key);
+              const lines = value.split('\n').length;
+              const isLarge = lines > 3 || value.length > 200;
               
               return (
                 <div key={key} className="space-y-2">
@@ -398,7 +397,7 @@ export function ConfigMapsView() {
                       setEditedData(prev => ({
                         ...prev,
                         [key]: e.target.value
-                      }))
+                      }));
                     }}
                     className={`font-mono text-sm ${
                       isLarge && !isExpanded ? 'h-20' : 'min-h-[100px]'
@@ -408,7 +407,7 @@ export function ConfigMapsView() {
                     }}
                   />
                 </div>
-              )
+              );
             })}
           </div>
           <DialogFooter>
@@ -440,5 +439,5 @@ export function ConfigMapsView() {
       </Dialog>
     </div>
 
-  )
+  );
 }

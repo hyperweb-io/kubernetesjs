@@ -1,4 +1,4 @@
-import { http, HttpResponse } from 'msw'
+import { http, HttpResponse } from 'msw';
 
 export const createPVCsListData = () => [
   {
@@ -94,7 +94,7 @@ export const createPVCsListData = () => [
       }
     }
   }
-]
+];
 
 export const createPVCsList = () => {
   return http.get('/api/v1/namespaces/:namespace/persistentvolumeclaims', () => {
@@ -102,9 +102,9 @@ export const createPVCsList = () => {
       apiVersion: 'v1',
       kind: 'PersistentVolumeClaimList',
       items: createPVCsListData()
-    })
-  })
-}
+    });
+  });
+};
 
 export const createAllPVCsList = () => {
   return http.get('/api/v1/persistentvolumeclaims', () => {
@@ -112,32 +112,32 @@ export const createAllPVCsList = () => {
       apiVersion: 'v1',
       kind: 'PersistentVolumeClaimList',
       items: createPVCsListData()
-    })
-  })
-}
+    });
+  });
+};
 
 export const createPVCDelete = () => {
   return http.delete('/api/v1/namespaces/:namespace/persistentvolumeclaims/:name', () => {
-    return HttpResponse.json({})
-  })
-}
+    return HttpResponse.json({});
+  });
+};
 
 export const createPVCsListError = () => {
   return http.get('/api/v1/namespaces/:namespace/persistentvolumeclaims', () => {
     return HttpResponse.json(
       { error: 'Server Error' },
       { status: 500 }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createPVCsListSlow = () => {
   return http.get('/api/v1/namespaces/:namespace/persistentvolumeclaims', async () => {
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 1000));
     return HttpResponse.json({
       apiVersion: 'v1',
       kind: 'PersistentVolumeClaimList',
       items: createPVCsListData()
-    })
-  })
-}
+    });
+  });
+};

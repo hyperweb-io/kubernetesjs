@@ -1,8 +1,10 @@
 import userEvent from '@testing-library/user-event';
+import { http, HttpResponse } from 'msw';
+
+import { server } from '@/__mocks__/server';
+
 import { InfraHeader } from '../../../components/headers/infra-header';
 import { render, screen } from '../../utils/test-utils';
-import { server } from '@/__mocks__/server';
-import { http, HttpResponse } from 'msw';
 
 describe('InfraHeader', () => {
   const defaultProps = {

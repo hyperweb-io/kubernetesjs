@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { RefreshCw } from 'lucide-react';
-import { OperatorFilters } from '@/components/admin/operator-filters';
-import { useOperators } from '@/hooks/use-operators';
+import { useState } from 'react';
+
 import { OperatorCard } from '@/components/admin/operator-card';
+import { OperatorFilters } from '@/components/admin/operator-filters';
+import { Card, CardContent } from '@/components/ui/card';
+import { useOperators } from '@/hooks/use-operators';
 
 export default function OperatorsPage() {
   const [searchTerm, setSearchTerm] = useState('');

@@ -1,17 +1,17 @@
-import { screen, waitFor, fireEvent } from '@testing-library/react';
+import { fireEvent,screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { render } from '../../utils/test-utils';
-import { server } from '@/__mocks__/server';
+import { http, HttpResponse } from 'msw';
+
+import { API_BASE } from '@/__mocks__/handlers/common';
 import { 
-  createRuntimeClassesList, 
+  createRuntimeClassesList,
   createRuntimeClassesListError,
   createRuntimeClassesListSlow,
-  deleteRuntimeClassHandler,
   deleteRuntimeClassErrorHandler,
-  createRuntimeClassesListData
-} from '@/__mocks__/handlers/runtimeclasses';
-import { http, HttpResponse } from 'msw';
-import { API_BASE } from '@/__mocks__/handlers/common';
+  deleteRuntimeClassHandler} from '@/__mocks__/handlers/runtimeclasses';
+import { server } from '@/__mocks__/server';
+
+import { render } from '../../utils/test-utils';
 
 // Mock window.alert for testing
 const mockAlert = jest.spyOn(window, 'alert').mockImplementation(() => {});

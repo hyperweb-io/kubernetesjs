@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
+
 import { AdaptiveLayout } from '../../components/adaptive-layout';
-import { render as customRender } from '../utils/test-utils';
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({

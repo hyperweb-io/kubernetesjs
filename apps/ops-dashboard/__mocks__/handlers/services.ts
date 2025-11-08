@@ -1,6 +1,7 @@
-import { http, HttpResponse } from "msw"
-import { API_BASE } from "./common"
-import { V1Service } from "@kubernetesjs/ops"
+import { V1Service } from '@kubernetesjs/ops';
+import { http, HttpResponse } from 'msw';
+
+import { API_BASE } from './common';
 
 export const createServicesListData = (): V1Service[] => {
   return [
@@ -80,21 +81,21 @@ export const createServicesListData = (): V1Service[] => {
         loadBalancer: {}
       }
     }
-  ]
-}
+  ];
+};
 
 export const createServicesList = (services: V1Service[] = createServicesListData()) => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/services`, ({ params }) => {
-    const namespace = params.namespace as string
-    const namespaceServices = services.filter(service => service.metadata?.namespace === namespace)
+    const namespace = params.namespace as string;
+    const namespaceServices = services.filter(service => service.metadata?.namespace === namespace);
 
     return HttpResponse.json({
       apiVersion: 'v1',
       kind: 'ServiceList',
       items: namespaceServices
-    })
-  })
-}
+    });
+  });
+};
 
 export const createAllServicesList = (services: V1Service[] = createServicesListData()) => {
   return http.get(`${API_BASE}/api/v1/services`, () => {
@@ -102,96 +103,96 @@ export const createAllServicesList = (services: V1Service[] = createServicesList
       apiVersion: 'v1',
       kind: 'ServiceList',
       items: services
-    })
-  })
-}
+    });
+  });
+};
 
 export const createServicesListError = (status: number = 500, message: string = 'Internal Server Error') => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/services`, () => {
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createAllServicesListError = (status: number = 500, message: string = 'Internal Server Error') => {
   return http.get(`${API_BASE}/api/v1/services`, () => {
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createServicesListSlow = (services: V1Service[] = createServicesListData(), delay: number = 1000) => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/services`, async ({ params }) => {
-    await new Promise(resolve => setTimeout(resolve, delay))
-    const namespace = params.namespace as string
-    const namespaceServices = services.filter(service => service.metadata?.namespace === namespace)
+    await new Promise(resolve => setTimeout(resolve, delay));
+    const namespace = params.namespace as string;
+    const namespaceServices = services.filter(service => service.metadata?.namespace === namespace);
 
     return HttpResponse.json({
       apiVersion: 'v1',
       kind: 'ServiceList',
       items: namespaceServices
-    })
-  })
-}
+    });
+  });
+};
 
 export const deleteServiceHandler = (name: string, namespace: string) => {
   return http.delete(`${API_BASE}/api/v1/namespaces/:namespace/services/:name`, ({ params }) => {
     if (params.name === name && params.namespace === namespace) {
-      return HttpResponse.json({}, { status: 200 })
+      return HttpResponse.json({}, { status: 200 });
     }
-    return HttpResponse.json({ error: 'Service not found' }, { status: 404 })
-  })
-}
+    return HttpResponse.json({ error: 'Service not found' }, { status: 404 });
+  });
+};
 
 export const deleteServiceErrorHandler = (name: string, namespace: string, status: number = 500, message: string = 'Deletion failed') => {
   return http.delete(`${API_BASE}/api/v1/namespaces/:namespace/services/:name`, ({ params }) => {
     if (params.name === name && params.namespace === namespace) {
-      return HttpResponse.json({ error: message }, { status })
+      return HttpResponse.json({ error: message }, { status });
     }
-    return HttpResponse.json({ error: 'Service not found' }, { status: 404 })
-  })
-}
+    return HttpResponse.json({ error: 'Service not found' }, { status: 404 });
+  });
+};
 
 export const createServiceHandler = (service: V1Service) => {
   return http.post(`${API_BASE}/api/v1/namespaces/:namespace/services`, () => {
-    return HttpResponse.json(service, { status: 201 })
-  })
-}
+    return HttpResponse.json(service, { status: 201 });
+  });
+};
 
 export const createServiceErrorHandler = (status: number = 400, message: string = 'Creation failed') => {
   return http.post(`${API_BASE}/api/v1/namespaces/:namespace/services`, () => {
-    return HttpResponse.json({ error: message }, { status })
-  })
-}
+    return HttpResponse.json({ error: message }, { status });
+  });
+};
 
 export const createServicesListNetworkError = () => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/services`, () => {
-    return HttpResponse.error()
-  })
-}
+    return HttpResponse.error();
+  });
+};
 
 // Get single service handler
 export const getService = (service: V1Service) => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/services/:name`, ({ params }) => {
-    const name = params.name as string
-    const namespace = params.namespace as string
+    const name = params.name as string;
+    const namespace = params.namespace as string;
     if (name === service.metadata.name && namespace === service.metadata.namespace) {
-      return HttpResponse.json(service)
+      return HttpResponse.json(service);
     }
-    return HttpResponse.json({ error: 'Service not found' }, { status: 404 })
-  })
-}
+    return HttpResponse.json({ error: 'Service not found' }, { status: 404 });
+  });
+};
 
 // Update service handler
 export const updateService = () => {
   return http.put(`${API_BASE}/api/v1/namespaces/:namespace/services/:name`, async ({ request, params }) => {
-    const body = await request.json() as V1Service
-    const name = params.name as string
-    const namespace = params.namespace as string
+    const body = await request.json() as V1Service;
+    const name = params.name as string;
+    const namespace = params.namespace as string;
     
     return HttpResponse.json({
       ...body,
@@ -202,9 +203,9 @@ export const updateService = () => {
         resourceVersion: '12345',
         uid: `service-${name}`
       }
-    })
-  })
-}
+    });
+  });
+};
 
 // Update service error handler
 export const updateServiceError = (status: number = 500, message: string = 'Update failed') => {
@@ -212,6 +213,6 @@ export const updateServiceError = (status: number = 500, message: string = 'Upda
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};

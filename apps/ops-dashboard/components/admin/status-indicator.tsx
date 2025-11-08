@@ -1,6 +1,7 @@
+import { AlertCircle, CheckCircle, Circle,Clock, XCircle } from 'lucide-react';
 import * as React from 'react';
+
 import { cn } from '@/lib/utils';
-import { CheckCircle, AlertCircle, Clock, XCircle, Circle } from 'lucide-react';
 
 export interface StatusIndicatorProps {
   status: 'ready' | 'installed' | 'creating' | 'installing' | 'pending' | 'error' | 'not-installed' | 'unknown';

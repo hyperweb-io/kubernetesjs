@@ -1,6 +1,7 @@
-import { Page, expect } from '@playwright/test';
-import { verifyPageLoadedSuccessfully } from './page-verification';
 import { InterwebClient } from '@kubernetesjs/ops';
+import { expect,Page } from '@playwright/test';
+
+import { verifyPageLoadedSuccessfully } from './page-verification';
 
 const interweb = new InterwebClient({
   restEndpoint: 'http://127.0.0.1:8001',

@@ -1,5 +1,5 @@
-import { InterwebClient as InterwebKubernetesClient } from '@kubernetesjs/ops';
 import { SetupClient } from '@kubernetesjs/client';
+import { InterwebClient as InterwebKubernetesClient } from '@kubernetesjs/ops';
 
 export function createSetupClient(): SetupClient {
   const restEndpoint = process.env.KUBERNETES_PROXY_URL || 'http://127.0.0.1:8001';

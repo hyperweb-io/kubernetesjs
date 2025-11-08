@@ -1,6 +1,7 @@
-import { http, HttpResponse } from "msw"
-import { API_BASE } from "./common"
-import { V1StatefulSet } from "@kubernetesjs/ops"
+import { V1StatefulSet } from '@kubernetesjs/ops';
+import { http, HttpResponse } from 'msw';
+
+import { API_BASE } from './common';
 
 export const createStatefulSetsListData = (): V1StatefulSet[] => {
   return [
@@ -73,35 +74,35 @@ export const createStatefulSetsListData = (): V1StatefulSet[] => {
         updatedReplicas: 0
       }
     }
-  ]
-}
+  ];
+};
 
 export const createStatefulSetsList = (statefulSets: V1StatefulSet[] = createStatefulSetsListData()) => {
   return http.get(`${API_BASE}/apis/apps/v1/namespaces/:namespace/statefulsets`, ({ params, request }) => {
-    const namespace = params.namespace as string
-    const namespaceStatefulSets = statefulSets.filter(ss => ss.metadata.namespace === namespace)
+    const namespace = params.namespace as string;
+    const namespaceStatefulSets = statefulSets.filter(ss => ss.metadata.namespace === namespace);
 
     return HttpResponse.json({
       apiVersion: 'apps/v1',
       kind: 'StatefulSetList',
       items: namespaceStatefulSets
-    })
-  })
-}
+    });
+  });
+};
 
 // Alternative handler that matches any statefulsets request
 export const createStatefulSetsListAny = (statefulSets: V1StatefulSet[] = createStatefulSetsListData()) => {
   return http.get(`${API_BASE}/apis/apps/v1/namespaces/:namespace/statefulsets`, ({ params, request }) => {
-    const namespace = params.namespace as string
-    const namespaceStatefulSets = statefulSets.filter(ss => ss.metadata.namespace === namespace)
+    const namespace = params.namespace as string;
+    const namespaceStatefulSets = statefulSets.filter(ss => ss.metadata.namespace === namespace);
 
     return HttpResponse.json({
       apiVersion: 'apps/v1',
       kind: 'StatefulSetList',
       items: namespaceStatefulSets
-    })
-  })
-}
+    });
+  });
+};
 
 export const createAllStatefulSetsList = (statefulSets: V1StatefulSet[] = createStatefulSetsListData()) => {
   return http.get(`${API_BASE}/apis/apps/v1/statefulsets`, () => {
@@ -109,9 +110,9 @@ export const createAllStatefulSetsList = (statefulSets: V1StatefulSet[] = create
       apiVersion: 'apps/v1',
       kind: 'StatefulSetList',
       items: statefulSets
-    })
-  })
-}
+    });
+  });
+};
 
 // Error handlers
 export const createStatefulSetsListError = (status: number = 500, message: string = 'Internal Server Error') => {
@@ -119,68 +120,68 @@ export const createStatefulSetsListError = (status: number = 500, message: strin
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createAllStatefulSetsListError = (status: number = 500, message: string = 'Internal Server Error') => {
   return http.get(`${API_BASE}/apis/apps/v1/statefulsets`, () => {
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 // Network error handler
 export const createStatefulSetsListNetworkError = () => {
   return http.get(`${API_BASE}/apis/apps/v1/namespaces/:namespace/statefulsets`, () => {
-    return HttpResponse.error()
-  })
-}
+    return HttpResponse.error();
+  });
+};
 
 // Slow response handler for testing loading states
 export const createStatefulSetsListSlow = (statefulSets: V1StatefulSet[] = createStatefulSetsListData(), delay: number = 1000) => {
   return http.get(`${API_BASE}/apis/apps/v1/namespaces/:namespace/statefulsets`, async ({ params }) => {
-    await new Promise(resolve => setTimeout(resolve, delay))
-    const namespace = params.namespace as string
-    const namespaceStatefulSets = statefulSets.filter(ss => ss.metadata.namespace === namespace)
+    await new Promise(resolve => setTimeout(resolve, delay));
+    const namespace = params.namespace as string;
+    const namespaceStatefulSets = statefulSets.filter(ss => ss.metadata.namespace === namespace);
 
     return HttpResponse.json({
       apiVersion: 'apps/v1',
       kind: 'StatefulSetList',
       items: namespaceStatefulSets
-    })
-  })
-}
+    });
+  });
+};
 
 // StatefulSet by name handler
 export const createStatefulSetByName = (statefulSets: V1StatefulSet[] = createStatefulSetsListData()) => {
   return http.get(`${API_BASE}/apis/apps/v1/namespaces/:namespace/statefulsets/:name`, ({ params }) => {
-    const namespace = params.namespace as string
-    const name = params.name as string
-    const statefulSet = statefulSets.find(ss => ss.metadata.namespace === namespace && ss.metadata.name === name)
+    const namespace = params.namespace as string;
+    const name = params.name as string;
+    const statefulSet = statefulSets.find(ss => ss.metadata.namespace === namespace && ss.metadata.name === name);
 
     if (!statefulSet) {
       return HttpResponse.json(
         { error: 'StatefulSet not found' },
         { status: 404 }
-      )
+      );
     }
 
-    return HttpResponse.json(statefulSet)
-  })
-}
+    return HttpResponse.json(statefulSet);
+  });
+};
 
 // StatefulSet details handler (alias for createStatefulSetByName)
 export const createStatefulSetDetails = (statefulSet: V1StatefulSet) => {
   return http.get(`${API_BASE}/apis/apps/v1/namespaces/:namespace/statefulsets/:name`, ({ params }) => {
     if (params.name === statefulSet.metadata?.name && params.namespace === statefulSet.metadata?.namespace) {
-      return HttpResponse.json(statefulSet)
+      return HttpResponse.json(statefulSet);
     }
-    return HttpResponse.json({ error: 'StatefulSet not found' }, { status: 404 })
-  })
-}
+    return HttpResponse.json({ error: 'StatefulSet not found' }, { status: 404 });
+  });
+};
 
 // Scale StatefulSet handler
 export const createStatefulSetScale = () => {
@@ -190,13 +191,13 @@ export const createStatefulSetScale = () => {
       kind: 'Scale',
       metadata: { name: 'test', namespace: 'default' },
       spec: { replicas: 1 }
-    })
-  })
-}
+    });
+  });
+};
 
 // Delete StatefulSet handler
 export const createStatefulSetDelete = () => {
   return http.delete(`${API_BASE}/apis/apps/v1/namespaces/:namespace/statefulsets/:name`, () => {
-    return HttpResponse.json({})
-  })
-}
+    return HttpResponse.json({});
+  });
+};

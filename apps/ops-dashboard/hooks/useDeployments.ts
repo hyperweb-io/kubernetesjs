@@ -1,38 +1,39 @@
+import type { AppsV1Deployment as Deployment, AutoscalingV1Scale as Scale } from '@kubernetesjs/ops';
+
+import { usePreferredNamespace } from '../contexts/NamespaceContext';
 import {
+  useCreateAppsV1NamespacedDeployment,
+  useDeleteAppsV1NamespacedDeployment,
   useListAppsV1DeploymentForAllNamespacesQuery,
   useListAppsV1NamespacedDeploymentQuery,
   useReadAppsV1NamespacedDeploymentQuery,
-  useCreateAppsV1NamespacedDeployment,
   useReplaceAppsV1NamespacedDeployment,
-  useDeleteAppsV1NamespacedDeployment,
   useReplaceAppsV1NamespacedDeploymentScale,
-} from '../k8s/index'
-import { usePreferredNamespace } from '../contexts/NamespaceContext'
-import type { AppsV1Deployment as Deployment, AppsV1DeploymentList as DeploymentList, AutoscalingV1Scale as Scale } from '@kubernetesjs/ops'
+} from '../k8s/index';
 
 // Query keys
-const DEPLOYMENTS_KEY = ['deployments'] as const
+const DEPLOYMENTS_KEY = ['deployments'] as const;
 
 export function useDeployments(namespace?: string) {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const ns = namespace || defaultNamespace
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const ns = namespace || defaultNamespace;
 
   if (ns === '_all') {
-    return useListAppsV1DeploymentForAllNamespacesQuery({ query: {} })
+    return useListAppsV1DeploymentForAllNamespacesQuery({ query: {} });
   }
-  return useListAppsV1NamespacedDeploymentQuery({ path: { namespace: ns }, query: {} })
+  return useListAppsV1NamespacedDeploymentQuery({ path: { namespace: ns }, query: {} });
 }
 
 export function useDeployment(name: string, namespace?: string) {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const ns = namespace || defaultNamespace
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const ns = namespace || defaultNamespace;
 
-  return useReadAppsV1NamespacedDeploymentQuery({ path: { namespace: ns, name }, query: {} })
+  return useReadAppsV1NamespacedDeploymentQuery({ path: { namespace: ns, name }, query: {} });
 }
 
 export function useCreateDeployment() {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const base = useCreateAppsV1NamespacedDeployment()
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const base = useCreateAppsV1NamespacedDeployment();
   return {
     ...base,
     mutate: (
@@ -51,12 +52,12 @@ export function useCreateDeployment() {
         { path: { namespace: namespace || defaultNamespace }, query: {}, body: deployment },
         opts
       ),
-  }
+  };
 }
 
 export function useUpdateDeployment() {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const base = useReplaceAppsV1NamespacedDeployment()
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const base = useReplaceAppsV1NamespacedDeployment();
   return {
     ...base,
     mutate: (
@@ -75,12 +76,12 @@ export function useUpdateDeployment() {
         { path: { namespace: namespace || defaultNamespace, name }, query: {}, body: deployment },
         opts
       ),
-  }
+  };
 }
 
 export function useDeleteDeployment() {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const base = useDeleteAppsV1NamespacedDeployment()
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const base = useDeleteAppsV1NamespacedDeployment();
   return {
     ...base,
     mutate: (
@@ -99,12 +100,12 @@ export function useDeleteDeployment() {
         { path: { namespace: namespace || defaultNamespace, name }, query: {} },
         opts
       ),
-  }
+  };
 }
 
 export function useScaleDeployment() {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const base = useReplaceAppsV1NamespacedDeploymentScale()
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const base = useReplaceAppsV1NamespacedDeploymentScale();
   return {
     ...base,
     mutate: (
@@ -141,5 +142,5 @@ export function useScaleDeployment() {
         },
         opts
       ),
-  }
+  };
 }

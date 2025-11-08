@@ -1,5 +1,6 @@
-import { http, HttpResponse } from "msw"
-import { API_BASE } from "./common"
+import { http, HttpResponse } from 'msw';
+
+import { API_BASE } from './common';
 
 export interface DatabaseInfo {
   name: string
@@ -64,29 +65,29 @@ export const createDatabasesListData = (): DatabaseInfo[] => {
       createdAt: '2024-01-05T10:00:00Z',
       description: 'Failed PostgreSQL database'
     }
-  ]
-}
+  ];
+};
 
 export const createDatabasesList = (databases: DatabaseInfo[] = createDatabasesListData()) => {
   return http.get('/api/databases', () => {
-    return HttpResponse.json(databases)
-  })
-}
+    return HttpResponse.json(databases);
+  });
+};
 
 export const createDatabasesListError = (status: number = 500, message: string = 'Internal Server Error') => {
   return http.get(`${API_BASE}/api/databases`, () => {
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createDatabasesListNetworkError = () => {
   return http.get(`${API_BASE}/api/databases`, () => {
-    return HttpResponse.error()
-  })
-}
+    return HttpResponse.error();
+  });
+};
 
 export const createCreateDatabase = (databaseName: string, namespace: string = 'default') => {
   return http.post(`${API_BASE}/api/databases`, ({ request }) => {
@@ -103,54 +104,54 @@ export const createCreateDatabase = (databaseName: string, namespace: string = '
         createdAt: new Date().toISOString(),
         description: `Database ${databaseName}`
       }
-    })
-  })
-}
+    });
+  });
+};
 
 export const createCreateDatabaseError = (status: number = 500, message: string = 'Database creation failed') => {
   return http.post(`${API_BASE}/api/databases`, () => {
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createDeleteDatabase = (databaseName: string, namespace: string = 'default') => {
   return http.delete(`${API_BASE}/api/databases/${namespace}/${databaseName}`, () => {
     return HttpResponse.json({ 
       success: true, 
       message: `Database ${databaseName} deleted successfully from namespace ${namespace}` 
-    })
-  })
-}
+    });
+  });
+};
 
 export const createDeleteDatabaseError = (databaseName: string, namespace: string = 'default', status: number = 500, message: string = 'Database deletion failed') => {
   return http.delete(`${API_BASE}/api/databases/${namespace}/${databaseName}`, () => {
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createStartDatabase = (databaseName: string, namespace: string = 'default') => {
   return http.post(`${API_BASE}/api/databases/${namespace}/${databaseName}/start`, () => {
     return HttpResponse.json({ 
       success: true, 
       message: `Database ${databaseName} started successfully` 
-    })
-  })
-}
+    });
+  });
+};
 
 export const createStopDatabase = (databaseName: string, namespace: string = 'default') => {
   return http.post(`${API_BASE}/api/databases/${namespace}/${databaseName}/stop`, () => {
     return HttpResponse.json({ 
       success: true, 
       message: `Database ${databaseName} stopped successfully` 
-    })
-  })
-}
+    });
+  });
+};
 
 export const createScaleDatabase = (databaseName: string, namespace: string = 'default', replicas: number) => {
   return http.post(`${API_BASE}/api/databases/${namespace}/${databaseName}/scale`, ({ request }) => {
@@ -158,13 +159,13 @@ export const createScaleDatabase = (databaseName: string, namespace: string = 'd
       success: true, 
       message: `Database ${databaseName} scaled to ${replicas} replicas`,
       replicas
-    })
-  })
-}
+    });
+  });
+};
 
 export const createCreateDatabaseSlow = (databaseName: string, namespace: string = 'default', delay: number = 2000) => {
   return http.post(`${API_BASE}/api/databases`, async () => {
-    await new Promise(resolve => setTimeout(resolve, delay))
+    await new Promise(resolve => setTimeout(resolve, delay));
     return HttpResponse.json({ 
       success: true, 
       message: `Database ${databaseName} created successfully in namespace ${namespace}`,
@@ -178,9 +179,9 @@ export const createCreateDatabaseSlow = (databaseName: string, namespace: string
         createdAt: new Date().toISOString(),
         description: `Database ${databaseName}`
       }
-    })
-  })
-}
+    });
+  });
+};
 
 // Database status handlers
 export interface DatabaseStatusSummary {
@@ -267,26 +268,26 @@ export const createDatabaseStatusData = (): DatabaseStatusSummary => {
         restarts: 1
       }
     ]
-  }
-}
+  };
+};
 
 export const createDatabaseStatus = (status: DatabaseStatusSummary = createDatabaseStatusData()) => {
   return http.get('/api/databases/:namespace/:name/status', () => {
-    return HttpResponse.json(status)
-  })
-}
+    return HttpResponse.json(status);
+  });
+};
 
 export const createDatabaseStatusError = (status: number = 404, message: string = 'Database not found') => {
   return http.get('/api/databases/:namespace/:name/status', () => {
-    return HttpResponse.json({ error: message }, { status })
-  })
-}
+    return HttpResponse.json({ error: message }, { status });
+  });
+};
 
 export const createDatabaseStatusNetworkError = () => {
   return http.get('/api/databases/:namespace/:name/status', () => {
-    return HttpResponse.error()
-  })
-}
+    return HttpResponse.error();
+  });
+};
 
 // Backup handlers
 export interface BackupInfo {
@@ -320,20 +321,20 @@ export const createBackupsListData = (): BackupInfo[] => {
       status: 'completed',
       type: 'manual'
     }
-  ]
-}
+  ];
+};
 
 export const createBackupsList = (backups: BackupInfo[] = createBackupsListData()) => {
   return http.get('/api/databases/:namespace/:name/backups', () => {
-    return HttpResponse.json(backups)
-  })
-}
+    return HttpResponse.json(backups);
+  });
+};
 
 export const createBackupsListError = (status: number = 500, message: string = 'Failed to fetch backups') => {
   return http.get('/api/databases/:namespace/:name/backups', () => {
-    return HttpResponse.json({ error: message }, { status })
-  })
-}
+    return HttpResponse.json({ error: message }, { status });
+  });
+};
 
 export const createCreateBackup = (namespace: string, name: string, method: string = 'manual') => {
   return http.post('/api/databases/:namespace/:name/backups', () => {
@@ -346,12 +347,12 @@ export const createCreateBackup = (namespace: string, name: string, method: stri
         status: 'in-progress',
         type: method
       }
-    })
-  })
-}
+    });
+  });
+};
 
 export const createCreateBackupError = (status: number = 500, message: string = 'Failed to create backup') => {
   return http.post('/api/databases/:namespace/:name/backups', () => {
-    return HttpResponse.json({ error: message }, { status })
-  })
-}
+    return HttpResponse.json({ error: message }, { status });
+  });
+};

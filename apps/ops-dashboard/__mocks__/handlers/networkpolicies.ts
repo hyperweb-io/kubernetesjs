@@ -1,6 +1,7 @@
-import { http, HttpResponse } from "msw"
-import { API_BASE } from "./common"
-import { NetworkingK8sIoV1NetworkPolicy } from "@kubernetesjs/ops"
+import { NetworkingK8sIoV1NetworkPolicy } from '@kubernetesjs/ops';
+import { http, HttpResponse } from 'msw';
+
+import { API_BASE } from './common';
 
 export const createNetworkPoliciesListData = (): NetworkingK8sIoV1NetworkPolicy[] => {
   return [
@@ -108,21 +109,21 @@ export const createNetworkPoliciesListData = (): NetworkingK8sIoV1NetworkPolicy[
         policyTypes: ['Ingress', 'Egress']
       }
     }
-  ]
-}
+  ];
+};
 
 export const createNetworkPoliciesList = (policies: NetworkingK8sIoV1NetworkPolicy[] = createNetworkPoliciesListData()) => {
   return http.get(`${API_BASE}/apis/networking.k8s.io/v1/namespaces/:namespace/networkpolicies`, ({ params, request }) => {
-    const namespace = params.namespace as string
-    const namespacePolicies = policies.filter(pol => pol.metadata.namespace === namespace)
+    const namespace = params.namespace as string;
+    const namespacePolicies = policies.filter(pol => pol.metadata.namespace === namespace);
 
     return HttpResponse.json({
       apiVersion: 'networking.k8s.io/v1',
       kind: 'NetworkPolicyList',
       items: namespacePolicies
-    })
-  })
-}
+    });
+  });
+};
 
 export const createAllNetworkPoliciesList = (policies: NetworkingK8sIoV1NetworkPolicy[] = createNetworkPoliciesListData()) => {
   return http.get(`${API_BASE}/apis/networking.k8s.io/v1/networkpolicies`, () => {
@@ -130,9 +131,9 @@ export const createAllNetworkPoliciesList = (policies: NetworkingK8sIoV1NetworkP
       apiVersion: 'networking.k8s.io/v1',
       kind: 'NetworkPolicyList',
       items: policies
-    })
-  })
-}
+    });
+  });
+};
 
 // Error handlers
 export const createNetworkPoliciesListError = (status: number = 500, message: string = 'Internal Server Error') => {
@@ -140,72 +141,72 @@ export const createNetworkPoliciesListError = (status: number = 500, message: st
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createAllNetworkPoliciesListError = (status: number = 500, message: string = 'Internal Server Error') => {
   return http.get(`${API_BASE}/apis/networking.k8s.io/v1/networkpolicies`, () => {
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 // Network error handler
 export const createNetworkPoliciesListNetworkError = () => {
   return http.get(`${API_BASE}/apis/networking.k8s.io/v1/namespaces/:namespace/networkpolicies`, () => {
-    return HttpResponse.error()
-  })
-}
+    return HttpResponse.error();
+  });
+};
 
 // Slow response handler for testing loading states
 export const createNetworkPoliciesListSlow = (policies: NetworkingK8sIoV1NetworkPolicy[] = createNetworkPoliciesListData(), delay: number = 1000) => {
   return http.get(`${API_BASE}/apis/networking.k8s.io/v1/namespaces/:namespace/networkpolicies`, async ({ params }) => {
-    await new Promise(resolve => setTimeout(resolve, delay))
-    const namespace = params.namespace as string
-    const namespacePolicies = policies.filter(pol => pol.metadata.namespace === namespace)
+    await new Promise(resolve => setTimeout(resolve, delay));
+    const namespace = params.namespace as string;
+    const namespacePolicies = policies.filter(pol => pol.metadata.namespace === namespace);
 
     return HttpResponse.json({
       apiVersion: 'networking.k8s.io/v1',
       kind: 'NetworkPolicyList',
       items: namespacePolicies
-    })
-  })
-}
+    });
+  });
+};
 
 // NetworkPolicy by name handler
 export const createNetworkPolicyByName = (policies: NetworkingK8sIoV1NetworkPolicy[] = createNetworkPoliciesListData()) => {
   return http.get(`${API_BASE}/apis/networking.k8s.io/v1/namespaces/:namespace/networkpolicies/:name`, ({ params }) => {
-    const namespace = params.namespace as string
-    const name = params.name as string
-    const policy = policies.find(pol => pol.metadata.namespace === namespace && pol.metadata.name === name)
+    const namespace = params.namespace as string;
+    const name = params.name as string;
+    const policy = policies.find(pol => pol.metadata.namespace === namespace && pol.metadata.name === name);
 
     if (!policy) {
       return HttpResponse.json(
         { error: 'NetworkPolicy not found' },
         { status: 404 }
-      )
+      );
     }
 
-    return HttpResponse.json(policy)
-  })
-}
+    return HttpResponse.json(policy);
+  });
+};
 
 // NetworkPolicy details handler (alias for createNetworkPolicyByName)
 export const createNetworkPolicyDetails = (policy: NetworkingK8sIoV1NetworkPolicy) => {
   return http.get(`${API_BASE}/apis/networking.k8s.io/v1/namespaces/:namespace/networkpolicies/:name`, ({ params }) => {
     if (params.name === policy.metadata?.name && params.namespace === policy.metadata?.namespace) {
-      return HttpResponse.json(policy)
+      return HttpResponse.json(policy);
     }
-    return HttpResponse.json({ error: 'NetworkPolicy not found' }, { status: 404 })
-  })
-}
+    return HttpResponse.json({ error: 'NetworkPolicy not found' }, { status: 404 });
+  });
+};
 
 // Delete NetworkPolicy handler
 export const createNetworkPolicyDelete = () => {
   return http.delete(`${API_BASE}/apis/networking.k8s.io/v1/namespaces/:namespace/networkpolicies/:name`, () => {
-    return HttpResponse.json({})
-  })
-}
+    return HttpResponse.json({});
+  });
+};

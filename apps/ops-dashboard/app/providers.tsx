@@ -1,10 +1,12 @@
 'use client';
 
 import { ThemeProvider } from 'next-themes';
-import { KubernetesProvider } from '../k8s/context';
-import { NamespaceProvider } from '@/contexts/NamespaceContext';
+
 import { AppProvider } from '@/contexts/AppContext';
+import { NamespaceProvider } from '@/contexts/NamespaceContext';
 import { ConfirmProvider } from '@/hooks/useConfirm';
+
+import { KubernetesProvider } from '../k8s/context';
 
 interface ProvidersProps {
   children: React.ReactNode;

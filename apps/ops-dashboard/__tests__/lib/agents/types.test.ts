@@ -1,4 +1,4 @@
-import { Session, Message, AgentConfig } from '@/lib/agents/types';
+import { AgentConfig,Message, Session } from '@/lib/agents/types';
 
 describe('lib/agents/types', () => {
   describe('Session interface', () => {

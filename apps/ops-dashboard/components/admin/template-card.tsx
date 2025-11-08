@@ -1,16 +1,18 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Switch } from '@/components/ui/switch'
-import { Button } from '@/components/ui/button'
-import { Loader2, Settings, ExternalLink, Database } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { StatusIndicator } from './status-indicator'
-import { TemplateDialog } from '@/components/templates/template-dialog'
-import { useTemplateInstalled } from '@/hooks/use-templates'
-import type { Template } from '@/components/templates/templates'
-import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { Database, Loader2, Settings } from 'lucide-react';
+import { useEffect,useState } from 'react';
+
+import { TemplateDialog } from '@/components/templates/template-dialog';
+import type { Template } from '@/components/templates/templates';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { Switch } from '@/components/ui/switch';
+import { useTemplateInstalled } from '@/hooks/use-templates';
+import { cn } from '@/lib/utils';
+
+import { StatusIndicator } from './status-indicator';
 
 type TemplateStatus = 'all' | 'installed' | 'not-installed' | 'installing' | 'error'
 
@@ -20,86 +22,86 @@ interface TemplateCardProps {
 }
 
 export function TemplateCard({ template, onStatusChange }: TemplateCardProps) {
-  const [showDialog, setShowDialog] = useState(false)
-  const [isToggling, setIsToggling] = useState(false)
-  const { isInstalled, isLoading, status, refetch, namespace } = useTemplateInstalled(template.id)
-  const [confirmOpen, setConfirmOpen] = useState(false)
-  const [confirmAction, setConfirmAction] = useState<'install' | 'uninstall' | null>(null)
+  const [showDialog, setShowDialog] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
+  const { isInstalled, isLoading, status, refetch, namespace } = useTemplateInstalled(template.id);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<'install' | 'uninstall' | null>(null);
 
   // Notify parent component of status changes
   useEffect(() => {
     if (onStatusChange && status) {
-      onStatusChange(template.id, status)
+      onStatusChange(template.id, status);
     }
-  }, [status, template.id]) // Remove onStatusChange from dependencies to prevent infinite loop
+  }, [status, template.id]); // Remove onStatusChange from dependencies to prevent infinite loop
 
   const handleToggle = async (checked: boolean) => {
-    console.log(`[TemplateCard] ${template.id} - Toggle clicked:`, { checked, isInstalled, isToggling })
-    if (isToggling) return
+    console.log(`[TemplateCard] ${template.id} - Toggle clicked:`, { checked, isInstalled, isToggling });
+    if (isToggling) return;
     // Removed pendingChecked to avoid unused variable
 
     if (checked && !isInstalled) {
       // Ask for confirmation before opening deployment dialog
-      setConfirmAction('install')
-      setConfirmOpen(true)
+      setConfirmAction('install');
+      setConfirmOpen(true);
     } else if (!checked && isInstalled) {
       // Ask for confirmation before uninstalling
-      setConfirmAction('uninstall')
-      setConfirmOpen(true)
+      setConfirmAction('uninstall');
+      setConfirmOpen(true);
     }
-  }
+  };
 
   const handleConfirm = async () => {
-    if (!confirmAction) return
+    if (!confirmAction) return;
 
     try {
       if (confirmAction === 'install') {
         // Show a brief processing state and then open the setup dialog
-        setIsToggling(true)
-        setShowDialog(true)
-        await new Promise(resolve => setTimeout(resolve, 300))
-        setIsToggling(false)
+        setIsToggling(true);
+        setShowDialog(true);
+        await new Promise(resolve => setTimeout(resolve, 300));
+        setIsToggling(false);
       } else if (confirmAction === 'uninstall' && isInstalled) {
-        setIsToggling(true)
-        console.log(`[TemplateCard] ${template.id} - Starting uninstall`)
-        const deploymentName = `${template.id}-deployment`
+        setIsToggling(true);
+        console.log(`[TemplateCard] ${template.id} - Starting uninstall`);
+        const deploymentName = `${template.id}-deployment`;
         const response = await fetch(`/api/templates/${template.id}?namespace=${namespace}&name=${deploymentName}`, {
           method: 'DELETE',
-        })
+        });
         if (response.ok) {
-          console.log(`[TemplateCard] ${template.id} - Uninstall successful, refetching status`)
-          await new Promise(resolve => setTimeout(resolve, 1000))
-          await refetch()
+          console.log(`[TemplateCard] ${template.id} - Uninstall successful, refetching status`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          await refetch();
         } else {
-          console.error(`[TemplateCard] ${template.id} - Uninstall failed:`, response.status, response.statusText)
-          const errorData = await response.json().catch(() => ({}))
-          throw new Error(errorData.message || 'Failed to uninstall template')
+          console.error(`[TemplateCard] ${template.id} - Uninstall failed:`, response.status, response.statusText);
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Failed to uninstall template');
         }
       }
     } catch (error) {
-      console.error(`[TemplateCard] ${template.id} - Confirmation action failed:`, error)
-      await new Promise(resolve => setTimeout(resolve, 500))
+      console.error(`[TemplateCard] ${template.id} - Confirmation action failed:`, error);
+      await new Promise(resolve => setTimeout(resolve, 500));
     } finally {
-      setConfirmOpen(false)
-      setConfirmAction(null)
-      setIsToggling(false)
+      setConfirmOpen(false);
+      setConfirmAction(null);
+      setIsToggling(false);
     }
-  }
+  };
 
   const getStatusText = () => {
     switch (status) {
-      case 'installed': return 'installed'
-      case 'installing': return 'installing'
-      case 'not-installed': return 'not-installed'
-      default: return 'error'
+    case 'installed': return 'installed';
+    case 'installing': return 'installing';
+    case 'not-installed': return 'not-installed';
+    default: return 'error';
     }
-  }
+  };
 
   // Determine states similar to operator card
-  const isInstalling = status === 'installing' || isToggling
-  const hasError = false // Templates don't have error state like operators
+  const isInstalling = status === 'installing' || isToggling;
+  const hasError = false; // Templates don't have error state like operators
 
-  const Icon = template?.icon || Database
+  const Icon = template?.icon || Database;
 
   return (
     <>
@@ -166,9 +168,9 @@ export function TemplateCard({ template, onStatusChange }: TemplateCardProps) {
         template={template}
         open={showDialog}
         onOpenChange={(open) => {
-          setShowDialog(open)
+          setShowDialog(open);
           if (!open) {
-            refetch()
+            refetch();
           }
         }}
       />
@@ -182,5 +184,5 @@ export function TemplateCard({ template, onStatusChange }: TemplateCardProps) {
         onConfirm={handleConfirm}
       />
     </>
-  )
+  );
 }

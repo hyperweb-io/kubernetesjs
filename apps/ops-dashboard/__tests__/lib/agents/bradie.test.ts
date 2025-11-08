@@ -1,4 +1,4 @@
-import BradieClient, { BradieSession, BradieActRequest, BradieActResponse } from '@/lib/agents/bradie';
+import BradieClient, { BradieActRequest } from '@/lib/agents/bradie';
 
 // Use the global mockFetch from setup
 const mockFetch = (global as any).mockFetch;

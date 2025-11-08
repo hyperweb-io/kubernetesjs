@@ -1,10 +1,11 @@
-'use client'
+'use client';
 
-import { Button } from '@/components/ui/button'
-import { NamespaceSwitcher } from '@/components/namespace-switcher'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { useKubernetes } from '@/k8s/context'
-import { Menu, PanelLeftClose, MessageSquare } from 'lucide-react'
+import { Menu, MessageSquare,PanelLeftClose } from 'lucide-react';
+
+import { NamespaceSwitcher } from '@/components/namespace-switcher';
+import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { useKubernetes } from '@/k8s/context';
 
 interface InfraHeaderProps {
   sidebarOpen: boolean
@@ -21,7 +22,7 @@ export function InfraHeader({
   onChatToggle, 
   chatVisible 
 }: InfraHeaderProps) {
-  const { config } = useKubernetes()
+  const { config } = useKubernetes();
 
   return (
     <header className="bg-card border-b px-6 py-4 flex items-center justify-between">
@@ -53,5 +54,5 @@ export function InfraHeader({
         <ThemeToggle />
       </div>
     </header>
-  )
+  );
 }

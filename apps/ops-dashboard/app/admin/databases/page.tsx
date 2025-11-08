@@ -1,16 +1,17 @@
 'use client';
 
-import { useDatabaseStatus } from '@/hooks/use-database-status';
-import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { CreateDatabasesDialog } from '@/components/create-databases-dialog';
-import { CreateDatabaseParams, useCreateBackup, useCreateDatabases, useQueryBackups } from '@/hooks/useDatabases';
 import { AlertCircle, CheckCircle, Eye, Plus, RefreshCw } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { TableHeader, TableRow, TableHead, TableBody, TableCell,Table } from '@/components/ui/table';
+import { useState } from 'react';
+
 import { CreateBackupDialog } from '@/components/create-backup-dialog';
+import { CreateDatabasesDialog } from '@/components/create-databases-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent,CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table,TableBody, TableCell,TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useDatabaseStatus } from '@/hooks/use-database-status';
+import { CreateDatabaseParams, useCreateBackup, useCreateDatabases, useQueryBackups } from '@/hooks/useDatabases';
 
 export default function DatabasesPage() {
   // For now default to the standard ns/name; later we can add list + picker
@@ -26,11 +27,11 @@ export default function DatabasesPage() {
 
   const [showCreateBackup, setShowCreateBackup] = useState(false);
 
-  const createDb = useCreateDatabases()
+  const createDb = useCreateDatabases();
 
-  const backups = useQueryBackups(ns, name)
+  const backups = useQueryBackups(ns, name);
 
-  const createBackup = useCreateBackup()
+  const createBackup = useCreateBackup();
 
   const handleCreateDb = async (data: CreateDatabaseParams) =>{
     return createDb.mutateAsync(data,{
@@ -38,12 +39,12 @@ export default function DatabasesPage() {
         refetch();
         qc.invalidateQueries({ queryKey: ['db-status', ns, name] });
       }
-    })
-  }
+    });
+  };
 
   const openBackupDialog = () => {
-    setShowCreateBackup(true)
-  }
+    setShowCreateBackup(true);
+  };
 
   const handleCreateBackUp = (method?: string) =>{
     return createBackup.mutateAsync({
@@ -52,24 +53,24 @@ export default function DatabasesPage() {
       method
     },{
       onSuccess: () => qc.invalidateQueries({ queryKey: ['db-backups', ns, name] }),
-    })
-  }
+    });
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Cluster in healthy state':
-        return <Badge variant="success" className="items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
+    case 'Cluster in healthy state':
+      return <Badge variant="success" className="items-center gap-1">
+        <CheckCircle className="w-3 h-3" />
           running
-        </Badge>
-      default:
-        return <Badge variant="outline">{status}</Badge>
+      </Badge>;
+    default:
+      return <Badge variant="outline">{status}</Badge>;
     }
-  }
+  };
 
   const handleRefresh = () => {
-    refetch()
-  }
+    refetch();
+  };
 
   return (
     <div className="space-y-6">

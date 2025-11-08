@@ -1,5 +1,5 @@
-import { EndpointsView } from '@/components/resources/endpoints'
+import { EndpointsView } from '@/components/resources/endpoints';
 
 export default function EndpointsPage() {
-  return <EndpointsView />
+  return <EndpointsView />;
 }

@@ -1,5 +1,6 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { AppLayout } from '../../components/app-layout';
 import { render as customRender } from '../utils/test-utils';
 

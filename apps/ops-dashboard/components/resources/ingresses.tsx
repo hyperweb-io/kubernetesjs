@@ -1,114 +1,112 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type NetworkingK8sIoV1Ingress as Ingress } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
   CheckCircle,
+  Eye,
   Globe,
+  Link,
   Lock,
-  Link
-} from 'lucide-react'
-import { 
-  useListNetworkingV1NamespacedIngressQuery,
-  useListNetworkingV1IngressForAllNamespacesQuery,
-  useDeleteNetworkingV1NamespacedIngress
-} from '@/k8s'
-import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import { type NetworkingK8sIoV1Ingress as Ingress } from '@kubernetesjs/ops'
+  Plus, 
+  RefreshCw, 
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePreferredNamespace } from '@/contexts/NamespaceContext';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { 
+  useDeleteNetworkingV1NamespacedIngress,
+  useListNetworkingV1IngressForAllNamespacesQuery,
+  useListNetworkingV1NamespacedIngressQuery} from '@/k8s';
 
 export function IngressesView() {
-  const [selectedIngress, setSelectedIngress] = useState<Ingress | null>(null)
-  const { namespace } = usePreferredNamespace()
+  const [selectedIngress, setSelectedIngress] = useState<Ingress | null>(null);
+  const { namespace } = usePreferredNamespace();
   
   const query = namespace === '_all' 
     ? useListNetworkingV1IngressForAllNamespacesQuery({ query: {} })
-    : useListNetworkingV1NamespacedIngressQuery({ path: { namespace }, query: {} })
+    : useListNetworkingV1NamespacedIngressQuery({ path: { namespace }, query: {} });
     
-  const { data, isLoading, error, refetch } = query
-  const deleteIngress = useDeleteNetworkingV1NamespacedIngress()
+  const { data, isLoading, error, refetch } = query;
+  const deleteIngress = useDeleteNetworkingV1NamespacedIngress();
 
-  const ingresses = data?.items || []
+  const ingresses = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const handleDelete = async (ingress: Ingress) => {
-    const name = ingress.metadata!.name!
-    const namespace = ingress.metadata!.namespace!
+    const name = ingress.metadata!.name!;
+    const namespace = ingress.metadata!.namespace!;
     
     const confirmed = await confirmDialog({
       title: 'Delete Ingress',
       description: `Are you sure you want to delete ${name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteIngress.mutateAsync({
           path: { namespace, name },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete ingress:', err)
-        alert(`Failed to delete ingress: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete ingress:', err);
+        alert(`Failed to delete ingress: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getHosts = (ingress: Ingress): string[] => {
-    const rules = ingress.spec?.rules || []
-    return rules.map(rule => rule.host || '*').filter((v, i, a) => a.indexOf(v) === i)
-  }
+    const rules = ingress.spec?.rules || [];
+    return rules.map(rule => rule.host || '*').filter((v, i, a) => a.indexOf(v) === i);
+  };
 
   const getPaths = (ingress: Ingress): number => {
-    const rules = ingress.spec?.rules || []
+    const rules = ingress.spec?.rules || [];
     return rules.reduce((sum, rule) => {
-      const paths = rule.http?.paths || []
-      return sum + paths.length
-    }, 0)
-  }
+      const paths = rule.http?.paths || [];
+      return sum + paths.length;
+    }, 0);
+  };
 
   const getIngressClass = (ingress: Ingress): string => {
     const className = ingress.spec?.ingressClassName as string | undefined;
     const annotation = ingress.metadata?.annotations?.['kubernetes.io/ingress.class'] as string | undefined;
 
     return className?.trim() || annotation?.trim() || 'default';
-  }
+  };
 
   const hasTLS = (ingress: Ingress): boolean => {
-    return (ingress.spec?.tls?.length || 0) > 0
-  }
+    return (ingress.spec?.tls?.length || 0) > 0;
+  };
 
   const getStatus = (ingress: Ingress) => {
-    const loadBalancers = ingress.status?.loadBalancer?.ingress || []
+    const loadBalancers = ingress.status?.loadBalancer?.ingress || [];
     if (loadBalancers.length > 0) {
-      return 'Active'
+      return 'Active';
     }
-    return 'Pending'
-  }
+    return 'Pending';
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Active':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      default:
-        return <Badge variant="secondary">{status}</Badge>
+    case 'Active':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <CheckCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    default:
+      return <Badge variant="secondary">{status}</Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -221,8 +219,8 @@ export function IngressesView() {
               </TableHeader>
               <TableBody>
                 {ingresses.map((ingress) => {
-                  const hosts = getHosts(ingress)
-                  const lbIngresses = ingress.status?.loadBalancer?.ingress || []
+                  const hosts = getHosts(ingress);
+                  const lbIngresses = ingress.status?.loadBalancer?.ingress || [];
                   
                   return (
                     <TableRow key={`${ingress.metadata?.namespace}/${ingress.metadata?.name}`}>
@@ -287,7 +285,7 @@ export function IngressesView() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  )
+                  );
                 })}
               </TableBody>
             </Table>
@@ -295,5 +293,5 @@ export function IngressesView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

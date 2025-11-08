@@ -1,4 +1,4 @@
-import { isLightColor, extractColorsFromString } from '@/lib/color';
+import { extractColorsFromString,isLightColor } from '@/lib/color';
 
 describe('lib/color', () => {
   describe('isLightColor', () => {

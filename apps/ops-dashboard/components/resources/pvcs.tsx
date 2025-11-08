@@ -1,128 +1,126 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import type { PersistentVolumeClaim } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
   CheckCircle,
+  Database,
+  Eye,
   HardDrive,
-  Database
-} from 'lucide-react'
-import { 
-  useListCoreV1NamespacedPersistentVolumeClaimQuery,
-  useListCoreV1PersistentVolumeClaimForAllNamespacesQuery,
-  useDeleteCoreV1NamespacedPersistentVolumeClaim
-} from '@/k8s'
-import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { PersistentVolumeClaim } from '@kubernetesjs/ops'
+  Plus, 
+  RefreshCw, 
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePreferredNamespace } from '@/contexts/NamespaceContext';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { 
+  useDeleteCoreV1NamespacedPersistentVolumeClaim,
+  useListCoreV1NamespacedPersistentVolumeClaimQuery,
+  useListCoreV1PersistentVolumeClaimForAllNamespacesQuery} from '@/k8s';
 
 export function PVCsView() {
-  const [selectedPVC, setSelectedPVC] = useState<PersistentVolumeClaim | null>(null)
-  const { namespace } = usePreferredNamespace()
+  const [selectedPVC, setSelectedPVC] = useState<PersistentVolumeClaim | null>(null);
+  const { namespace } = usePreferredNamespace();
   
   const query = namespace === '_all' 
     ? useListCoreV1PersistentVolumeClaimForAllNamespacesQuery({ query: {} })
-    : useListCoreV1NamespacedPersistentVolumeClaimQuery({ path: { namespace }, query: {} })
+    : useListCoreV1NamespacedPersistentVolumeClaimQuery({ path: { namespace }, query: {} });
     
-  const { data, isLoading, error, refetch } = query
-  const deletePVC = useDeleteCoreV1NamespacedPersistentVolumeClaim()
+  const { data, isLoading, error, refetch } = query;
+  const deletePVC = useDeleteCoreV1NamespacedPersistentVolumeClaim();
 
-  const pvcs = data?.items || []
+  const pvcs = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const coerceString = (value: unknown): string | undefined => {
     if (typeof value === 'string') {
-      const trimmed = value.trim()
-      return trimmed.length > 0 ? trimmed : undefined
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : undefined;
     }
-    return undefined
-  }
+    return undefined;
+  };
 
   const handleDelete = async (pvc: PersistentVolumeClaim) => {
-    const name = pvc.metadata!.name!
-    const namespace = pvc.metadata!.namespace!
+    const name = pvc.metadata!.name!;
+    const namespace = pvc.metadata!.namespace!;
     
     const confirmed = await confirmDialog({
       title: 'Delete Persistent Volume Claim',
       description: `Are you sure you want to delete ${name}? This may cause data loss.`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deletePVC.mutateAsync({
           path: { namespace, name },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete PVC:', err)
-        alert(`Failed to delete PVC: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete PVC:', err);
+        alert(`Failed to delete PVC: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getPhase = (pvc: PersistentVolumeClaim): string => {
-    return pvc.status?.phase || 'Unknown'
-  }
+    return pvc.status?.phase || 'Unknown';
+  };
 
   const getStatusBadge = (phase: string) => {
     switch (phase) {
-      case 'Bound':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          {phase}
-        </Badge>
-      case 'Pending':
-        return <Badge variant="warning" className="flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
-          {phase}
-        </Badge>
-      case 'Lost':
-        return <Badge variant="destructive" className="flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
-          {phase}
-        </Badge>
-      default:
-        return <Badge variant="secondary">{phase}</Badge>
+    case 'Bound':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <CheckCircle className="w-3 h-3" />
+        {phase}
+      </Badge>;
+    case 'Pending':
+      return <Badge variant="warning" className="flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" />
+        {phase}
+      </Badge>;
+    case 'Lost':
+      return <Badge variant="destructive" className="flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" />
+        {phase}
+      </Badge>;
+    default:
+      return <Badge variant="secondary">{phase}</Badge>;
     }
-  }
+  };
 
   const getAccessModes = (pvc: PersistentVolumeClaim): string => {
-    const modes = pvc.spec?.accessModes || []
+    const modes = pvc.spec?.accessModes || [];
     const modeMap: Record<string, string> = {
-      'ReadWriteOnce': 'RWO',
-      'ReadOnlyMany': 'ROX',
-      'ReadWriteMany': 'RWX',
-      'ReadWriteOncePod': 'RWOP'
-    }
-    return modes.map(m => modeMap[m] || m).join(', ') || 'None'
-  }
+      ReadWriteOnce: 'RWO',
+      ReadOnlyMany: 'ROX',
+      ReadWriteMany: 'RWX',
+      ReadWriteOncePod: 'RWOP'
+    };
+    return modes.map(m => modeMap[m] || m).join(', ') || 'None';
+  };
 
   const getStorageSize = (pvc: PersistentVolumeClaim): string => {
-    const storage = coerceString(pvc.spec?.resources?.requests?.storage)
-    const capacity = coerceString(pvc.status?.capacity?.storage)
-    return capacity || storage || 'Unknown'
-  }
+    const storage = coerceString(pvc.spec?.resources?.requests?.storage);
+    const capacity = coerceString(pvc.status?.capacity?.storage);
+    return capacity || storage || 'Unknown';
+  };
 
   const getStorageClass = (pvc: PersistentVolumeClaim): string => {
-    return coerceString(pvc.spec?.storageClassName) || 'default'
-  }
+    return coerceString(pvc.spec?.storageClassName) || 'default';
+  };
 
   const getVolumeName = (pvc: PersistentVolumeClaim): string => {
-    return coerceString(pvc.spec?.volumeName) || 'Not bound'
-  }
+    return coerceString(pvc.spec?.volumeName) || 'Not bound';
+  };
 
   return (
     <div className="space-y-6">
@@ -184,16 +182,16 @@ export function PVCsView() {
           <CardContent>
             <div className="text-2xl font-bold">
               {pvcs.reduce((sum, pvc) => {
-                const size = getStorageSize(pvc)
-                const match = size.match(/(\d+)([GMK]i)?/)
+                const size = getStorageSize(pvc);
+                const match = size.match(/(\d+)([GMK]i)?/);
                 if (match) {
-                  const value = parseInt(match[1])
-                  const unit = match[2] || 'Gi'
-                  if (unit === 'Gi') return sum + value
-                  if (unit === 'Mi') return sum + value / 1024
-                  if (unit === 'Ki') return sum + value / (1024 * 1024)
+                  const value = parseInt(match[1]);
+                  const unit = match[2] || 'Gi';
+                  if (unit === 'Gi') return sum + value;
+                  if (unit === 'Mi') return sum + value / 1024;
+                  if (unit === 'Ki') return sum + value / (1024 * 1024);
                 }
-                return sum
+                return sum;
               }, 0).toFixed(1)} GB
             </div>
           </CardContent>

@@ -1,118 +1,119 @@
-import React from 'react'
-import { render, screen, waitFor, fireEvent } from '../../utils/test-utils'
-import userEvent from '@testing-library/user-event'
-import { DaemonSetsView } from '@/components/resources/daemonsets'
-import { server } from '../../../__mocks__/server'
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+
+import { DaemonSetsView } from '@/components/resources/daemonsets';
+
 import { 
+  createDaemonSetDelete,
+  createDaemonSetDeleteError,
   createDaemonSetsList, 
   createDaemonSetsListError, 
-  createDaemonSetsListSlow,
-  createDaemonSetDelete,
-  createDaemonSetDeleteError
-} from '../../../__mocks__/handlers/daemonsets'
+  createDaemonSetsListSlow} from '../../../__mocks__/handlers/daemonsets';
+import { server } from '../../../__mocks__/server';
+import { fireEvent,render, screen, waitFor } from '../../utils/test-utils';
 
 // Mock window.alert for testing error messages
-const mockAlert = jest.spyOn(window, 'alert').mockImplementation(() => {})
+const mockAlert = jest.spyOn(window, 'alert').mockImplementation(() => {});
 
 describe('DaemonSetsView', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    server.use(createDaemonSetsList(), createDaemonSetDelete())
-  })
+    jest.clearAllMocks();
+    server.use(createDaemonSetsList(), createDaemonSetDelete());
+  });
 
   afterEach(() => {
-    mockAlert.mockClear()
-  })
+    mockAlert.mockClear();
+  });
 
   describe('Basic Rendering', () => {
     it('should render daemonsets view with header and controls', () => {
-      render(<DaemonSetsView />)
+      render(<DaemonSetsView />);
       
-      expect(screen.getByText('DaemonSets')).toBeInTheDocument()
-      expect(screen.getByText('Manage your Kubernetes DaemonSets')).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /create daemonset/i })).toBeInTheDocument()
-    })
+      expect(screen.getByText('DaemonSets')).toBeInTheDocument();
+      expect(screen.getByText('Manage your Kubernetes DaemonSets')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /create daemonset/i })).toBeInTheDocument();
+    });
 
     it('should display daemonsets data when loaded', async () => {
-      render(<DaemonSetsView />)
+      render(<DaemonSetsView />);
       
       await waitFor(() => {
-        expect(screen.getByText('nginx-daemonset')).toBeInTheDocument()
-        expect(screen.getByText('redis-daemonset')).toBeInTheDocument()
-      })
+        expect(screen.getByText('nginx-daemonset')).toBeInTheDocument();
+        expect(screen.getByText('redis-daemonset')).toBeInTheDocument();
+      });
       
       // Check for total daemonsets count (only 2 in default namespace)
-      expect(screen.getByText('Total DaemonSets')).toBeInTheDocument()
+      expect(screen.getByText('Total DaemonSets')).toBeInTheDocument();
       const totalCard = screen.getByText('Total DaemonSets').closest('.rounded-lg');
       expect(totalCard).toBeInTheDocument();
       expect(totalCard).toHaveTextContent('2');
-    })
+    });
 
     it('should show loading state initially', () => {
-      render(<DaemonSetsView />)
+      render(<DaemonSetsView />);
       
-      expect(screen.getByRole('button', { name: '' })).toBeInTheDocument() // Refresh button
-      expect(screen.getByRole('button', { name: /create daemonset/i })).toBeInTheDocument()
-    })
-  })
+      expect(screen.getByRole('button', { name: '' })).toBeInTheDocument(); // Refresh button
+      expect(screen.getByRole('button', { name: /create daemonset/i })).toBeInTheDocument();
+    });
+  });
 
   describe('Data Loading', () => {
     it('should load daemonsets from API', async () => {
-      render(<DaemonSetsView />)
+      render(<DaemonSetsView />);
       
       await waitFor(() => {
-        expect(screen.getByText('nginx-daemonset')).toBeInTheDocument()
-        expect(screen.getByText('redis-daemonset')).toBeInTheDocument()
-      })
-    })
+        expect(screen.getByText('nginx-daemonset')).toBeInTheDocument();
+        expect(screen.getByText('redis-daemonset')).toBeInTheDocument();
+      });
+    });
 
     it('should handle loading state with slow API response', async () => {
-      server.use(createDaemonSetsListSlow())
+      server.use(createDaemonSetsListSlow());
       
-      render(<DaemonSetsView />)
+      render(<DaemonSetsView />);
       
       // Should show loading initially
-      expect(screen.getByRole('button', { name: '' })).toBeInTheDocument() // Refresh button
-      expect(screen.getByRole('button', { name: /create daemonset/i })).toBeInTheDocument()
-      expect(screen.getByText('Total DaemonSets')).toBeInTheDocument()
-      expect(screen.getByText('Ready')).toBeInTheDocument()
-      expect(screen.getByText('Total Pods')).toBeInTheDocument()
-      expect(screen.getAllByText('0')).toHaveLength(3) // Initial count before data loads
+      expect(screen.getByRole('button', { name: '' })).toBeInTheDocument(); // Refresh button
+      expect(screen.getByRole('button', { name: /create daemonset/i })).toBeInTheDocument();
+      expect(screen.getByText('Total DaemonSets')).toBeInTheDocument();
+      expect(screen.getByText('Ready')).toBeInTheDocument();
+      expect(screen.getByText('Total Pods')).toBeInTheDocument();
+      expect(screen.getAllByText('0')).toHaveLength(3); // Initial count before data loads
       
       await waitFor(() => {
-        expect(screen.getByText('nginx-daemonset')).toBeInTheDocument()
-      }, { timeout: 2000 })
-    })
+        expect(screen.getByText('nginx-daemonset')).toBeInTheDocument();
+      }, { timeout: 2000 });
+    });
 
     it('should handle API errors gracefully', async () => {
-      server.use(createDaemonSetsListError(500, 'HTTP error! status: 500'))
+      server.use(createDaemonSetsListError(500, 'HTTP error! status: 500'));
       
-      render(<DaemonSetsView />)
+      render(<DaemonSetsView />);
       
       await waitFor(() => {
-        expect(screen.getByText(/HTTP error! status: 500/)).toBeInTheDocument()
-      })
-    })
-  })
+        expect(screen.getByText(/HTTP error! status: 500/)).toBeInTheDocument();
+      });
+    });
+  });
 
   describe('DaemonSet Status Display', () => {
     it('should display daemonset status correctly', async () => {
-      render(<DaemonSetsView />)
+      render(<DaemonSetsView />);
       
       await waitFor(() => {
-        expect(screen.getByText('nginx-daemonset')).toBeInTheDocument()
-      })
+        expect(screen.getByText('nginx-daemonset')).toBeInTheDocument();
+      });
       
-      expect(screen.getByText('nginx-daemonset').closest('tr')).toHaveTextContent('Ready')
-      expect(screen.getByText('redis-daemonset').closest('tr')).toHaveTextContent('Ready')
-    })
+      expect(screen.getByText('nginx-daemonset').closest('tr')).toHaveTextContent('Ready');
+      expect(screen.getByText('redis-daemonset').closest('tr')).toHaveTextContent('Ready');
+    });
 
     it('should show correct pod counts', async () => {
-      render(<DaemonSetsView />)
+      render(<DaemonSetsView />);
       
       await waitFor(() => {
-        expect(screen.getByText('nginx-daemonset')).toBeInTheDocument()
-      })
+        expect(screen.getByText('nginx-daemonset')).toBeInTheDocument();
+      });
       
       // Find the Ready card by looking for the h3 element with "Ready" text
       const readyCard = screen.getByRole('heading', { name: 'Ready' }).closest('.rounded-lg');
@@ -122,40 +123,40 @@ describe('DaemonSetsView', () => {
       const totalPodsCard = screen.getByText('Total Pods').closest('.rounded-lg');
       expect(totalPodsCard).toBeInTheDocument();
       expect(totalPodsCard).toHaveTextContent('5'); // Total Pods: 5 (3+2)
-    })
-  })
+    });
+  });
 
   describe('Button Functionality', () => {
     it('should have create daemonset button', async () => {
-      render(<DaemonSetsView />)
+      render(<DaemonSetsView />);
       
-      const createButton = screen.getByRole('button', { name: /create daemonset/i })
-      expect(createButton).toBeInTheDocument()
-    })
+      const createButton = screen.getByRole('button', { name: /create daemonset/i });
+      expect(createButton).toBeInTheDocument();
+    });
 
     it('should have action buttons for each daemonset', async () => {
-      render(<DaemonSetsView />)
+      render(<DaemonSetsView />);
       
       await waitFor(() => {
-        expect(screen.getByText('nginx-daemonset')).toBeInTheDocument()
-      })
+        expect(screen.getByText('nginx-daemonset')).toBeInTheDocument();
+      });
       
-      const viewButtons = screen.getAllByTitle('View details')
-      const deleteButtons = screen.getAllByTitle('Delete daemonset')
+      const viewButtons = screen.getAllByTitle('View details');
+      const deleteButtons = screen.getAllByTitle('Delete daemonset');
       
-      expect(viewButtons).toHaveLength(2)
-      expect(deleteButtons).toHaveLength(2)
-    })
-  })
+      expect(viewButtons).toHaveLength(2);
+      expect(deleteButtons).toHaveLength(2);
+    });
+  });
 
   describe('Refresh Functionality', () => {
     it('should refresh data when refresh button is clicked', async () => {
-      const user = userEvent.setup()
-      render(<DaemonSetsView />)
+      const user = userEvent.setup();
+      render(<DaemonSetsView />);
       
       await waitFor(() => {
-        expect(screen.getByText('nginx-daemonset')).toBeInTheDocument()
-      })
+        expect(screen.getByText('nginx-daemonset')).toBeInTheDocument();
+      });
       
       server.use(createDaemonSetsList([
         {
@@ -163,51 +164,51 @@ describe('DaemonSetsView', () => {
           spec: { selector: { matchLabels: { app: 'new' } }, template: { metadata: { labels: { app: 'new' } }, spec: { containers: [{ name: 'new', image: 'new:latest' }] } } },
           status: { currentNumberScheduled: 1, numberReady: 1, desiredNumberScheduled: 1, numberAvailable: 1 }
         }
-      ]))
+      ]));
       
-      const refreshButton = screen.getAllByRole('button', { name: '' })[0]
-      await user.click(refreshButton)
+      const refreshButton = screen.getAllByRole('button', { name: '' })[0];
+      await user.click(refreshButton);
       
       await waitFor(() => {
-        expect(screen.getByText('new-daemonset')).toBeInTheDocument()
-        expect(screen.queryByText('nginx-daemonset')).not.toBeInTheDocument()
-      })
-    })
-  })
+        expect(screen.getByText('new-daemonset')).toBeInTheDocument();
+        expect(screen.queryByText('nginx-daemonset')).not.toBeInTheDocument();
+      });
+    });
+  });
 
   describe('Error Handling', () => {
     it('should show error message when API fails', async () => {
-      server.use(createDaemonSetsListError(500, 'HTTP error! status: 500'))
+      server.use(createDaemonSetsListError(500, 'HTTP error! status: 500'));
       
-      render(<DaemonSetsView />)
+      render(<DaemonSetsView />);
       
       await waitFor(() => {
-        expect(screen.getByText(/HTTP error! status: 500/)).toBeInTheDocument()
-      })
-    })
+        expect(screen.getByText(/HTTP error! status: 500/)).toBeInTheDocument();
+      });
+    });
 
     it('should show retry button when there is an error', async () => {
-      server.use(createDaemonSetsListError(500, 'HTTP error! status: 500'))
+      server.use(createDaemonSetsListError(500, 'HTTP error! status: 500'));
       
-      render(<DaemonSetsView />)
+      render(<DaemonSetsView />);
       
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
-      })
-    })
-  })
+        expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
+      });
+    });
+  });
 
   describe('Empty State', () => {
     it('should show empty state when no daemonsets exist', async () => {
-      server.use(createDaemonSetsList([]))
+      server.use(createDaemonSetsList([]));
       
-      render(<DaemonSetsView />)
+      render(<DaemonSetsView />);
       
       await waitFor(() => {
-        expect(screen.getByText(/No daemonsets found in the default namespace/)).toBeInTheDocument()
-      })
-    })
-  })
+        expect(screen.getByText(/No daemonsets found in the default namespace/)).toBeInTheDocument();
+      });
+    });
+  });
 
   describe('Status Determination', () => {
     it('should determine daemonset status correctly for different states', async () => {
@@ -526,4 +527,4 @@ describe('DaemonSetsView', () => {
       expect(refreshButton).not.toBeDisabled();
     });
   });
-})
+});

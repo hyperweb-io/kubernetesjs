@@ -1,4 +1,4 @@
-import { http, HttpResponse } from "msw"
+import { http, HttpResponse } from 'msw';
 
 export interface ClusterStatus {
   isConnected: boolean
@@ -51,33 +51,33 @@ export const createClusterStatusData = (): ClusterStatus => {
       installed: 3,
       total: 5
     }
-  }
-}
+  };
+};
 
 export const createClusterStatus = (status: ClusterStatus = createClusterStatusData()) => {
   return http.get('/api/cluster/status', () => {
-    return HttpResponse.json(status)
-  })
-}
+    return HttpResponse.json(status);
+  });
+};
 
 export const createClusterStatusError = (status: number = 500, message: string = 'Failed to fetch cluster status') => {
   return http.get('/api/cluster/status', () => {
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createClusterStatusNetworkError = () => {
   return http.get('/api/cluster/status', () => {
-    return HttpResponse.error()
-  })
-}
+    return HttpResponse.error();
+  });
+};
 
 export const createClusterStatusSlow = (delay: number = 2000) => {
   return http.get('/api/cluster/status', async () => {
-    await new Promise(resolve => setTimeout(resolve, delay))
-    return HttpResponse.json(createClusterStatusData())
-  })
-}
+    await new Promise(resolve => setTimeout(resolve, delay));
+    return HttpResponse.json(createClusterStatusData());
+  });
+};

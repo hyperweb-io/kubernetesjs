@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createSetupClient } from '@/k8s/client';
-import { createRequire } from 'module';
 import fs from 'fs';
+import { createRequire } from 'module';
+import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
+
+import { createSetupClient } from '@/k8s/client';
 
 export async function POST(
   request: NextRequest,

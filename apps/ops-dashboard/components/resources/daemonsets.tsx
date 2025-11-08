@@ -1,23 +1,21 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type AppsV1DaemonSet as K8sDaemonSet } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
   CheckCircle,
-  Server
-} from 'lucide-react'
-import { type AppsV1DaemonSet as K8sDaemonSet } from '@kubernetesjs/ops'
-import { useDaemonSets, useDeleteDaemonSet } from '@/hooks/useDaemonSets'
+  Eye,
+  Plus, 
+  RefreshCw,
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { useDaemonSets, useDeleteDaemonSet } from '@/hooks/useDaemonSets';
 
 interface DaemonSet {
   name: string
@@ -33,23 +31,23 @@ interface DaemonSet {
 }
 
 export function DaemonSetsView() {
-  const [selectedDaemonSet, setSelectedDaemonSet] = useState<DaemonSet | null>(null)
+  const [selectedDaemonSet, setSelectedDaemonSet] = useState<DaemonSet | null>(null);
   
   // Use TanStack Query hooks
-  const { data, isLoading, error, refetch } = useDaemonSets()
-  const deleteDaemonSetMutation = useDeleteDaemonSet()
+  const { data, isLoading, error, refetch } = useDaemonSets();
+  const deleteDaemonSetMutation = useDeleteDaemonSet();
   
   // Helper function to determine daemon set status
   function determineDaemonSetStatus(ds: K8sDaemonSet): DaemonSet['status'] {
-    const status = ds.status
-    if (!status) return 'NotReady'
+    const status = ds.status;
+    if (!status) return 'NotReady';
     
     if (status.desiredNumberScheduled === status.numberReady) {
-      return 'Ready'
+      return 'Ready';
     } else if (status.updatedNumberScheduled && status.updatedNumberScheduled > 0) {
-      return 'Updating'
+      return 'Updating';
     } else {
-      return 'NotReady'
+      return 'NotReady';
     }
   }
   
@@ -66,12 +64,12 @@ export function DaemonSetsView() {
       createdAt: item.metadata?.creationTimestamp || new Date().toISOString(),
       status: determineDaemonSetStatus(item),
       k8sData: item
-    }
-  }) || []
+    };
+  }) || [];
 
   const handleRefresh = () => {
-    refetch()
-  }
+    refetch();
+  };
 
   const handleDelete = async (daemonSet: DaemonSet) => {
     const confirmed = await confirmDialog({
@@ -79,42 +77,42 @@ export function DaemonSetsView() {
       description: `Are you sure you want to delete ${daemonSet.name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteDaemonSetMutation.mutateAsync({
           name: daemonSet.name,
           namespace: daemonSet.namespace
-        })
+        });
       } catch (err) {
-        console.error('Failed to delete daemonset:', err)
-        alert(`Failed to delete daemonset: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete daemonset:', err);
+        alert(`Failed to delete daemonset: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getStatusBadge = (status: DaemonSet['status']) => {
     switch (status) {
-      case 'Ready':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'Updating':
-        return <Badge variant="warning" className="flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'NotReady':
-        return <Badge variant="destructive" className="flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      default:
-        return <Badge>{status}</Badge>
+    case 'Ready':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <CheckCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'Updating':
+      return <Badge variant="warning" className="flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'NotReady':
+      return <Badge variant="destructive" className="flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    default:
+      return <Badge>{status}</Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -267,5 +265,5 @@ export function DaemonSetsView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

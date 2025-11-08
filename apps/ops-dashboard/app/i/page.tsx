@@ -1,9 +1,9 @@
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Suspense } from 'react';
+import { Activity, ArrowRight, Copy, Key, Layers,Package, Server, Settings } from 'lucide-react';
 import Link from 'next/link';
-import { Package, Server, Key, Settings, Copy, Activity, ArrowRight, Layers } from 'lucide-react';
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const resources = [
   {

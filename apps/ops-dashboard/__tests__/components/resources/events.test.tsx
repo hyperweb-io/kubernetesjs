@@ -1,6 +1,7 @@
-import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen, waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'next-themes';
+
 import { EventsView } from '@/components/resources/events';
 
 // Mock the Kubernetes hooks

@@ -1,22 +1,22 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useDeferredValue } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { type AppsV1DaemonSet as DaemonSet, type AppsV1Deployment as Deployment, type AppsV1ReplicaSet as ReplicaSet, type Pod, type Service } from '@kubernetesjs/ops';
 import {
+  Activity,
+  AlertCircle,
   ChevronDown,
   ChevronRight,
-  RefreshCw,
-  Package,
-  Server,
-  Activity,
   Copy,
-  Settings,
-  AlertCircle
-} from 'lucide-react'
-import { useDeployments, useServices, usePods, useDaemonSets, useReplicaSets } from '@/hooks'
-import { type AppsV1Deployment as Deployment, type AppsV1DaemonSet as DaemonSet, type AppsV1ReplicaSet as ReplicaSet, type Pod, type Service } from '@kubernetesjs/ops'
+  Package,
+  RefreshCw,
+  Server,
+  Settings} from 'lucide-react';
+import { useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useDaemonSets, useDeployments, usePods, useReplicaSets,useServices } from '@/hooks';
 
 interface ResourceSectionProps {
   title: string
@@ -30,7 +30,7 @@ interface ResourceSectionProps {
 }
 
 function ResourceSection({ title, icon: Icon, color, count, loading, error, children, onRefresh }: ResourceSectionProps) {
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(true);
 
   return (
     <Card className="mb-4">
@@ -54,8 +54,8 @@ function ResourceSection({ title, icon: Icon, color, count, loading, error, chil
             variant="outline"
             size="sm"
             onClick={(e) => {
-              e.stopPropagation()
-              onRefresh()
+              e.stopPropagation();
+              onRefresh();
             }}
             disabled={loading}
           >
@@ -76,24 +76,24 @@ function ResourceSection({ title, icon: Icon, color, count, loading, error, chil
         </CardContent>
       )}
     </Card>
-  )
+  );
 }
 
 export function AllResourcesView() {
   // Always call all hooks, but control their enabled state
-  const deployments = useDeployments()
-  const services = useServices()
-  const pods = usePods()
-  const daemonSets = useDaemonSets()
-  const replicaSets = useReplicaSets()
+  const deployments = useDeployments();
+  const services = useServices();
+  const pods = usePods();
+  const daemonSets = useDaemonSets();
+  const replicaSets = useReplicaSets();
 
   const refreshAll = () => {
-    deployments.refetch()
-    services.refetch()
-    pods.refetch()
-    daemonSets.refetch()
-    replicaSets.refetch()
-  }
+    deployments.refetch();
+    services.refetch();
+    pods.refetch();
+    daemonSets.refetch();
+    replicaSets.refetch();
+  };
 
   return (
     <div className="space-y-6">
@@ -169,9 +169,9 @@ export function AllResourcesView() {
         >
           <div className="space-y-2">
             {deployments.data?.items?.map((item: Deployment) => {
-              const replicas = item.spec?.replicas || 0
-              const readyReplicas = item.status?.readyReplicas || 0
-              const isReady = replicas === readyReplicas && replicas > 0
+              const replicas = item.spec?.replicas || 0;
+              const readyReplicas = item.status?.readyReplicas || 0;
+              const isReady = replicas === readyReplicas && replicas > 0;
               
               return (
                 <div key={item.metadata?.uid} className="flex items-center justify-between p-3 border rounded-lg">
@@ -185,7 +185,7 @@ export function AllResourcesView() {
                     {item.spec?.template?.spec?.containers[0]?.image || 'unknown'}
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         </ResourceSection>
@@ -202,8 +202,8 @@ export function AllResourcesView() {
         >
           <div className="space-y-2">
             {services.data?.items?.map((item: Service) => {
-              const type = item.spec?.type || 'Unknown'
-              const ports = item.spec?.ports?.map(p => p.port).join(', ') || 'none'
+              const type = item.spec?.type || 'Unknown';
+              const ports = item.spec?.ports?.map(p => p.port).join(', ') || 'none';
               
               return (
                 <div key={item.metadata?.uid} className="flex items-center justify-between p-3 border rounded-lg">
@@ -215,7 +215,7 @@ export function AllResourcesView() {
                     Ports: {ports}
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         </ResourceSection>
@@ -232,10 +232,10 @@ export function AllResourcesView() {
         >
           <div className="space-y-2">
             {pods.data?.items?.map((item: Pod) => {
-              const phase = item.status?.phase || 'Unknown'
-              const containerStatuses = item.status?.containerStatuses || []
-              const readyContainers = containerStatuses.filter(cs => cs.ready).length
-              const totalContainers = containerStatuses.length
+              const phase = item.status?.phase || 'Unknown';
+              const containerStatuses = item.status?.containerStatuses || [];
+              const readyContainers = containerStatuses.filter(cs => cs.ready).length;
+              const totalContainers = containerStatuses.length;
               
               return (
                 <div key={item.metadata?.uid} className="flex items-center justify-between p-3 border rounded-lg">
@@ -252,7 +252,7 @@ export function AllResourcesView() {
                     Node: {item.spec?.nodeName || 'unassigned'}
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         </ResourceSection>
@@ -269,9 +269,9 @@ export function AllResourcesView() {
         >
           <div className="space-y-2">
             {daemonSets.data?.items?.map((item: DaemonSet) => {
-              const desired = item.status?.desiredNumberScheduled || 0
-              const ready = item.status?.numberReady || 0
-              const isReady = desired === ready && desired > 0
+              const desired = item.status?.desiredNumberScheduled || 0;
+              const ready = item.status?.numberReady || 0;
+              const isReady = desired === ready && desired > 0;
               
               return (
                 <div key={item.metadata?.uid} className="flex items-center justify-between p-3 border rounded-lg">
@@ -285,7 +285,7 @@ export function AllResourcesView() {
                     {item.spec?.template?.spec?.containers[0]?.image || 'unknown'}
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         </ResourceSection>
@@ -302,13 +302,13 @@ export function AllResourcesView() {
         >
           <div className="space-y-2">
             {replicaSets.data?.items?.map((item: ReplicaSet) => {
-              const replicas = item.spec?.replicas || 0
-              const readyReplicas = item.status?.readyReplicas || 0
-              const isReady = replicas === readyReplicas && replicas > 0
+              const replicas = item.spec?.replicas || 0;
+              const readyReplicas = item.status?.readyReplicas || 0;
+              const isReady = replicas === readyReplicas && replicas > 0;
               
               // Check if owned by deployment
-              const ownerRefs = item.metadata?.ownerReferences || []
-              const deploymentRef = ownerRefs.find(ref => ref.kind === 'Deployment')
+              const ownerRefs = item.metadata?.ownerReferences || [];
+              const deploymentRef = ownerRefs.find(ref => ref.kind === 'Deployment');
               
               return (
                 <div key={item.metadata?.uid} className="flex items-center justify-between p-3 border rounded-lg">
@@ -327,11 +327,11 @@ export function AllResourcesView() {
                     {item.spec?.template?.spec?.containers[0]?.image || 'unknown'}
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         </ResourceSection>
       </div>
     </div>
-  )
+  );
 }

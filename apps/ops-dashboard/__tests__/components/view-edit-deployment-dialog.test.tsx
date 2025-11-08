@@ -1,8 +1,10 @@
-import React from 'react'
-import { render, screen, waitFor, cleanup } from '../utils/test-utils'
-import userEvent from '@testing-library/user-event'
-import { ViewEditDeploymentDialog } from '@/components/view-edit-deployment-dialog'
-import type { AppsV1Deployment as Deployment } from '@kubernetesjs/ops'
+import type { AppsV1Deployment as Deployment } from '@kubernetesjs/ops';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+
+import { ViewEditDeploymentDialog } from '@/components/view-edit-deployment-dialog';
+
+import { cleanup,render, screen, waitFor } from '../utils/test-utils';
 
 // Mock the YAMLEditor component
 jest.mock('../../components/yaml-editor', () => ({
@@ -21,13 +23,13 @@ jest.mock('../../components/yaml-editor', () => ({
       placeholder="YAML content"
     />
   )
-}))
+}));
 
 // Mock js-yaml
 jest.mock('js-yaml', () => ({
   dump: jest.fn((obj) => 'mocked yaml content'),
   load: jest.fn((yaml) => ({ apiVersion: 'apps/v1', kind: 'Deployment' }))
-}))
+}));
 
 // Mock the React Query hook
 jest.mock('../../k8s', () => ({
@@ -40,7 +42,7 @@ jest.mock('../../k8s', () => ({
     isLoading: false,
     error: null
   }))
-}))
+}));
 
 const mockDeployment: Deployment = {
   metadata: {
@@ -61,15 +63,15 @@ const mockDeployment: Deployment = {
     readyReplicas: 3,
     availableReplicas: 3
   }
-}
+};
 
 describe('ViewEditDeploymentDialog', () => {
-  const mockOnOpenChange = jest.fn()
-  const mockOnSubmit = jest.fn()
+  const mockOnOpenChange = jest.fn();
+  const mockOnSubmit = jest.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    cleanup()
+    jest.clearAllMocks();
+    cleanup();
     
     // Reset fetch mock
     global.fetch = jest.fn(() =>
@@ -80,8 +82,8 @@ describe('ViewEditDeploymentDialog', () => {
           status: { readyReplicas: 3 }
         }),
       })
-    ) as jest.Mock
-  })
+    ) as jest.Mock;
+  });
 
   describe('Basic Rendering', () => {
     it('should render dialog when open with deployment', () => {
@@ -92,13 +94,13 @@ describe('ViewEditDeploymentDialog', () => {
           onOpenChange={mockOnOpenChange}
           mode="view"
         />
-      )
+      );
 
-      expect(screen.getByText('View Deployment: test-deployment')).toBeInTheDocument()
-      expect(screen.getByText('Viewing deployment configuration in YAML format')).toBeInTheDocument()
-      expect(screen.getByRole('tab', { name: /view/i })).toBeInTheDocument()
-      expect(screen.getByRole('tab', { name: /edit/i })).toBeInTheDocument()
-    })
+      expect(screen.getByText('View Deployment: test-deployment')).toBeInTheDocument();
+      expect(screen.getByText('Viewing deployment configuration in YAML format')).toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: /view/i })).toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: /edit/i })).toBeInTheDocument();
+    });
 
     it('should not render dialog when closed', () => {
       render(
@@ -108,10 +110,10 @@ describe('ViewEditDeploymentDialog', () => {
           onOpenChange={mockOnOpenChange}
           mode="view"
         />
-      )
+      );
 
-      expect(screen.queryByText('View Deployment: test-deployment')).not.toBeInTheDocument()
-    })
+      expect(screen.queryByText('View Deployment: test-deployment')).not.toBeInTheDocument();
+    });
 
     it('should not render when deployment is null', () => {
       render(
@@ -121,10 +123,10 @@ describe('ViewEditDeploymentDialog', () => {
           onOpenChange={mockOnOpenChange}
           mode="view"
         />
-      )
+      );
 
-      expect(screen.queryByText('View Deployment:')).not.toBeInTheDocument()
-    })
+      expect(screen.queryByText('View Deployment:')).not.toBeInTheDocument();
+    });
 
     it('should show edit mode when initial mode is edit', () => {
       render(
@@ -135,12 +137,12 @@ describe('ViewEditDeploymentDialog', () => {
           mode="edit"
           onSubmit={mockOnSubmit}
         />
-      )
+      );
 
-      expect(screen.getByText('Edit Deployment: test-deployment')).toBeInTheDocument()
-      expect(screen.getByText('Edit deployment configuration using YAML')).toBeInTheDocument()
-    })
-  })
+      expect(screen.getByText('Edit Deployment: test-deployment')).toBeInTheDocument();
+      expect(screen.getByText('Edit deployment configuration using YAML')).toBeInTheDocument();
+    });
+  });
 
   describe('Data Loading', () => {
     it('should fetch deployment data when opened', async () => {
@@ -151,21 +153,21 @@ describe('ViewEditDeploymentDialog', () => {
           onOpenChange={mockOnOpenChange}
           mode="view"
         />
-      )
+      );
 
       await waitFor(() => {
-        expect(screen.getByTestId('yaml-editor')).toBeInTheDocument()
-      })
-    })
+        expect(screen.getByTestId('yaml-editor')).toBeInTheDocument();
+      });
+    });
 
     it('should show loading state while fetching data', () => {
       // Mock loading state
-      const { useReadAppsV1NamespacedDeploymentQuery } = require('../../k8s')
+      const { useReadAppsV1NamespacedDeploymentQuery } = require('../../k8s');
       useReadAppsV1NamespacedDeploymentQuery.mockReturnValue({
         data: null,
         isLoading: true,
         error: null
-      })
+      });
 
       render(
         <ViewEditDeploymentDialog
@@ -174,19 +176,19 @@ describe('ViewEditDeploymentDialog', () => {
           onOpenChange={mockOnOpenChange}
           mode="view"
         />
-      )
+      );
 
-      expect(screen.getByText('Loading deployment...')).toBeInTheDocument()
-    })
+      expect(screen.getByText('Loading deployment...')).toBeInTheDocument();
+    });
 
     it('should show error when fetch fails', async () => {
       // Mock error state
-      const { useReadAppsV1NamespacedDeploymentQuery } = require('../../k8s')
+      const { useReadAppsV1NamespacedDeploymentQuery } = require('../../k8s');
       useReadAppsV1NamespacedDeploymentQuery.mockReturnValue({
         data: null,
         isLoading: false,
         error: new Error('Network error')
-      })
+      });
 
       render(
         <ViewEditDeploymentDialog
@@ -195,17 +197,17 @@ describe('ViewEditDeploymentDialog', () => {
           onOpenChange={mockOnOpenChange}
           mode="view"
         />
-      )
+      );
 
       await waitFor(() => {
-        expect(screen.getByText('Failed to load deployment data')).toBeInTheDocument()
-      })
-    })
-  })
+        expect(screen.getByText('Failed to load deployment data')).toBeInTheDocument();
+      });
+    });
+  });
 
   describe('Tab Switching', () => {
     it('should switch between view and edit tabs', async () => {
-      const user = userEvent.setup()
+      const user = userEvent.setup();
       render(
         <ViewEditDeploymentDialog
           deployment={mockDeployment}
@@ -214,22 +216,22 @@ describe('ViewEditDeploymentDialog', () => {
           mode="view"
           onSubmit={mockOnSubmit}
         />
-      )
+      );
 
       await waitFor(() => {
-        expect(screen.getByTestId('yaml-editor')).toBeInTheDocument()
-      })
+        expect(screen.getByTestId('yaml-editor')).toBeInTheDocument();
+      });
 
       // Switch to edit tab
-      const editTab = screen.getByRole('tab', { name: /edit/i })
-      await user.click(editTab)
+      const editTab = screen.getByRole('tab', { name: /edit/i });
+      await user.click(editTab);
 
-      expect(screen.getByText('Edit Deployment: test-deployment')).toBeInTheDocument()
-      expect(screen.getByText('Edit deployment configuration using YAML')).toBeInTheDocument()
-    })
+      expect(screen.getByText('Edit Deployment: test-deployment')).toBeInTheDocument();
+      expect(screen.getByText('Edit deployment configuration using YAML')).toBeInTheDocument();
+    });
 
     it('should show save button only in edit mode', async () => {
-      const user = userEvent.setup()
+      const user = userEvent.setup();
       render(
         <ViewEditDeploymentDialog
           deployment={mockDeployment}
@@ -238,27 +240,27 @@ describe('ViewEditDeploymentDialog', () => {
           mode="view"
           onSubmit={mockOnSubmit}
         />
-      )
+      );
 
       await waitFor(() => {
-        expect(screen.getByTestId('yaml-editor')).toBeInTheDocument()
-      })
+        expect(screen.getByTestId('yaml-editor')).toBeInTheDocument();
+      });
 
       // In view mode, no save button
-      expect(screen.queryByRole('button', { name: /save changes/i })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /save changes/i })).not.toBeInTheDocument();
 
       // Switch to edit mode
-      const editTab = screen.getByRole('tab', { name: /edit/i })
-      await user.click(editTab)
+      const editTab = screen.getByRole('tab', { name: /edit/i });
+      await user.click(editTab);
 
       // Now save button should appear
-      expect(screen.getByRole('button', { name: /save changes/i })).toBeInTheDocument()
-    })
-  })
+      expect(screen.getByRole('button', { name: /save changes/i })).toBeInTheDocument();
+    });
+  });
 
   describe('User Interactions', () => {
     it('should handle cancel button click', async () => {
-      const user = userEvent.setup()
+      const user = userEvent.setup();
       render(
         <ViewEditDeploymentDialog
           deployment={mockDeployment}
@@ -266,22 +268,22 @@ describe('ViewEditDeploymentDialog', () => {
           onOpenChange={mockOnOpenChange}
           mode="view"
         />
-      )
+      );
 
       await waitFor(() => {
-        expect(screen.getByTestId('yaml-editor')).toBeInTheDocument()
-      })
+        expect(screen.getByTestId('yaml-editor')).toBeInTheDocument();
+      });
 
       // Use getAllByRole to get all close buttons and click the first one
-      const cancelButtons = screen.getAllByRole('button', { name: /close/i })
-      await user.click(cancelButtons[0])
+      const cancelButtons = screen.getAllByRole('button', { name: /close/i });
+      await user.click(cancelButtons[0]);
 
-      expect(mockOnOpenChange).toHaveBeenCalledWith(false)
-    })
+      expect(mockOnOpenChange).toHaveBeenCalledWith(false);
+    });
 
     it('should handle successful submission in edit mode', async () => {
-      const user = userEvent.setup()
-      mockOnSubmit.mockResolvedValue(undefined)
+      const user = userEvent.setup();
+      mockOnSubmit.mockResolvedValue(undefined);
 
       render(
         <ViewEditDeploymentDialog
@@ -291,26 +293,26 @@ describe('ViewEditDeploymentDialog', () => {
           mode="edit"
           onSubmit={mockOnSubmit}
         />
-      )
+      );
 
       // Wait for YAML editor to be rendered
       await waitFor(() => {
-        expect(screen.getByTestId('yaml-editor')).toBeInTheDocument()
-      })
+        expect(screen.getByTestId('yaml-editor')).toBeInTheDocument();
+      });
 
       // Type some content in the YAML editor
-      const yamlEditor = screen.getByTestId('yaml-editor')
-      await user.type(yamlEditor, 'test yaml content')
+      const yamlEditor = screen.getByTestId('yaml-editor');
+      await user.type(yamlEditor, 'test yaml content');
 
-      const saveButton = screen.getByRole('button', { name: /save changes/i })
-      await user.click(saveButton)
+      const saveButton = screen.getByRole('button', { name: /save changes/i });
+      await user.click(saveButton);
 
       await waitFor(() => {
-        expect(mockOnSubmit).toHaveBeenCalledWith('test yaml content')
-        expect(mockOnOpenChange).toHaveBeenCalledWith(false)
-      })
-    })
-  })
+        expect(mockOnSubmit).toHaveBeenCalledWith('test yaml content');
+        expect(mockOnOpenChange).toHaveBeenCalledWith(false);
+      });
+    });
+  });
 
   describe('YAML Editor Behavior', () => {
     it('should make YAML editor read-only in view mode', async () => {
@@ -321,15 +323,15 @@ describe('ViewEditDeploymentDialog', () => {
           onOpenChange={mockOnOpenChange}
           mode="view"
         />
-      )
+      );
 
       await waitFor(() => {
-        expect(screen.getByTestId('yaml-editor')).toBeInTheDocument()
-      })
+        expect(screen.getByTestId('yaml-editor')).toBeInTheDocument();
+      });
 
-      const yamlEditor = screen.getByTestId('yaml-editor')
-      expect(yamlEditor).toHaveAttribute('readOnly')
-    })
+      const yamlEditor = screen.getByTestId('yaml-editor');
+      expect(yamlEditor).toHaveAttribute('readOnly');
+    });
 
     it('should make YAML editor editable in edit mode', async () => {
       render(
@@ -340,18 +342,18 @@ describe('ViewEditDeploymentDialog', () => {
           mode="edit"
           onSubmit={mockOnSubmit}
         />
-      )
+      );
 
       await waitFor(() => {
-        expect(screen.getByTestId('yaml-editor')).toBeInTheDocument()
-      })
+        expect(screen.getByTestId('yaml-editor')).toBeInTheDocument();
+      });
 
-      const yamlEditor = screen.getByTestId('yaml-editor')
-      expect(yamlEditor).not.toHaveAttribute('readOnly')
-    })
+      const yamlEditor = screen.getByTestId('yaml-editor');
+      expect(yamlEditor).not.toHaveAttribute('readOnly');
+    });
 
     it('should handle YAML content changes in edit mode', async () => {
-      const user = userEvent.setup()
+      const user = userEvent.setup();
       render(
         <ViewEditDeploymentDialog
           deployment={mockDeployment}
@@ -360,19 +362,19 @@ describe('ViewEditDeploymentDialog', () => {
           mode="edit"
           onSubmit={mockOnSubmit}
         />
-      )
+      );
 
       await waitFor(() => {
-        expect(screen.getByTestId('yaml-editor')).toBeInTheDocument()
-      })
+        expect(screen.getByTestId('yaml-editor')).toBeInTheDocument();
+      });
 
-      const yamlEditor = screen.getByTestId('yaml-editor')
+      const yamlEditor = screen.getByTestId('yaml-editor');
       // Clear the existing content and type new content
-      await user.clear(yamlEditor)
-      await user.type(yamlEditor, 'new yaml content')
+      await user.clear(yamlEditor);
+      await user.type(yamlEditor, 'new yaml content');
 
       // The value should be updated through the onChange handler
-      expect(yamlEditor.value).toBe('new yaml content')
-    })
-  })
-})
+      expect(yamlEditor.value).toBe('new yaml content');
+    });
+  });
+});

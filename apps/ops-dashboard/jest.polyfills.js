@@ -8,7 +8,7 @@ const {
  
 const { ReadableStream, TransformStream } = require('node:stream/web');
  
-const { BroadcastChannel, MessagePort } = require("node:worker_threads")
+const { BroadcastChannel, MessagePort } = require('node:worker_threads');
 
 Object.defineProperties(globalThis, {
   TextDecoder: { value: TextDecoder },
@@ -17,17 +17,17 @@ Object.defineProperties(globalThis, {
   TransformStream: { value: TransformStream },
   BroadcastChannel: { value: BroadcastChannel },
   MessagePort:{value:MessagePort}
-})
+});
 
 const {
   Blob, File,
-} = require('node:buffer')
+} = require('node:buffer');
 
 // Use whatwg-fetch instead of undici for better MSW compatibility
-const { fetch, Headers, Request, Response } = require('whatwg-fetch')
+const { fetch, Headers, Request, Response } = require('whatwg-fetch');
 
 // Add markResourceTiming polyfill for compatibility
-globalThis.markResourceTiming = globalThis.markResourceTiming || (() => {})
+globalThis.markResourceTiming = globalThis.markResourceTiming || (() => {});
 
 Object.assign(globalThis, {
   fetch,
@@ -36,4 +36,4 @@ Object.assign(globalThis, {
   Response,
   Blob,
   File,
-})
+});

@@ -1,18 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-
-
-import { Settings, ExternalLink, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { StatusIndicator } from './status-indicator';
-import { Switch } from '@/components/ui/switch'
 import type { OperatorInfo } from '@kubernetesjs/client';
-import { useOperatorMutation } from '@/hooks/use-operators';
+import { ExternalLink, Loader2,Settings } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { useOperatorMutation } from '@/hooks/use-operators';
+import { cn } from '@/lib/utils';
+
+import { StatusIndicator } from './status-indicator';
 
 interface OperatorCardProps {
   operator: OperatorInfo;

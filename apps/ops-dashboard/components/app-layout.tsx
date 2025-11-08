@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+
 import { AdaptiveLayout } from '@/components/adaptive-layout';
 import { AIChatAgentic } from '@/components/ai-chat-agentic';
 

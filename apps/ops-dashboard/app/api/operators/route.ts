@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
-import { createRequire } from 'module';
 import fs from 'fs';
+import { createRequire } from 'module';
 import path from 'path';
+
 import { createSetupClient } from '@/k8s/client';
 
 export async function GET() {

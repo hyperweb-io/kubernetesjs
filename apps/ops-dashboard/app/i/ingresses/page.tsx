@@ -1,5 +1,5 @@
-import { IngressesView } from '@/components/resources/ingresses'
+import { IngressesView } from '@/components/resources/ingresses';
 
 export default function IngressesPage() {
-  return <IngressesView />
+  return <IngressesView />;
 }

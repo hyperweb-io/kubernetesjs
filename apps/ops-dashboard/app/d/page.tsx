@@ -1,8 +1,9 @@
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Activity, ArrowRight, Database, Globe, Link as LinkIcon, TrendingUp,Zap } from 'lucide-react';
 import Link from 'next/link';
-import { Database, Zap, Link as LinkIcon, Globe, Settings, ArrowRight, Activity, TrendingUp, Users } from 'lucide-react';
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const smartObjects = [
   {

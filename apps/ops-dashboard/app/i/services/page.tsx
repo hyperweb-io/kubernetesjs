@@ -1,5 +1,5 @@
-import { ServicesView } from '@/components/resources/services'
+import { ServicesView } from '@/components/resources/services';
 
 export default function ServicesPage() {
-  return <ServicesView />
+  return <ServicesView />;
 }

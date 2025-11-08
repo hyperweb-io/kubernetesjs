@@ -1,14 +1,14 @@
-import { screen, waitFor, fireEvent } from '@testing-library/react';
+import { fireEvent,screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { render } from '../../utils/test-utils';
-import { server } from '@/__mocks__/server';
+
 import { 
   createPodsList, 
   createPodsListError,
   createPodsListSlow
 } from '@/__mocks__/handlers/pods';
-import { http, HttpResponse } from 'msw';
-import { API_BASE } from '@/__mocks__/handlers/common';
+import { server } from '@/__mocks__/server';
+
+import { render } from '../../utils/test-utils';
 
 // Mock window.alert for testing
 const mockAlert = jest.spyOn(window, 'alert').mockImplementation(() => {});
@@ -281,21 +281,21 @@ describe('PodsView', () => {
     });
   });
 
-         describe('Stats Display', () => {
-           it('should display correct statistics', async () => {
-             render(<PodsView />);
+  describe('Stats Display', () => {
+    it('should display correct statistics', async () => {
+      render(<PodsView />);
              
-             await waitFor(() => {
-               expect(screen.getByText('nginx-pod-1')).toBeInTheDocument();
-             });
+      await waitFor(() => {
+        expect(screen.getByText('nginx-pod-1')).toBeInTheDocument();
+      });
              
-             // Check for stats cards
-             expect(screen.getByText('Total Pods')).toBeInTheDocument();
-             expect(screen.getByRole('heading', { name: 'Running' })).toBeInTheDocument();
-             expect(screen.getByRole('heading', { name: 'Pending' })).toBeInTheDocument();
-             expect(screen.getByRole('heading', { name: 'Failed' })).toBeInTheDocument();
-           });
-         });
+      // Check for stats cards
+      expect(screen.getByText('Total Pods')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Running' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Pending' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Failed' })).toBeInTheDocument();
+    });
+  });
 
   describe('Namespace Handling', () => {
     it('should handle namespace prop', async () => {

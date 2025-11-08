@@ -1,9 +1,10 @@
 'use client';
 
+import { Database, Key, Rocket } from 'lucide-react';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Button } from '@/components/ui/button';
-import { Plus, Database, Key, Rocket } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function QuickActions() {
   const actions = [

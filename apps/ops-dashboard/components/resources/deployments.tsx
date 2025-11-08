@@ -1,31 +1,28 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type AppsV1Deployment as K8sDeployment } from '@kubernetesjs/ops';
+import yaml from 'js-yaml';
+import { load } from 'js-yaml';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Edit, 
-  Scale, 
-  Eye,
   AlertCircle,
-  CheckCircle
-} from 'lucide-react'
-import { type AppsV1Deployment as K8sDeployment } from '@kubernetesjs/ops'
-import { useDeployments, useDeleteDeployment, useScaleDeployment, useCreateDeployment, useUpdateDeployment } from '@/hooks'
+  CheckCircle,
+  Edit, 
+  Eye,
+  Plus, 
+  RefreshCw, 
+  Scale, 
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
-
-import { CreateDeploymentDialog } from '@/components/create-deployment-dialog'
-
-import { ViewEditDeploymentDialog } from '@/components/view-edit-deployment-dialog'
-import { ScaleDeploymentDialog } from '@/components/scale-deployment-dialog'
-import yaml from 'js-yaml'
-import { load } from 'js-yaml'
+import { CreateDeploymentDialog } from '@/components/create-deployment-dialog';
+import { ScaleDeploymentDialog } from '@/components/scale-deployment-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ViewEditDeploymentDialog } from '@/components/view-edit-deployment-dialog';
+import { useCreateDeployment, useDeleteDeployment, useDeployments, useScaleDeployment, useUpdateDeployment } from '@/hooks';
+import { confirmDialog } from '@/hooks/useConfirm';
 
 interface Deployment {
   name: string
@@ -39,39 +36,39 @@ interface Deployment {
 }
 
 export function DeploymentsView() {
-  const [selectedDeployment, setSelectedDeployment] = useState<Deployment | null>(null)
+  const [selectedDeployment, setSelectedDeployment] = useState<Deployment | null>(null);
 
-  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  const [showViewEditDialog, setShowViewEditDialog] = useState(false)
-  const [viewEditMode, setViewEditMode] = useState<'view' | 'edit'>('view')
-  const [showScaleDialog, setShowScaleDialog] = useState(false)
+  const [showViewEditDialog, setShowViewEditDialog] = useState(false);
+  const [viewEditMode, setViewEditMode] = useState<'view' | 'edit'>('view');
+  const [showScaleDialog, setShowScaleDialog] = useState(false);
   
   // Use TanStack Query hooks
-  const { data, isLoading, error, refetch } = useDeployments()
-  const deleteDeploymentMutation = useDeleteDeployment()
-  const scaleDeploymentMutation = useScaleDeployment()
-  const createDeploymentMutation = useCreateDeployment()
-  const updateDeploymentMutation = useUpdateDeployment()
+  const { data, isLoading, error, refetch } = useDeployments();
+  const deleteDeploymentMutation = useDeleteDeployment();
+  const scaleDeploymentMutation = useScaleDeployment();
+  const createDeploymentMutation = useCreateDeployment();
+  const updateDeploymentMutation = useUpdateDeployment();
   // Helper function to determine deployment status
   function determineStatus(deployment: K8sDeployment): 'Running' | 'Pending' | 'Failed' {
-    const conditions = deployment.status!.conditions || []
-    const progressingCondition = conditions.find(c => c.type === 'Progressing')
-    const availableCondition = conditions.find(c => c.type === 'Available')
+    const conditions = deployment.status!.conditions || [];
+    const progressingCondition = conditions.find(c => c.type === 'Progressing');
+    const availableCondition = conditions.find(c => c.type === 'Available');
     
     if (availableCondition?.status === 'True' && 
         deployment.status!.availableReplicas === deployment.spec!.replicas!) {
-      return 'Running'
+      return 'Running';
     } else if (progressingCondition?.status === 'True') {
-      return 'Pending'
+      return 'Pending';
     } else {
-      return 'Failed'
+      return 'Failed';
     }
   }
   
   // Format deployments from query data
   const deployments: Deployment[] = (data?.items as any[])?.map(item => {
-    const status = determineStatus(item)
+    const status = determineStatus(item);
     return {
       name: item.metadata?.name || 'unknown',
       namespace: item.metadata?.namespace || 'unknown',
@@ -81,30 +78,30 @@ export function DeploymentsView() {
       createdAt: item.metadata?.creationTimestamp || new Date().toISOString(),
       status,
       k8sData: item
-    }
-  }) || []
+    };
+  }) || [];
 
 
   const handleRefresh = () => {
-    refetch()
-  }
+    refetch();
+  };
 
   const handleScale = (deployment: Deployment) => {
-    setSelectedDeployment(deployment)
-    setShowScaleDialog(true)
-  }
+    setSelectedDeployment(deployment);
+    setShowScaleDialog(true);
+  };
 
   const handleView = (deployment: Deployment) => {
-    setSelectedDeployment(deployment)
-    setViewEditMode('view')
-    setShowViewEditDialog(true)
-  }
+    setSelectedDeployment(deployment);
+    setViewEditMode('view');
+    setShowViewEditDialog(true);
+  };
 
   const handleEdit = (deployment: Deployment) => {
-    setSelectedDeployment(deployment)
-    setViewEditMode('edit')
-    setShowViewEditDialog(true)
-  }
+    setSelectedDeployment(deployment);
+    setViewEditMode('edit');
+    setShowViewEditDialog(true);
+  };
 
   const handleDelete = async (deployment: Deployment) => {
     const confirmed = await confirmDialog({
@@ -112,43 +109,43 @@ export function DeploymentsView() {
       description: `Are you sure you want to delete ${deployment.name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteDeploymentMutation.mutateAsync({
           name: deployment.name,
           namespace: deployment.namespace
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete deployment:', err)
-        alert(`Failed to delete deployment: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete deployment:', err);
+        alert(`Failed to delete deployment: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Running':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'Pending':
-        return <Badge variant="warning" className="flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'Failed':
-        return <Badge variant="destructive" className="flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      default:
-        return <Badge>{status}</Badge>
+    case 'Running':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <CheckCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'Pending':
+      return <Badge variant="warning" className="flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'Failed':
+      return <Badge variant="destructive" className="flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    default:
+      return <Badge>{status}</Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -321,34 +318,34 @@ export function DeploymentsView() {
         onSubmit={async (yaml) => {
           try {
             // Parse YAML to extract namespace if provided
-            const yamlLines = yaml.split('\n')
-            let namespace = 'default'
+            const yamlLines = yaml.split('\n');
+            let namespace = 'default';
             
             // Look for namespace in metadata
-            const metadataIndex = yamlLines.findIndex(line => line.trim() === 'metadata:')
+            const metadataIndex = yamlLines.findIndex(line => line.trim() === 'metadata:');
             if (metadataIndex !== -1) {
               for (let i = metadataIndex + 1; i < yamlLines.length; i++) {
-                const line = yamlLines[i].trim()
+                const line = yamlLines[i].trim();
                 if (line.startsWith('namespace:')) {
-                  namespace = line.split(':')[1].trim()
-                  break
+                  namespace = line.split(':')[1].trim();
+                  break;
                 }
                 // Stop if we hit another top-level key
                 if (!line.startsWith(' ') && !line.startsWith('\t') && line.includes(':')) {
-                  break
+                  break;
                 }
               }
             }
             
             // Convert YAML string to JSON object
-            const deploymentObj = load(yaml) as any
+            const deploymentObj = load(yaml) as any;
             // Create deployment using hook
-            await createDeploymentMutation.mutateAsync({ deployment: deploymentObj, namespace })
+            await createDeploymentMutation.mutateAsync({ deployment: deploymentObj, namespace });
             // Refresh the deployments list
-            refetch()
+            refetch();
           } catch (error) {
-            console.error('Failed to create deployment:', error)
-            throw error
+            console.error('Failed to create deployment:', error);
+            throw error;
           }
         }}
       />
@@ -361,24 +358,24 @@ export function DeploymentsView() {
         onOpenChange={setShowViewEditDialog}
         mode={viewEditMode}
         onSubmit={async (yamlContent) => {
-          if (!selectedDeployment) return
+          if (!selectedDeployment) return;
           
           try {
             // Parse the YAML to get the deployment object
-            const deploymentObj = yaml.load(yamlContent) as any
+            const deploymentObj = yaml.load(yamlContent) as any;
             
             // Update deployment using PUT request
             await updateDeploymentMutation.mutateAsync({
               name: selectedDeployment.name,
               deployment: deploymentObj,
               namespace: selectedDeployment.namespace
-            })
+            });
             
             // Refresh the deployments list
-            refetch()
+            refetch();
           } catch (error) {
-            console.error('Failed to update deployment:', error)
-            throw error
+            console.error('Failed to update deployment:', error);
+            throw error;
           }
         }}
       />
@@ -389,21 +386,21 @@ export function DeploymentsView() {
         open={showScaleDialog}
         onOpenChange={setShowScaleDialog}
         onScale={async (replicas) => {
-          if (!selectedDeployment) return
+          if (!selectedDeployment) return;
           
           try {
             await scaleDeploymentMutation.mutateAsync({
               name: selectedDeployment.name,
               replicas: replicas,
               namespace: selectedDeployment.namespace
-            })
-            refetch()
+            });
+            refetch();
           } catch (err) {
-            console.error('Failed to scale deployment:', err)
-            throw err
+            console.error('Failed to scale deployment:', err);
+            throw err;
           }
         }}
       />
     </div>
-  )
+  );
 }

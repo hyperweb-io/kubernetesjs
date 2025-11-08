@@ -8,19 +8,19 @@ interface UseShowMoreReturn<T> {
 }
 
 export const useShowMore = <T>({
-	items,
-	defaultVisibleCount,
+  items,
+  defaultVisibleCount,
 }: {
 	items: T[];
 	defaultVisibleCount: number;
 }): UseShowMoreReturn<T> => {
-	const [isShowMore, setIsShowMore] = useState(false);
+  const [isShowMore, setIsShowMore] = useState(false);
 
-	const visibleItems = isShowMore ? items : items.slice(0, defaultVisibleCount);
+  const visibleItems = isShowMore ? items : items.slice(0, defaultVisibleCount);
 
-	const toggleShowMore = () => setIsShowMore((prev) => !prev);
+  const toggleShowMore = () => setIsShowMore((prev) => !prev);
 
-	const btnText = isShowMore ? 'Show Less' : 'Show More';
+  const btnText = isShowMore ? 'Show Less' : 'Show More';
 
-	return { visibleItems, toggleShowMore, isShowMore, btnText };
+  return { visibleItems, toggleShowMore, isShowMore, btnText };
 };

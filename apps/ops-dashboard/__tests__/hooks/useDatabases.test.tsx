@@ -1,9 +1,10 @@
-import { renderHook, waitFor, act } from '../utils/test-utils'
-import { useCreateDatabases, useQueryBackups, useCreateBackup } from '../../hooks/useDatabases'
-import { server } from '../../__mocks__/server'
-import { http, HttpResponse } from 'msw'
+import { http, HttpResponse } from 'msw';
 
-const API_BASE = 'http://localhost:8001'
+import { server } from '../../__mocks__/server';
+import { useCreateBackup,useCreateDatabases, useQueryBackups } from '../../hooks/useDatabases';
+import { act,renderHook, waitFor } from '../utils/test-utils';
+
+const API_BASE = 'http://localhost:8001';
 
 describe('useCreateDatabases', () => {
   describe('Success scenarios', () => {
@@ -13,11 +14,11 @@ describe('useCreateDatabases', () => {
           return HttpResponse.json({ 
             success: true, 
             message: 'Database created successfully' 
-          })
+          });
         })
-      )
+      );
 
-      const { result } = renderHook(() => useCreateDatabases())
+      const { result } = renderHook(() => useCreateDatabases());
 
       const params = {
         ns: 'default',
@@ -31,18 +32,18 @@ describe('useCreateDatabases', () => {
         enablePooler: true,
         poolerName: 'test-pooler',
         poolerInstances: 1
-      }
+      };
 
       await act(async () => {
-        await result.current.mutateAsync(params)
-      })
+        await result.current.mutateAsync(params);
+      });
 
       await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true)
-    })
+        expect(result.current.isSuccess).toBe(true);
+      });
 
-      expect(result.current.data).toBeDefined()
-    })
+      expect(result.current.data).toBeDefined();
+    });
 
     it('should handle different database configurations', async () => {
       server.use(
@@ -50,11 +51,11 @@ describe('useCreateDatabases', () => {
           return HttpResponse.json({ 
             success: true, 
             message: 'Database created successfully' 
-          })
+          });
         })
-      )
+      );
 
-      const { result } = renderHook(() => useCreateDatabases())
+      const { result } = renderHook(() => useCreateDatabases());
 
       const params = {
         ns: 'production',
@@ -68,17 +69,17 @@ describe('useCreateDatabases', () => {
         enablePooler: false,
         poolerName: '',
         poolerInstances: 0
-      }
+      };
 
       await act(async () => {
-        await result.current.mutateAsync(params)
-      })
+        await result.current.mutateAsync(params);
+      });
 
       await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true)
-    })
-    })
-  })
+        expect(result.current.isSuccess).toBe(true);
+      });
+    });
+  });
 
   describe('Error handling', () => {
     it('should handle creation errors', async () => {
@@ -87,11 +88,11 @@ describe('useCreateDatabases', () => {
           return HttpResponse.json(
             { error: 'Database creation failed' },
             { status: 500 }
-          )
+          );
         })
-      )
+      );
 
-      const { result } = renderHook(() => useCreateDatabases())
+      const { result } = renderHook(() => useCreateDatabases());
 
       const params = {
         ns: 'default',
@@ -105,21 +106,21 @@ describe('useCreateDatabases', () => {
         enablePooler: false,
         poolerName: '',
         poolerInstances: 0
-      }
+      };
 
       await act(async () => {
         try {
-          await result.current.mutateAsync(params)
+          await result.current.mutateAsync(params);
         } catch (error) {
           // Expected to throw
         }
-      })
+      });
 
       await waitFor(() => {
-      expect(result.current.isError).toBe(true)
-    })
-      expect(result.current.error).toBeDefined()
-    })
+        expect(result.current.isError).toBe(true);
+      });
+      expect(result.current.error).toBeDefined();
+    });
 
     it('should handle validation errors', async () => {
       server.use(
@@ -127,11 +128,11 @@ describe('useCreateDatabases', () => {
           return HttpResponse.json(
             { error: 'Invalid parameters' },
             { status: 400 }
-          )
+          );
         })
-      )
+      );
 
-      const { result } = renderHook(() => useCreateDatabases())
+      const { result } = renderHook(() => useCreateDatabases());
 
       const params = {
         ns: 'default',
@@ -145,32 +146,32 @@ describe('useCreateDatabases', () => {
         enablePooler: false,
         poolerName: '',
         poolerInstances: 0
-      }
+      };
 
       await act(async () => {
         try {
-          await result.current.mutateAsync(params)
+          await result.current.mutateAsync(params);
         } catch (error) {
           // Expected to throw
         }
-      })
+      });
 
       await waitFor(() => {
-      expect(result.current.isError).toBe(true)
-    })
-    })
-  })
+        expect(result.current.isError).toBe(true);
+      });
+    });
+  });
 
   describe('Loading states', () => {
     it('should show loading state during creation', async () => {
       server.use(
         http.post('/api/databases/:ns/:name/deploy', async () => {
-          await new Promise(resolve => setTimeout(resolve, 100))
-          return HttpResponse.json({ success: true })
+          await new Promise(resolve => setTimeout(resolve, 100));
+          return HttpResponse.json({ success: true });
         })
-      )
+      );
 
-      const { result } = renderHook(() => useCreateDatabases())
+      const { result } = renderHook(() => useCreateDatabases());
 
       const params = {
         ns: 'default',
@@ -184,23 +185,23 @@ describe('useCreateDatabases', () => {
         enablePooler: false,
         poolerName: '',
         poolerInstances: 0
-      }
+      };
 
       act(() => {
-        result.current.mutate(params)
-      })
+        result.current.mutate(params);
+      });
 
       // Check that mutation is pending (may be very quick)
-      expect(result.current.isPending).toBeDefined()
+      expect(result.current.isPending).toBeDefined();
 
       await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true)
-    })
+        expect(result.current.isSuccess).toBe(true);
+      });
 
-      expect(result.current.isPending).toBe(false)
-    })
-  })
-})
+      expect(result.current.isPending).toBe(false);
+    });
+  });
+});
 
 describe('useQueryBackups', () => {
   describe('Success scenarios', () => {
@@ -208,39 +209,39 @@ describe('useQueryBackups', () => {
       const mockBackups = [
         { id: 'backup-1', name: 'backup-1', createdAt: '2024-01-01T10:00:00Z', status: 'completed' },
         { id: 'backup-2', name: 'backup-2', createdAt: '2024-01-02T10:00:00Z', status: 'completed' }
-      ]
+      ];
 
       server.use(
         http.get('/api/databases/:ns/:name/backups', () => {
-          return HttpResponse.json(mockBackups)
+          return HttpResponse.json(mockBackups);
         })
-      )
+      );
 
-      const { result } = renderHook(() => useQueryBackups('default', 'test-db'))
+      const { result } = renderHook(() => useQueryBackups('default', 'test-db'));
 
       await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true)
-    })
+        expect(result.current.isSuccess).toBe(true);
+      });
 
-      expect(result.current.data).toEqual(mockBackups)
-    })
+      expect(result.current.data).toEqual(mockBackups);
+    });
 
     it('should handle empty backups list', async () => {
       server.use(
         http.get('/api/databases/:ns/:name/backups', () => {
-          return HttpResponse.json([])
+          return HttpResponse.json([]);
         })
-      )
+      );
 
-      const { result } = renderHook(() => useQueryBackups('default', 'test-db'))
+      const { result } = renderHook(() => useQueryBackups('default', 'test-db'));
 
       await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true)
-    })
+        expect(result.current.isSuccess).toBe(true);
+      });
 
-      expect(result.current.data).toEqual([])
-    })
-  })
+      expect(result.current.data).toEqual([]);
+    });
+  });
 
   describe('Error handling', () => {
     it('should handle backup fetch errors', async () => {
@@ -249,20 +250,20 @@ describe('useQueryBackups', () => {
           return HttpResponse.json(
             { error: 'Failed to fetch backups' },
             { status: 500 }
-          )
+          );
         })
-      )
+      );
 
-      const { result } = renderHook(() => useQueryBackups('default', 'test-db'))
+      const { result } = renderHook(() => useQueryBackups('default', 'test-db'));
 
       await waitFor(() => {
-      expect(result.current.isError).toBe(true)
-    })
+        expect(result.current.isError).toBe(true);
+      });
 
-      expect(result.current.error).toBeDefined()
-    })
-  })
-})
+      expect(result.current.error).toBeDefined();
+    });
+  });
+});
 
 describe('useCreateBackup', () => {
   describe('Success scenarios', () => {
@@ -273,27 +274,27 @@ describe('useCreateBackup', () => {
             success: true, 
             message: 'Backup created successfully',
             backupId: 'backup-123'
-          })
+          });
         })
-      )
+      );
 
-      const { result } = renderHook(() => useCreateBackup())
+      const { result } = renderHook(() => useCreateBackup());
 
       const params = {
         ns: 'default',
         name: 'test-db',
         method: 'pg_dump'
-      }
+      };
 
       await act(async () => {
-        await result.current.mutateAsync(params)
-      })
+        await result.current.mutateAsync(params);
+      });
 
       await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true)
-    })
-      expect(result.current.data).toBeDefined()
-    })
+        expect(result.current.isSuccess).toBe(true);
+      });
+      expect(result.current.data).toBeDefined();
+    });
 
     it('should create backup with default method', async () => {
       server.use(
@@ -301,26 +302,26 @@ describe('useCreateBackup', () => {
           return HttpResponse.json({ 
             success: true, 
             message: 'Backup created successfully' 
-          })
+          });
         })
-      )
+      );
 
-      const { result } = renderHook(() => useCreateBackup())
+      const { result } = renderHook(() => useCreateBackup());
 
       const params = {
         ns: 'default',
         name: 'test-db'
-      }
+      };
 
       await act(async () => {
-        await result.current.mutateAsync(params)
-      })
+        await result.current.mutateAsync(params);
+      });
 
       await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true)
-    })
-    })
-  })
+        expect(result.current.isSuccess).toBe(true);
+      });
+    });
+  });
 
   describe('Error handling', () => {
     it('should handle backup creation errors', async () => {
@@ -329,62 +330,62 @@ describe('useCreateBackup', () => {
           return HttpResponse.json(
             { error: 'Backup creation failed' },
             { status: 500 }
-          )
+          );
         })
-      )
+      );
 
-      const { result } = renderHook(() => useCreateBackup())
+      const { result } = renderHook(() => useCreateBackup());
 
       const params = {
         ns: 'default',
         name: 'test-db',
         method: 'pg_dump'
-      }
+      };
 
       await act(async () => {
         try {
-          await result.current.mutateAsync(params)
+          await result.current.mutateAsync(params);
         } catch (error) {
           // Expected to throw
         }
-      })
+      });
 
       await waitFor(() => {
-      expect(result.current.isError).toBe(true)
-    })
-      expect(result.current.error).toBeDefined()
-    })
-  })
+        expect(result.current.isError).toBe(true);
+      });
+      expect(result.current.error).toBeDefined();
+    });
+  });
 
   describe('Loading states', () => {
     it('should show loading state during backup creation', async () => {
       server.use(
         http.post('/api/databases/:ns/:name/backups', async () => {
-          await new Promise(resolve => setTimeout(resolve, 100))
-          return HttpResponse.json({ success: true })
+          await new Promise(resolve => setTimeout(resolve, 100));
+          return HttpResponse.json({ success: true });
         })
-      )
+      );
 
-      const { result } = renderHook(() => useCreateBackup())
+      const { result } = renderHook(() => useCreateBackup());
 
       const params = {
         ns: 'default',
         name: 'test-db',
         method: 'pg_dump'
-      }
+      };
 
       act(() => {
-        result.current.mutate(params)
-      })
+        result.current.mutate(params);
+      });
 
       // Check that mutation is pending (may be very quick)
-      expect(result.current.isPending).toBeDefined()
+      expect(result.current.isPending).toBeDefined();
 
       await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true)
-    })
+        expect(result.current.isSuccess).toBe(true);
+      });
 
-      expect(result.current.isPending).toBe(false)
-    })
-  })
-})
+      expect(result.current.isPending).toBe(false);
+    });
+  });
+});

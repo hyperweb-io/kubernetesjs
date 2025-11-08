@@ -1,38 +1,39 @@
-'use client'
+'use client';
 
-import { useState, useMemo, useCallback } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { TemplateFilters } from '@/components/admin/template-filters'
-import { templates, type Template } from '@/components/templates/templates'
-import { TemplateCard } from '@/components/admin/template-card'
+import { useCallback,useMemo, useState } from 'react';
+
+import { TemplateCard } from '@/components/admin/template-card';
+import { TemplateFilters } from '@/components/admin/template-filters';
+import { type Template,templates } from '@/components/templates/templates';
+import { Card, CardContent } from '@/components/ui/card';
 
 type TemplateStatus = 'all' | 'installed' | 'not-installed' | 'installing' | 'error'
 
 export default function AdminTemplatesPage() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [globalStatusFilter, setGlobalStatusFilter] = useState<TemplateStatus>('all')
-  const [templateStatuses, setTemplateStatuses] = useState<Map<string, TemplateStatus>>(new Map())
+  const [searchTerm, setSearchTerm] = useState('');
+  const [globalStatusFilter, setGlobalStatusFilter] = useState<TemplateStatus>('all');
+  const [templateStatuses, setTemplateStatuses] = useState<Map<string, TemplateStatus>>(new Map());
 
   const filteredTemplates = useMemo(() => {
-    const term = searchTerm.toLowerCase()
+    const term = searchTerm.toLowerCase();
     return templates.filter((tpl) => {
-      const matchesSearch = tpl.name.toLowerCase().includes(term) || tpl.description.toLowerCase().includes(term)
+      const matchesSearch = tpl.name.toLowerCase().includes(term) || tpl.description.toLowerCase().includes(term);
       
       // Apply global status filter if not 'all'
       if (globalStatusFilter !== 'all') {
-        const templateStatus = templateStatuses.get(tpl.id) || 'not-installed'
+        const templateStatus = templateStatuses.get(tpl.id) || 'not-installed';
         if (templateStatus !== globalStatusFilter) {
-          return false
+          return false;
         }
       }
       
-      return matchesSearch
-    })
-  }, [searchTerm, globalStatusFilter, templateStatuses])
+      return matchesSearch;
+    });
+  }, [searchTerm, globalStatusFilter, templateStatuses]);
 
   const updateTemplateStatus = useCallback((templateId: string, status: TemplateStatus) => {
-    setTemplateStatuses(prev => new Map(prev).set(templateId, status))
-  }, [])
+    setTemplateStatuses(prev => new Map(prev).set(templateId, status));
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -71,5 +72,5 @@ export default function AdminTemplatesPage() {
         </Card>
       )}
     </div>
-  )
+  );
 }

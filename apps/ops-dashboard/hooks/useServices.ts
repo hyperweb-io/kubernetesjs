@@ -1,37 +1,38 @@
+import type { Service } from '@kubernetesjs/ops';
+
+import { usePreferredNamespace } from '../contexts/NamespaceContext';
 import {
-  useListCoreV1ServiceForAllNamespacesQuery,
-  useListCoreV1NamespacedServiceQuery,
-  useReadCoreV1NamespacedServiceQuery,
   useCreateCoreV1NamespacedService,
-  useReplaceCoreV1NamespacedService,
   useDeleteCoreV1NamespacedService,
-} from '../k8s/index'
-import { usePreferredNamespace } from '../contexts/NamespaceContext'
-import type { Service, ServiceList } from '@kubernetesjs/ops'
+  useListCoreV1NamespacedServiceQuery,
+  useListCoreV1ServiceForAllNamespacesQuery,
+  useReadCoreV1NamespacedServiceQuery,
+  useReplaceCoreV1NamespacedService,
+} from '../k8s/index';
 
 // Query keys
-const SERVICES_KEY = ['services'] as const
+const SERVICES_KEY = ['services'] as const;
 
 export function useServices(namespace?: string) {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const ns = namespace || defaultNamespace
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const ns = namespace || defaultNamespace;
 
   if (ns === '_all') {
-    return useListCoreV1ServiceForAllNamespacesQuery({ query: {} })
+    return useListCoreV1ServiceForAllNamespacesQuery({ query: {} });
   }
-  return useListCoreV1NamespacedServiceQuery({ path: { namespace: ns }, query: {} })
+  return useListCoreV1NamespacedServiceQuery({ path: { namespace: ns }, query: {} });
 }
 
 export function useService(name: string, namespace?: string) {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const ns = namespace || defaultNamespace
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const ns = namespace || defaultNamespace;
 
-  return useReadCoreV1NamespacedServiceQuery({ path: { namespace: ns, name }, query: {} })
+  return useReadCoreV1NamespacedServiceQuery({ path: { namespace: ns, name }, query: {} });
 }
 
 export function useCreateService() {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const base = useCreateCoreV1NamespacedService()
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const base = useCreateCoreV1NamespacedService();
   return {
     ...base,
     mutate: (
@@ -50,12 +51,12 @@ export function useCreateService() {
         { path: { namespace: namespace || defaultNamespace }, query: {}, body: service },
         opts
       ),
-  }
+  };
 }
 
 export function useUpdateService() {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const base = useReplaceCoreV1NamespacedService()
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const base = useReplaceCoreV1NamespacedService();
   return {
     ...base,
     mutate: (
@@ -74,12 +75,12 @@ export function useUpdateService() {
         { path: { namespace: namespace || defaultNamespace, name }, query: {}, body: service },
         opts
       ),
-  }
+  };
 }
 
 export function useDeleteService() {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const base = useDeleteCoreV1NamespacedService()
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const base = useDeleteCoreV1NamespacedService();
   return {
     ...base,
     mutate: (
@@ -98,5 +99,5 @@ export function useDeleteService() {
         { path: { namespace: namespace || defaultNamespace, name }, query: {} },
         opts
       ),
-  }
+  };
 }

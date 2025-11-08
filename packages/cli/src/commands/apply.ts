@@ -1,10 +1,10 @@
-import { CLIOptions, Inquirerer, Question } from 'inquirerer';
-import { ParsedArgs } from 'minimist';
 import chalk from 'chalk';
-import { KubernetesClient } from 'kubernetesjs';
-import { readYamlFile, inferResourceType } from '../config';
 import * as fs from 'fs';
-import * as path from 'path';
+import { CLIOptions, Inquirerer, Question } from 'inquirerer';
+import { KubernetesClient } from 'kubernetesjs';
+import { ParsedArgs } from 'minimist';
+
+import {readYamlFile } from '../config';
 
 async function promptYamlFilePath(prompter: Inquirerer, argv: Partial<ParsedArgs>): Promise<string> {
   const question: Question = {
@@ -30,68 +30,68 @@ async function applyResource(client: KubernetesClient, resource: any, namespace:
   
   try {
     switch (kind) {
-      case 'deployment':
-        await client.createAppsV1NamespacedDeployment({
-          path: { namespace },
-          query: { 
-            pretty: 'true',
-            fieldManager: 'kubernetesjs-cli'
-          },
-          body: resource
-        });
-        console.log(chalk.green(`Deployment "${name}" created/updated successfully`));
-        break;
+    case 'deployment':
+      await client.createAppsV1NamespacedDeployment({
+        path: { namespace },
+        query: { 
+          pretty: 'true',
+          fieldManager: 'kubernetesjs-cli'
+        },
+        body: resource
+      });
+      console.log(chalk.green(`Deployment "${name}" created/updated successfully`));
+      break;
         
-      case 'service':
-        await client.createCoreV1NamespacedService({
-          path: { namespace },
-          query: { 
-            pretty: 'true',
-            fieldManager: 'kubernetesjs-cli'
-          },
-          body: resource
-        });
-        console.log(chalk.green(`Service "${name}" created/updated successfully`));
-        break;
+    case 'service':
+      await client.createCoreV1NamespacedService({
+        path: { namespace },
+        query: { 
+          pretty: 'true',
+          fieldManager: 'kubernetesjs-cli'
+        },
+        body: resource
+      });
+      console.log(chalk.green(`Service "${name}" created/updated successfully`));
+      break;
         
-      case 'pod':
-        await client.createCoreV1NamespacedPod({
-          path: { namespace },
-          query: { 
-            pretty: 'true',
-            fieldManager: 'kubernetesjs-cli'
-          },
-          body: resource
-        });
-        console.log(chalk.green(`Pod "${name}" created/updated successfully`));
-        break;
+    case 'pod':
+      await client.createCoreV1NamespacedPod({
+        path: { namespace },
+        query: { 
+          pretty: 'true',
+          fieldManager: 'kubernetesjs-cli'
+        },
+        body: resource
+      });
+      console.log(chalk.green(`Pod "${name}" created/updated successfully`));
+      break;
         
-      case 'configmap':
-        await client.createCoreV1NamespacedConfigMap({
-          path: { namespace },
-          query: { 
-            pretty: 'true',
-            fieldManager: 'kubernetesjs-cli'
-          },
-          body: resource
-        });
-        console.log(chalk.green(`ConfigMap "${name}" created/updated successfully`));
-        break;
+    case 'configmap':
+      await client.createCoreV1NamespacedConfigMap({
+        path: { namespace },
+        query: { 
+          pretty: 'true',
+          fieldManager: 'kubernetesjs-cli'
+        },
+        body: resource
+      });
+      console.log(chalk.green(`ConfigMap "${name}" created/updated successfully`));
+      break;
         
-      case 'secret':
-        await client.createCoreV1NamespacedSecret({
-          path: { namespace },
-          query: { 
-            pretty: 'true',
-            fieldManager: 'kubernetesjs-cli'
-          },
-          body: resource
-        });
-        console.log(chalk.green(`Secret "${name}" created/updated successfully`));
-        break;
+    case 'secret':
+      await client.createCoreV1NamespacedSecret({
+        path: { namespace },
+        query: { 
+          pretty: 'true',
+          fieldManager: 'kubernetesjs-cli'
+        },
+        body: resource
+      });
+      console.log(chalk.green(`Secret "${name}" created/updated successfully`));
+      break;
         
-      default:
-        console.log(chalk.yellow(`Resource kind "${kind}" not implemented yet`));
+    default:
+      console.log(chalk.yellow(`Resource kind "${kind}" not implemented yet`));
     }
   } catch (error) {
     console.error(chalk.red(`Error applying ${kind} "${name}": ${error}`));

@@ -1,8 +1,9 @@
-'use client'
+'use client';
 
-import { Button } from '@/components/ui/button'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { Menu, PanelLeftClose, MessageSquare } from 'lucide-react'
+import { Menu, MessageSquare,PanelLeftClose } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 interface SmartObjectsHeaderProps {
   sidebarOpen: boolean
@@ -47,5 +48,5 @@ export function SmartObjectsHeader({
         <ThemeToggle />
       </div>
     </header>
-  )
+  );
 }

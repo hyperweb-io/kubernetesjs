@@ -1,5 +1,5 @@
-import { http, HttpResponse } from 'msw'
-import { type DiscoveryK8sIoV1EndpointSlice as EndpointSlice } from '@kubernetesjs/ops'
+import { type DiscoveryK8sIoV1EndpointSlice as EndpointSlice } from '@kubernetesjs/ops';
+import { http, HttpResponse } from 'msw';
 
 export function createEndpointSlicesListData(): EndpointSlice[] {
   return [
@@ -74,26 +74,26 @@ export function createEndpointSlicesListData(): EndpointSlice[] {
         { name: 'mysql', port: 3306, protocol: 'TCP' }
       ]
     }
-  ]
+  ];
 }
 
 export const createEndpointSliceDelete = () =>
   http.delete('/apis/discovery.k8s.io/v1/namespaces/:namespace/endpointslices/:name', () => {
-    return HttpResponse.json({})
-  })
+    return HttpResponse.json({});
+  });
 
 export const createEndpointSlicesList = () =>
   http.get('/apis/discovery.k8s.io/v1/namespaces/:namespace/endpointslices', ({ request, params }) => {
-    const namespace = params.namespace as string
+    const namespace = params.namespace as string;
     
-    const data = createEndpointSlicesListData().filter(slice => slice.metadata?.namespace === namespace)
+    const data = createEndpointSlicesListData().filter(slice => slice.metadata?.namespace === namespace);
     
     return HttpResponse.json({
       apiVersion: 'discovery.k8s.io/v1',
       kind: 'EndpointSliceList',
       items: data
-    })
-  })
+    });
+  });
 
 export const createAllEndpointSlicesList = () =>
   http.get('/apis/discovery.k8s.io/v1/endpointslices', () => {
@@ -101,20 +101,20 @@ export const createAllEndpointSlicesList = () =>
       apiVersion: 'discovery.k8s.io/v1',
       kind: 'EndpointSliceList',
       items: createEndpointSlicesListData()
-    })
-  })
+    });
+  });
 
 export const createEndpointSlicesListError = () =>
   http.get('/apis/discovery.k8s.io/v1/namespaces/:namespace/endpointslices', () => {
-    return HttpResponse.error()
-  })
+    return HttpResponse.error();
+  });
 
 export const createEndpointSlicesListSlow = () =>
   http.get('/apis/discovery.k8s.io/v1/namespaces/:namespace/endpointslices', async () => {
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 1000));
     return HttpResponse.json({
       apiVersion: 'discovery.k8s.io/v1',
       kind: 'EndpointSliceList',
       items: createEndpointSlicesListData()
-    })
-  })
+    });
+  });

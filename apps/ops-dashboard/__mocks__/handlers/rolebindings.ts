@@ -1,4 +1,4 @@
-import { http, HttpResponse } from 'msw'
+import { http, HttpResponse } from 'msw';
 
 export const createRoleBindingsListData = () => [
   {
@@ -83,7 +83,7 @@ export const createRoleBindingsListData = () => [
       }
     ]
   }
-]
+];
 
 export const createClusterRoleBindingsListData = () => [
   {
@@ -142,101 +142,101 @@ export const createClusterRoleBindingsListData = () => [
       }
     ]
   }
-]
+];
 
 export const createRoleBindingDelete = () =>
   http.delete('/apis/rbac.authorization.k8s.io/v1/namespaces/:namespace/rolebindings/:name', ({ params }) => {
-    const { namespace, name } = params
+    const { namespace, name } = params;
     return HttpResponse.json({
       metadata: {
         name,
         namespace,
         deletionTimestamp: new Date().toISOString()
       }
-    })
-  })
+    });
+  });
 
 export const createClusterRoleBindingDelete = () =>
   http.delete('/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/:name', ({ params }) => {
-    const { name } = params
+    const { name } = params;
     return HttpResponse.json({
       metadata: {
         name,
         deletionTimestamp: new Date().toISOString()
       }
-    })
-  })
+    });
+  });
 
 export const createRoleBindingsList = () =>
   http.get('/apis/rbac.authorization.k8s.io/v1/namespaces/:namespace/rolebindings', ({ request }) => {
-    const url = new URL(request.url)
-    const namespace = url.pathname.split('/')[4]
+    const url = new URL(request.url);
+    const namespace = url.pathname.split('/')[4];
     
     const data = createRoleBindingsListData().filter(binding => 
       binding.metadata.namespace === namespace
-    )
+    );
     
     return HttpResponse.json({
       apiVersion: 'rbac.authorization.k8s.io/v1',
       kind: 'RoleBindingList',
       items: data
-    })
-  })
+    });
+  });
 
 export const createAllRoleBindingsList = () =>
   http.get('/apis/rbac.authorization.k8s.io/v1/rolebindings', () => {
-    const data = createRoleBindingsListData()
+    const data = createRoleBindingsListData();
     
     return HttpResponse.json({
       apiVersion: 'rbac.authorization.k8s.io/v1',
       kind: 'RoleBindingList',
       items: data
-    })
-  })
+    });
+  });
 
 export const createClusterRoleBindingsList = () =>
   http.get('/apis/rbac.authorization.k8s.io/v1/clusterrolebindings', () => {
-    const data = createClusterRoleBindingsListData()
+    const data = createClusterRoleBindingsListData();
     
     return HttpResponse.json({
       apiVersion: 'rbac.authorization.k8s.io/v1',
       kind: 'ClusterRoleBindingList',
       items: data
-    })
-  })
+    });
+  });
 
 export const createRoleBindingsListError = () =>
   http.get('/apis/rbac.authorization.k8s.io/v1/namespaces/:namespace/rolebindings', () => {
     return HttpResponse.json(
       { error: 'Network request failed' },
       { status: 500 }
-    )
-  })
+    );
+  });
 
 export const createRoleBindingsListSlow = () =>
   http.get('/apis/rbac.authorization.k8s.io/v1/namespaces/:namespace/rolebindings', async () => {
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    await new Promise(resolve => setTimeout(resolve, 2000));
     return HttpResponse.json({
       apiVersion: 'rbac.authorization.k8s.io/v1',
       kind: 'RoleBindingList',
       items: []
-    })
-  })
+    });
+  });
 
 export const createClusterRoleBindingsListError = () =>
   http.get('/apis/rbac.authorization.k8s.io/v1/clusterrolebindings', () => {
     return HttpResponse.json(
       { error: 'Network request failed' },
       { status: 500 }
-    )
-  })
+    );
+  });
 
 export const createClusterRoleBindingsListSlow = () =>
   http.get('/apis/rbac.authorization.k8s.io/v1/clusterrolebindings', async () => {
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    await new Promise(resolve => setTimeout(resolve, 2000));
     return HttpResponse.json({
       apiVersion: 'rbac.authorization.k8s.io/v1',
       kind: 'ClusterRoleBindingList',
       items: []
-    })
-  })
+    });
+  });

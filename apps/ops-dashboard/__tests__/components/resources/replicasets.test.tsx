@@ -1,18 +1,18 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { render } from '../../utils/test-utils';
-import { server } from '@/__mocks__/server';
+
 import { 
-  createReplicaSetsList, 
-  createReplicaSetsListError,
-  createReplicaSetsListSlow,
+  createReplicaSetDelete,
+  createReplicaSetDeleteError,
   createReplicaSetScale,
   createReplicaSetScaleError,
-  createReplicaSetDelete,
-  createReplicaSetDeleteError
-} from '@/__mocks__/handlers/replicasets';
-
+  createReplicaSetsList, 
+  createReplicaSetsListError,
+  createReplicaSetsListSlow} from '@/__mocks__/handlers/replicasets';
+import { server } from '@/__mocks__/server';
 import { ReplicaSetsView } from '@/components/resources/replicasets';
+
+import { render } from '../../utils/test-utils';
 
 describe('ReplicaSetsView', () => {
   const user = userEvent.setup();
@@ -192,58 +192,58 @@ describe('ReplicaSetsView', () => {
     });
   });
 
-       describe('Status Determination', () => {
-         it('should determine Ready status correctly', async () => {
-           const readyReplicaSet = {
-             metadata: { name: 'ready-rs', namespace: 'default', creationTimestamp: '2023-01-01T00:00:00Z' },
-             spec: { replicas: 3, template: { spec: { containers: [{ image: 'nginx:latest' }] } } },
-             status: { readyReplicas: 3, availableReplicas: 3 }
-           };
+  describe('Status Determination', () => {
+    it('should determine Ready status correctly', async () => {
+      const readyReplicaSet = {
+        metadata: { name: 'ready-rs', namespace: 'default', creationTimestamp: '2023-01-01T00:00:00Z' },
+        spec: { replicas: 3, template: { spec: { containers: [{ image: 'nginx:latest' }] } } },
+        status: { readyReplicas: 3, availableReplicas: 3 }
+      };
            
-           server.use(createReplicaSetsList([readyReplicaSet]));
+      server.use(createReplicaSetsList([readyReplicaSet]));
            
-           render(<ReplicaSetsView />);
+      render(<ReplicaSetsView />);
            
-           await waitFor(() => {
-             expect(screen.getByText('ready-rs')).toBeInTheDocument();
-             expect(screen.getAllByText('Ready')).toHaveLength(3); // Card title, table header, and badge
-           });
-         });
+      await waitFor(() => {
+        expect(screen.getByText('ready-rs')).toBeInTheDocument();
+        expect(screen.getAllByText('Ready')).toHaveLength(3); // Card title, table header, and badge
+      });
+    });
 
-         it('should determine Scaling status correctly', async () => {
-           const scalingReplicaSet = {
-             metadata: { name: 'scaling-rs', namespace: 'default', creationTimestamp: '2023-01-01T00:00:00Z' },
-             spec: { replicas: 5, template: { spec: { containers: [{ image: 'nginx:latest' }] } } },
-             status: { readyReplicas: 3, availableReplicas: 3 }
-           };
+    it('should determine Scaling status correctly', async () => {
+      const scalingReplicaSet = {
+        metadata: { name: 'scaling-rs', namespace: 'default', creationTimestamp: '2023-01-01T00:00:00Z' },
+        spec: { replicas: 5, template: { spec: { containers: [{ image: 'nginx:latest' }] } } },
+        status: { readyReplicas: 3, availableReplicas: 3 }
+      };
            
-           server.use(createReplicaSetsList([scalingReplicaSet]));
+      server.use(createReplicaSetsList([scalingReplicaSet]));
            
-           render(<ReplicaSetsView />);
+      render(<ReplicaSetsView />);
            
-           await waitFor(() => {
-             expect(screen.getByText('scaling-rs')).toBeInTheDocument();
-             expect(screen.getByText('Scaling')).toBeInTheDocument();
-           });
-         });
+      await waitFor(() => {
+        expect(screen.getByText('scaling-rs')).toBeInTheDocument();
+        expect(screen.getByText('Scaling')).toBeInTheDocument();
+      });
+    });
 
-         it('should determine NotReady status correctly', async () => {
-           const notReadyReplicaSet = {
-             metadata: { name: 'notready-rs', namespace: 'default', creationTimestamp: '2023-01-01T00:00:00Z' },
-             spec: { replicas: 0, template: { spec: { containers: [{ image: 'nginx:latest' }] } } },
-             status: { readyReplicas: 0, availableReplicas: 0 }
-           };
+    it('should determine NotReady status correctly', async () => {
+      const notReadyReplicaSet = {
+        metadata: { name: 'notready-rs', namespace: 'default', creationTimestamp: '2023-01-01T00:00:00Z' },
+        spec: { replicas: 0, template: { spec: { containers: [{ image: 'nginx:latest' }] } } },
+        status: { readyReplicas: 0, availableReplicas: 0 }
+      };
            
-           server.use(createReplicaSetsList([notReadyReplicaSet]));
+      server.use(createReplicaSetsList([notReadyReplicaSet]));
            
-           render(<ReplicaSetsView />);
+      render(<ReplicaSetsView />);
            
-           await waitFor(() => {
-             expect(screen.getByText('notready-rs')).toBeInTheDocument();
-             expect(screen.getByText('NotReady')).toBeInTheDocument();
-           });
-         });
-       });
+      await waitFor(() => {
+        expect(screen.getByText('notready-rs')).toBeInTheDocument();
+        expect(screen.getByText('NotReady')).toBeInTheDocument();
+      });
+    });
+  });
 
   describe('ReplicaSet Actions', () => {
     it('should handle scale action', async () => {
@@ -401,20 +401,20 @@ describe('ReplicaSetsView', () => {
     });
   });
 
-       describe('Stats Display', () => {
-         it('should display correct statistics', async () => {
-           render(<ReplicaSetsView />);
+  describe('Stats Display', () => {
+    it('should display correct statistics', async () => {
+      render(<ReplicaSetsView />);
            
-           await waitFor(() => {
-             expect(screen.getByText('nginx-deployment-1234567890')).toBeInTheDocument();
-           });
+      await waitFor(() => {
+        expect(screen.getByText('nginx-deployment-1234567890')).toBeInTheDocument();
+      });
            
-           // Check for stats cards
-           expect(screen.getByText('Total ReplicaSets')).toBeInTheDocument();
-           expect(screen.getByRole('heading', { name: 'Ready' })).toBeInTheDocument();
-           expect(screen.getByRole('heading', { name: 'Total Replicas' })).toBeInTheDocument();
-         });
-       });
+      // Check for stats cards
+      expect(screen.getByText('Total ReplicaSets')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Ready' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Total Replicas' })).toBeInTheDocument();
+    });
+  });
 
   describe('Create ReplicaSet Alert', () => {
     it('should show create alert when create button is clicked', async () => {

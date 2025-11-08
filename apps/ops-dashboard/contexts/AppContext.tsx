@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext, useState } from 'react';
 
 export type AppMode = 'smart-objects' | 'infra'
 
@@ -9,7 +9,7 @@ interface AppContextValue {
   setMode: (mode: AppMode) => void
 }
 
-const AppContext = createContext<AppContextValue | undefined>(undefined)
+const AppContext = createContext<AppContextValue | undefined>(undefined);
 
 interface AppProviderProps {
   children: React.ReactNode
@@ -17,17 +17,17 @@ interface AppProviderProps {
 }
 
 export function AppProvider({ children, initialMode = 'infra' }: AppProviderProps) {
-  const [mode, setMode] = useState<AppMode>(initialMode)
+  const [mode, setMode] = useState<AppMode>(initialMode);
 
   return (
     <AppContext.Provider value={{ mode, setMode }}>
       {children}
     </AppContext.Provider>
-  )
+  );
 }
 
 export function useAppMode(): AppContextValue {
-  const ctx = useContext(AppContext)
-  if (!ctx) throw new Error('useAppMode must be used within an AppProvider')
-  return ctx
+  const ctx = useContext(AppContext);
+  if (!ctx) throw new Error('useAppMode must be used within an AppProvider');
+  return ctx;
 }

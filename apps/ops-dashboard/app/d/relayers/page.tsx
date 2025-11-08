@@ -1,8 +1,9 @@
-'use client'
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Globe, Plus, Activity, ArrowRightLeft, Zap } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Activity, ArrowRightLeft, Globe, Plus, Zap } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function RelayersPage() {
   return (
@@ -81,5 +82,5 @@ export default function RelayersPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

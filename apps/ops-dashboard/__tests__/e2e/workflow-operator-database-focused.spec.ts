@@ -1,9 +1,9 @@
-import { test, expect } from '@playwright/test';
+import { expect,test } from '@playwright/test';
 
 test.describe('Workflow 1: Operator Installation & Database Management (Focused)', () => {
   
   test('Complete Operator Installation & Database Management Workflow', async ({ page }) => {
-    test.setTimeout(600000)
+    test.setTimeout(600000);
     // Step 1: Open dashboard and navigate to admin/operators
     await test.step('1. Navigate to admin/operators', async () => {
       await page.goto('/admin/operators');

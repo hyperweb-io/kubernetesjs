@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+
 import { GET } from '@/app/api/operators/[operator]/debug/route';
 
 // Mock the dependencies

@@ -1,25 +1,24 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type Service as K8sService } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
+  AlertCircle,
   Edit, 
   Eye,
   Globe,
-  Shield,
+  Plus, 
+  RefreshCw, 
   Server,
-  AlertCircle
-} from 'lucide-react'
-import { type Service as K8sService } from '@kubernetesjs/ops'
-import { useServices, useDeleteService } from '@/hooks'
+  Shield,
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useDeleteService,useServices } from '@/hooks';
+import { confirmDialog } from '@/hooks/useConfirm';
 
 interface Service {
   name: string
@@ -35,15 +34,15 @@ interface Service {
 }
 
 export function ServicesView({ namespace:defaultNamespace }: { namespace?: string }) {
-  const [selectedService, setSelectedService] = useState<Service | null>(null)
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
   
   // Use TanStack Query hooks
-  const { data, isLoading, error, refetch } = useServices(defaultNamespace)
-  const deleteServiceMutation = useDeleteService()
+  const { data, isLoading, error, refetch } = useServices(defaultNamespace);
+  const deleteServiceMutation = useDeleteService();
   
   // Format services from query data
   const services: Service[] = data?.items?.map(item => {
-    const loadBalancerIngress = item.status?.loadBalancer?.ingress?.[0]
+    const loadBalancerIngress = item.status?.loadBalancer?.ingress?.[0];
     return {
       name: item.metadata!.name!,
       namespace: item.metadata!.namespace!,
@@ -61,12 +60,12 @@ export function ServicesView({ namespace:defaultNamespace }: { namespace?: strin
       externalIPs: item.spec!.externalIPs,
       loadBalancerIP: loadBalancerIngress?.ip || loadBalancerIngress?.hostname,
       k8sData: item,
-    }
-  }) || []
+    };
+  }) || [];
 
   const handleRefresh = () => {
-    refetch()
-  }
+    refetch();
+  };
 
   const handleDelete = async (service: Service) => {
     const confirmed = await confirmDialog({
@@ -74,60 +73,60 @@ export function ServicesView({ namespace:defaultNamespace }: { namespace?: strin
       description: `Are you sure you want to delete ${service.name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteServiceMutation.mutateAsync({
           name: service.name,
           namespace: service.namespace
-        })
+        });
         refetch();
       } catch (err) {
-        console.error('Failed to delete service:', err)
-        alert(`Failed to delete service: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete service:', err);
+        alert(`Failed to delete service: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getTypeBadge = (type: string) => {
     switch (type) {
-      case 'LoadBalancer':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <Globe className="w-3 h-3" />
-          {type}
-        </Badge>
-      case 'NodePort':
-        return <Badge variant="secondary" className="flex items-center gap-1">
-          <Server className="w-3 h-3" />
-          {type}
-        </Badge>
-      case 'ClusterIP':
-        return <Badge variant="outline" className="flex items-center gap-1">
-          <Shield className="w-3 h-3" />
-          {type}
-        </Badge>
-      default:
-        return <Badge>{type}</Badge>
+    case 'LoadBalancer':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <Globe className="w-3 h-3" />
+        {type}
+      </Badge>;
+    case 'NodePort':
+      return <Badge variant="secondary" className="flex items-center gap-1">
+        <Server className="w-3 h-3" />
+        {type}
+      </Badge>;
+    case 'ClusterIP':
+      return <Badge variant="outline" className="flex items-center gap-1">
+        <Shield className="w-3 h-3" />
+        {type}
+      </Badge>;
+    default:
+      return <Badge>{type}</Badge>;
     }
-  }
+  };
 
   const formatPorts = (ports: Service['ports']) => {
     return ports.map(p => {
-      let portStr = `${p.port}`
+      let portStr = `${p.port}`;
       if (p.targetPort !== p.port) {
-        portStr += `:${p.targetPort}`
+        portStr += `:${p.targetPort}`;
       }
       if (p.nodePort) {
-        portStr += `:${p.nodePort}`
+        portStr += `:${p.nodePort}`;
       }
-      return `${portStr}/${p.protocol}`
-    }).join(', ')
-  }
+      return `${portStr}/${p.protocol}`;
+    }).join(', ');
+  };
 
   const formatSelector = (selector: Record<string, string>) => {
-    return Object.entries(selector).map(([k, v]) => `${k}=${v}`).join(', ')
-  }
+    return Object.entries(selector).map(([k, v]) => `${k}=${v}`).join(', ');
+  };
 
   return (
     <div className="space-y-6">
@@ -307,5 +306,5 @@ export function ServicesView({ namespace:defaultNamespace }: { namespace?: strin
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,19 +1,19 @@
-'use client'
+'use client';
 
-import React, { useState, useRef, useEffect, KeyboardEvent } from 'react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { AgentManagerAgentic } from './agent-manager-agentic'
 import {
-  AgentKit,
-  OllamaAdapter,
   BradieAdapter,
-  createMultiProviderKit
-} from 'agentic-kit'
+  createMultiProviderKit,
+  OllamaAdapter} from 'agentic-kit';
+import React, { KeyboardEvent,useEffect, useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import remarkGfm from 'remark-gfm';
+
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+
+import { AgentManagerAgentic } from './agent-manager-agentic';
 
 export type AgentProvider = 'ollama' | 'bradie'
 
@@ -25,31 +25,30 @@ export interface ChatMessage {
   provider?: AgentProvider
 }
 import {
-  MoreVertical,
-  Send,
-  User,
+  AlertCircle,
   Bot,
-  Copy,
+  Brain,
   Check,
   ChevronRight,
+  Copy,
+  Loader2,
   MessageSquare,
-  Trash2,
-  Plus,
+  MoreVertical,
   Pin,
   PinOff,
-  Loader2,
-  AlertCircle,
+  Send,
   Settings2,
-  Brain,
-  Sparkles
-} from 'lucide-react'
+  Sparkles,
+  Trash2,
+  User} from 'lucide-react';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu'
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface AIChatAgenticProps {
   isOpen: boolean
@@ -68,70 +67,70 @@ export function AIChatAgentic({
   layoutMode, 
   onLayoutModeChange 
 }: AIChatAgenticProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [input, setInput] = useState('')
-  const [showTimestamps, setShowTimestamps] = useState(false)
-  const [copiedCode, setCopiedCode] = useState<string | null>(null)
-  const [isResizing, setIsResizing] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [showAgentManager, setShowAgentManager] = useState(false)
-  const [streamingMessage, setStreamingMessage] = useState('')
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState('');
+  const [showTimestamps, setShowTimestamps] = useState(false);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [isResizing, setIsResizing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showAgentManager, setShowAgentManager] = useState(false);
+  const [streamingMessage, setStreamingMessage] = useState('');
   
   // Agent state
-  const [currentProvider, setCurrentProvider] = useState<AgentProvider>('ollama')
+  const [currentProvider, setCurrentProvider] = useState<AgentProvider>('ollama');
   const [agentKit] = useState(() => {
-    const kit = createMultiProviderKit()
-    kit.addProvider(new OllamaAdapter('http://localhost:11434'))
+    const kit = createMultiProviderKit();
+    kit.addProvider(new OllamaAdapter('http://localhost:11434'));
     kit.addProvider(new BradieAdapter({
       domain: 'http://localhost:3001',
       onSystemMessage: () => {},
       onAssistantReply: () => {}
-    }))
-    kit.setProvider('ollama')
-    return kit
-  })
+    }));
+    kit.setProvider('ollama');
+    return kit;
+  });
 
-  const resizeRef = useRef<HTMLDivElement>(null)
-  const chatEndRef = useRef<HTMLDivElement>(null)
+  const resizeRef = useRef<HTMLDivElement>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Auto scroll to bottom on new messages
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, streamingMessage])
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, streamingMessage]);
 
   // Load chat history from localStorage (use same key as global chat)
   useEffect(() => {
-    const savedMessages = localStorage.getItem('ai-chat-messages')
+    const savedMessages = localStorage.getItem('ai-chat-messages');
     if (savedMessages) {
       try {
-        const parsed = JSON.parse(savedMessages)
+        const parsed = JSON.parse(savedMessages);
         setMessages(parsed.map((m: any) => ({ 
           ...m, 
           timestamp: new Date(m.timestamp) 
-        })))
+        })));
       } catch (err) {
-        console.error('Failed to load chat history:', err)
+        console.error('Failed to load chat history:', err);
       }
     }
-  }, [])
+  }, []);
 
   // Save messages to localStorage (use same key as global chat)
   useEffect(() => {
     if (messages.length > 0) {
-      localStorage.setItem('ai-chat-messages', JSON.stringify(messages))
+      localStorage.setItem('ai-chat-messages', JSON.stringify(messages));
     }
-  }, [messages])
+  }, [messages]);
 
   // Handle provider change
   const handleProviderChange = (provider: AgentProvider) => {
-    setCurrentProvider(provider)
-    agentKit.setProvider(provider)
-  }
+    setCurrentProvider(provider);
+    agentKit.setProvider(provider);
+  };
 
   // Handle send message
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return
+    if (!input.trim() || isLoading) return;
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -139,22 +138,22 @@ export function AIChatAgentic({
       content: input.trim(),
       timestamp: new Date(),
       provider: currentProvider
-    }
+    };
 
-    setMessages(prev => [...prev, userMessage])
-    setInput('')
-    setIsLoading(true)
-    setError(null)
-    setStreamingMessage('')
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setIsLoading(true);
+    setError(null);
+    setStreamingMessage('');
 
     try {
-      let fullResponse = ''
+      let fullResponse = '';
       
       // Handle streaming
       const onChunk = (chunk: string) => {
-        fullResponse += chunk
-        setStreamingMessage(fullResponse)
-      }
+        fullResponse += chunk;
+        setStreamingMessage(fullResponse);
+      };
 
       // Generate response
       await agentKit.generate(
@@ -232,7 +231,7 @@ export default class HelloWorldContract {
         { 
           onChunk
         }
-      )
+      );
 
       // After streaming completes, create the final message
       if (fullResponse.trim()) {
@@ -242,74 +241,74 @@ export default class HelloWorldContract {
           content: fullResponse,
           timestamp: new Date(),
           provider: currentProvider
-        }
-        setMessages(prev => [...prev, assistantMessage])
+        };
+        setMessages(prev => [...prev, assistantMessage]);
       }
       
       // Clear streaming message
-      setStreamingMessage('')
+      setStreamingMessage('');
 
     } catch (err) {
-      console.error('Error generating response:', err)
-      setError('An error occurred. Please try again.')
-      setStreamingMessage('')
+      console.error('Error generating response:', err);
+      setError('An error occurred. Please try again.');
+      setStreamingMessage('');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
+      e.preventDefault();
       if (!isLoading) {
-        handleSend()
+        handleSend();
       }
     }
-  }
+  };
 
   const copyToClipboard = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(text)
-      setCopiedCode(text)
-      setTimeout(() => setCopiedCode(null), 2000)
+      await navigator.clipboard.writeText(text);
+      setCopiedCode(text);
+      setTimeout(() => setCopiedCode(null), 2000);
     } catch (err) {
-      console.error('Failed to copy:', err)
+      console.error('Failed to copy:', err);
     }
-  }
+  };
 
   const clearHistory = () => {
-    setMessages([])
-    localStorage.removeItem('ai-chat-messages')
-  }
+    setMessages([]);
+    localStorage.removeItem('ai-chat-messages');
+  };
 
   // Handle resize
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isResizing) return
-      const newWidth = window.innerWidth - e.clientX
-      onWidthChange(Math.max(300, Math.min(800, newWidth)))
-    }
+      if (!isResizing) return;
+      const newWidth = window.innerWidth - e.clientX;
+      onWidthChange(Math.max(300, Math.min(800, newWidth)));
+    };
 
     const handleMouseUp = () => {
-      setIsResizing(false)
-    }
+      setIsResizing(false);
+    };
 
     if (isResizing) {
-      document.addEventListener('mousemove', handleMouseMove)
-      document.addEventListener('mouseup', handleMouseUp)
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
     }
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-    }
-  }, [isResizing, onWidthChange])
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing, onWidthChange]);
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   const containerStyle = layoutMode === 'floating' 
     ? 'fixed right-4 top-4 bottom-4 shadow-2xl rounded-lg border' 
-    : 'fixed right-0 top-0 bottom-0 border-l'
+    : 'fixed right-0 top-0 bottom-0 border-l';
 
   return (
     <>
@@ -397,13 +396,13 @@ export default class HelloWorldContract {
                       remarkPlugins={[remarkGfm]}
                       components={{
                         code({ node, inline, className, children, ...props }: any) {
-                          const match = /language-(\w+)/.exec(className || '')
+                          const match = /language-(\w+)/.exec(className || '');
                           return !inline && match ? (
                             <div className="relative my-2">
                               {React.createElement(SyntaxHighlighter as any, {
                                 style: vscDarkPlus,
                                 language: match[1],
-                                PreTag: "div",
+                                PreTag: 'div',
                                 ...props
                               }, String(children).replace(/\n$/, ''))}
                               <Button
@@ -423,7 +422,7 @@ export default class HelloWorldContract {
                             <code className={className} {...props}>
                               {children}
                             </code>
-                          )
+                          );
                         }
                       }}
                     >
@@ -514,5 +513,5 @@ export default class HelloWorldContract {
         />
       )}
     </>
-  )
+  );
 }

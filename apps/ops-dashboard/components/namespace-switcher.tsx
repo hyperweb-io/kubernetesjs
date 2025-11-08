@@ -1,23 +1,24 @@
-'use client'
+'use client';
 
-import { useNamespaces } from '@/hooks'
-import { usePreferredNamespace } from '@/contexts/NamespaceContext'
+import { RefreshCw } from 'lucide-react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { RefreshCw } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+} from '@/components/ui/select';
+import { usePreferredNamespace } from '@/contexts/NamespaceContext';
+import { useNamespaces } from '@/hooks';
 
 export function NamespaceSwitcher() {
-  const { namespace, setNamespace } = usePreferredNamespace()
-  const { data, isLoading, error, refetch } = useNamespaces()
+  const { namespace, setNamespace } = usePreferredNamespace();
+  const { data, isLoading, error, refetch } = useNamespaces();
 
-  const namespaces = (data?.items as any[])?.map((item: any) => item.metadata?.name).filter(Boolean) || []
+  const namespaces = (data?.items as any[])?.map((item: any) => item.metadata?.name).filter(Boolean) || [];
 
   return (
     <div className="flex items-center gap-2">
@@ -68,5 +69,5 @@ export function NamespaceSwitcher() {
         <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
       </Button>
     </div>
-  )
+  );
 }

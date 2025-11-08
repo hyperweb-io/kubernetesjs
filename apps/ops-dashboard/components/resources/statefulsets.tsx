@@ -1,54 +1,53 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type AppsV1StatefulSet as StatefulSet } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Edit, 
-  Scale, 
-  Eye,
   AlertCircle,
-  CheckCircle
-} from 'lucide-react'
+  CheckCircle,
+  Edit, 
+  Eye,
+  Plus, 
+  RefreshCw, 
+  Scale, 
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePreferredNamespace } from '@/contexts/NamespaceContext';
+import { confirmDialog } from '@/hooks/useConfirm';
 import { 
+  useDeleteAppsV1NamespacedStatefulSet,
   useListAppsV1NamespacedStatefulSetQuery,
   useListAppsV1StatefulSetForAllNamespacesQuery,
-  useDeleteAppsV1NamespacedStatefulSet,
   useReplaceAppsV1NamespacedStatefulSetScale
-} from '@/k8s'
-import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import { type AppsV1StatefulSet as StatefulSet } from '@kubernetesjs/ops'
-
-import { confirmDialog } from '@/hooks/useConfirm'
+} from '@/k8s';
 
 export function StatefulSetsView() {
-  const [selectedStatefulSet, setSelectedStatefulSet] = useState<StatefulSet | null>(null)
-  const { namespace } = usePreferredNamespace()
+  const [selectedStatefulSet, setSelectedStatefulSet] = useState<StatefulSet | null>(null);
+  const { namespace } = usePreferredNamespace();
   
   // Use k8s hooks directly
   const query = namespace === '_all' 
     ? useListAppsV1StatefulSetForAllNamespacesQuery({ query: {} })
-    : useListAppsV1NamespacedStatefulSetQuery({ path: { namespace }, query: {} })
+    : useListAppsV1NamespacedStatefulSetQuery({ path: { namespace }, query: {} });
     
-  const { data, isLoading, error, refetch } = query
-  const deleteStatefulSet = useDeleteAppsV1NamespacedStatefulSet()
-  const scaleStatefulSet = useReplaceAppsV1NamespacedStatefulSetScale()
+  const { data, isLoading, error, refetch } = query;
+  const deleteStatefulSet = useDeleteAppsV1NamespacedStatefulSet();
+  const scaleStatefulSet = useReplaceAppsV1NamespacedStatefulSetScale();
 
-  const statefulsets = data?.items || []
+  const statefulsets = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const handleScale = async (ss: StatefulSet) => {
-    const name = ss.metadata!.name!
-    const namespace = ss.metadata!.namespace!
-    const currentReplicas = ss.spec!.replicas || 0
+    const name = ss.metadata!.name!;
+    const namespace = ss.metadata!.namespace!;
+    const currentReplicas = ss.spec!.replicas || 0;
     
-    const newReplicas = prompt(`Scale ${name} to how many replicas?`, currentReplicas.toString())
+    const newReplicas = prompt(`Scale ${name} to how many replicas?`, currentReplicas.toString());
     if (newReplicas && !isNaN(Number(newReplicas))) {
       try {
         await scaleStatefulSet.mutateAsync({
@@ -60,69 +59,69 @@ export function StatefulSetsView() {
             spec: { replicas: Number(newReplicas) }
           },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to scale statefulset:', err)
-        alert(`Failed to scale statefulset: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to scale statefulset:', err);
+        alert(`Failed to scale statefulset: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const handleDelete = async (ss: StatefulSet) => {
-    const name = ss.metadata!.name!
-    const namespace = ss.metadata!.namespace!
+    const name = ss.metadata!.name!;
+    const namespace = ss.metadata!.namespace!;
     
     const confirmed = await confirmDialog({
       title: 'Delete StatefulSet',
       description: `Are you sure you want to delete ${name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteStatefulSet.mutateAsync({
           path: { namespace, name },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete statefulset:', err)
-        alert(`Failed to delete statefulset: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete statefulset:', err);
+        alert(`Failed to delete statefulset: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getStatus = (ss: StatefulSet) => {
-    const replicas = ss.spec?.replicas || 0
-    const readyReplicas = ss.status?.readyReplicas || 0
+    const replicas = ss.spec?.replicas || 0;
+    const readyReplicas = ss.status?.readyReplicas || 0;
     
     if (readyReplicas === replicas && replicas > 0) {
-      return 'Running'
+      return 'Running';
     } else if (readyReplicas < replicas) {
-      return 'Updating'
+      return 'Updating';
     } else {
-      return 'Pending'
+      return 'Pending';
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Running':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'Updating':
-        return <Badge variant="warning" className="flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      default:
-        return <Badge>{status}</Badge>
+    case 'Running':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <CheckCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'Updating':
+      return <Badge variant="warning" className="flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    default:
+      return <Badge>{status}</Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -283,5 +282,5 @@ export function StatefulSetsView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,7 +1,8 @@
-import { CLIOptions, Inquirerer, Question } from 'inquirerer';
-import { ParsedArgs } from 'minimist';
 import chalk from 'chalk';
+import { CLIOptions, Inquirerer, Question } from 'inquirerer';
 import { KubernetesClient } from 'kubernetesjs';
+import { ParsedArgs } from 'minimist';
+
 import { getCurrentNamespace } from '../config';
 
 async function promptResourceType(prompter: Inquirerer, argv: Partial<ParsedArgs>): Promise<string> {
@@ -40,33 +41,33 @@ async function promptResourceName(
   let resources: any[] = [];
   
   switch (resourceType) {
-    case 'pod':
-      const pods = await client.listCoreV1NamespacedPod({
-        path: { namespace },
-        query: { limit: 100 }
-      });
-      resources = pods.items || [];
-      break;
+  case 'pod':
+    const pods = await client.listCoreV1NamespacedPod({
+      path: { namespace },
+      query: { limit: 100 }
+    });
+    resources = pods.items || [];
+    break;
       
-    case 'service':
-      const services = await client.listCoreV1NamespacedService({
-        path: { namespace },
-        query: { limit: 100 }
-      });
-      resources = services.items || [];
-      break;
+  case 'service':
+    const services = await client.listCoreV1NamespacedService({
+      path: { namespace },
+      query: { limit: 100 }
+    });
+    resources = services.items || [];
+    break;
       
-    case 'deployment':
-      const deployments = await client.listAppsV1NamespacedDeployment({
-        path: { namespace },
-        query: { limit: 100 }
-      });
-      resources = deployments.items || [];
-      break;
+  case 'deployment':
+    const deployments = await client.listAppsV1NamespacedDeployment({
+      path: { namespace },
+      query: { limit: 100 }
+    });
+    resources = deployments.items || [];
+    break;
       
-    default:
-      console.log(chalk.yellow(`Resource type '${resourceType}' not implemented yet for selection`));
-      return '';
+  default:
+    console.log(chalk.yellow(`Resource type '${resourceType}' not implemented yet for selection`));
+    return '';
   }
   
   if (resources.length === 0) {
@@ -218,47 +219,47 @@ export default async (
     console.log(chalk.blue(`Describing ${resourceType} ${resourceName} in namespace ${namespace}...`));
     
     switch (resourceType) {
-      case 'pod':
-        const pod = await client.readCoreV1NamespacedPod({
-          path: { 
-            namespace,
-            name: resourceName
-          },
-          query: {
+    case 'pod':
+      const pod = await client.readCoreV1NamespacedPod({
+        path: { 
+          namespace,
+          name: resourceName
+        },
+        query: {
 
-          }
-        });
-        describePod(pod);
-        break;
+        }
+      });
+      describePod(pod);
+      break;
         
-      case 'service':
-        const service = await client.readCoreV1NamespacedService({
-          path: { 
-            namespace,
-            name: resourceName
-          },
-          query: {
+    case 'service':
+      const service = await client.readCoreV1NamespacedService({
+        path: { 
+          namespace,
+          name: resourceName
+        },
+        query: {
 
-          }
-        });
-        describeService(service);
-        break;
+        }
+      });
+      describeService(service);
+      break;
         
-      case 'deployment':
-        const deployment = await client.readAppsV1NamespacedDeployment({
-          path: { 
-            namespace,
-            name: resourceName
-          },
-          query: {
+    case 'deployment':
+      const deployment = await client.readAppsV1NamespacedDeployment({
+        path: { 
+          namespace,
+          name: resourceName
+        },
+        query: {
             
-          }
-        });
-        describeDeployment(deployment);
-        break;
+        }
+      });
+      describeDeployment(deployment);
+      break;
         
-      default:
-        console.log(chalk.yellow(`Resource type '${resourceType}' not implemented yet`));
+    default:
+      console.log(chalk.yellow(`Resource type '${resourceType}' not implemented yet`));
     }
   } catch (error) {
     console.error(chalk.red(`Error: ${error}`));

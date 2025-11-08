@@ -1,5 +1,6 @@
-import { POST } from '@/app/api/init/route';
 import { NextRequest } from 'next/server';
+
+import { POST } from '@/app/api/init/route';
 
 // Mock crypto module
 jest.mock('crypto', () => ({

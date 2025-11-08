@@ -1,4 +1,4 @@
-import { http, HttpResponse } from 'msw'
+import { http, HttpResponse } from 'msw';
 
 export const createPVsListData = () => [
   {
@@ -77,7 +77,7 @@ export const createPVsListData = () => [
       phase: 'Failed'
     }
   }
-]
+];
 
 export const createPVsList = () => {
   return http.get('/api/v1/persistentvolumes', () => {
@@ -85,32 +85,32 @@ export const createPVsList = () => {
       apiVersion: 'v1',
       kind: 'PersistentVolumeList',
       items: createPVsListData()
-    })
-  })
-}
+    });
+  });
+};
 
 export const createPVDelete = () => {
   return http.delete('/api/v1/persistentvolumes/:name', () => {
-    return HttpResponse.json({})
-  })
-}
+    return HttpResponse.json({});
+  });
+};
 
 export const createPVsListError = () => {
   return http.get('/api/v1/persistentvolumes', () => {
     return HttpResponse.json(
       { error: 'Server Error' },
       { status: 500 }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createPVsListSlow = () => {
   return http.get('/api/v1/persistentvolumes', async () => {
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 1000));
     return HttpResponse.json({
       apiVersion: 'v1',
       kind: 'PersistentVolumeList',
       items: createPVsListData()
-    })
-  })
-}
+    });
+  });
+};

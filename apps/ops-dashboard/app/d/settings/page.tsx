@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Settings, User, Key, Bell, Shield } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Bell, Key, Shield,User } from 'lucide-react';
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function SettingsPage() {
   return (
@@ -85,5 +85,5 @@ export default function SettingsPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

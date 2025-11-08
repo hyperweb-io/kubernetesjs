@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
-import { POST, DELETE } from '@/app/api/operators/[operator]/install/route';
+
+import { DELETE,POST } from '@/app/api/operators/[operator]/install/route';
 
 // Mock the dependencies
 jest.mock('@/k8s/client', () => ({

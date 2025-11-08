@@ -1,5 +1,5 @@
-import { http, HttpResponse } from 'msw'
-import type { RbacAuthorizationK8sIoV1Role as Role, RbacAuthorizationK8sIoV1ClusterRole as ClusterRole } from '@kubernetesjs/ops'
+import type { RbacAuthorizationK8sIoV1ClusterRole as ClusterRole,RbacAuthorizationK8sIoV1Role as Role } from '@kubernetesjs/ops';
+import { http, HttpResponse } from 'msw';
 
 export function createRolesListData(): Role[] {
   return [
@@ -59,7 +59,7 @@ export function createRolesListData(): Role[] {
         }
       ]
     }
-  ]
+  ];
 }
 
 export function createClusterRolesListData(): ClusterRole[] {
@@ -109,40 +109,40 @@ export function createClusterRolesListData(): ClusterRole[] {
         }
       ]
     }
-  ]
+  ];
 }
 
 export function createRoleDelete() {
   return http.delete('/apis/rbac.authorization.k8s.io/v1/namespaces/:namespace/roles/:name', () => {
-    return HttpResponse.json({})
-  })
+    return HttpResponse.json({});
+  });
 }
 
 export function createClusterRoleDelete() {
   return http.delete('/apis/rbac.authorization.k8s.io/v1/clusterroles/:name', () => {
-    return HttpResponse.json({})
-  })
+    return HttpResponse.json({});
+  });
 }
 
 export function createRolesList() {
   return http.get('/apis/rbac.authorization.k8s.io/v1/namespaces/:namespace/roles', ({ request }) => {
-    const url = new URL(request.url)
-    const namespace = url.pathname.split('/')[5]
+    const url = new URL(request.url);
+    const namespace = url.pathname.split('/')[5];
     
     if (namespace === 'default') {
       return HttpResponse.json({
         apiVersion: 'rbac.authorization.k8s.io/v1',
         kind: 'RoleList',
         items: createRolesListData().filter(role => role.metadata?.namespace === 'default')
-      })
+      });
     }
     
     return HttpResponse.json({
       apiVersion: 'rbac.authorization.k8s.io/v1',
       kind: 'RoleList',
       items: createRolesListData()
-    })
-  })
+    });
+  });
 }
 
 export function createAllRolesList() {
@@ -151,8 +151,8 @@ export function createAllRolesList() {
       apiVersion: 'rbac.authorization.k8s.io/v1',
       kind: 'RoleList',
       items: createRolesListData()
-    })
-  })
+    });
+  });
 }
 
 export function createClusterRolesList() {
@@ -161,14 +161,14 @@ export function createClusterRolesList() {
       apiVersion: 'rbac.authorization.k8s.io/v1',
       kind: 'ClusterRoleList',
       items: createClusterRolesListData()
-    })
-  })
+    });
+  });
 }
 
 export function createRolesListError() {
   return http.get('/apis/rbac.authorization.k8s.io/v1/namespaces/:namespace/roles', () => {
-    return HttpResponse.error()
-  })
+    return HttpResponse.error();
+  });
 }
 
 export function createRolesListSlow() {
@@ -179,8 +179,8 @@ export function createRolesListSlow() {
           apiVersion: 'rbac.authorization.k8s.io/v1',
           kind: 'RoleList',
           items: createRolesListData()
-        }))
-      }, 2000)
-    })
-  })
+        }));
+      }, 2000);
+    });
+  });
 }

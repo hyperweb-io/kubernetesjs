@@ -1,94 +1,92 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import type { ResourceQuota } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
+  AlertTriangle,
   CheckCircle,
-  AlertTriangle
-} from 'lucide-react'
-import { 
-  useListCoreV1NamespacedResourceQuotaQuery,
-  useListCoreV1ResourceQuotaForAllNamespacesQuery,
-  useDeleteCoreV1NamespacedResourceQuota
-} from '@/k8s'
-import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { ResourceQuota } from '@kubernetesjs/ops'
+  Eye,
+  Plus, 
+  RefreshCw, 
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePreferredNamespace } from '@/contexts/NamespaceContext';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { 
+  useDeleteCoreV1NamespacedResourceQuota,
+  useListCoreV1NamespacedResourceQuotaQuery,
+  useListCoreV1ResourceQuotaForAllNamespacesQuery} from '@/k8s';
 
 export function ResourceQuotasView() {
-  const [selectedQuota, setSelectedQuota] = useState<ResourceQuota | null>(null)
-  const { namespace } = usePreferredNamespace()
+  const [selectedQuota, setSelectedQuota] = useState<ResourceQuota | null>(null);
+  const { namespace } = usePreferredNamespace();
   
   const query = namespace === '_all' 
     ? useListCoreV1ResourceQuotaForAllNamespacesQuery({ query: {} })
-    : useListCoreV1NamespacedResourceQuotaQuery({ path: { namespace }, query: {} })
+    : useListCoreV1NamespacedResourceQuotaQuery({ path: { namespace }, query: {} });
     
-  const { data, isLoading, error, refetch } = query
-  const deleteQuota = useDeleteCoreV1NamespacedResourceQuota()
+  const { data, isLoading, error, refetch } = query;
+  const deleteQuota = useDeleteCoreV1NamespacedResourceQuota();
 
-  const quotas = data?.items || []
+  const quotas = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const handleDelete = async (quota: ResourceQuota) => {
-    const name = quota.metadata!.name!
-    const namespace = quota.metadata!.namespace!
+    const name = quota.metadata!.name!;
+    const namespace = quota.metadata!.namespace!;
     
     const confirmed = await confirmDialog({
       title: 'Delete Resource Quota',
       description: `Are you sure you want to delete ${name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteQuota.mutateAsync({
           path: { namespace, name },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete resource quota:', err)
-        alert(`Failed to delete resource quota: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete resource quota:', err);
+        alert(`Failed to delete resource quota: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getUsagePercentage = (used: string, hard: string) => {
-    const usedNum = parseInt(used) || 0
-    const hardNum = parseInt(hard) || 0
-    if (hardNum === 0) return 0
-    return Math.round((usedNum / hardNum) * 100)
-  }
+    const usedNum = parseInt(used) || 0;
+    const hardNum = parseInt(hard) || 0;
+    if (hardNum === 0) return 0;
+    return Math.round((usedNum / hardNum) * 100);
+  };
 
   const getUsageBadge = (percentage: number) => {
     if (percentage >= 90) {
       return <Badge variant="destructive" className="flex items-center gap-1">
         <AlertCircle className="w-3 h-3" />
         {percentage}%
-      </Badge>
+      </Badge>;
     } else if (percentage >= 75) {
       return <Badge variant="warning" className="flex items-center gap-1">
         <AlertTriangle className="w-3 h-3" />
         {percentage}%
-      </Badge>
+      </Badge>;
     } else {
       return <Badge variant="success" className="flex items-center gap-1">
         <CheckCircle className="w-3 h-3" />
         {percentage}%
-      </Badge>
+      </Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -141,11 +139,11 @@ export function ResourceQuotasView() {
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">
               {quotas.filter(q => {
-                const used = q.status?.used || {}
-                const hard = q.status?.hard || {}
+                const used = q.status?.used || {};
+                const hard = q.status?.hard || {};
                 return Object.keys(hard).some((key) =>
                   getUsagePercentage(String(used[key] ?? '0'), String(hard[key] ?? '0')) >= 75
-                )
+                );
               }).length}
             </div>
           </CardContent>
@@ -196,9 +194,9 @@ export function ResourceQuotasView() {
               </TableHeader>
               <TableBody>
                 {quotas.map((quota) => {
-                  const hard = quota.status?.hard || {}
-                  const used = quota.status?.used || {}
-                  const resources = Object.keys(hard)
+                  const hard = quota.status?.hard || {};
+                  const used = quota.status?.used || {};
+                  const resources = Object.keys(hard);
                   
                   return resources.map((resource, idx) => (
                     <TableRow key={`${quota.metadata?.namespace}/${quota.metadata?.name}/${resource}`}>
@@ -245,7 +243,7 @@ export function ResourceQuotasView() {
                         </TableCell>
                       )}
                     </TableRow>
-                  ))
+                  ));
                 })}
               </TableBody>
             </Table>
@@ -253,5 +251,5 @@ export function ResourceQuotasView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

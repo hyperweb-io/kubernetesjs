@@ -1,16 +1,13 @@
 import userEvent from '@testing-library/user-event';
-import { render, screen, waitFor, fireEvent } from '@/__tests__/utils/test-utils';
-import { server } from '@/__mocks__/server';
+
 import { 
-  createSecretsList, 
-  createSecretsListError,
   createAllSecretsList,
-  deleteSecretHandler,
+  createSecretsList,
+  createSecretsListError,
   deleteSecretErrorHandler,
-  createSecretHandler,
-  createSecretErrorHandler,
-  createSecretsListData
-} from '@/__mocks__/handlers/secrets';
+  deleteSecretHandler} from '@/__mocks__/handlers/secrets';
+import { server } from '@/__mocks__/server';
+import { fireEvent,render, screen, waitFor } from '@/__tests__/utils/test-utils';
 
 // Mock window.alert for testing
 const mockAlert = jest.spyOn(window, 'alert').mockImplementation(() => {});

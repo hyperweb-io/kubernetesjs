@@ -1,8 +1,9 @@
-'use client'
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Zap, Plus, Activity, Clock, TrendingUp } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Activity, Clock, Plus, TrendingUp,Zap } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function FunctionsPage() {
   return (
@@ -81,5 +82,5 @@ export default function FunctionsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,20 +1,19 @@
-import { render, screen, waitFor, fireEvent, act } from '../../utils/test-utils';
 import userEvent from '@testing-library/user-event';
-import { server } from '@/__mocks__/server';
-import { 
-  createConfigMapsList, 
-  createConfigMapsListError,
-  createConfigMapsListSlow,
-  createConfigMapsListData,
-  createConfigMapUpdate,
-  createConfigMapUpdateError,
-  createConfigMapDelete,
-  createConfigMapDeleteError
-} from '@/__mocks__/handlers/configmaps';
 import { http, HttpResponse } from 'msw';
 
+import { 
+  createConfigMapDelete,
+  createConfigMapDeleteError,
+  createConfigMapsList,
+  createConfigMapsListError,
+  createConfigMapsListSlow,
+  createConfigMapUpdate,
+  createConfigMapUpdateError} from '@/__mocks__/handlers/configmaps';
+import { server } from '@/__mocks__/server';
 // Import the component
 import { ConfigMapsView } from '@/components/resources/configmaps';
+
+import {fireEvent, render, screen, waitFor } from '../../utils/test-utils';
 
 // Mock window.alert for testing error messages
 const mockAlert = jest.spyOn(window, 'alert').mockImplementation(() => {});

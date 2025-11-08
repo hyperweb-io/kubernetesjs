@@ -1,15 +1,15 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { render } from '../../../utils/test-utils';
-import { server } from '@/__mocks__/server';
+
 import { 
-  createDatabaseStatus, 
-  createDatabaseStatusError,
   createBackupsList,
-  createCreateBackup
-} from '@/__mocks__/handlers/databases';
+  createDatabaseStatus, 
+  createDatabaseStatusError} from '@/__mocks__/handlers/databases';
+import { server } from '@/__mocks__/server';
 import DatabasesPage from '@/app/admin/databases/page';
 import { DatabaseStatusSummary } from '@/hooks/use-database-status';
+
+import { render } from '../../../utils/test-utils';
 
 describe('DatabasesPage', () => {
   const mockDatabaseStatus: DatabaseStatusSummary = {

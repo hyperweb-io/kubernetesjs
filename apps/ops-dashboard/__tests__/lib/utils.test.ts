@@ -1,16 +1,16 @@
 import {
   cn,
-  isExternalImage,
-  truncateString,
-  getCookie,
-  isMacOS,
-  safeJSONParse,
   formatBytes,
   formatDuration,
   formatRelativeTime,
+  getCookie,
+  isExternalImage,
+  isMacOS,
+  parseResourceQuantity,
+  safeJSONParse,
+  truncateString,
   validateKubernetesName,
   validateNamespace,
-  parseResourceQuantity,
 } from '@/lib/utils';
 
 // Mock document for getCookie tests

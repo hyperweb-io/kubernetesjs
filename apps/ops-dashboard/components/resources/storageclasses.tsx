@@ -1,84 +1,82 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type StorageK8sIoV1StorageClass as StorageClass } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
-  Database,
-  Zap,
   Archive,
-  HardDrive
-} from 'lucide-react'
-import { 
-  useListStorageV1StorageClassQuery,
-  useDeleteStorageV1StorageClass
-} from '@/k8s'
-import { type StorageK8sIoV1StorageClass as StorageClass } from '@kubernetesjs/ops'
+  Database,
+  Eye,
+  HardDrive,
+  Plus, 
+  RefreshCw, 
+  Trash2, 
+  Zap} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { 
+  useDeleteStorageV1StorageClass,
+  useListStorageV1StorageClassQuery} from '@/k8s';
 
 export function StorageClassesView() {
-  const [selectedClass, setSelectedClass] = useState<StorageClass | null>(null)
+  const [selectedClass, setSelectedClass] = useState<StorageClass | null>(null);
   
-  const { data, isLoading, error, refetch } = useListStorageV1StorageClassQuery({ query: {} })
-  const deleteClass = useDeleteStorageV1StorageClass()
+  const { data, isLoading, error, refetch } = useListStorageV1StorageClassQuery({ query: {} });
+  const deleteClass = useDeleteStorageV1StorageClass();
 
-  const storageClasses = data?.items || []
+  const storageClasses = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const handleDelete = async (sc: StorageClass) => {
-    const name = sc.metadata!.name!
+    const name = sc.metadata!.name!;
     
     const confirmed = await confirmDialog({
       title: 'Delete Storage Class',
       description: `Are you sure you want to delete ${name}? PVs using this class won't be affected.`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteClass.mutateAsync({
           path: { name },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete storage class:', err)
-        alert(`Failed to delete storage class: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete storage class:', err);
+        alert(`Failed to delete storage class: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getProvisioner = (sc: StorageClass): string => {
-    return sc.provisioner || 'Unknown'
-  }
+    return sc.provisioner || 'Unknown';
+  };
 
   const getReclaimPolicy = (sc: StorageClass): string => {
-    return sc.reclaimPolicy || 'Delete'
-  }
+    return sc.reclaimPolicy || 'Delete';
+  };
 
   const getVolumeBindingMode = (sc: StorageClass): string => {
-    return sc.volumeBindingMode || 'Immediate'
-  }
+    return sc.volumeBindingMode || 'Immediate';
+  };
 
   const isDefaultClass = (sc: StorageClass): boolean => {
-    const annotations = sc.metadata?.annotations || {}
+    const annotations = sc.metadata?.annotations || {};
     return annotations['storageclass.kubernetes.io/is-default-class'] === 'true' ||
-           annotations['storageclass.beta.kubernetes.io/is-default-class'] === 'true'
-  }
+           annotations['storageclass.beta.kubernetes.io/is-default-class'] === 'true';
+  };
 
   const getAllowVolumeExpansion = (sc: StorageClass): boolean => {
-    return sc.allowVolumeExpansion === true
-  }
+    return sc.allowVolumeExpansion === true;
+  };
 
   const getProvisionerBadge = (provisioner: string) => {
     // Common provisioners
@@ -86,30 +84,30 @@ export function StorageClassesView() {
       return <Badge variant="default" className="flex items-center gap-1">
         <Database className="w-3 h-3" />
         AWS EBS
-      </Badge>
+      </Badge>;
     } else if (provisioner.includes('azure-disk')) {
       return <Badge variant="default" className="flex items-center gap-1">
         <Database className="w-3 h-3" />
         Azure Disk
-      </Badge>
+      </Badge>;
     } else if (provisioner.includes('gce-pd')) {
       return <Badge variant="default" className="flex items-center gap-1">
         <Database className="w-3 h-3" />
         GCE PD
-      </Badge>
+      </Badge>;
     } else if (provisioner.includes('nfs')) {
       return <Badge variant="secondary" className="flex items-center gap-1">
         <Archive className="w-3 h-3" />
         NFS
-      </Badge>
+      </Badge>;
     } else if (provisioner.includes('local')) {
       return <Badge variant="outline" className="flex items-center gap-1">
         <HardDrive className="w-3 h-3" />
         Local
-      </Badge>
+      </Badge>;
     }
-    return <Badge variant="secondary">{provisioner}</Badge>
-  }
+    return <Badge variant="secondary">{provisioner}</Badge>;
+  };
 
   return (
     <div className="space-y-6">
@@ -277,5 +275,5 @@ export function StorageClassesView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

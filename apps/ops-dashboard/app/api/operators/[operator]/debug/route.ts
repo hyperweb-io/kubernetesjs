@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+
 import { createSetupClient } from '@/k8s/client';
 
 export const dynamic = 'force-dynamic';

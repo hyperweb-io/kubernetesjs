@@ -1,4 +1,3 @@
-import userEvent from '@testing-library/user-event';
 import { ContextSwitcher } from '../../components/context-switcher';
 import { render, screen } from '../utils/test-utils';
 

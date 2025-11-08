@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+
 import { DashboardLayout } from './dashboard-layout';
 
 interface AdaptiveLayoutProps {

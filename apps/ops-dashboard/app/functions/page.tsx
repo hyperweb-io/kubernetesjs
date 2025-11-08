@@ -1,7 +1,8 @@
-'use client'
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Zap } from 'lucide-react'
+import { Zap } from 'lucide-react';
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function FunctionsPage() {
   return (
@@ -34,5 +35,5 @@ export default function FunctionsPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

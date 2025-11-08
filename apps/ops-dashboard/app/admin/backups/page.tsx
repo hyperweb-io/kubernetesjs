@@ -1,32 +1,33 @@
-'use client'
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { useQueryBackups } from "@/hooks/useDatabases";
-import { RefreshCw, Plus, AlertCircle, Table, Eye, Terminal, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { AlertCircle, Eye, RefreshCw, Table, Terminal, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription,CardHeader, CardTitle } from '@/components/ui/card';
+import { TableBody, TableCell,TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useQueryBackups } from '@/hooks/useDatabases';
 
 
 export default function AdminBackupView() {
-  const namespace = 'postgres-db'
+  const namespace = 'postgres-db';
 
-  const { data, isLoading ,error, refetch } = useQueryBackups(namespace, 'postgres-cluster')
+  const { data, isLoading ,error, refetch } = useQueryBackups(namespace, 'postgres-cluster');
   const handleRefresh = () => {
-    refetch()
-  }
+    refetch();
+  };
 
-  const backups = data?.backups || []
+  const backups = data?.backups || [];
 
-  const [selectedBackup, setSelectedBackup] = useState<any | null>(null)
+  const [selectedBackup, setSelectedBackup] = useState<any | null>(null);
 
   const handleViewLogs = (backup: any) => {
-    console.log(backup)
-  }
+    console.log(backup);
+  };
 
   const handleDelete = (backup: any) => {
-    console.log(backup)
-  }
+    console.log(backup);
+  };
 
   return (
     <div className="space-y-6">
@@ -193,5 +194,5 @@ export default function AdminBackupView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

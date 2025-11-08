@@ -1,5 +1,5 @@
-import { ServiceAccountsView } from '@/components/resources/serviceaccounts'
+import { ServiceAccountsView } from '@/components/resources/serviceaccounts';
 
 export default function ServiceAccountsPage() {
-  return <ServiceAccountsView />
+  return <ServiceAccountsView />;
 }

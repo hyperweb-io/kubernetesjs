@@ -1,128 +1,127 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import type { ServiceAccount } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
   Bot,
+  Eye,
   Key,
   Lock,
+  Plus, 
+  RefreshCw, 
+  Trash2, 
   Unlock
-} from 'lucide-react'
-import { 
-  useListCoreV1NamespacedServiceAccountQuery,
-  useListCoreV1ServiceAccountForAllNamespacesQuery,
-  useDeleteCoreV1NamespacedServiceAccount
-} from '@/k8s'
-import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { ServiceAccount } from '@kubernetesjs/ops'
+} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePreferredNamespace } from '@/contexts/NamespaceContext';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { 
+  useDeleteCoreV1NamespacedServiceAccount,
+  useListCoreV1NamespacedServiceAccountQuery,
+  useListCoreV1ServiceAccountForAllNamespacesQuery} from '@/k8s';
 
 export function ServiceAccountsView() {
-  const [selectedAccount, setSelectedAccount] = useState<ServiceAccount | null>(null)
-  const { namespace } = usePreferredNamespace()
+  const [selectedAccount, setSelectedAccount] = useState<ServiceAccount | null>(null);
+  const { namespace } = usePreferredNamespace();
   
   const query = namespace === '_all' 
     ? useListCoreV1ServiceAccountForAllNamespacesQuery({ query: {} })
-    : useListCoreV1NamespacedServiceAccountQuery({ path: { namespace }, query: {} })
+    : useListCoreV1NamespacedServiceAccountQuery({ path: { namespace }, query: {} });
     
-  const { data, isLoading, error, refetch } = query
-  const deleteAccount = useDeleteCoreV1NamespacedServiceAccount()
+  const { data, isLoading, error, refetch } = query;
+  const deleteAccount = useDeleteCoreV1NamespacedServiceAccount();
 
-  const accounts = data?.items || []
+  const accounts = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const handleDelete = async (account: ServiceAccount) => {
-    const name = account.metadata!.name!
-    const namespace = account.metadata!.namespace!
+    const name = account.metadata!.name!;
+    const namespace = account.metadata!.namespace!;
     
     const confirmed = await confirmDialog({
       title: 'Delete Service Account',
       description: `Are you sure you want to delete ${name}? This may affect pods using this service account.`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteAccount.mutateAsync({
           path: { namespace, name },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete service account:', err)
-        alert(`Failed to delete service account: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete service account:', err);
+        alert(`Failed to delete service account: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getSecretCount = (account: ServiceAccount): number => {
-    return account.secrets?.length || 0
-  }
+    return account.secrets?.length || 0;
+  };
 
   const getImagePullSecrets = (account: ServiceAccount): number => {
-    return account.imagePullSecrets?.length || 0
-  }
+    return account.imagePullSecrets?.length || 0;
+  };
 
   const hasAutomountToken = (account: ServiceAccount): boolean => {
-    return account.automountServiceAccountToken !== false
-  }
+    return account.automountServiceAccountToken !== false;
+  };
 
   const isDefaultAccount = (account: ServiceAccount): boolean => {
-    return account.metadata?.name === 'default'
-  }
+    return account.metadata?.name === 'default';
+  };
 
   const isSystemAccount = (account: ServiceAccount): boolean => {
-    const name = account.metadata?.name || ''
-    const namespace = account.metadata?.namespace || ''
+    const name = account.metadata?.name || '';
+    const namespace = account.metadata?.namespace || '';
     return namespace.startsWith('kube-') || 
            name.startsWith('system:') ||
            name.includes('controller') ||
-           name.includes('operator')
-  }
+           name.includes('operator');
+  };
 
   const getSecretNames = (account: ServiceAccount): string => {
-    const secrets = account.secrets || []
-    if (secrets.length === 0) return 'None'
-    if (secrets.length === 1) return secrets[0].name || 'Unknown'
-    return `${secrets.length} secrets`
-  }
+    const secrets = account.secrets || [];
+    if (secrets.length === 0) return 'None';
+    if (secrets.length === 1) return secrets[0].name || 'Unknown';
+    return `${secrets.length} secrets`;
+  };
 
   const getAccountType = (account: ServiceAccount) => {
-    if (isDefaultAccount(account)) return 'Default'
-    if (isSystemAccount(account)) return 'System'
-    return 'User'
-  }
+    if (isDefaultAccount(account)) return 'Default';
+    if (isSystemAccount(account)) return 'System';
+    return 'User';
+  };
 
   const getAccountBadge = (type: string) => {
     switch (type) {
-      case 'Default':
-        return <Badge variant="secondary" className="flex items-center gap-1">
-          <Bot className="w-3 h-3" />
-          {type}
-        </Badge>
-      case 'System':
-        return <Badge variant="outline" className="flex items-center gap-1">
-          <Bot className="w-3 h-3" />
-          {type}
-        </Badge>
-      default:
-        return <Badge variant="default" className="flex items-center gap-1">
-          <Bot className="w-3 h-3" />
-          {type}
-        </Badge>
+    case 'Default':
+      return <Badge variant="secondary" className="flex items-center gap-1">
+        <Bot className="w-3 h-3" />
+        {type}
+      </Badge>;
+    case 'System':
+      return <Badge variant="outline" className="flex items-center gap-1">
+        <Bot className="w-3 h-3" />
+        {type}
+      </Badge>;
+    default:
+      return <Badge variant="default" className="flex items-center gap-1">
+        <Bot className="w-3 h-3" />
+        {type}
+      </Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -235,9 +234,9 @@ export function ServiceAccountsView() {
               </TableHeader>
               <TableBody>
                 {accounts.map((account) => {
-                  const accountType = getAccountType(account)
-                  const isSystem = accountType === 'System'
-                  const isDefault = accountType === 'Default'
+                  const accountType = getAccountType(account);
+                  const isSystem = accountType === 'System';
+                  const isDefault = accountType === 'Default';
                   
                   return (
                     <TableRow key={`${account.metadata?.namespace}/${account.metadata?.name}`}>
@@ -296,7 +295,7 @@ export function ServiceAccountsView() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  )
+                  );
                 })}
               </TableBody>
             </Table>
@@ -304,5 +303,5 @@ export function ServiceAccountsView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

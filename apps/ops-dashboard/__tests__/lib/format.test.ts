@@ -1,13 +1,13 @@
 import {
-  trimPath,
-  formatDuration,
-  getTotalDuration,
-  formatBlogDate,
-  getFilenameFromPath,
-  capitalToKebabCase,
-  getChildrenString,
-  getHeadingId,
   capitalize,
+  capitalToKebabCase,
+  formatBlogDate,
+  formatDuration,
+  getChildrenString,
+  getFilenameFromPath,
+  getHeadingId,
+  getTotalDuration,
+  trimPath,
 } from '@/lib/format';
 
 // Mock dayjs

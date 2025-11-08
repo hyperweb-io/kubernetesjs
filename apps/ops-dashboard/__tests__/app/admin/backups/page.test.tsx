@@ -1,10 +1,11 @@
-import React from 'react';
-import { render, screen, waitFor, act } from '@/__tests__/utils/test-utils';
 import userEvent from '@testing-library/user-event';
-import { server } from '@/__mocks__/server';
 import { http, HttpResponse } from 'msw';
+import React from 'react';
+
+import { BackupInfo } from '@/__mocks__/handlers/backups';
+import { server } from '@/__mocks__/server';
+import {render, screen, waitFor } from '@/__tests__/utils/test-utils';
 import AdminBackupView from '@/app/admin/backups/page';
-import { createBackupsList, createBackupsListError, createBackupsListNetworkError, createBackupsListData, BackupInfo } from '@/__mocks__/handlers/backups';
 
 // Mock data factory
 const createMockBackup = (overrides: Partial<BackupInfo> = {}): BackupInfo => ({

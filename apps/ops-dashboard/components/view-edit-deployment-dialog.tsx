@@ -1,15 +1,16 @@
-'use client'
+'use client';
 
-import React, { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { YAMLEditor } from '@/components/yaml-editor'
-import { AlertCircle, Eye, Edit } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import yaml from 'js-yaml'
-import { useReadAppsV1NamespacedDeploymentQuery } from '@/k8s'
-import type { AppsV1Deployment as Deployment } from '@kubernetesjs/ops'
+import type { AppsV1Deployment as Deployment } from '@kubernetesjs/ops';
+import yaml from 'js-yaml';
+import { AlertCircle, Edit,Eye } from 'lucide-react';
+import React, { useEffect,useState } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter,DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { YAMLEditor } from '@/components/yaml-editor';
+import { useReadAppsV1NamespacedDeploymentQuery } from '@/k8s';
 
 interface ViewEditDeploymentDialogProps {
   deployment: Deployment | null
@@ -26,10 +27,10 @@ export function ViewEditDeploymentDialog({
   mode: initialMode,
   onSubmit 
 }: ViewEditDeploymentDialogProps) {
-  const [mode, setMode] = useState<'view' | 'edit'>(initialMode)
-  const [yamlContent, setYamlContent] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [mode, setMode] = useState<'view' | 'edit'>(initialMode);
+  const [yamlContent, setYamlContent] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Use React Query hook to fetch deployment data
   const deploymentQuery = useReadAppsV1NamespacedDeploymentQuery({
@@ -38,10 +39,10 @@ export function ViewEditDeploymentDialog({
       name: deployment?.metadata?.name
     },
     query: {}
-  })
+  });
 
-  const isLoading = deploymentQuery.isLoading
-  const queryError = deploymentQuery.error
+  const isLoading = deploymentQuery.isLoading;
+  const queryError = deploymentQuery.error;
 
   // Convert deployment data to YAML when it's loaded
   useEffect(() => {
@@ -51,60 +52,60 @@ export function ViewEditDeploymentDialog({
           skipInvalid: true,
           noRefs: true,
           sortKeys: false
-        })
-        setYamlContent(yamlStr)
-        setError(null)
+        });
+        setYamlContent(yamlStr);
+        setError(null);
       } catch (err) {
-        console.error('Failed to convert deployment to YAML:', err)
-        setError('Failed to convert deployment data to YAML')
+        console.error('Failed to convert deployment to YAML:', err);
+        setError('Failed to convert deployment data to YAML');
       }
     }
-  }, [deploymentQuery.data, open])
+  }, [deploymentQuery.data, open]);
 
   // Handle query errors
   useEffect(() => {
     if (queryError && open) {
-      console.error('Failed to fetch deployment:', queryError)
-      setError('Failed to load deployment data')
+      console.error('Failed to fetch deployment:', queryError);
+      setError('Failed to load deployment data');
     }
-  }, [queryError, open])
+  }, [queryError, open]);
 
   useEffect(() => {
-    setMode(initialMode)
-  }, [initialMode])
+    setMode(initialMode);
+  }, [initialMode]);
 
   const handleSubmit = async () => {
-    if (!onSubmit || mode !== 'edit') return
+    if (!onSubmit || mode !== 'edit') return;
     
-    setError(null)
-    setIsSubmitting(true)
+    setError(null);
+    setIsSubmitting(true);
     
     try {
       // Basic YAML validation
       if (!yamlContent.trim()) {
-        throw new Error('YAML content cannot be empty')
+        throw new Error('YAML content cannot be empty');
       }
       
       // Validate YAML syntax
-      yaml.load(yamlContent)
+      yaml.load(yamlContent);
       
-      await onSubmit(yamlContent)
-      onOpenChange(false)
+      await onSubmit(yamlContent);
+      onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update deployment')
+      setError(err instanceof Error ? err.message : 'Failed to update deployment');
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    setError(null)
-    onOpenChange(false)
-  }
+    setError(null);
+    onOpenChange(false);
+  };
 
-  if (!deployment) return null
+  if (!deployment) return null;
 
-  const deploymentName = deployment.metadata?.name || 'Unknown'
+  const deploymentName = deployment.metadata?.name || 'Unknown';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -180,5 +181,5 @@ export function ViewEditDeploymentDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

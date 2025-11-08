@@ -1,5 +1,5 @@
-import { http, HttpResponse } from 'msw'
-import type { ServiceAccount } from '@kubernetesjs/ops'
+import type { ServiceAccount } from '@kubernetesjs/ops';
+import { http, HttpResponse } from 'msw';
 
 export function createServiceAccountsListData(): ServiceAccount[] {
   return [
@@ -76,34 +76,34 @@ export function createServiceAccountsListData(): ServiceAccount[] {
       ],
       automountServiceAccountToken: true
     }
-  ]
+  ];
 }
 
 export function createServiceAccountDelete() {
   return http.delete('/api/v1/namespaces/:namespace/serviceaccounts/:name', () => {
-    return HttpResponse.json({})
-  })
+    return HttpResponse.json({});
+  });
 }
 
 export function createServiceAccountsList() {
   return http.get('/api/v1/namespaces/:namespace/serviceaccounts', ({ request }) => {
-    const url = new URL(request.url)
-    const namespace = url.pathname.split('/')[4]
+    const url = new URL(request.url);
+    const namespace = url.pathname.split('/')[4];
     
     if (namespace === 'default') {
       return HttpResponse.json({
         apiVersion: 'v1',
         kind: 'ServiceAccountList',
         items: createServiceAccountsListData().filter(sa => sa.metadata?.namespace === 'default')
-      })
+      });
     }
     
     return HttpResponse.json({
       apiVersion: 'v1',
       kind: 'ServiceAccountList',
       items: createServiceAccountsListData()
-    })
-  })
+    });
+  });
 }
 
 export function createAllServiceAccountsList() {
@@ -112,14 +112,14 @@ export function createAllServiceAccountsList() {
       apiVersion: 'v1',
       kind: 'ServiceAccountList',
       items: createServiceAccountsListData()
-    })
-  })
+    });
+  });
 }
 
 export function createServiceAccountsListError() {
   return http.get('/api/v1/namespaces/:namespace/serviceaccounts', () => {
-    return HttpResponse.error()
-  })
+    return HttpResponse.error();
+  });
 }
 
 export function createServiceAccountsListSlow() {
@@ -130,8 +130,8 @@ export function createServiceAccountsListSlow() {
           apiVersion: 'v1',
           kind: 'ServiceAccountList',
           items: createServiceAccountsListData()
-        }))
-      }, 2000)
-    })
-  })
+        }));
+      }, 2000);
+    });
+  });
 }

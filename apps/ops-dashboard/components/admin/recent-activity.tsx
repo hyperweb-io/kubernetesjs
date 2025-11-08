@@ -1,8 +1,9 @@
 'use client';
 
+import { AlertCircle, CheckCircle, Clock, XCircle } from 'lucide-react';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatRelativeTime } from '@/lib/utils';
-import { Clock, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
 
 // Mock data for now - in a real implementation, this would come from Kubernetes events
 const mockActivities = [

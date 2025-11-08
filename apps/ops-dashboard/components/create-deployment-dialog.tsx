@@ -1,11 +1,12 @@
-'use client'
+'use client';
 
-import React, { useState } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { YAMLEditor } from '@/components/yaml-editor'
-import { AlertCircle } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter,DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { YAMLEditor } from '@/components/yaml-editor';
 
 interface CreateDeploymentDialogProps {
   open: boolean
@@ -40,40 +41,40 @@ spec:
             memory: "128Mi"
           requests:
             cpu: "50m"
-            memory: "64Mi"`
+            memory: "64Mi"`;
 
 export function CreateDeploymentDialog({ open, onOpenChange, onSubmit }: CreateDeploymentDialogProps) {
-  const [yaml, setYaml] = useState(DEFAULT_DEPLOYMENT_TEMPLATE)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [yaml, setYaml] = useState(DEFAULT_DEPLOYMENT_TEMPLATE);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
-    setError(null)
-    setIsSubmitting(true)
+    setError(null);
+    setIsSubmitting(true);
     
     try {
       // Basic YAML validation
       if (!yaml.trim()) {
-        throw new Error('YAML content cannot be empty')
+        throw new Error('YAML content cannot be empty');
       }
       
-      await onSubmit(yaml)
-      onOpenChange(false)
+      await onSubmit(yaml);
+      onOpenChange(false);
       // Reset to template for next time
-      setYaml(DEFAULT_DEPLOYMENT_TEMPLATE)
+      setYaml(DEFAULT_DEPLOYMENT_TEMPLATE);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create deployment')
+      setError(err instanceof Error ? err.message : 'Failed to create deployment');
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    setError(null)
-    onOpenChange(false)
+    setError(null);
+    onOpenChange(false);
     // Reset to template
-    setYaml(DEFAULT_DEPLOYMENT_TEMPLATE)
-  }
+    setYaml(DEFAULT_DEPLOYMENT_TEMPLATE);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -110,5 +111,5 @@ export function CreateDeploymentDialog({ open, onOpenChange, onSubmit }: CreateD
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

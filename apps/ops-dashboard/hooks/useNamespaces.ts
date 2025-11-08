@@ -1,24 +1,24 @@
+
 import {
-  useListCoreV1NamespaceQuery,
-  useReadCoreV1NamespaceQuery,
   useCreateCoreV1Namespace,
   useDeleteCoreV1Namespace,
-} from '../k8s/index'
-import type { Namespace, NamespaceList } from '@kubernetesjs/ops'
+  useListCoreV1NamespaceQuery,
+  useReadCoreV1NamespaceQuery,
+} from '../k8s/index';
 
 // Query keys
-const NAMESPACES_KEY = ['namespaces'] as const
+const NAMESPACES_KEY = ['namespaces'] as const;
 
 export function useNamespaces() {
-  return useListCoreV1NamespaceQuery({ query: {} })
+  return useListCoreV1NamespaceQuery({ query: {} });
 }
 
 export function useNamespace(name: string) {
-  return useReadCoreV1NamespaceQuery({ path: { name }, query: {} })
+  return useReadCoreV1NamespaceQuery({ path: { name }, query: {} });
 }
 
 export function useCreateNamespace() {
-  const base = useCreateCoreV1Namespace()
+  const base = useCreateCoreV1Namespace();
   return {
     ...base,
     mutate: (
@@ -51,11 +51,11 @@ export function useCreateNamespace() {
         },
         opts
       ),
-  }
+  };
 }
 
 export function useDeleteNamespace() {
-  const base = useDeleteCoreV1Namespace()
+  const base = useDeleteCoreV1Namespace();
   return {
     ...base,
     mutate: (name: string, opts?: Parameters<typeof base.mutate>[1]) =>
@@ -68,5 +68,5 @@ export function useDeleteNamespace() {
         { path: { name }, query: {} },
         opts
       ),
-  }
+  };
 }

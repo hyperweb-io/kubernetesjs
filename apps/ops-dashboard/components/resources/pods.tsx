@@ -1,26 +1,26 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type Pod as K8sPod } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
-  Terminal,
   AlertCircle,
   CheckCircle,
   Clock,
+  Eye,
+  Plus, 
+  RefreshCw, 
+  Terminal,
+  Trash2, 
   XCircle
-} from 'lucide-react'
-import { type Pod as K8sPod } from '@kubernetesjs/ops'
-import { usePods, useDeletePod, usePodLogs } from '@/hooks'
+} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
-import { usePreferredNamespace } from '@/contexts/NamespaceContext'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePreferredNamespace } from '@/contexts/NamespaceContext';
+import { useDeletePod,usePods } from '@/hooks';
+import { confirmDialog } from '@/hooks/useConfirm';
 
 interface Pod {
   name: string
@@ -34,29 +34,29 @@ interface Pod {
 }
 
 export function PodsView({ namespace:defaultNamespace }: { namespace?: string }) {
-  const [selectedPod, setSelectedPod] = useState<Pod | null>(null)
+  const [selectedPod, setSelectedPod] = useState<Pod | null>(null);
   
   // Use TanStack Query hooks
-  const { namespace } = usePreferredNamespace()
-  const { data, isLoading, error, refetch } = usePods(defaultNamespace)
-  const deletePodMutation = useDeletePod()
+  const { namespace } = usePreferredNamespace();
+  const { data, isLoading, error, refetch } = usePods(defaultNamespace);
+  const deletePodMutation = useDeletePod();
   
   // Helper function to determine pod status
   function determinePodStatus(pod: K8sPod): Pod['status'] {
-    const phase = pod.status?.phase
-    if (phase === 'Running') return 'Running'
-    if (phase === 'Pending') return 'Pending'
-    if (phase === 'Failed') return 'Failed'
-    if (phase === 'Succeeded') return 'Succeeded'
-    return 'Unknown'
+    const phase = pod.status?.phase;
+    if (phase === 'Running') return 'Running';
+    if (phase === 'Pending') return 'Pending';
+    if (phase === 'Failed') return 'Failed';
+    if (phase === 'Succeeded') return 'Succeeded';
+    return 'Unknown';
   }
   
   // Format pods from query data
   const pods: Pod[] = data?.items?.map(item => {
-    const containerStatuses = item.status?.containerStatuses || []
-    const readyContainers = containerStatuses.filter(cs => cs.ready).length
-    const totalContainers = containerStatuses.length
-    const totalRestarts = containerStatuses.reduce((sum, cs) => sum + (cs.restartCount || 0), 0)
+    const containerStatuses = item.status?.containerStatuses || [];
+    const readyContainers = containerStatuses.filter(cs => cs.ready).length;
+    const totalContainers = containerStatuses.length;
+    const totalRestarts = containerStatuses.reduce((sum, cs) => sum + (cs.restartCount || 0), 0);
     
     return {
       name: item.metadata!.name!,
@@ -67,12 +67,12 @@ export function PodsView({ namespace:defaultNamespace }: { namespace?: string })
       age: getAge(item.metadata!.creationTimestamp!),
       nodeName: item.spec?.nodeName || 'unassigned',
       k8sData: item
-    }
-  }) || []
+    };
+  }) || [];
 
   const handleRefresh = () => {
-    refetch()
-  }
+    refetch();
+  };
 
   const handleDelete = async (pod: Pod) => {
     const confirmed = await confirmDialog({
@@ -80,65 +80,65 @@ export function PodsView({ namespace:defaultNamespace }: { namespace?: string })
       description: `Are you sure you want to delete pod ${pod.name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deletePodMutation.mutateAsync({
           name: pod.name,
           namespace: pod.namespace
-        })
+        });
       } catch (err) {
-        console.error('Failed to delete pod:', err)
-        alert(`Failed to delete pod: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete pod:', err);
+        alert(`Failed to delete pod: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const handleViewLogs = (pod: Pod) => {
     // This would open a logs viewer - for now just alert
-    alert(`View logs functionality for ${pod.name} coming soon!\n\nUse kubectl for now:\nkubectl logs ${pod.name} -n ${pod.namespace}`)
-  }
+    alert(`View logs functionality for ${pod.name} coming soon!\n\nUse kubectl for now:\nkubectl logs ${pod.name} -n ${pod.namespace}`);
+  };
 
   const getStatusBadge = (status: Pod['status']) => {
     switch (status) {
-      case 'Running':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'Pending':
-        return <Badge variant="warning" className="flex items-center gap-1">
-          <Clock className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'Failed':
-        return <Badge variant="destructive" className="flex items-center gap-1">
-          <XCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'Succeeded':
-        return <Badge variant="secondary" className="flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      default:
-        return <Badge variant="outline">{status}</Badge>
+    case 'Running':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <CheckCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'Pending':
+      return <Badge variant="warning" className="flex items-center gap-1">
+        <Clock className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'Failed':
+      return <Badge variant="destructive" className="flex items-center gap-1">
+        <XCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'Succeeded':
+      return <Badge variant="secondary" className="flex items-center gap-1">
+        <CheckCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    default:
+      return <Badge variant="outline">{status}</Badge>;
     }
-  }
+  };
 
   function getAge(timestamp: string): string {
-    const created = new Date(timestamp)
-    const now = new Date()
-    const diff = now.getTime() - created.getTime()
+    const created = new Date(timestamp);
+    const now = new Date();
+    const diff = now.getTime() - created.getTime();
     
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     
-    if (days > 0) return `${days}d${hours}h`
-    if (hours > 0) return `${hours}h${minutes}m`
-    return `${minutes}m`
+    if (days > 0) return `${days}d${hours}h`;
+    if (hours > 0) return `${hours}h${minutes}m`;
+    return `${minutes}m`;
   }
 
   return (
@@ -308,5 +308,5 @@ export function PodsView({ namespace:defaultNamespace }: { namespace?: string })
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

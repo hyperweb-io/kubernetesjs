@@ -1,107 +1,103 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type StorageK8sIoV1VolumeAttachment as VolumeAttachment } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
-  CheckCircle,
+  Eye,
   Link,
-  Link2Off,
-  Server
-} from 'lucide-react'
-import { 
-  useListStorageV1VolumeAttachmentQuery,
-  useDeleteStorageV1VolumeAttachment
-} from '@/k8s'
-import { type StorageK8sIoV1VolumeAttachment as VolumeAttachment } from '@kubernetesjs/ops'
+  Link2Off, 
+  RefreshCw, 
+  Server,
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { 
+  useDeleteStorageV1VolumeAttachment,
+  useListStorageV1VolumeAttachmentQuery} from '@/k8s';
 
 export function VolumeAttachmentsView() {
-  const [selectedAttachment, setSelectedAttachment] = useState<VolumeAttachment | null>(null)
+  const [selectedAttachment, setSelectedAttachment] = useState<VolumeAttachment | null>(null);
   
-  const { data, isLoading, error, refetch } = useListStorageV1VolumeAttachmentQuery({ query: {} })
-  const deleteAttachment = useDeleteStorageV1VolumeAttachment()
+  const { data, isLoading, error, refetch } = useListStorageV1VolumeAttachmentQuery({ query: {} });
+  const deleteAttachment = useDeleteStorageV1VolumeAttachment();
 
-  const attachments = data?.items || []
+  const attachments = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const handleDelete = async (va: VolumeAttachment) => {
-    const name = va.metadata!.name!
+    const name = va.metadata!.name!;
     
     const confirmed = await confirmDialog({
       title: 'Delete Volume Attachment',
       description: `Are you sure you want to delete ${name}? This may disrupt attached volumes.`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteAttachment.mutateAsync({
           path: { name },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete volume attachment:', err)
-        alert(`Failed to delete volume attachment: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete volume attachment:', err);
+        alert(`Failed to delete volume attachment: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getAttachmentStatus = (va: VolumeAttachment): string => {
-    return va.status?.attached ? 'Attached' : 'Detached'
-  }
+    return va.status?.attached ? 'Attached' : 'Detached';
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Attached':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <Link className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'Detached':
-        return <Badge variant="secondary" className="flex items-center gap-1">
-          <Link2Off className="w-3 h-3" />
-          {status}
-        </Badge>
-      default:
-        return <Badge>{status}</Badge>
+    case 'Attached':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <Link className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'Detached':
+      return <Badge variant="secondary" className="flex items-center gap-1">
+        <Link2Off className="w-3 h-3" />
+        {status}
+      </Badge>;
+    default:
+      return <Badge>{status}</Badge>;
     }
-  }
+  };
 
   const getAttacher = (va: VolumeAttachment): string => {
-    return va.spec?.attacher || 'Unknown'
-  }
+    return va.spec?.attacher || 'Unknown';
+  };
 
   const getNodeName = (va: VolumeAttachment): string => {
-    return va.spec?.nodeName || 'Unknown'
-  }
+    return va.spec?.nodeName || 'Unknown';
+  };
 
   const getPVName = (va: VolumeAttachment): string => {
-    return va.spec?.source?.persistentVolumeName || 'Unknown'
-  }
+    return va.spec?.source?.persistentVolumeName || 'Unknown';
+  };
 
   const getAttachError = (va: VolumeAttachment): string | null => {
-    const error = va.status?.attachError
-    if (!error) return null
-    return error.message || 'Unknown error'
-  }
+    const error = va.status?.attachError;
+    if (!error) return null;
+    return error.message || 'Unknown error';
+  };
 
   const getDetachError = (va: VolumeAttachment): string | null => {
-    const error = va.status?.detachError
-    if (!error) return null
-    return error.message || 'Unknown error'
-  }
+    const error = va.status?.detachError;
+    if (!error) return null;
+    return error.message || 'Unknown error';
+  };
 
   return (
     <div className="space-y-6">
@@ -210,9 +206,9 @@ export function VolumeAttachmentsView() {
               </TableHeader>
               <TableBody>
                 {attachments.map((va) => {
-                  const attachError = getAttachError(va)
-                  const detachError = getDetachError(va)
-                  const hasError = attachError || detachError
+                  const attachError = getAttachError(va);
+                  const detachError = getDetachError(va);
+                  const hasError = attachError || detachError;
                   
                   return (
                     <TableRow key={va.metadata?.name}>
@@ -263,7 +259,7 @@ export function VolumeAttachmentsView() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  )
+                  );
                 })}
               </TableBody>
             </Table>
@@ -271,5 +267,5 @@ export function VolumeAttachmentsView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,46 +1,46 @@
+
+import { usePreferredNamespace } from '../contexts/NamespaceContext';
 import {
-  useListCoreV1PodForAllNamespacesQuery,
-  useListCoreV1NamespacedPodQuery,
-  useReadCoreV1NamespacedPodQuery,
-  useReadCoreV1NamespacedPodLogQuery,
   useDeleteCoreV1NamespacedPod,
-} from '../k8s/index'
-import { usePreferredNamespace } from '../contexts/NamespaceContext'
-import type { Pod, PodList } from '@kubernetesjs/ops'
+  useListCoreV1NamespacedPodQuery,
+  useListCoreV1PodForAllNamespacesQuery,
+  useReadCoreV1NamespacedPodLogQuery,
+  useReadCoreV1NamespacedPodQuery,
+} from '../k8s/index';
 
 // Query keys
-const PODS_KEY = ['pods'] as const
+const PODS_KEY = ['pods'] as const;
 
 export function usePods(namespace?: string) {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const ns = namespace || defaultNamespace
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const ns = namespace || defaultNamespace;
 
   if (ns === '_all') {
-    return useListCoreV1PodForAllNamespacesQuery({ query: {} })
+    return useListCoreV1PodForAllNamespacesQuery({ query: {} });
   }
-  return useListCoreV1NamespacedPodQuery({ path: { namespace: ns }, query: {} })
+  return useListCoreV1NamespacedPodQuery({ path: { namespace: ns }, query: {} });
 }
 
 export function usePod(name: string, namespace?: string) {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const ns = namespace || defaultNamespace
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const ns = namespace || defaultNamespace;
 
-  return useReadCoreV1NamespacedPodQuery({ path: { namespace: ns, name }, query: {} })
+  return useReadCoreV1NamespacedPodQuery({ path: { namespace: ns, name }, query: {} });
 }
 
 export function usePodLogs(name: string, namespace?: string, container?: string) {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const ns = namespace || defaultNamespace
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const ns = namespace || defaultNamespace;
 
   return useReadCoreV1NamespacedPodLogQuery({
     path: { namespace: ns, name },
     query: container ? { container } : {},
-  })
+  });
 }
 
 export function useDeletePod() {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const base = useDeleteCoreV1NamespacedPod()
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const base = useDeleteCoreV1NamespacedPod();
   return {
     ...base,
     mutate: (
@@ -59,15 +59,15 @@ export function useDeletePod() {
         { path: { namespace: namespace || defaultNamespace, name }, query: {} },
         opts
       ),
-  }
+  };
 }
 
 export function usePodsForDeployment(deploymentName: string, namespace?: string) {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const ns = namespace || defaultNamespace
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const ns = namespace || defaultNamespace;
 
   return useListCoreV1NamespacedPodQuery({
     path: { namespace: ns },
     query: { labelSelector: `app=${deploymentName}` },
-  })
+  });
 }

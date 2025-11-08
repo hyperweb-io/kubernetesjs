@@ -1,6 +1,7 @@
-import { http, HttpResponse } from "msw"
-import { API_BASE } from "./common"
-import { V1Pod } from "@kubernetesjs/ops"
+import { V1Pod } from '@kubernetesjs/ops';
+import { http, HttpResponse } from 'msw';
+
+import { API_BASE } from './common';
 
 export const createPodsListData = (): V1Pod[] => {
   return [
@@ -100,21 +101,21 @@ export const createPodsListData = (): V1Pod[] => {
         ]
       }
     }
-  ]
-}
+  ];
+};
 
 export const createPodsList = (pods: V1Pod[] = createPodsListData()) => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/pods`, ({ params }) => {
-    const namespace = params.namespace as string
-    const namespacePods = pods.filter(pod => pod.metadata.namespace === namespace)
+    const namespace = params.namespace as string;
+    const namespacePods = pods.filter(pod => pod.metadata.namespace === namespace);
       
     return HttpResponse.json({
       apiVersion: 'v1',
       kind: 'PodList',
       items: namespacePods
-    })
-  })
-}
+    });
+  });
+};
 
 export const createAllPodsList = (pods: V1Pod[] = createPodsListData()) => {
   return http.get(`${API_BASE}/api/v1/pods`, () => {
@@ -122,9 +123,9 @@ export const createAllPodsList = (pods: V1Pod[] = createPodsListData()) => {
       apiVersion: 'v1',
       kind: 'PodList',
       items: pods
-    })
-  })
-}
+    });
+  });
+};
 
 // Error handlers
 export const createPodsListError = (status: number = 500, message: string = 'Internal Server Error') => {
@@ -132,92 +133,92 @@ export const createPodsListError = (status: number = 500, message: string = 'Int
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createAllPodsListError = (status: number = 500, message: string = 'Internal Server Error') => {
   return http.get(`${API_BASE}/api/v1/pods`, () => {
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 // Network error handler
 export const createPodsListNetworkError = () => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/pods`, () => {
-    return HttpResponse.error()
-  })
-}
+    return HttpResponse.error();
+  });
+};
 
 // Slow response handler for testing loading states
 export const createPodsListSlow = (pods: V1Pod[] = createPodsListData(), delay: number = 1000) => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/pods`, async ({ params }) => {
-    await new Promise(resolve => setTimeout(resolve, delay))
-    const namespace = params.namespace as string
-    const namespacePods = pods.filter(pod => pod.metadata.namespace === namespace)
+    await new Promise(resolve => setTimeout(resolve, delay));
+    const namespace = params.namespace as string;
+    const namespacePods = pods.filter(pod => pod.metadata.namespace === namespace);
       
     return HttpResponse.json({
       apiVersion: 'v1',
       kind: 'PodList',
       items: namespacePods
-    })
-  })
-}
+    });
+  });
+};
 
 // Pod by name handler
 export const createPodByName = (pods: V1Pod[] = createPodsListData()) => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/pods/:name`, ({ params }) => {
-    const namespace = params.namespace as string
-    const name = params.name as string
-    const pod = pods.find(p => p.metadata.namespace === namespace && p.metadata.name === name)
+    const namespace = params.namespace as string;
+    const name = params.name as string;
+    const pod = pods.find(p => p.metadata.namespace === namespace && p.metadata.name === name);
     
     if (!pod) {
       return HttpResponse.json(
         { error: 'Pod not found' },
         { status: 404 }
-      )
+      );
     }
     
-    return HttpResponse.json(pod)
-  })
-}
+    return HttpResponse.json(pod);
+  });
+};
 
 // Pod details handler (alias for createPodByName)
 export const createPodDetails = (pod: V1Pod) => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/pods/:name`, ({ params }) => {
     if (params.name === pod.metadata?.name && params.namespace === pod.metadata?.namespace) {
-      return HttpResponse.json(pod)
+      return HttpResponse.json(pod);
     }
-    return HttpResponse.json({ error: 'Pod not found' }, { status: 404 })
-  })
-}
+    return HttpResponse.json({ error: 'Pod not found' }, { status: 404 });
+  });
+};
 
 // Pod logs handler
 export const createPodLogs = (name: string, namespace: string, logs: string) => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/pods/:name/log`, ({ params, request }) => {
     if (params.name === name && params.namespace === namespace) {
       // Check for container parameter in query string
-      const url = new URL(request.url)
-      const container = url.searchParams.get('container')
+      const url = new URL(request.url);
+      const container = url.searchParams.get('container');
       
       return new HttpResponse(logs, { 
         headers: { 
           'Content-Type': 'text/plain',
           'Content-Length': logs.length.toString()
         } 
-      })
+      });
     }
-    return HttpResponse.json({ error: 'Logs not found' }, { status: 404 })
-  })
-}
+    return HttpResponse.json({ error: 'Logs not found' }, { status: 404 });
+  });
+};
 
 // Generic pod logs handler for any pod
 export const createPodLogsHandler = (logs: string) => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/pods/:name/log`, ({ params, request }) => {
     // Check for container parameter in query string
-    return HttpResponse.json(logs)
-  })
-}
+    return HttpResponse.json(logs);
+  });
+};

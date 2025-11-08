@@ -1,5 +1,5 @@
-import { ReactElement } from 'react';
 import dayjs from 'dayjs';
+import { ReactElement } from 'react';
 
 const BASE_PATH = '/public';
 
@@ -31,18 +31,18 @@ export const formatDuration = (duration: string) => {
     .reduce((a, b, i) => a + b * 60 ** i);
 
   switch (true) {
-    case totalSeconds >= 3600: {
-      const h = (totalSeconds / 3600).toFixed(1);
-      return pluralize(Number(h), 'hour');
-    }
+  case totalSeconds >= 3600: {
+    const h = (totalSeconds / 3600).toFixed(1);
+    return pluralize(Number(h), 'hour');
+  }
 
-    case totalSeconds >= 60: {
-      const m = Math.floor(totalSeconds / 60);
-      return pluralize(m, 'minute');
-    }
+  case totalSeconds >= 60: {
+    const m = Math.floor(totalSeconds / 60);
+    return pluralize(m, 'minute');
+  }
 
-    default:
-      return pluralize(totalSeconds, 'second');
+  default:
+    return pluralize(totalSeconds, 'second');
   }
 };
 

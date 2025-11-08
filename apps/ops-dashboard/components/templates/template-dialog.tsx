@@ -1,7 +1,10 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useRef } from 'react'
-import { Button } from '@/components/ui/button'
+import { CheckCircle,Loader2, XCircle } from 'lucide-react';
+import { useEffect, useRef,useState } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -9,12 +12,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, CheckCircle, XCircle, FileJson } from 'lucide-react'
-import { usePreferredNamespace } from '@/contexts/NamespaceContext'
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { usePreferredNamespace } from '@/contexts/NamespaceContext';
 
 interface Template {
   id: string
@@ -35,7 +36,7 @@ interface TemplateDialogProps {
 }
 
 export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogProps) {
-  const { namespace: contextNamespace } = usePreferredNamespace()
+  const { namespace: contextNamespace } = usePreferredNamespace();
 
   // Deploy template function using new API
   const deployTemplate = async (params: {
@@ -71,7 +72,7 @@ export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogP
 
     const result = await response.json();
     return result;
-  }
+  };
 
   // Force uninstall template function using API
   const forceUninstallTemplate = async (params: {
@@ -104,41 +105,41 @@ export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogP
 
     const result = await response.json();
     return result;
-  }
-  const [deploymentName, setDeploymentName] = useState(template.id)
-  const [namespace, setNamespace] = useState(contextNamespace === '_all' ? 'default' : contextNamespace)
-  const [isDeploying, setIsDeploying] = useState(false)
-  const [isUninstalling, setIsUninstalling] = useState(false)
-  const [deploymentStatus, setDeploymentStatus] = useState<'idle' | 'success' | 'error'>('idle')
-  const [successMessage, setSuccessMessage] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
+  };
+  const [deploymentName, setDeploymentName] = useState(template.id);
+  const [namespace, setNamespace] = useState(contextNamespace === '_all' ? 'default' : contextNamespace);
+  const [isDeploying, setIsDeploying] = useState(false);
+  const [isUninstalling, setIsUninstalling] = useState(false);
+  const [deploymentStatus, setDeploymentStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Prevent double deploy/uninstall clicks
-  const isDeployingRef = useRef(false)
-  const isUninstallingRef = useRef(false)
+  const isDeployingRef = useRef(false);
+  const isUninstallingRef = useRef(false);
 
   // Reset form state when dialog opens or template changes
   useEffect(() => {
     if (open) {
-      setDeploymentName(`${template.id}-deployment`)
-      setNamespace(contextNamespace === '_all' ? 'default' : contextNamespace)
-      setDeploymentStatus('idle')
-      setSuccessMessage('')
-      setErrorMessage('')
+      setDeploymentName(`${template.id}-deployment`);
+      setNamespace(contextNamespace === '_all' ? 'default' : contextNamespace);
+      setDeploymentStatus('idle');
+      setSuccessMessage('');
+      setErrorMessage('');
     }
-  }, [open, template.id])
+  }, [open, template.id]);
 
   const handleDeploy = async () => {
-    console.log(`[TemplateDialog] ${template.id} - Deploy button clicked`)
+    console.log(`[TemplateDialog] ${template.id} - Deploy button clicked`);
     if (isDeployingRef.current || isUninstallingRef.current) {
-      console.log(`[TemplateDialog] ${template.id} - Another operation in progress, ignoring click`)
-      return
+      console.log(`[TemplateDialog] ${template.id} - Another operation in progress, ignoring click`);
+      return;
     }
-    isDeployingRef.current = true
-    setIsDeploying(true)
-    setDeploymentStatus('idle')
-    setSuccessMessage('')
-    setErrorMessage('')
+    isDeployingRef.current = true;
+    setIsDeploying(true);
+    setDeploymentStatus('idle');
+    setSuccessMessage('');
+    setErrorMessage('');
 
     try {
       console.log(`[TemplateDialog] ${template.id} - Starting deployment with params:`, {
@@ -148,7 +149,7 @@ export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogP
         image: template.details.image,
         ports: template.details.ports,
         environment: template.details.environment
-      })
+      });
       
       await deployTemplate({
         templateId: template.id,
@@ -157,70 +158,70 @@ export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogP
         image: template.details.image,
         ports: template.details.ports,
         environment: template.details.environment
-      })
+      });
       
-      console.log(`[TemplateDialog] ${template.id} - Deployment successful`)
-      setDeploymentStatus('success')
-      setSuccessMessage(`${template.name} deployed successfully!`)
+      console.log(`[TemplateDialog] ${template.id} - Deployment successful`);
+      setDeploymentStatus('success');
+      setSuccessMessage(`${template.name} deployed successfully!`);
       setTimeout(() => {
-        onOpenChange(false)
-        setDeploymentStatus('idle')
-        setDeploymentName(`${template.id}-deployment`)
-        setSuccessMessage('')
-      }, 2000)
+        onOpenChange(false);
+        setDeploymentStatus('idle');
+        setDeploymentName(`${template.id}-deployment`);
+        setSuccessMessage('');
+      }, 2000);
     } catch (error) {
-      console.error(`[TemplateDialog] ${template.id} - Deployment failed:`, error)
-      setDeploymentStatus('error')
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to deploy template')
+      console.error(`[TemplateDialog] ${template.id} - Deployment failed:`, error);
+      setDeploymentStatus('error');
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to deploy template');
     } finally {
-      setIsDeploying(false)
-      isDeployingRef.current = false
+      setIsDeploying(false);
+      isDeployingRef.current = false;
     }
-  }
+  };
 
   const handleForceUninstall = async () => {
-    console.log(`[TemplateDialog] ${template.id} - Force Uninstall button clicked`)
+    console.log(`[TemplateDialog] ${template.id} - Force Uninstall button clicked`);
     if (isUninstallingRef.current || isDeployingRef.current) {
-      console.log(`[TemplateDialog] ${template.id} - Another operation in progress, ignoring click`)
-      return
+      console.log(`[TemplateDialog] ${template.id} - Another operation in progress, ignoring click`);
+      return;
     }
-    isUninstallingRef.current = true
-    setIsUninstalling(true)
-    setDeploymentStatus('idle')
-    setSuccessMessage('')
-    setErrorMessage('')
+    isUninstallingRef.current = true;
+    setIsUninstalling(true);
+    setDeploymentStatus('idle');
+    setSuccessMessage('');
+    setErrorMessage('');
 
     try {
       console.log(`[TemplateDialog] ${template.id} - Starting force uninstall with params:`, {
         templateId: template.id,
         name: deploymentName,
         namespace,
-      })
+      });
 
       await forceUninstallTemplate({
         templateId: template.id,
         name: deploymentName,
         namespace,
-      })
+      });
 
-      console.log(`[TemplateDialog] ${template.id} - Force uninstall successful`)
-      setDeploymentStatus('success')
-      setSuccessMessage(`${template.name} force uninstalled successfully!`)
+      console.log(`[TemplateDialog] ${template.id} - Force uninstall successful`);
+      setDeploymentStatus('success');
+      setSuccessMessage(`${template.name} force uninstalled successfully!`);
       setTimeout(() => {
-        onOpenChange(false)
-        setDeploymentStatus('idle')
-        setDeploymentName(`${template.id}-deployment`)
-        setSuccessMessage('')
-      }, 2000)
+        onOpenChange(false);
+        setDeploymentStatus('idle');
+        setDeploymentName(`${template.id}-deployment`);
+        setSuccessMessage('');
+      }, 2000);
     } catch (error) {
-      console.error(`[TemplateDialog] ${template.id} - Force uninstall failed:`, error)
-      setDeploymentStatus('error')
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to uninstall template')
+      console.error(`[TemplateDialog] ${template.id} - Force uninstall failed:`, error);
+      setDeploymentStatus('error');
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to uninstall template');
     } finally {
-      setIsUninstalling(false)
-      isUninstallingRef.current = false
+      setIsUninstalling(false);
+      isUninstallingRef.current = false;
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -334,5 +335,5 @@ export function TemplateDialog({ template, open, onOpenChange }: TemplateDialogP
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

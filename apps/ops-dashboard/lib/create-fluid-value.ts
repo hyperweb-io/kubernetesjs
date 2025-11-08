@@ -12,27 +12,27 @@ const HTML_FONT_SIZE = 16;
  * transition between a `minSize` and `maxSize` based on the screen size provided
  */
 export const createFluidValue = (
-	minSize: number,
-	maxSize: number,
-	minScreenSize: number = DEFAULT_MIN_SCREEN,
-	maxScreenSize: number = DEFAULT_MAX_SCREEN,
+  minSize: number,
+  maxSize: number,
+  minScreenSize: number = DEFAULT_MIN_SCREEN,
+  maxScreenSize: number = DEFAULT_MAX_SCREEN,
 ) => {
-	return `clamp(${pxToRem(minSize)}, ${getPreferredValue(
-		minSize,
-		maxSize,
-		minScreenSize,
-		maxScreenSize,
-	)}, ${pxToRem(maxSize)})`;
+  return `clamp(${pxToRem(minSize)}, ${getPreferredValue(
+    minSize,
+    maxSize,
+    minScreenSize,
+    maxScreenSize,
+  )}, ${pxToRem(maxSize)})`;
 };
 
 /**
  * Determines how fluid typography scales
  */
 const getPreferredValue = (minSize: number, maxSize: number, minScreenSize: number, maxScreenSize: number) => {
-	const vwCalc = cleanNumber((100 * (maxSize - minSize)) / (maxScreenSize - minScreenSize));
-	const remCalc = cleanNumber((minScreenSize * maxSize - maxScreenSize * minSize) / (minScreenSize - maxScreenSize));
+  const vwCalc = cleanNumber((100 * (maxSize - minSize)) / (maxScreenSize - minScreenSize));
+  const remCalc = cleanNumber((minScreenSize * maxSize - maxScreenSize * minSize) / (minScreenSize - maxScreenSize));
 
-	return `${vwCalc}vw + ${pxToRem(remCalc)}`;
+  return `${vwCalc}vw + ${pxToRem(remCalc)}`;
 };
 
 const pxToRem = (px: number | string) => `${cleanNumber(Number(px) / HTML_FONT_SIZE)}rem`;

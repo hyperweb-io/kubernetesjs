@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { render, screen } from '@/__tests__/utils/test-utils';
 import ResourceQuotasPage from '@/app/i/resourcequotas/page';
 

@@ -1,6 +1,7 @@
-import { http, HttpResponse } from "msw"
-import { API_BASE } from "./common"
-import { V1Secret } from "@kubernetesjs/ops"
+import { V1Secret } from '@kubernetesjs/ops';
+import { http, HttpResponse } from 'msw';
+
+import { API_BASE } from './common';
 
 export const createSecretsListData = (): V1Secret[] => {
   return [
@@ -12,8 +13,8 @@ export const createSecretsListData = (): V1Secret[] => {
       },
       type: 'Opaque',
       data: {
-        'username': 'dGVzdA==', // base64 encoded 'test'
-        'password': 'cGFzc3dvcmQ=' // base64 encoded 'password'
+        username: 'dGVzdA==', // base64 encoded 'test'
+        password: 'cGFzc3dvcmQ=' // base64 encoded 'password'
       }
     },
     {
@@ -39,21 +40,21 @@ export const createSecretsListData = (): V1Secret[] => {
         'tls.key': 'LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0t' // base64 encoded key
       }
     }
-  ]
-}
+  ];
+};
 
 export const createSecretsList = (secrets: V1Secret[] = createSecretsListData()) => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/secrets`, ({ params }) => {
-    const namespace = params.namespace as string
-    const namespaceSecrets = secrets.filter(secret => secret.metadata?.namespace === namespace)
+    const namespace = params.namespace as string;
+    const namespaceSecrets = secrets.filter(secret => secret.metadata?.namespace === namespace);
 
     return HttpResponse.json({
       apiVersion: 'v1',
       kind: 'SecretList',
       items: namespaceSecrets
-    })
-  })
-}
+    });
+  });
+};
 
 export const createAllSecretsList = (secrets: V1Secret[] = createSecretsListData()) => {
   return http.get(`${API_BASE}/api/v1/secrets`, () => {
@@ -61,96 +62,96 @@ export const createAllSecretsList = (secrets: V1Secret[] = createSecretsListData
       apiVersion: 'v1',
       kind: 'SecretList',
       items: secrets
-    })
-  })
-}
+    });
+  });
+};
 
 export const createSecretsListError = (status: number = 500, message: string = 'Internal Server Error') => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/secrets`, () => {
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createAllSecretsListError = (status: number = 500, message: string = 'Internal Server Error') => {
   return http.get(`${API_BASE}/api/v1/secrets`, () => {
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createSecretsListSlow = (secrets: V1Secret[] = createSecretsListData(), delay: number = 1000) => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/secrets`, async ({ params }) => {
-    await new Promise(resolve => setTimeout(resolve, delay))
-    const namespace = params.namespace as string
-    const namespaceSecrets = secrets.filter(secret => secret.metadata?.namespace === namespace)
+    await new Promise(resolve => setTimeout(resolve, delay));
+    const namespace = params.namespace as string;
+    const namespaceSecrets = secrets.filter(secret => secret.metadata?.namespace === namespace);
 
     return HttpResponse.json({
       apiVersion: 'v1',
       kind: 'SecretList',
       items: namespaceSecrets
-    })
-  })
-}
+    });
+  });
+};
 
 export const deleteSecretHandler = (name: string, namespace: string) => {
   return http.delete(`${API_BASE}/api/v1/namespaces/:namespace/secrets/:name`, ({ params }) => {
     if (params.name === name && params.namespace === namespace) {
-      return HttpResponse.json({}, { status: 200 })
+      return HttpResponse.json({}, { status: 200 });
     }
-    return HttpResponse.json({ error: 'Secret not found' }, { status: 404 })
-  })
-}
+    return HttpResponse.json({ error: 'Secret not found' }, { status: 404 });
+  });
+};
 
 export const deleteSecretErrorHandler = (name: string, namespace: string, status: number = 500, message: string = 'Deletion failed') => {
   return http.delete(`${API_BASE}/api/v1/namespaces/:namespace/secrets/:name`, ({ params }) => {
     if (params.name === name && params.namespace === namespace) {
-      return HttpResponse.json({ error: message }, { status })
+      return HttpResponse.json({ error: message }, { status });
     }
-    return HttpResponse.json({ error: 'Secret not found' }, { status: 404 })
-  })
-}
+    return HttpResponse.json({ error: 'Secret not found' }, { status: 404 });
+  });
+};
 
 export const createSecretHandler = (secret: V1Secret) => {
   return http.post(`${API_BASE}/api/v1/namespaces/:namespace/secrets`, () => {
-    return HttpResponse.json(secret, { status: 201 })
-  })
-}
+    return HttpResponse.json(secret, { status: 201 });
+  });
+};
 
 export const createSecretErrorHandler = (status: number = 400, message: string = 'Creation failed') => {
   return http.post(`${API_BASE}/api/v1/namespaces/:namespace/secrets`, () => {
-    return HttpResponse.json({ error: message }, { status })
-  })
-}
+    return HttpResponse.json({ error: message }, { status });
+  });
+};
 
 export const createSecretsListNetworkError = () => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/secrets`, () => {
-    return HttpResponse.error()
-  })
-}
+    return HttpResponse.error();
+  });
+};
 
 // Get single secret handler
 export const getSecret = (secret: V1Secret) => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/secrets/:name`, ({ params }) => {
-    const name = params.name as string
-    const namespace = params.namespace as string
+    const name = params.name as string;
+    const namespace = params.namespace as string;
     if (name === secret.metadata?.name && namespace === secret.metadata?.namespace) {
-      return HttpResponse.json(secret)
+      return HttpResponse.json(secret);
     }
-    return HttpResponse.json({ error: 'Secret not found' }, { status: 404 })
-  })
-}
+    return HttpResponse.json({ error: 'Secret not found' }, { status: 404 });
+  });
+};
 
 // Update secret handler
 export const updateSecret = () => {
   return http.put(`${API_BASE}/api/v1/namespaces/:namespace/secrets/:name`, async ({ request, params }) => {
-    const body = await request.json() as V1Secret
-    const name = params.name as string
-    const namespace = params.namespace as string
+    const body = await request.json() as V1Secret;
+    const name = params.name as string;
+    const namespace = params.namespace as string;
     
     return HttpResponse.json({
       ...body,
@@ -161,9 +162,9 @@ export const updateSecret = () => {
         resourceVersion: '12345',
         uid: `secret-${name}`
       }
-    })
-  })
-}
+    });
+  });
+};
 
 // Update secret error handler
 export const updateSecretError = (status: number = 500, message: string = 'Update failed') => {
@@ -171,6 +172,6 @@ export const updateSecretError = (status: number = 500, message: string = 'Updat
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};

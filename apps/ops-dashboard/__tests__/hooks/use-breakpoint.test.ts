@@ -1,4 +1,5 @@
 import { renderHook } from '@testing-library/react';
+
 import { useBreakpoint } from '@/hooks/use-breakpoint';
 
 // Mock the useMediaQuery hook

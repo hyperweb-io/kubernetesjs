@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
 import type { ClusterOverview } from '@kubernetesjs/client';
+import { useQuery } from '@tanstack/react-query';
 
 export function useClusterStatus() {
   return useQuery<ClusterOverview>({

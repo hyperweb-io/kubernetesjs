@@ -1,5 +1,5 @@
-import { CronJobsView } from '@/components/resources/cronjobs'
+import { CronJobsView } from '@/components/resources/cronjobs';
 
 export default function CronJobsPage() {
-  return <CronJobsView />
+  return <CronJobsView />;
 }

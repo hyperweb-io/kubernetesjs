@@ -1,12 +1,13 @@
-import React, { ReactElement } from 'react'
-import { render, renderHook, RenderOptions } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ThemeProvider } from 'next-themes'
-import { KubernetesProvider } from '../../k8s/context'
-import { NamespaceProvider } from '../../contexts/NamespaceContext'
-import { AppProvider } from '../../contexts/AppContext'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, renderHook, RenderOptions } from '@testing-library/react';
+import { ThemeProvider } from 'next-themes';
+import React, { ReactElement } from 'react';
+
+import { AppProvider } from '../../contexts/AppContext';
+import { NamespaceProvider } from '../../contexts/NamespaceContext';
 // import { ConfirmProvider } from '@/hooks'
-import { ConfirmProvider } from '../../hooks/useConfirm'
+import { ConfirmProvider } from '../../hooks/useConfirm';
+import { KubernetesProvider } from '../../k8s/context';
 
 // Create a custom render function that includes providers
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
@@ -19,7 +20,7 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
         retry: false,
       },
     },
-  })
+  });
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -40,25 +41,25 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
         </ThemeProvider>
       </AppProvider>
     </QueryClientProvider>
-  )
-}
+  );
+};
 
 const customRender = (
   ui: ReactElement,
   options?: RenderOptions,
-) => render(ui, { wrapper: AllTheProviders, ...options })
+) => render(ui, { wrapper: AllTheProviders, ...options });
 
 
 const customRenderHook = <T,>(
   hook: () => T,
   options?: RenderOptions,
-) => renderHook(hook, { wrapper: AllTheProviders, ...options })
+) => renderHook(hook, { wrapper: AllTheProviders, ...options });
 
 // Re-export everything
-export * from '@testing-library/react'
+export * from '@testing-library/react';
 export { 
   customRender as render, 
   customRenderHook as renderHook,
-}
+};
 
 

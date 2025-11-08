@@ -1,49 +1,48 @@
-'use client'
+'use client';
 
-import React, { useState, useRef, useEffect, KeyboardEvent } from 'react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { AgentManagerGlobal } from './agent-manager-global'
-import { 
-  OllamaClient, 
-  BradieClient, 
-  getCurrentAgent, 
-  setAgent,
-  getBradieDomain,
-  setBradieDomain,
-  type AgentType 
-} from '@/lib/agents'
-import type { Session } from '@/lib/agents/types'
 import {
-  MoreVertical,
-  Send,
-  User,
+  AlertCircle,
   Bot,
-  Copy,
+  Brain,
   Check,
   ChevronRight,
+  Copy,
+  Loader2,
   MessageSquare,
-  Trash2,
-  Plus,
+  MoreVertical,
   Pin,
   PinOff,
-  Loader2,
-  AlertCircle,
+  Send,
   Settings2,
-  Brain,
-  Sparkles
-} from 'lucide-react'
+  Sparkles,
+  Trash2,
+  User} from 'lucide-react';
+import React, { KeyboardEvent,useEffect, useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import remarkGfm from 'remark-gfm';
+
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu'
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  type AgentType, 
+  BradieClient, 
+  getBradieDomain,
+  getCurrentAgent, 
+  OllamaClient, 
+  setAgent,
+  setBradieDomain} from '@/lib/agents';
+import type { Session } from '@/lib/agents/types';
+
+import { AgentManagerGlobal } from './agent-manager-global';
 
 interface Message {
   id: string
@@ -71,31 +70,31 @@ interface AIChatGlobalProps {
 }
 
 export function AIChatGlobal({ isOpen, onToggle, width, onWidthChange, layoutMode, onLayoutModeChange }: AIChatGlobalProps) {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
-  const [showTimestamps, setShowTimestamps] = useState(false)
-  const [copiedCode, setCopiedCode] = useState<string | null>(null)
-  const [isResizing, setIsResizing] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [showAgentManager, setShowAgentManager] = useState(false)
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [showTimestamps, setShowTimestamps] = useState(false);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [isResizing, setIsResizing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showAgentManager, setShowAgentManager] = useState(false);
   
   // Agent state
-  const [currentAgent, setCurrentAgent] = useState<AgentType>(getCurrentAgent())
+  const [currentAgent, setCurrentAgent] = useState<AgentType>(getCurrentAgent());
   const [agentConfig, setAgentConfig] = useState<GlobalAgentConfig>(() => {
     // Load saved agent config from localStorage
     if (typeof window !== 'undefined') {
-      const savedConfig = localStorage.getItem('ai-chat-agent-config')
+      const savedConfig = localStorage.getItem('ai-chat-agent-config');
       if (savedConfig) {
         try {
-          const parsed = JSON.parse(savedConfig)
+          const parsed = JSON.parse(savedConfig);
           // Reconstruct session dates
           if (parsed.session) {
-            parsed.session.createdAt = new Date(parsed.session.createdAt)
+            parsed.session.createdAt = new Date(parsed.session.createdAt);
           }
-          return parsed
+          return parsed;
         } catch (err) {
-          console.error('Failed to parse saved agent config:', err)
+          console.error('Failed to parse saved agent config:', err);
         }
       }
     }
@@ -105,55 +104,55 @@ export function AIChatGlobal({ isOpen, onToggle, width, onWidthChange, layoutMod
       model: 'llama2',
       bradieDomain: getBradieDomain(),
       session: null
-    }
-  })
+    };
+  });
 
-  const resizeRef = useRef<HTMLDivElement>(null)
-  const chatEndRef = useRef<HTMLDivElement>(null)
-  const ollamaClientRef = useRef<OllamaClient>()
-  const bradieClientRef = useRef<BradieClient>()
+  const resizeRef = useRef<HTMLDivElement>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const ollamaClientRef = useRef<OllamaClient>();
+  const bradieClientRef = useRef<BradieClient>();
 
   // Initialize clients
   useEffect(() => {
-    ollamaClientRef.current = new OllamaClient(agentConfig.endpoint)
-    bradieClientRef.current = new BradieClient(agentConfig.bradieDomain)
-  }, [agentConfig.endpoint, agentConfig.bradieDomain])
+    ollamaClientRef.current = new OllamaClient(agentConfig.endpoint);
+    bradieClientRef.current = new BradieClient(agentConfig.bradieDomain);
+  }, [agentConfig.endpoint, agentConfig.bradieDomain]);
 
   // Auto scroll to bottom on new messages
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   // Load chat history from localStorage
   useEffect(() => {
-    const savedMessages = localStorage.getItem('ai-chat-messages')
+    const savedMessages = localStorage.getItem('ai-chat-messages');
     if (savedMessages) {
       try {
-        const parsed = JSON.parse(savedMessages)
-        setMessages(parsed.map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })))
+        const parsed = JSON.parse(savedMessages);
+        setMessages(parsed.map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })));
       } catch (err) {
-        console.error('Failed to load chat history:', err)
+        console.error('Failed to load chat history:', err);
       }
     }
-  }, [])
+  }, []);
 
   // Save messages to localStorage
   useEffect(() => {
     if (messages.length > 0) {
-      localStorage.setItem('ai-chat-messages', JSON.stringify(messages))
+      localStorage.setItem('ai-chat-messages', JSON.stringify(messages));
     }
-  }, [messages])
+  }, [messages]);
 
   // Handle agent change
   const handleAgentChange = (agent: AgentType) => {
-    setCurrentAgent(agent)
-    setAgent(agent)
-    setAgentConfig(prev => ({ ...prev, agent }))
-  }
+    setCurrentAgent(agent);
+    setAgent(agent);
+    setAgentConfig(prev => ({ ...prev, agent }));
+  };
 
   // Handle send message
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return
+    if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -161,27 +160,27 @@ export function AIChatGlobal({ isOpen, onToggle, width, onWidthChange, layoutMod
       content: input.trim(),
       timestamp: new Date(),
       agent: currentAgent
-    }
+    };
 
-    setMessages(prev => [...prev, userMessage])
-    setInput('')
-    setIsLoading(true)
-    setError(null)
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setIsLoading(true);
+    setError(null);
 
     try {
-      let response = ''
+      let response = '';
       
       if (currentAgent === 'ollama') {
-        if (!ollamaClientRef.current) throw new Error('Ollama client not initialized')
-        response = await ollamaClientRef.current.generateResponse(userMessage.content)
+        if (!ollamaClientRef.current) throw new Error('Ollama client not initialized');
+        response = await ollamaClientRef.current.generateResponse(userMessage.content);
       } else {
-        if (!bradieClientRef.current) throw new Error('Bradie client not initialized')
-        if (!agentConfig.session) throw new Error('No Bradie session selected')
+        if (!bradieClientRef.current) throw new Error('Bradie client not initialized');
+        if (!agentConfig.session) throw new Error('No Bradie session selected');
         
         response = await bradieClientRef.current.sendMessageAndWait(
           agentConfig.session.id,
           userMessage.content
-        )
+        );
       }
 
       const assistantMessage: Message = {
@@ -190,69 +189,69 @@ export function AIChatGlobal({ isOpen, onToggle, width, onWidthChange, layoutMod
         content: response,
         timestamp: new Date(),
         agent: currentAgent
-      }
+      };
 
-      setMessages(prev => [...prev, assistantMessage])
+      setMessages(prev => [...prev, assistantMessage]);
     } catch (err) {
-      console.error('Error generating response:', err)
-      setError('An error occurred. Please try again.')
+      console.error('Error generating response:', err);
+      setError('An error occurred. Please try again.');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
+      e.preventDefault();
       if (!isLoading) {
-        handleSend()
+        handleSend();
       }
     }
-  }
+  };
 
   const copyToClipboard = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(text)
-      setCopiedCode(text)
-      setTimeout(() => setCopiedCode(null), 2000)
+      await navigator.clipboard.writeText(text);
+      setCopiedCode(text);
+      setTimeout(() => setCopiedCode(null), 2000);
     } catch (err) {
-      console.error('Failed to copy:', err)
+      console.error('Failed to copy:', err);
     }
-  }
+  };
 
   const clearHistory = () => {
-    setMessages([])
-    localStorage.removeItem('ai-chat-messages')
-  }
+    setMessages([]);
+    localStorage.removeItem('ai-chat-messages');
+  };
 
   // Handle resize
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isResizing) return
-      const newWidth = window.innerWidth - e.clientX
-      onWidthChange(Math.max(300, Math.min(800, newWidth)))
-    }
+      if (!isResizing) return;
+      const newWidth = window.innerWidth - e.clientX;
+      onWidthChange(Math.max(300, Math.min(800, newWidth)));
+    };
 
     const handleMouseUp = () => {
-      setIsResizing(false)
-    }
+      setIsResizing(false);
+    };
 
     if (isResizing) {
-      document.addEventListener('mousemove', handleMouseMove)
-      document.addEventListener('mouseup', handleMouseUp)
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
     }
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-    }
-  }, [isResizing, onWidthChange])
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing, onWidthChange]);
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   const containerStyle = layoutMode === 'floating' 
     ? 'fixed right-4 top-4 bottom-4 shadow-2xl rounded-lg border' 
-    : 'fixed right-0 top-0 bottom-0 border-l'
+    : 'fixed right-0 top-0 bottom-0 border-l';
 
   return (
     <>
@@ -339,13 +338,13 @@ export function AIChatGlobal({ isOpen, onToggle, width, onWidthChange, layoutMod
                       remarkPlugins={[remarkGfm]}
                       components={{
                         code({ node, inline, className, children, ...props }: any) {
-                          const match = /language-(\w+)/.exec(className || '')
+                          const match = /language-(\w+)/.exec(className || '');
                           return !inline && match ? (
                             <div className="relative my-2">
                               {React.createElement(SyntaxHighlighter as any, {
                                 style: vscDarkPlus,
                                 language: match[1],
-                                PreTag: "div",
+                                PreTag: 'div',
                                 ...props
                               }, String(children).replace(/\n$/, ''))}
                               <Button
@@ -434,12 +433,12 @@ export function AIChatGlobal({ isOpen, onToggle, width, onWidthChange, layoutMod
           onClose={() => setShowAgentManager(false)}
           currentConfig={agentConfig}
           onConfigChange={(config) => {
-            setAgentConfig(config)
-            handleAgentChange(config.agent)
+            setAgentConfig(config);
+            handleAgentChange(config.agent);
             if (config.bradieDomain) {
-              setBradieDomain(config.bradieDomain)
+              setBradieDomain(config.bradieDomain);
             }
-            localStorage.setItem('ai-chat-agent-config', JSON.stringify(config))
+            localStorage.setItem('ai-chat-agent-config', JSON.stringify(config));
           }}
         />
       )}

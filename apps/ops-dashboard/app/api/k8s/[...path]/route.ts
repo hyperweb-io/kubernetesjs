@@ -19,8 +19,8 @@ const resolvePath = async (context: any) => {
   const segments = Array.isArray(rawParams?.path)
     ? rawParams.path
     : rawParams?.path
-    ? [rawParams.path]
-    : [];
+      ? [rawParams.path]
+      : [];
   return segments.join('/');
 };
 
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest, context: any) {
     const response = await fetch(proxyUrl, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
     });
     
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest, context: any) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
       body: JSON.stringify(body),
     });
@@ -108,7 +108,7 @@ export async function DELETE(request: NextRequest, context: any) {
     const response = await fetch(proxyUrl, {
       method: 'DELETE',
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
     });
     
@@ -144,7 +144,7 @@ export async function PUT(request: NextRequest, context: any) {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
       body: JSON.stringify(body),
     });
@@ -181,7 +181,7 @@ export async function PATCH(request: NextRequest, context: any) {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/strategic-merge-patch+json',
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
       body: JSON.stringify(body),
     });

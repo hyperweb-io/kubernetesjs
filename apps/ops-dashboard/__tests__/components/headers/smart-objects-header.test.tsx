@@ -1,4 +1,5 @@
 import userEvent from '@testing-library/user-event';
+
 import { SmartObjectsHeader } from '../../../components/headers/smart-objects-header';
 import { render, screen } from '../../utils/test-utils';
 

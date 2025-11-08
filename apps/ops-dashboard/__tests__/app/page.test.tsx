@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { render } from '@/__tests__/utils/test-utils';
 import HomePage from '@/app/page';
 

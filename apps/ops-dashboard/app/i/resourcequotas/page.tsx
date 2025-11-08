@@ -1,5 +1,5 @@
-import { ResourceQuotasView } from '@/components/resources/resourcequotas'
+import { ResourceQuotasView } from '@/components/resources/resourcequotas';
 
 export default function ResourceQuotasPage() {
-  return <ResourceQuotasView />
+  return <ResourceQuotasView />;
 }

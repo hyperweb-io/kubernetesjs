@@ -1,19 +1,19 @@
-'use client'
+'use client';
 
-import { usePathname, useRouter } from 'next/navigation'
+import {
+  Layers, 
+  Server, 
+  Shield
+} from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { 
-  Layers, 
-  Server, 
-  Code,
-  Shield
-} from 'lucide-react'
+} from '@/components/ui/select';
 
 type RouteMode = 'smart-objects' | 'infra' | 'admin'
 
@@ -24,26 +24,26 @@ const modeConfig = {
     color: 'text-purple-600',
     route: '/d'
   },
-  'infra': {
+  infra: {
     label: 'Infrastructure', 
     icon: Server,
     color: 'text-blue-600',
     route: '/i'
   },
-  'admin': {
+  admin: {
     label: 'Admin',
     icon: Shield,
     color: 'text-red-600',
     route: '/admin'
   }
-}
+};
 
 // Determine current mode from route
 function getModeFromRoute(pathname: string): RouteMode {
-  if (pathname === '/d' || pathname.startsWith('/d/')) return 'smart-objects'
-  if (pathname === '/i' || pathname.startsWith('/i/')) return 'infra'
-  if (pathname === '/admin' || pathname.startsWith('/admin/')) return 'admin'
-  return 'infra' // Default
+  if (pathname === '/d' || pathname.startsWith('/d/')) return 'smart-objects';
+  if (pathname === '/i' || pathname.startsWith('/i/')) return 'infra';
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) return 'admin';
+  return 'infra'; // Default
 }
 
 interface ContextSwitcherProps {
@@ -51,15 +51,15 @@ interface ContextSwitcherProps {
 }
 
 export function ContextSwitcher({ variant = 'sidebar' }: ContextSwitcherProps) {
-  const pathname = usePathname()
-  const router = useRouter()
-  const currentMode = getModeFromRoute(pathname)
-  const currentConfig = modeConfig[currentMode]
+  const pathname = usePathname();
+  const router = useRouter();
+  const currentMode = getModeFromRoute(pathname);
+  const currentConfig = modeConfig[currentMode];
 
   const handleModeChange = (newMode: RouteMode) => {
-    const config = modeConfig[newMode]
-    router.push(config.route)
-  }
+    const config = modeConfig[newMode];
+    router.push(config.route);
+  };
 
   // Compact version - just an icon that opens dropdown
   if (variant === 'compact') {
@@ -74,7 +74,7 @@ export function ContextSwitcher({ variant = 'sidebar' }: ContextSwitcherProps) {
           </SelectTrigger>
           <SelectContent align="start" side="right">
             {Object.entries(modeConfig).map(([key, config]) => {
-              const Icon = config.icon
+              const Icon = config.icon;
               return (
                 <SelectItem key={key} value={key as RouteMode}>
                   <div className="flex items-center gap-2">
@@ -82,22 +82,22 @@ export function ContextSwitcher({ variant = 'sidebar' }: ContextSwitcherProps) {
                     <span>{config.label}</span>
                   </div>
                 </SelectItem>
-              )
+              );
             })}
           </SelectContent>
         </Select>
       </div>
-    )
+    );
   }
 
   // Regular versions
   const containerClasses = variant === 'sidebar' 
-    ? "px-4 pb-4 border-b" 
-    : ""
+    ? 'px-4 pb-4 border-b' 
+    : '';
   
   const triggerClasses = variant === 'sidebar'
-    ? "w-full"
-    : "w-[180px]"
+    ? 'w-full'
+    : 'w-[180px]';
 
   return (
     <div className={containerClasses}>
@@ -110,7 +110,7 @@ export function ContextSwitcher({ variant = 'sidebar' }: ContextSwitcherProps) {
         </SelectTrigger>
         <SelectContent>
           {Object.entries(modeConfig).map(([key, config]) => {
-            const Icon = config.icon
+            const Icon = config.icon;
             return (
               <SelectItem key={key} value={key as RouteMode}>
                 <div className="flex items-center gap-2">
@@ -118,10 +118,10 @@ export function ContextSwitcher({ variant = 'sidebar' }: ContextSwitcherProps) {
                   <span>{config.label}</span>
                 </div>
               </SelectItem>
-            )
+            );
           })}
         </SelectContent>
       </Select>
     </div>
-  )
+  );
 }

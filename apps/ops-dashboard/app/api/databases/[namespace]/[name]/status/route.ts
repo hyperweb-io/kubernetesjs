@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
 import { InterwebClient as InterwebKubernetesClient } from '@kubernetesjs/ops';
+import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 

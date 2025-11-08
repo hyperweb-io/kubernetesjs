@@ -1,9 +1,11 @@
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DashboardLayout } from '@/components/dashboard-layout';
-import { render } from '../utils/test-utils';
-import { server } from '@/__mocks__/server';
+
 import { createNamespacesList } from '@/__mocks__/handlers/namespaces';
+import { server } from '@/__mocks__/server';
+import { DashboardLayout } from '@/components/dashboard-layout';
+
+import { render } from '../utils/test-utils';
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({

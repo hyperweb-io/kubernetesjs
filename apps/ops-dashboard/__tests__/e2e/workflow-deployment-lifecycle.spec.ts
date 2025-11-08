@@ -1,19 +1,11 @@
-import { test, expect } from '@playwright/test';
+import { expect,test } from '@playwright/test';
+
 import { 
-  setNamespaceTo,
+  cleanupResources, 
+  verifyClusterState} from './utils/cluster-verification';
+import {
   createDeployment,
-  verifyDeploymentCreated,
-  testDeploymentUI,
-  deleteDeployment,
-  verifyDeploymentDeleted,
-  checkDeploymentPods
-} from './utils/deployment-helpers';
-import { 
-  verifyClusterState, 
-  waitForDeploymentReady, 
-  waitForPodReady,
-  cleanupResources 
-} from './utils/cluster-verification';
+  setNamespaceTo} from './utils/deployment-helpers';
 
 test.describe('Workflow 2: Deployment Lifecycle Management', () => {
   

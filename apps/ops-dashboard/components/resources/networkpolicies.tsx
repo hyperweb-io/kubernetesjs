@@ -1,103 +1,101 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type NetworkingK8sIoV1NetworkPolicy as NetworkPolicy } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
-  Shield,
-  ArrowRight,
   ArrowLeft,
-  ArrowUpDown
-} from 'lucide-react'
-import { 
-  useListNetworkingV1NamespacedNetworkPolicyQuery,
-  useListNetworkingV1NetworkPolicyForAllNamespacesQuery,
-  useDeleteNetworkingV1NamespacedNetworkPolicy
-} from '@/k8s'
-import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import { type NetworkingK8sIoV1NetworkPolicy as NetworkPolicy } from '@kubernetesjs/ops'
+  ArrowRight,
+  ArrowUpDown,
+  Eye,
+  Plus, 
+  RefreshCw, 
+  Shield,
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePreferredNamespace } from '@/contexts/NamespaceContext';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { 
+  useDeleteNetworkingV1NamespacedNetworkPolicy,
+  useListNetworkingV1NamespacedNetworkPolicyQuery,
+  useListNetworkingV1NetworkPolicyForAllNamespacesQuery} from '@/k8s';
 
 export function NetworkPoliciesView() {
-  const [selectedPolicy, setSelectedPolicy] = useState<NetworkPolicy | null>(null)
-  const { namespace } = usePreferredNamespace()
+  const [selectedPolicy, setSelectedPolicy] = useState<NetworkPolicy | null>(null);
+  const { namespace } = usePreferredNamespace();
   
   const query = namespace === '_all' 
     ? useListNetworkingV1NetworkPolicyForAllNamespacesQuery({ query: {} })
-    : useListNetworkingV1NamespacedNetworkPolicyQuery({ path: { namespace }, query: {} })
+    : useListNetworkingV1NamespacedNetworkPolicyQuery({ path: { namespace }, query: {} });
     
-  const { data, isLoading, error, refetch } = query
-  const deletePolicy = useDeleteNetworkingV1NamespacedNetworkPolicy()
+  const { data, isLoading, error, refetch } = query;
+  const deletePolicy = useDeleteNetworkingV1NamespacedNetworkPolicy();
 
-  const policies = data?.items || []
+  const policies = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const handleDelete = async (policy: NetworkPolicy) => {
-    const name = policy.metadata!.name!
-    const namespace = policy.metadata!.namespace!
+    const name = policy.metadata!.name!;
+    const namespace = policy.metadata!.namespace!;
     
     const confirmed = await confirmDialog({
       title: 'Delete Network Policy',
       description: `Are you sure you want to delete ${name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deletePolicy.mutateAsync({
           path: { namespace, name },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete network policy:', err)
-        alert(`Failed to delete network policy: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete network policy:', err);
+        alert(`Failed to delete network policy: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getPolicyTypes = (policy: NetworkPolicy): string[] => {
-    return policy.spec?.policyTypes || ['Ingress']
-  }
+    return policy.spec?.policyTypes || ['Ingress'];
+  };
 
   const getSelector = (policy: NetworkPolicy): string => {
-    const selector = policy.spec?.podSelector
+    const selector = policy.spec?.podSelector;
     if (!selector || !selector.matchLabels || Object.keys(selector.matchLabels).length === 0) {
-      return 'All pods'
+      return 'All pods';
     }
     return Object.entries(selector.matchLabels)
       .map(([k, v]) => `${k}=${v}`)
-      .join(', ')
-  }
+      .join(', ');
+  };
 
   const getIngressRules = (policy: NetworkPolicy): number => {
-    return policy.spec?.ingress?.length || 0
-  }
+    return policy.spec?.ingress?.length || 0;
+  };
 
   const getEgressRules = (policy: NetworkPolicy): number => {
-    return policy.spec?.egress?.length || 0
-  }
+    return policy.spec?.egress?.length || 0;
+  };
 
   const getPolicyDirection = (types: string[]) => {
     if (types.includes('Ingress') && types.includes('Egress')) {
-      return { icon: ArrowUpDown, label: 'Both' }
+      return { icon: ArrowUpDown, label: 'Both' };
     } else if (types.includes('Ingress')) {
-      return { icon: ArrowLeft, label: 'Ingress' }
+      return { icon: ArrowLeft, label: 'Ingress' };
     } else if (types.includes('Egress')) {
-      return { icon: ArrowRight, label: 'Egress' }
+      return { icon: ArrowRight, label: 'Egress' };
     }
-    return { icon: Shield, label: 'Unknown' }
-  }
+    return { icon: Shield, label: 'Unknown' };
+  };
 
   return (
     <div className="space-y-6">
@@ -210,9 +208,9 @@ export function NetworkPoliciesView() {
               </TableHeader>
               <TableBody>
                 {policies.map((policy) => {
-                  const types = getPolicyTypes(policy)
-                  const direction = getPolicyDirection(types)
-                  const DirectionIcon = direction.icon
+                  const types = getPolicyTypes(policy);
+                  const direction = getPolicyDirection(types);
+                  const DirectionIcon = direction.icon;
                   
                   return (
                     <TableRow key={`${policy.metadata?.namespace}/${policy.metadata?.name}`}>
@@ -260,7 +258,7 @@ export function NetworkPoliciesView() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  )
+                  );
                 })}
               </TableBody>
             </Table>
@@ -268,5 +266,5 @@ export function NetworkPoliciesView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

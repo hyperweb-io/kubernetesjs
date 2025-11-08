@@ -1,5 +1,5 @@
-import { PVsView } from '@/components/resources/pvs'
+import { PVsView } from '@/components/resources/pvs';
 
 export default function PVsPage() {
-  return <PVsView />
+  return <PVsView />;
 }

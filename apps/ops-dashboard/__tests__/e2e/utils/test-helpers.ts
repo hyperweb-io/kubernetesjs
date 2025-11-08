@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { expect,Page } from '@playwright/test';
 
 /**
  * Wait for the dashboard to be fully loaded

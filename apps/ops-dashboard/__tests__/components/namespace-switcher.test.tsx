@@ -1,9 +1,11 @@
 import userEvent from '@testing-library/user-event';
+import { http, HttpResponse } from 'msw';
+
+import { createNamespacesList } from '@/__mocks__/handlers/namespaces';
+import { server } from '@/__mocks__/server';
+
 import { NamespaceSwitcher } from '../../components/namespace-switcher';
 import { render, screen, waitFor } from '../utils/test-utils';
-import { server } from '@/__mocks__/server';
-import { createNamespacesList } from '@/__mocks__/handlers/namespaces';
-import { http, HttpResponse } from 'msw';
 
 // Mock usePreferredNamespace
 const mockSetNamespace = jest.fn();
@@ -151,7 +153,7 @@ describe('NamespaceSwitcher', () => {
       
       // Wait for data to load
       await waitFor(() => {
-        expect(screen.getByText('default')).toBeInTheDocument()
+        expect(screen.getByText('default')).toBeInTheDocument();
       });
       
       // Test calling setNamespace with 'kube-system'

@@ -1,36 +1,37 @@
+import type { AutoscalingV1Scale as Scale } from '@kubernetesjs/ops';
+
+import { usePreferredNamespace } from '../contexts/NamespaceContext';
 import {
-  useListAppsV1ReplicaSetForAllNamespacesQuery,
-  useListAppsV1NamespacedReplicaSetQuery,
-  useReadAppsV1NamespacedReplicaSetQuery,
   useDeleteAppsV1NamespacedReplicaSet,
+  useListAppsV1NamespacedReplicaSetQuery,
+  useListAppsV1ReplicaSetForAllNamespacesQuery,
+  useReadAppsV1NamespacedReplicaSetQuery,
   useReplaceAppsV1NamespacedReplicaSetScale,
-} from '../k8s/index'
-import { usePreferredNamespace } from '../contexts/NamespaceContext'
-import type { AppsV1ReplicaSet as ReplicaSet, AppsV1ReplicaSetList as ReplicaSetList, AutoscalingV1Scale as Scale } from '@kubernetesjs/ops'
+} from '../k8s/index';
 
 // Query keys
-const REPLICASETS_KEY = ['replicasets'] as const
+const REPLICASETS_KEY = ['replicasets'] as const;
 
 export function useReplicaSets(namespace?: string) {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const ns = namespace || defaultNamespace
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const ns = namespace || defaultNamespace;
 
   if (ns === '_all') {
-    return useListAppsV1ReplicaSetForAllNamespacesQuery({ query: {} })
+    return useListAppsV1ReplicaSetForAllNamespacesQuery({ query: {} });
   }
-  return useListAppsV1NamespacedReplicaSetQuery({ path: { namespace: ns }, query: {} })
+  return useListAppsV1NamespacedReplicaSetQuery({ path: { namespace: ns }, query: {} });
 }
 
 export function useReplicaSet(name: string, namespace?: string) {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const ns = namespace || defaultNamespace
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const ns = namespace || defaultNamespace;
 
-  return useReadAppsV1NamespacedReplicaSetQuery({ path: { namespace: ns, name }, query: {} })
+  return useReadAppsV1NamespacedReplicaSetQuery({ path: { namespace: ns, name }, query: {} });
 }
 
 export function useDeleteReplicaSet() {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const base = useDeleteAppsV1NamespacedReplicaSet()
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const base = useDeleteAppsV1NamespacedReplicaSet();
   return {
     ...base,
     mutate: (
@@ -49,12 +50,12 @@ export function useDeleteReplicaSet() {
         { path: { namespace: namespace || defaultNamespace, name }, query: {} },
         opts
       ),
-  }
+  };
 }
 
 export function useScaleReplicaSet() {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const base = useReplaceAppsV1NamespacedReplicaSetScale()
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const base = useReplaceAppsV1NamespacedReplicaSetScale();
   return {
     ...base,
     mutate: (
@@ -91,5 +92,5 @@ export function useScaleReplicaSet() {
         },
         opts
       ),
-  }
+  };
 }

@@ -1,29 +1,28 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import { type Secret as K8sSecret } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
+  AlertCircle,
   Edit, 
-  Key,
   FileText,
+  Key,
   Lock,
-  Upload,
-  AlertCircle
-} from 'lucide-react'
-import { type Secret as K8sSecret } from '@kubernetesjs/ops'
-import { useSecrets, useDeleteSecret, useCreateSecret } from '@/hooks'
+  Plus, 
+  RefreshCw, 
+  Trash2, 
+  Upload} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
+import { useCreateSecret,useDeleteSecret, useSecrets } from '@/hooks';
+import { confirmDialog } from '@/hooks/useConfirm';
 
 interface Secret {
   name: string
@@ -36,20 +35,20 @@ interface Secret {
 }
 
 export function SecretsView() {
-  const [selectedSecret, setSelectedSecret] = useState<Secret | null>(null)
-  const [createDialogOpen, setCreateDialogOpen] = useState(false)
-  const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const [editingSecret, setEditingSecret] = useState<Secret | null>(null)
-  const [secretName, setSecretName] = useState('')
-  const [secretContent, setSecretContent] = useState('')
-  const [uploadMethod, setUploadMethod] = useState<'text' | 'file'>('text')
-  const [creating, setCreating] = useState(false)
-  const [editing, setEditing] = useState(false)
+  const [selectedSecret, setSelectedSecret] = useState<Secret | null>(null);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingSecret, setEditingSecret] = useState<Secret | null>(null);
+  const [secretName, setSecretName] = useState('');
+  const [secretContent, setSecretContent] = useState('');
+  const [uploadMethod, setUploadMethod] = useState<'text' | 'file'>('text');
+  const [creating, setCreating] = useState(false);
+  const [editing, setEditing] = useState(false);
   
   // Use TanStack Query hooks
-  const { data, isLoading, error, refetch } = useSecrets()
-  const deleteSecretMutation = useDeleteSecret()
-  const createSecretMutation = useCreateSecret()
+  const { data, isLoading, error, refetch } = useSecrets();
+  const deleteSecretMutation = useDeleteSecret();
+  const createSecretMutation = useCreateSecret();
   
   // Format secrets from query data
   const secrets: Secret[] = data?.items
@@ -62,11 +61,11 @@ export function SecretsView() {
       createdAt: item.metadata!.creationTimestamp!,
       immutable: item.immutable,
       k8sData: item
-    })) || []
+    })) || [];
 
   const handleRefresh = () => {
-    refetch()
-  }
+    refetch();
+  };
 
   const handleDelete = async (secret: Secret) => {
     const confirmed = await confirmDialog({
@@ -74,71 +73,71 @@ export function SecretsView() {
       description: `Are you sure you want to delete ${secret.name}? This action cannot be undone.`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteSecretMutation.mutateAsync({
           name: secret.name,
           namespace: secret.namespace
-        })
+        });
       } catch (err) {
-        console.error('Failed to delete secret:', err)
-        alert(`Failed to delete secret: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete secret:', err);
+        alert(`Failed to delete secret: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const parseEnvContent = (content: string): Record<string, string> => {
-    const result: Record<string, string> = {}
-    const lines = content.split('\n')
+    const result: Record<string, string> = {};
+    const lines = content.split('\n');
     
     for (const line of lines) {
-      const trimmed = line.trim()
-      if (!trimmed || trimmed.startsWith('#')) continue
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
       
-      const index = trimmed.indexOf('=')
+      const index = trimmed.indexOf('=');
       if (index > 0) {
-        const key = trimmed.substring(0, index).trim()
-        let value = trimmed.substring(index + 1).trim()
+        const key = trimmed.substring(0, index).trim();
+        let value = trimmed.substring(index + 1).trim();
         
         // Remove quotes if present
         if ((value.startsWith('"') && value.endsWith('"')) || 
             (value.startsWith("'") && value.endsWith("'"))) {
-          value = value.slice(1, -1)
+          value = value.slice(1, -1);
         }
         
-        result[key] = value
+        result[key] = value;
       }
     }
     
-    return result
-  }
+    return result;
+  };
 
   const handleCreateSecret = async () => {
     if (!secretName.trim()) {
-      alert('Please provide a secret name')
-      return
+      alert('Please provide a secret name');
+      return;
     }
     
     if (!secretContent.trim()) {
-      alert('Please provide secret content')
-      return
+      alert('Please provide secret content');
+      return;
     }
     
-    setCreating(true)
+    setCreating(true);
     try {
-      const parsedData = parseEnvContent(secretContent)
+      const parsedData = parseEnvContent(secretContent);
       
       if (Object.keys(parsedData).length === 0) {
-        alert('No valid key-value pairs found in the content')
-        return
+        alert('No valid key-value pairs found in the content');
+        return;
       }
       
       // Convert to base64 for Kubernetes
-      const data: Record<string, string> = {}
+      const data: Record<string, string> = {};
       for (const [key, value] of Object.entries(parsedData)) {
-        data[key] = btoa(value) // Base64 encode
+        data[key] = btoa(value); // Base64 encode
       }
       
       const secret: K8sSecret = {
@@ -149,57 +148,57 @@ export function SecretsView() {
         },
         type: 'Opaque',
         data
-      }
+      };
       
       await createSecretMutation.mutateAsync({
         secret,
         namespace: 'default'
-      })
+      });
       
       // Reset form and close dialog
-      setSecretName('')
-      setSecretContent('')
-      setCreateDialogOpen(false)
+      setSecretName('');
+      setSecretContent('');
+      setCreateDialogOpen(false);
     } catch (err) {
-      console.error('Failed to create secret:', err)
-      alert(`Failed to create secret: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      console.error('Failed to create secret:', err);
+      alert(`Failed to create secret: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
-      setCreating(false)
+      setCreating(false);
     }
-  }
+  };
 
   const handleEditSecret = async () => {
-    if (!editingSecret) return
+    if (!editingSecret) return;
     
     if (!secretName.trim()) {
-      alert('Please provide a secret name')
-      return
+      alert('Please provide a secret name');
+      return;
     }
     
     if (!secretContent.trim()) {
-      alert('Please provide secret content')
-      return
+      alert('Please provide secret content');
+      return;
     }
     
-    setEditing(true)
+    setEditing(true);
     try {
-      const parsedData = parseEnvContent(secretContent)
+      const parsedData = parseEnvContent(secretContent);
       
       if (Object.keys(parsedData).length === 0) {
-        alert('No valid key-value pairs found in the content')
-        return
+        alert('No valid key-value pairs found in the content');
+        return;
       }
       
       // First delete the old secret
       await deleteSecretMutation.mutateAsync({
         name: editingSecret.name,
         namespace: editingSecret.namespace
-      })
+      });
       
       // Convert to base64 for Kubernetes
-      const data: Record<string, string> = {}
+      const data: Record<string, string> = {};
       for (const [key, value] of Object.entries(parsedData)) {
-        data[key] = btoa(value) // Base64 encode
+        data[key] = btoa(value); // Base64 encode
       }
       
       // Then create the new secret with the same name
@@ -211,72 +210,72 @@ export function SecretsView() {
         },
         type: 'Opaque',
         data
-      }
+      };
       
       await createSecretMutation.mutateAsync({
         secret,
         namespace: editingSecret.namespace
-      })
+      });
       
       // Reset form and close dialog
-      setSecretName('')
-      setSecretContent('')
-      setEditDialogOpen(false)
-      setEditingSecret(null)
+      setSecretName('');
+      setSecretContent('');
+      setEditDialogOpen(false);
+      setEditingSecret(null);
     } catch (err) {
-      console.error('Failed to edit secret:', err)
-      alert(`Failed to edit secret: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      console.error('Failed to edit secret:', err);
+      alert(`Failed to edit secret: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
-      setEditing(false)
+      setEditing(false);
     }
-  }
+  };
 
   const handleOpenEditDialog = (secret: Secret) => {
-    setEditingSecret(secret)
-    setSecretName(secret.name)
-    setSecretContent('') // Start with empty content for security
-    setUploadMethod('text')
-    setEditDialogOpen(true)
-  }
+    setEditingSecret(secret);
+    setSecretName(secret.name);
+    setSecretContent(''); // Start with empty content for security
+    setUploadMethod('text');
+    setEditDialogOpen(true);
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
+    const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onload = (e) => {
-        const content = e.target?.result as string
-        setSecretContent(content)
-      }
-      reader.readAsText(file)
+        const content = e.target?.result as string;
+        setSecretContent(content);
+      };
+      reader.readAsText(file);
     }
-  }
+  };
 
   const getTypeBadge = (type: string) => {
     switch (type) {
-      case 'Opaque':
-        return <Badge variant="secondary" className="flex items-center gap-1">
-          <Key className="w-3 h-3" />
+    case 'Opaque':
+      return <Badge variant="secondary" className="flex items-center gap-1">
+        <Key className="w-3 h-3" />
           Generic
-        </Badge>
-      case 'kubernetes.io/tls':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <Lock className="w-3 h-3" />
+      </Badge>;
+    case 'kubernetes.io/tls':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <Lock className="w-3 h-3" />
           TLS
-        </Badge>
-      case 'kubernetes.io/dockerconfigjson':
-        return <Badge variant="outline" className="flex items-center gap-1">
-          <FileText className="w-3 h-3" />
+      </Badge>;
+    case 'kubernetes.io/dockerconfigjson':
+      return <Badge variant="outline" className="flex items-center gap-1">
+        <FileText className="w-3 h-3" />
           Docker
-        </Badge>
-      case 'kubernetes.io/service-account-token':
-        return <Badge className="flex items-center gap-1">
-          <Key className="w-3 h-3" />
+      </Badge>;
+    case 'kubernetes.io/service-account-token':
+      return <Badge className="flex items-center gap-1">
+        <Key className="w-3 h-3" />
           Service Account
-        </Badge>
-      default:
-        return <Badge>{type}</Badge>
+      </Badge>;
+    default:
+      return <Badge>{type}</Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -647,5 +646,5 @@ export function SecretsView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,108 +1,107 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import type { Event } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
+  Activity,
   AlertCircle,
-  Info,
   AlertTriangle,
-  Filter,
   Clock,
-  Activity
-} from 'lucide-react'
+  Filter,
+  Info,
+  RefreshCw} from 'lucide-react';
+import { useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePreferredNamespace } from '@/contexts/NamespaceContext';
 import { 
-  useListCoreV1NamespacedEventQuery,
-  useListCoreV1EventForAllNamespacesQuery
-} from '@/k8s'
-import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { Event } from '@kubernetesjs/ops'
+  useListCoreV1EventForAllNamespacesQuery,
+  useListCoreV1NamespacedEventQuery} from '@/k8s';
 
 export function EventsView() {
-  const [typeFilter, setTypeFilter] = useState<string>('All')
-  const { namespace } = usePreferredNamespace()
+  const [typeFilter, setTypeFilter] = useState<string>('All');
+  const { namespace } = usePreferredNamespace();
   
   // Note: Events API has changed in newer versions, using v1 events
   const query = namespace === '_all' 
     ? useListCoreV1EventForAllNamespacesQuery({ query: {} })
-    : useListCoreV1NamespacedEventQuery({ path: { namespace }, query: {} })
+    : useListCoreV1NamespacedEventQuery({ path: { namespace }, query: {} });
     
-  const { data, isLoading, error, refetch } = query
+  const { data, isLoading, error, refetch } = query;
 
-  const events = data?.items || []
+  const events = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const getEventType = (event: Event): string => {
-    return event.type || 'Normal'
-  }
+    return event.type || 'Normal';
+  };
 
   const getEventReason = (event: Event): string => {
-    return event.reason || 'Unknown'
-  }
+    return event.reason || 'Unknown';
+  };
 
   const getEventMessage = (event: Event): string => {
-    return event.message || 'No message'
-  }
+    return event.message || 'No message';
+  };
 
   const getEventObject = (event: Event): string => {
-    const obj = event.involvedObject
-    if (!obj) return 'Unknown'
-    return `${obj.kind}/${obj.name}`
-  }
+    const obj = event.involvedObject;
+    if (!obj) return 'Unknown';
+    return `${obj.kind}/${obj.name}`;
+  };
 
   const getEventTime = (event: Event): string => {
-    const timestamp = event.lastTimestamp || event.firstTimestamp
-    if (!timestamp) return 'Unknown'
+    const timestamp = event.lastTimestamp || event.firstTimestamp;
+    if (!timestamp) return 'Unknown';
     
-    const date = new Date(timestamp)
-    const now = new Date()
-    const diff = now.getTime() - date.getTime()
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
     
-    if (diff < 60000) return 'Just now'
-    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`
-    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`
-    return date.toLocaleDateString()
-  }
+    if (diff < 60000) return 'Just now';
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+    return date.toLocaleDateString();
+  };
 
   const getEventCount = (event: Event): number => {
-    return event.count || 1
-  }
+    return event.count || 1;
+  };
 
   const getTypeBadge = (type: string) => {
     switch (type) {
-      case 'Normal':
-        return <Badge variant="default" className="flex items-center gap-1">
-          <Info className="w-3 h-3" />
-          {type}
-        </Badge>
-      case 'Warning':
-        return <Badge variant="warning" className="flex items-center gap-1">
-          <AlertTriangle className="w-3 h-3" />
-          {type}
-        </Badge>
-      case 'Error':
-        return <Badge variant="destructive" className="flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
-          {type}
-        </Badge>
-      default:
-        return <Badge variant="secondary">{type}</Badge>
+    case 'Normal':
+      return <Badge variant="default" className="flex items-center gap-1">
+        <Info className="w-3 h-3" />
+        {type}
+      </Badge>;
+    case 'Warning':
+      return <Badge variant="warning" className="flex items-center gap-1">
+        <AlertTriangle className="w-3 h-3" />
+        {type}
+      </Badge>;
+    case 'Error':
+      return <Badge variant="destructive" className="flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" />
+        {type}
+      </Badge>;
+    default:
+      return <Badge variant="secondary">{type}</Badge>;
     }
-  }
+  };
 
   const filteredEvents = typeFilter === 'All' 
     ? events 
-    : events.filter((e: Event) => getEventType(e) === typeFilter)
+    : events.filter((e: Event) => getEventType(e) === typeFilter);
 
   const sortedEvents = [...filteredEvents].sort((a: Event, b: Event) => {
-    const timeA = new Date(a.lastTimestamp || a.firstTimestamp || 0).getTime()
-    const timeB = new Date(b.lastTimestamp || b.firstTimestamp || 0).getTime()
-    return timeB - timeA // Most recent first
-  })
+    const timeA = new Date(a.lastTimestamp || a.firstTimestamp || 0).getTime();
+    const timeB = new Date(b.lastTimestamp || b.firstTimestamp || 0).getTime();
+    return timeB - timeA; // Most recent first
+  });
 
   return (
     <div className="space-y-6">
@@ -273,5 +272,5 @@ export function EventsView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

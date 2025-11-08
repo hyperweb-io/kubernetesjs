@@ -1,65 +1,63 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type RbacAuthorizationK8sIoV1ClusterRoleBinding as ClusterRoleBinding,type RbacAuthorizationK8sIoV1RoleBinding as RoleBinding } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
-  UserCheck,
-  Users,
+  Bot,
+  Eye,
+  Plus, 
+  RefreshCw, 
+  Trash2, 
   User,
-  Bot
-} from 'lucide-react'
+  UserCheck,
+  Users} from 'lucide-react';
+import { useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePreferredNamespace } from '@/contexts/NamespaceContext';
+import { confirmDialog } from '@/hooks/useConfirm';
 import { 
-  useListRbacAuthorizationV1NamespacedRoleBindingQuery,
-  useListRbacAuthorizationV1RoleBindingForAllNamespacesQuery,
+  useDeleteRbacAuthorizationV1ClusterRoleBinding,
   useDeleteRbacAuthorizationV1NamespacedRoleBinding,
   useListRbacAuthorizationV1ClusterRoleBindingQuery,
-  useDeleteRbacAuthorizationV1ClusterRoleBinding
-} from '@/k8s'
-import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import { type RbacAuthorizationK8sIoV1RoleBinding as RoleBinding, type RbacAuthorizationK8sIoV1ClusterRoleBinding as ClusterRoleBinding } from '@kubernetesjs/ops'
-
-import { confirmDialog } from '@/hooks/useConfirm'
+  useListRbacAuthorizationV1NamespacedRoleBindingQuery,
+  useListRbacAuthorizationV1RoleBindingForAllNamespacesQuery} from '@/k8s';
 
 export function RoleBindingsView() {
-  const [selectedBinding, setSelectedBinding] = useState<RoleBinding | ClusterRoleBinding | null>(null)
-  const [showClusterBindings, setShowClusterBindings] = useState(false)
-  const { namespace } = usePreferredNamespace()
+  const [selectedBinding, setSelectedBinding] = useState<RoleBinding | ClusterRoleBinding | null>(null);
+  const [showClusterBindings, setShowClusterBindings] = useState(false);
+  const { namespace } = usePreferredNamespace();
   
   // Namespace role bindings
   const nsQuery = namespace === '_all' 
     ? useListRbacAuthorizationV1RoleBindingForAllNamespacesQuery({ query: {} })
-    : useListRbacAuthorizationV1NamespacedRoleBindingQuery({ path: { namespace }, query: {} })
+    : useListRbacAuthorizationV1NamespacedRoleBindingQuery({ path: { namespace }, query: {} });
   
   // Cluster role bindings
-  const clusterQuery = useListRbacAuthorizationV1ClusterRoleBindingQuery({ query: {} })
+  const clusterQuery = useListRbacAuthorizationV1ClusterRoleBindingQuery({ query: {} });
   
-  const query = showClusterBindings ? clusterQuery : nsQuery
-  const { data, isLoading, error, refetch } = query
+  const query = showClusterBindings ? clusterQuery : nsQuery;
+  const { data, isLoading, error, refetch } = query;
   
-  const deleteNsBinding = useDeleteRbacAuthorizationV1NamespacedRoleBinding()
-  const deleteClusterBinding = useDeleteRbacAuthorizationV1ClusterRoleBinding()
+  const deleteNsBinding = useDeleteRbacAuthorizationV1NamespacedRoleBinding();
+  const deleteClusterBinding = useDeleteRbacAuthorizationV1ClusterRoleBinding();
 
-  const bindings = data?.items || []
+  const bindings = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const handleDelete = async (binding: RoleBinding | ClusterRoleBinding) => {
-    const name = binding.metadata!.name!
+    const name = binding.metadata!.name!;
     
     const confirmed = await confirmDialog({
       title: 'Delete Role Binding',
       description: `Are you sure you want to delete ${name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
@@ -67,53 +65,53 @@ export function RoleBindingsView() {
           await deleteClusterBinding.mutateAsync({
             path: { name },
             query: {}
-          })
+          });
         } else {
-          const namespace = binding.metadata!.namespace!
+          const namespace = binding.metadata!.namespace!;
           await deleteNsBinding.mutateAsync({
             path: { namespace, name },
             query: {}
-          })
+          });
         }
-        refetch()
+        refetch();
       } catch (err) {
-        console.error('Failed to delete role binding:', err)
-        alert(`Failed to delete role binding: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete role binding:', err);
+        alert(`Failed to delete role binding: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getRoleRef = (binding: RoleBinding | ClusterRoleBinding): string => {
-    const ref = binding.roleRef
-    return `${ref.kind}/${ref.name}`
-  }
+    const ref = binding.roleRef;
+    return `${ref.kind}/${ref.name}`;
+  };
 
   const getSubjects = (binding: RoleBinding | ClusterRoleBinding): string => {
-    const subjects = binding.subjects || []
-    if (subjects.length === 0) return 'None'
+    const subjects = binding.subjects || [];
+    if (subjects.length === 0) return 'None';
     if (subjects.length === 1) {
-      const s = subjects[0]
-      return `${s.kind}/${s.name}`
+      const s = subjects[0];
+      return `${s.kind}/${s.name}`;
     }
-    return `${subjects.length} subjects`
-  }
+    return `${subjects.length} subjects`;
+  };
 
   const getSubjectTypes = (binding: RoleBinding | ClusterRoleBinding): string[] => {
-    const subjects = binding.subjects || []
-    const types = new Set(subjects.map(s => s.kind))
-    return Array.from(types)
-  }
+    const subjects = binding.subjects || [];
+    const types = new Set(subjects.map(s => s.kind));
+    return Array.from(types);
+  };
 
   const getSubjectIcon = (types: string[]) => {
-    if (types.includes('ServiceAccount')) return Bot
-    if (types.includes('Group')) return Users
-    if (types.includes('User')) return User
-    return UserCheck
-  }
+    if (types.includes('ServiceAccount')) return Bot;
+    if (types.includes('Group')) return Users;
+    if (types.includes('User')) return User;
+    return UserCheck;
+  };
 
   const isClusterRole = (binding: RoleBinding | ClusterRoleBinding): boolean => {
-    return binding.roleRef.kind === 'ClusterRole'
-  }
+    return binding.roleRef.kind === 'ClusterRole';
+  };
 
   return (
     <div className="space-y-6">
@@ -243,8 +241,8 @@ export function RoleBindingsView() {
               </TableHeader>
               <TableBody>
                 {bindings.map((binding) => {
-                  const subjectTypes = getSubjectTypes(binding)
-                  const SubjectIcon = getSubjectIcon(subjectTypes)
+                  const subjectTypes = getSubjectTypes(binding);
+                  const SubjectIcon = getSubjectIcon(subjectTypes);
                   
                   return (
                     <TableRow key={binding.metadata?.uid || binding.metadata?.name}>
@@ -289,7 +287,7 @@ export function RoleBindingsView() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  )
+                  );
                 })}
               </TableBody>
             </Table>
@@ -297,5 +295,5 @@ export function RoleBindingsView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

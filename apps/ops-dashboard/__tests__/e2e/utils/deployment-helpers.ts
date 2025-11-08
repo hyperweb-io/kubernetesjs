@@ -1,5 +1,5 @@
-import { Page, expect } from '@playwright/test';
-import { verifyPageLoadedSuccessfully } from './page-verification';
+import { expect,Page } from '@playwright/test';
+
 
 /**
  * Set namespace to a specific namespace using the namespace switcher
@@ -112,8 +112,8 @@ function generateDeploymentYAML(name: string, config: DeploymentConfig): string 
   const envVars = config.env || {};
   const envYAML = Object.keys(envVars).length > 0 
     ? Object.entries(envVars)
-        .map(([key, value]) => `        - name: ${key}\n          value: ${value}`)
-        .join('\n')
+      .map(([key, value]) => `        - name: ${key}\n          value: ${value}`)
+      .join('\n')
     : '';
   
   const envSection = envYAML ? `\n        env:\n${envYAML}` : '';

@@ -1,5 +1,5 @@
-import { http, HttpResponse } from "msw"
-import { API_BASE } from "./common"
+import { http, HttpResponse } from 'msw';
+
 
 export interface OperatorInfo {
   name: string
@@ -50,72 +50,72 @@ export const createOperatorsListData = (): OperatorInfo[] => {
       version: 'v4.0.0',
       docsUrl: 'https://grafana.com/docs'
     }
-  ]
-}
+  ];
+};
 
 export const createOperatorsList = (operators: OperatorInfo[] = createOperatorsListData()) => {
   return http.get('/api/operators', () => {
-    return HttpResponse.json(operators)
-  })
-}
+    return HttpResponse.json(operators);
+  });
+};
 
 export const createOperatorsListError = (status: number = 500, message: string = 'Internal Server Error') => {
   return http.get('/api/operators', () => {
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createOperatorsListNetworkError = () => {
   return http.get('/api/operators', () => {
-    return HttpResponse.error()
-  })
-}
+    return HttpResponse.error();
+  });
+};
 
 export const createInstallOperator = (operatorName: string) => {
   return http.post(`/api/operators/${operatorName}/install`, () => {
     return HttpResponse.json({ 
       success: true, 
       message: `Operator ${operatorName} installed successfully` 
-    })
-  })
-}
+    });
+  });
+};
 
 export const createInstallOperatorError = (operatorName: string, status: number = 500, message: string = 'Installation failed') => {
   return http.post(`/api/operators/${operatorName}/install`, () => {
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createUninstallOperator = (operatorName: string) => {
   return http.delete(`/api/operators/${operatorName}/install`, () => {
     return HttpResponse.json({ 
       success: true, 
       message: `Operator ${operatorName} uninstalled successfully` 
-    })
-  })
-}
+    });
+  });
+};
 
 export const createUninstallOperatorError = (operatorName: string, status: number = 500, message: string = 'Uninstallation failed') => {
   return http.delete(`/api/operators/${operatorName}/install`, () => {
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createInstallOperatorSlow = (operatorName: string, delay: number = 2000) => {
   return http.post(`/api/operators/${operatorName}/install`, async () => {
-    await new Promise(resolve => setTimeout(resolve, delay))
+    await new Promise(resolve => setTimeout(resolve, delay));
     return HttpResponse.json({ 
       success: true, 
       message: `Operator ${operatorName} installed successfully` 
-    })
-  })
-}
+    });
+  });
+};

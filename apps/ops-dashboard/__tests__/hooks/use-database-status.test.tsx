@@ -1,13 +1,12 @@
-import { useDatabaseStatus, type DatabaseStatusSummary, type DatabaseInstanceRow } from '../../hooks/use-database-status'
-import { server } from '../../__mocks__/server'
-import { renderHook, waitFor } from '../utils/test-utils'
-import { http, HttpResponse } from 'msw'
+import { http, HttpResponse } from 'msw';
+
 import { 
   createDatabaseStatus, 
   createDatabaseStatusError, 
-  createDatabaseStatusNetworkError,
-  createDatabaseStatusData 
-} from '../../__mocks__/handlers/databases'
+  createDatabaseStatusNetworkError} from '../../__mocks__/handlers/databases';
+import { server } from '../../__mocks__/server';
+import {type DatabaseStatusSummary, useDatabaseStatus } from '../../hooks/use-database-status';
+import { renderHook, waitFor } from '../utils/test-utils';
 
 describe('useDatabaseStatus', () => {
   const mockDatabaseStatus: DatabaseStatusSummary = {
@@ -67,58 +66,58 @@ describe('useDatabaseStatus', () => {
         restarts: 1
       }
     ]
-  }
+  };
 
   it('should fetch database status successfully', async () => {
-    server.use(createDatabaseStatus(mockDatabaseStatus))
+    server.use(createDatabaseStatus(mockDatabaseStatus));
 
-    const { result } = renderHook(() => useDatabaseStatus('default', 'postgres-cluster'))
+    const { result } = renderHook(() => useDatabaseStatus('default', 'postgres-cluster'));
 
     await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true)
-    })
+      expect(result.current.isSuccess).toBe(true);
+    });
 
-    expect(result.current.data).toEqual(mockDatabaseStatus)
-    expect(result.current.isLoading).toBe(false)
-  })
+    expect(result.current.data).toEqual(mockDatabaseStatus);
+    expect(result.current.isLoading).toBe(false);
+  });
 
   it('should handle API errors', async () => {
-    server.use(createDatabaseStatusError(404, 'Database not found'))
+    server.use(createDatabaseStatusError(404, 'Database not found'));
 
-    const { result } = renderHook(() => useDatabaseStatus('default', 'non-existent'))
+    const { result } = renderHook(() => useDatabaseStatus('default', 'non-existent'));
 
     await waitFor(() => {
-      expect(result.current.isError).toBe(true)
-    })
+      expect(result.current.isError).toBe(true);
+    });
 
-    expect(result.current.error).toBeDefined()
-    expect(result.current.data).toBeUndefined()
-  })
+    expect(result.current.error).toBeDefined();
+    expect(result.current.data).toBeUndefined();
+  });
 
   it('should handle network errors', async () => {
-    server.use(createDatabaseStatusNetworkError())
+    server.use(createDatabaseStatusNetworkError());
 
-    const { result } = renderHook(() => useDatabaseStatus('default', 'postgres-cluster'))
+    const { result } = renderHook(() => useDatabaseStatus('default', 'postgres-cluster'));
 
     await waitFor(() => {
-      expect(result.current.isError).toBe(true)
-    })
+      expect(result.current.isError).toBe(true);
+    });
 
-    expect(result.current.error).toBeDefined()
-  })
+    expect(result.current.error).toBeDefined();
+  });
 
   it('should have correct query configuration with namespace and name', async () => {
-    server.use(createDatabaseStatus(mockDatabaseStatus))
+    server.use(createDatabaseStatus(mockDatabaseStatus));
 
-    const { result } = renderHook(() => useDatabaseStatus('production', 'mysql-cluster'))
+    const { result } = renderHook(() => useDatabaseStatus('production', 'mysql-cluster'));
 
-    expect(result.current.isLoading).toBe(true)
-    expect(result.current.data).toBeUndefined()
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.data).toBeUndefined();
 
     await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true)
-    })
-  })
+      expect(result.current.isSuccess).toBe(true);
+    });
+  });
 
   it('should handle different database statuses', async () => {
     const differentStatus: DatabaseStatusSummary = {
@@ -138,20 +137,20 @@ describe('useDatabaseStatus', () => {
           restarts: 3
         }
       ]
-    }
+    };
 
-    server.use(createDatabaseStatus(differentStatus))
+    server.use(createDatabaseStatus(differentStatus));
 
-    const { result } = renderHook(() => useDatabaseStatus('staging', 'mysql-cluster'))
+    const { result } = renderHook(() => useDatabaseStatus('staging', 'mysql-cluster'));
 
     await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true)
-    })
+      expect(result.current.isSuccess).toBe(true);
+    });
 
-    expect(result.current.data?.phase).toBe('Pending')
-    expect(result.current.data?.readyInstances).toBe(0)
-    expect(result.current.data?.instancesTable[0].status).toBe('NotReady')
-  })
+    expect(result.current.data?.phase).toBe('Pending');
+    expect(result.current.data?.readyInstances).toBe(0);
+    expect(result.current.data?.instancesTable[0].status).toBe('NotReady');
+  });
 
   it('should handle database with no backups configured', async () => {
     const noBackupsStatus: DatabaseStatusSummary = {
@@ -160,19 +159,19 @@ describe('useDatabaseStatus', () => {
         configured: false,
         scheduledCount: 0
       }
-    }
+    };
 
-    server.use(createDatabaseStatus(noBackupsStatus))
+    server.use(createDatabaseStatus(noBackupsStatus));
 
-    const { result } = renderHook(() => useDatabaseStatus('default', 'postgres-cluster'))
+    const { result } = renderHook(() => useDatabaseStatus('default', 'postgres-cluster'));
 
     await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true)
-    })
+      expect(result.current.isSuccess).toBe(true);
+    });
 
-    expect(result.current.data?.backups.configured).toBe(false)
-    expect(result.current.data?.backups.scheduledCount).toBe(0)
-  })
+    expect(result.current.data?.backups.configured).toBe(false);
+    expect(result.current.data?.backups.scheduledCount).toBe(0);
+  });
 
   it('should handle database with no streaming configured', async () => {
     const noStreamingStatus: DatabaseStatusSummary = {
@@ -181,36 +180,36 @@ describe('useDatabaseStatus', () => {
         configured: false,
         replicas: 0
       }
-    }
+    };
 
-    server.use(createDatabaseStatus(noStreamingStatus))
+    server.use(createDatabaseStatus(noStreamingStatus));
 
-    const { result } = renderHook(() => useDatabaseStatus('default', 'postgres-cluster'))
+    const { result } = renderHook(() => useDatabaseStatus('default', 'postgres-cluster'));
 
     await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true)
-    })
+      expect(result.current.isSuccess).toBe(true);
+    });
 
-    expect(result.current.data?.streaming.configured).toBe(false)
-    expect(result.current.data?.streaming.replicas).toBe(0)
-  })
+    expect(result.current.data?.streaming.configured).toBe(false);
+    expect(result.current.data?.streaming.replicas).toBe(0);
+  });
 
   it('should refetch on interval', async () => {
-    let callCount = 0
+    let callCount = 0;
     const handler = http.get('/api/databases/:namespace/:name/status', () => {
-      callCount++
-      return HttpResponse.json(mockDatabaseStatus)
-    })
+      callCount++;
+      return HttpResponse.json(mockDatabaseStatus);
+    });
 
-    server.use(handler)
+    server.use(handler);
 
-    const { result } = renderHook(() => useDatabaseStatus('default', 'postgres-cluster'))
+    const { result } = renderHook(() => useDatabaseStatus('default', 'postgres-cluster'));
 
     await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true)
-    })
+      expect(result.current.isSuccess).toBe(true);
+    });
 
     // Wait for potential refetch (this test mainly verifies the configuration)
-    expect(callCount).toBeGreaterThanOrEqual(1)
-  })
-})
+    expect(callCount).toBeGreaterThanOrEqual(1);
+  });
+});

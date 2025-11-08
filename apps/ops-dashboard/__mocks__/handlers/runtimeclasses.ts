@@ -1,6 +1,7 @@
-import { http, HttpResponse } from "msw"
-import { API_BASE } from "./common"
-import { NodeK8sIoV1RuntimeClass } from "@kubernetesjs/ops"
+import { NodeK8sIoV1RuntimeClass } from '@kubernetesjs/ops';
+import { http, HttpResponse } from 'msw';
+
+import { API_BASE } from './common';
 
 export const createRuntimeClassesListData = (): NodeK8sIoV1RuntimeClass[] => {
   return [
@@ -47,8 +48,8 @@ export const createRuntimeClassesListData = (): NodeK8sIoV1RuntimeClass[] => {
       },
       overhead: { podFixed: { cpu: '50m', memory: '32Mi' } }
     }
-  ]
-}
+  ];
+};
 
 export const createRuntimeClassesList = (runtimeClasses: NodeK8sIoV1RuntimeClass[] = createRuntimeClassesListData()) => {
   return http.get(`${API_BASE}/apis/node.k8s.io/v1/runtimeclasses`, () => {
@@ -56,44 +57,44 @@ export const createRuntimeClassesList = (runtimeClasses: NodeK8sIoV1RuntimeClass
       apiVersion: 'node.k8s.io/v1',
       kind: 'RuntimeClassList',
       items: runtimeClasses
-    })
-  })
-}
+    });
+  });
+};
 
 export const createRuntimeClassesListError = (status: number = 500, message: string = 'Internal Server Error') => {
   return http.get(`${API_BASE}/apis/node.k8s.io/v1/runtimeclasses`, () => {
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createRuntimeClassesListSlow = (runtimeClasses: NodeK8sIoV1RuntimeClass[] = createRuntimeClassesListData(), delay: number = 1000) => {
   return http.get(`${API_BASE}/apis/node.k8s.io/v1/runtimeclasses`, async () => {
-    await new Promise(resolve => setTimeout(resolve, delay))
+    await new Promise(resolve => setTimeout(resolve, delay));
     return HttpResponse.json({
       apiVersion: 'node.k8s.io/v1',
       kind: 'RuntimeClassList',
       items: runtimeClasses
-    })
-  })
-}
+    });
+  });
+};
 
 export const deleteRuntimeClassHandler = (name: string) => {
   return http.delete(`${API_BASE}/apis/node.k8s.io/v1/runtimeclasses/:name`, ({ params }) => {
     if (params.name === name) {
-      return HttpResponse.json({}, { status: 200 })
+      return HttpResponse.json({}, { status: 200 });
     }
-    return HttpResponse.json({ error: 'Runtime class not found' }, { status: 404 })
-  })
-}
+    return HttpResponse.json({ error: 'Runtime class not found' }, { status: 404 });
+  });
+};
 
 export const deleteRuntimeClassErrorHandler = (name: string, status: number = 500, message: string = 'Deletion failed') => {
   return http.delete(`${API_BASE}/apis/node.k8s.io/v1/runtimeclasses/:name`, ({ params }) => {
     if (params.name === name) {
-      return HttpResponse.json({ error: message }, { status })
+      return HttpResponse.json({ error: message }, { status });
     }
-    return HttpResponse.json({ error: 'Runtime class not found' }, { status: 404 })
-  })
-}
+    return HttpResponse.json({ error: 'Runtime class not found' }, { status: 404 });
+  });
+};

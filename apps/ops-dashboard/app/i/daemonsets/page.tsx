@@ -1,5 +1,5 @@
-import { DaemonSetsView } from '@/components/resources/daemonsets'
+import { DaemonSetsView } from '@/components/resources/daemonsets';
 
 export default function DaemonSetsPage() {
-  return <DaemonSetsView />
+  return <DaemonSetsView />;
 }

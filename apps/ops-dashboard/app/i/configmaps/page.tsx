@@ -1,5 +1,5 @@
-import { ConfigMapsView } from '@/components/resources/configmaps'
+import { ConfigMapsView } from '@/components/resources/configmaps';
 
 export default function ConfigMapsPage() {
-  return <ConfigMapsView />
+  return <ConfigMapsView />;
 }

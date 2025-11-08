@@ -1,11 +1,6 @@
 import { CLIOptions, Inquirerer, Question } from 'inquirerer';
+import { Deployment, KubernetesClient, Service } from 'kubernetesjs';
 import { ParsedArgs } from 'minimist';
-import { KubernetesClient, Deployment, Service } from 'kubernetesjs';
-
-interface DeploymentAnswers {
-  deploymentType: string;
-  confirmDeployment: boolean;
-}
 
 const createDeployment = (type: string): Deployment => {
   const commonMetadata = {
@@ -32,75 +27,75 @@ const createDeployment = (type: string): Deployment => {
   };
 
   switch (type) {
-    case 'minio':
-      return {
-        apiVersion: 'apps/v1',
-        kind: 'Deployment',
-        metadata: commonMetadata,
-        spec: {
-          ...commonSpec,
-          template: {
-            ...commonSpec.template,
-            spec: {
-              containers: [{
-                name: 'minio',
-                image: 'minio/minio:latest',
-                ports: [{ containerPort: 9000, name: 'minio' }],
-                env: [
-                  { name: 'MINIO_ROOT_USER', value: 'minioadmin' },
-                  { name: 'MINIO_ROOT_PASSWORD', value: 'minioadmin' }
-                ],
-                args: ['server', '/data']
-              }]
-            }
+  case 'minio':
+    return {
+      apiVersion: 'apps/v1',
+      kind: 'Deployment',
+      metadata: commonMetadata,
+      spec: {
+        ...commonSpec,
+        template: {
+          ...commonSpec.template,
+          spec: {
+            containers: [{
+              name: 'minio',
+              image: 'minio/minio:latest',
+              ports: [{ containerPort: 9000, name: 'minio' }],
+              env: [
+                { name: 'MINIO_ROOT_USER', value: 'minioadmin' },
+                { name: 'MINIO_ROOT_PASSWORD', value: 'minioadmin' }
+              ],
+              args: ['server', '/data']
+            }]
           }
         }
-      };
-    case 'postgres':
-      return {
-        apiVersion: 'apps/v1',
-        kind: 'Deployment',
-        metadata: commonMetadata,
-        spec: {
-          ...commonSpec,
-          template: {
-            ...commonSpec.template,
-            spec: {
-              containers: [{
-                name: 'postgres',
-                image: 'pyramation/pgvector:13.3-alpine',
-                ports: [{ containerPort: 5432, name: 'postgres' }],
-                env: [
-                  { name: 'POSTGRES_USER', value: 'postgres' },
-                  { name: 'POSTGRES_PASSWORD', value: 'postgres' },
-                  { name: 'POSTGRES_DB', value: 'postgres' }
-                ]
-              }]
-            }
+      }
+    };
+  case 'postgres':
+    return {
+      apiVersion: 'apps/v1',
+      kind: 'Deployment',
+      metadata: commonMetadata,
+      spec: {
+        ...commonSpec,
+        template: {
+          ...commonSpec.template,
+          spec: {
+            containers: [{
+              name: 'postgres',
+              image: 'pyramation/pgvector:13.3-alpine',
+              ports: [{ containerPort: 5432, name: 'postgres' }],
+              env: [
+                { name: 'POSTGRES_USER', value: 'postgres' },
+                { name: 'POSTGRES_PASSWORD', value: 'postgres' },
+                { name: 'POSTGRES_DB', value: 'postgres' }
+              ]
+            }]
           }
         }
-      };
-    case 'ollama':
-      return {
-        apiVersion: 'apps/v1',
-        kind: 'Deployment',
-        metadata: commonMetadata,
-        spec: {
-          ...commonSpec,
-          template: {
-            ...commonSpec.template,
-            spec: {
-              containers: [{
-                name: 'ollama',
-                image: 'ollama/ollama:latest',
-                ports: [{ containerPort: 11434, name: 'ollama' }]
-              }]
-            }
+      }
+    };
+  case 'ollama':
+    return {
+      apiVersion: 'apps/v1',
+      kind: 'Deployment',
+      metadata: commonMetadata,
+      spec: {
+        ...commonSpec,
+        template: {
+          ...commonSpec.template,
+          spec: {
+            containers: [{
+              name: 'ollama',
+              image: 'ollama/ollama:latest',
+              ports: [{ containerPort: 11434, name: 'ollama' }]
+            }]
           }
         }
-      };
-    default:
-      throw new Error(`Unsupported deployment type: ${type}`);
+      }
+    };
+  default:
+    throw new Error(`Unsupported deployment type: ${type}`);
   }
 };
 
@@ -119,41 +114,41 @@ const createService = (type: string): Service => {
   };
 
   switch (type) {
-    case 'minio':
-      return {
-        apiVersion: 'v1',
-        kind: 'Service',
-        metadata: commonMetadata,
-        spec: {
-          ...commonSpec,
-          ports: [{ port: 9000, targetPort: 'minio' }],
-          type: 'ClusterIP'
-        }
-      };
-    case 'postgres':
-      return {
-        apiVersion: 'v1',
-        kind: 'Service',
-        metadata: commonMetadata,
-        spec: {
-          ...commonSpec,
-          ports: [{ port: 5432, targetPort: 'postgres' }],
-          type: 'ClusterIP'
-        }
-      };
-    case 'ollama':
-      return {
-        apiVersion: 'v1',
-        kind: 'Service',
-        metadata: commonMetadata,
-        spec: {
-          ...commonSpec,
-          ports: [{ port: 11434, targetPort: 'ollama' }],
-          type: 'ClusterIP'
-        }
-      };
-    default:
-      throw new Error(`Unsupported service type: ${type}`);
+  case 'minio':
+    return {
+      apiVersion: 'v1',
+      kind: 'Service',
+      metadata: commonMetadata,
+      spec: {
+        ...commonSpec,
+        ports: [{ port: 9000, targetPort: 'minio' }],
+        type: 'ClusterIP'
+      }
+    };
+  case 'postgres':
+    return {
+      apiVersion: 'v1',
+      kind: 'Service',
+      metadata: commonMetadata,
+      spec: {
+        ...commonSpec,
+        ports: [{ port: 5432, targetPort: 'postgres' }],
+        type: 'ClusterIP'
+      }
+    };
+  case 'ollama':
+    return {
+      apiVersion: 'v1',
+      kind: 'Service',
+      metadata: commonMetadata,
+      spec: {
+        ...commonSpec,
+        ports: [{ port: 11434, targetPort: 'ollama' }],
+        type: 'ClusterIP'
+      }
+    };
+  default:
+    throw new Error(`Unsupported service type: ${type}`);
   }
 };
 

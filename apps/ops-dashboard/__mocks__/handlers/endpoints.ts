@@ -1,6 +1,7 @@
-import { http, HttpResponse } from "msw"
-import { API_BASE } from "./common"
-import { Endpoints } from "@kubernetesjs/ops"
+import { Endpoints } from '@kubernetesjs/ops';
+import { http, HttpResponse } from 'msw';
+
+import { API_BASE } from './common';
 
 export const createEndpointsListData = (): Endpoints[] => {
   return [
@@ -75,21 +76,21 @@ export const createEndpointsListData = (): Endpoints[] => {
         }
       ]
     }
-  ]
-}
+  ];
+};
 
 export const createEndpointsList = (endpoints: Endpoints[] = createEndpointsListData()) => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/endpoints`, ({ params, request }) => {
-    const namespace = params.namespace as string
-    const namespaceEndpoints = endpoints.filter(ep => ep.metadata.namespace === namespace)
+    const namespace = params.namespace as string;
+    const namespaceEndpoints = endpoints.filter(ep => ep.metadata.namespace === namespace);
 
     return HttpResponse.json({
       apiVersion: 'v1',
       kind: 'EndpointsList',
       items: namespaceEndpoints
-    })
-  })
-}
+    });
+  });
+};
 
 export const createAllEndpointsList = (endpoints: Endpoints[] = createEndpointsListData()) => {
   return http.get(`${API_BASE}/api/v1/endpoints`, () => {
@@ -97,9 +98,9 @@ export const createAllEndpointsList = (endpoints: Endpoints[] = createEndpointsL
       apiVersion: 'v1',
       kind: 'EndpointsList',
       items: endpoints
-    })
-  })
-}
+    });
+  });
+};
 
 // Error handlers
 export const createEndpointsListError = (status: number = 500, message: string = 'Internal Server Error') => {
@@ -107,72 +108,72 @@ export const createEndpointsListError = (status: number = 500, message: string =
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 export const createAllEndpointsListError = (status: number = 500, message: string = 'Internal Server Error') => {
   return http.get(`${API_BASE}/api/v1/endpoints`, () => {
     return HttpResponse.json(
       { error: message },
       { status }
-    )
-  })
-}
+    );
+  });
+};
 
 // Network error handler
 export const createEndpointsListNetworkError = () => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/endpoints`, () => {
-    return HttpResponse.error()
-  })
-}
+    return HttpResponse.error();
+  });
+};
 
 // Slow response handler for testing loading states
 export const createEndpointsListSlow = (endpoints: Endpoints[] = createEndpointsListData(), delay: number = 1000) => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/endpoints`, async ({ params }) => {
-    await new Promise(resolve => setTimeout(resolve, delay))
-    const namespace = params.namespace as string
-    const namespaceEndpoints = endpoints.filter(ep => ep.metadata.namespace === namespace)
+    await new Promise(resolve => setTimeout(resolve, delay));
+    const namespace = params.namespace as string;
+    const namespaceEndpoints = endpoints.filter(ep => ep.metadata.namespace === namespace);
 
     return HttpResponse.json({
       apiVersion: 'v1',
       kind: 'EndpointsList',
       items: namespaceEndpoints
-    })
-  })
-}
+    });
+  });
+};
 
 // Endpoint by name handler
 export const createEndpointByName = (endpoints: Endpoints[] = createEndpointsListData()) => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/endpoints/:name`, ({ params }) => {
-    const namespace = params.namespace as string
-    const name = params.name as string
-    const endpoint = endpoints.find(ep => ep.metadata.namespace === namespace && ep.metadata.name === name)
+    const namespace = params.namespace as string;
+    const name = params.name as string;
+    const endpoint = endpoints.find(ep => ep.metadata.namespace === namespace && ep.metadata.name === name);
 
     if (!endpoint) {
       return HttpResponse.json(
         { error: 'Endpoints not found' },
         { status: 404 }
-      )
+      );
     }
 
-    return HttpResponse.json(endpoint)
-  })
-}
+    return HttpResponse.json(endpoint);
+  });
+};
 
 // Endpoint details handler (alias for createEndpointByName)
 export const createEndpointDetails = (endpoint: Endpoints) => {
   return http.get(`${API_BASE}/api/v1/namespaces/:namespace/endpoints/:name`, ({ params }) => {
     if (params.name === endpoint.metadata?.name && params.namespace === endpoint.metadata?.namespace) {
-      return HttpResponse.json(endpoint)
+      return HttpResponse.json(endpoint);
     }
-    return HttpResponse.json({ error: 'Endpoints not found' }, { status: 404 })
-  })
-}
+    return HttpResponse.json({ error: 'Endpoints not found' }, { status: 404 });
+  });
+};
 
 // Delete Endpoint handler
 export const createEndpointDelete = () => {
   return http.delete(`${API_BASE}/api/v1/namespaces/:namespace/endpoints/:name`, () => {
-    return HttpResponse.json({})
-  })
-}
+    return HttpResponse.json({});
+  });
+};

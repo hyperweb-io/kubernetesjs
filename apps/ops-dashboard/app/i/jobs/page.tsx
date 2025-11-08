@@ -1,5 +1,5 @@
-import { JobsView } from '@/components/resources/jobs'
+import { JobsView } from '@/components/resources/jobs';
 
 export default function JobsPage() {
-  return <JobsView />
+  return <JobsView />;
 }

@@ -1,37 +1,38 @@
+import type { ConfigMap } from '@kubernetesjs/ops';
+
+import { usePreferredNamespace } from '../contexts/NamespaceContext';
 import {
+  useCreateCoreV1NamespacedConfigMap,
+  useDeleteCoreV1NamespacedConfigMap,
   useListCoreV1ConfigMapForAllNamespacesQuery,
   useListCoreV1NamespacedConfigMapQuery,
   useReadCoreV1NamespacedConfigMapQuery,
-  useCreateCoreV1NamespacedConfigMap,
   useReplaceCoreV1NamespacedConfigMap,
-  useDeleteCoreV1NamespacedConfigMap,
-} from '../k8s/index'
-import { usePreferredNamespace } from '../contexts/NamespaceContext'
-import type { ConfigMap, ConfigMapList } from '@kubernetesjs/ops'
+} from '../k8s/index';
 
 // Query keys
-const CONFIGMAPS_KEY = ['configmaps'] as const
+const CONFIGMAPS_KEY = ['configmaps'] as const;
 
 export function useConfigMaps(namespace?: string) {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const ns = namespace || defaultNamespace
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const ns = namespace || defaultNamespace;
 
   if (ns === '_all') {
-    return useListCoreV1ConfigMapForAllNamespacesQuery({ query: {} })
+    return useListCoreV1ConfigMapForAllNamespacesQuery({ query: {} });
   }
-  return useListCoreV1NamespacedConfigMapQuery({ path: { namespace: ns }, query: {} })
+  return useListCoreV1NamespacedConfigMapQuery({ path: { namespace: ns }, query: {} });
 }
 
 export function useConfigMap(name: string, namespace?: string) {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const ns = namespace || defaultNamespace
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const ns = namespace || defaultNamespace;
 
-  return useReadCoreV1NamespacedConfigMapQuery({ path: { namespace: ns, name }, query: {} })
+  return useReadCoreV1NamespacedConfigMapQuery({ path: { namespace: ns, name }, query: {} });
 }
 
 export function useCreateConfigMap() {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const base = useCreateCoreV1NamespacedConfigMap()
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const base = useCreateCoreV1NamespacedConfigMap();
   return {
     ...base,
     mutate: (
@@ -50,12 +51,12 @@ export function useCreateConfigMap() {
         { path: { namespace: namespace || defaultNamespace }, query: {}, body: configMap },
         opts
       ),
-  }
+  };
 }
 
 export function useUpdateConfigMap() {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const base = useReplaceCoreV1NamespacedConfigMap()
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const base = useReplaceCoreV1NamespacedConfigMap();
   return {
     ...base,
     mutate: (
@@ -74,12 +75,12 @@ export function useUpdateConfigMap() {
         { path: { namespace: namespace || defaultNamespace, name }, query: {}, body: configMap },
         opts
       ),
-  }
+  };
 }
 
 export function useDeleteConfigMap() {
-  const { namespace: defaultNamespace } = usePreferredNamespace()
-  const base = useDeleteCoreV1NamespacedConfigMap()
+  const { namespace: defaultNamespace } = usePreferredNamespace();
+  const base = useDeleteCoreV1NamespacedConfigMap();
   return {
     ...base,
     mutate: (
@@ -98,5 +99,5 @@ export function useDeleteConfigMap() {
         { path: { namespace: namespace || defaultNamespace, name }, query: {} },
         opts
       ),
-  }
+  };
 }

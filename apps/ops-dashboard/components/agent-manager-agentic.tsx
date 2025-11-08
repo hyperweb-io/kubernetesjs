@@ -1,6 +1,22 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import OllamaClient from '@agentic-kit/ollama';
+import { AgentKit } from 'agentic-kit';
+import {
+  AlertCircle,
+  Brain,
+  CheckCircle,
+  Download,
+  FolderOpen,
+  Loader2,
+  Plus,
+  Server,
+  Sparkles,
+  Trash2} from 'lucide-react';
+import { useEffect,useState } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -8,35 +24,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import {
-  Loader2,
-  Download,
-  Trash2,
-  CheckCircle,
-  AlertCircle,
-  Server,
-  Settings,
-  Plus,
-  FolderOpen,
-  Brain,
-  Sparkles
-} from 'lucide-react'
-import { AgentKit } from 'agentic-kit'
-import OllamaClient from '@agentic-kit/ollama'
-import type { AgentProvider } from './ai-chat-agentic'
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+import type { AgentProvider } from './ai-chat-agentic';
 
 interface AgentManagerAgenticProps {
   isOpen: boolean
@@ -54,164 +54,164 @@ export function AgentManagerAgentic({
   onProviderChange 
 }: AgentManagerAgenticProps) {
   // Connection states
-  const [ollamaStatus, setOllamaStatus] = useState<'checking' | 'online' | 'offline'>('checking')
-  const [bradieStatus, setBradieStatus] = useState<'checking' | 'online' | 'offline'>('checking')
+  const [ollamaStatus, setOllamaStatus] = useState<'checking' | 'online' | 'offline'>('checking');
+  const [bradieStatus, setBradieStatus] = useState<'checking' | 'online' | 'offline'>('checking');
   
   // Model management
-  const [ollamaModels, setOllamaModels] = useState<string[]>([])
-  const [isLoadingModels, setIsLoadingModels] = useState(false)
-  const [isPulling, setIsPulling] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [pullModel, setPullModel] = useState('')
+  const [ollamaModels, setOllamaModels] = useState<string[]>([]);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const [isPulling, setIsPulling] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [pullModel, setPullModel] = useState('');
   
   // Endpoints
-  const [ollamaEndpoint, setOllamaEndpoint] = useState('http://localhost:11434')
-  const [bradieEndpoint, setBradieEndpoint] = useState('http://localhost:3001')
+  const [ollamaEndpoint, setOllamaEndpoint] = useState('http://localhost:11434');
+  const [bradieEndpoint, setBradieEndpoint] = useState('http://localhost:3001');
   
   // Bradie project management
-  const [projectName, setProjectName] = useState('')
-  const [projectPath, setProjectPath] = useState('')
-  const [isCreatingProject, setIsCreatingProject] = useState(false)
+  const [projectName, setProjectName] = useState('');
+  const [projectPath, setProjectPath] = useState('');
+  const [isCreatingProject, setIsCreatingProject] = useState(false);
   
   // UI state
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-  const [isTestingConnection, setIsTestingConnection] = useState(false)
-  const [selectedModel, setSelectedModel] = useState<string>('')
-  const [sessionId, setSessionId] = useState<string | null>(null)
-  const [projectId, setProjectId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<string>('');
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [projectId, setProjectId] = useState<string | null>(null);
 
-  const ollamaClient = new OllamaClient(ollamaEndpoint)
+  const ollamaClient = new OllamaClient(ollamaEndpoint);
 
   // Test connections when dialog opens
   useEffect(() => {
     if (isOpen) {
-      testConnections()
-      loadOllamaModels()
+      testConnections();
+      loadOllamaModels();
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   const testConnections = async () => {
-    setOllamaStatus('checking')
-    setBradieStatus('checking')
+    setOllamaStatus('checking');
+    setBradieStatus('checking');
     
     try {
-      await ollamaClient.listModels()
-      setOllamaStatus('online')
+      await ollamaClient.listModels();
+      setOllamaStatus('online');
     } catch {
-      setOllamaStatus('offline')
+      setOllamaStatus('offline');
     }
 
     try {
-      const response = await fetch(`${bradieEndpoint}/api/health`)
-      setBradieStatus(response.ok ? 'online' : 'offline')
+      const response = await fetch(`${bradieEndpoint}/api/health`);
+      setBradieStatus(response.ok ? 'online' : 'offline');
     } catch {
-      setBradieStatus('offline')
+      setBradieStatus('offline');
     }
-  }
+  };
 
   const loadOllamaModels = async () => {
     if (ollamaStatus === 'offline') {
-      setOllamaModels([])
-      return
+      setOllamaModels([]);
+      return;
     }
     
-    setIsLoadingModels(true)
+    setIsLoadingModels(true);
     try {
-      const models = await ollamaClient.listModels()
-      setOllamaModels(models || [])
+      const models = await ollamaClient.listModels();
+      setOllamaModels(models || []);
     } catch (err) {
-      console.error('Failed to load Ollama models:', err)
-      setOllamaModels([])
+      console.error('Failed to load Ollama models:', err);
+      setOllamaModels([]);
     } finally {
-      setIsLoadingModels(false)
+      setIsLoadingModels(false);
     }
-  }
+  };
 
   const handlePullModel = async () => {
-    if (!pullModel.trim()) return
+    if (!pullModel.trim()) return;
 
-    setIsPulling(true)
-    setError(null)
-    setSuccess(null)
+    setIsPulling(true);
+    setError(null);
+    setSuccess(null);
 
     try {
-      await ollamaClient.pullModel(pullModel.trim())
-      setSuccess(`Successfully pulled model: ${pullModel}`)
-      setPullModel('')
-      await loadOllamaModels()
+      await ollamaClient.pullModel(pullModel.trim());
+      setSuccess(`Successfully pulled model: ${pullModel}`);
+      setPullModel('');
+      await loadOllamaModels();
     } catch (err) {
-      setError(`Failed to pull model: ${err}`)
+      setError(`Failed to pull model: ${err}`);
     } finally {
-      setIsPulling(false)
+      setIsPulling(false);
     }
-  }
+  };
 
   const handleDeleteModel = async (model: string) => {
-    if (!confirm(`Are you sure you want to delete the model "${model}"?`)) return
+    if (!confirm(`Are you sure you want to delete the model "${model}"?`)) return;
 
-    setIsDeleting(true)
-    setError(null)
-    setSuccess(null)
+    setIsDeleting(true);
+    setError(null);
+    setSuccess(null);
 
     try {
-      await ollamaClient.deleteModel(model)
-      setSuccess(`Successfully deleted model: ${model}`)
-      await loadOllamaModels()
+      await ollamaClient.deleteModel(model);
+      setSuccess(`Successfully deleted model: ${model}`);
+      await loadOllamaModels();
     } catch (err) {
-      setError(`Failed to delete model: ${err}`)
+      setError(`Failed to delete model: ${err}`);
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
   const handleTestConnection = async (provider: AgentProvider, endpoint: string) => {
-    setIsTestingConnection(true)
+    setIsTestingConnection(true);
     try {
-      let isOnline = false
+      let isOnline = false;
       if (provider === 'ollama') {
-        const testClient = new OllamaClient(endpoint)
-        await testClient.listModels()
-        isOnline = true
-        setOllamaStatus('online')
+        const testClient = new OllamaClient(endpoint);
+        await testClient.listModels();
+        isOnline = true;
+        setOllamaStatus('online');
       } else {
-        const response = await fetch(`${endpoint}/api/health`)
-        isOnline = response.ok
-        setBradieStatus(isOnline ? 'online' : 'offline')
+        const response = await fetch(`${endpoint}/api/health`);
+        isOnline = response.ok;
+        setBradieStatus(isOnline ? 'online' : 'offline');
       }
-      setSuccess(`${provider} connection ${isOnline ? 'successful' : 'failed'}`)
+      setSuccess(`${provider} connection ${isOnline ? 'successful' : 'failed'}`);
     } catch (err) {
       if (provider === 'ollama') {
-        setOllamaStatus('offline')
+        setOllamaStatus('offline');
       } else {
-        setBradieStatus('offline')
+        setBradieStatus('offline');
       }
-      setError(`Failed to test ${provider} connection: ${err}`)
+      setError(`Failed to test ${provider} connection: ${err}`);
     } finally {
-      setIsTestingConnection(false)
+      setIsTestingConnection(false);
     }
-  }
+  };
 
   const handleCreateBradieProject = async () => {
     if (!projectName.trim() || !projectPath.trim()) {
-      setError('Please fill in all fields')
-      return
+      setError('Please fill in all fields');
+      return;
     }
 
-    setIsCreatingProject(true)
-    setError(null)
+    setIsCreatingProject(true);
+    setError(null);
 
     try {
       // This would need Bradie client implementation
-      setSuccess(`Project creation not yet implemented`)
-      setProjectName('')
-      setProjectPath('')
+      setSuccess(`Project creation not yet implemented`);
+      setProjectName('');
+      setProjectPath('');
     } catch (err) {
-      setError(`Failed to create project: ${err}`)
+      setError(`Failed to create project: ${err}`);
     } finally {
-      setIsCreatingProject(false)
+      setIsCreatingProject(false);
     }
-  }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -278,8 +278,8 @@ export function AgentManagerAgentic({
                 <Label>Ollama Endpoint</Label>
                 <div className={`flex items-center gap-1 text-xs ${
                   ollamaStatus === 'online' ? 'text-green-600' : 
-                  ollamaStatus === 'offline' ? 'text-red-600' : 
-                  'text-muted-foreground'
+                    ollamaStatus === 'offline' ? 'text-red-600' : 
+                      'text-muted-foreground'
                 }`}>
                   {ollamaStatus === 'checking' ? (
                     <Loader2 className="w-3 h-3 animate-spin" />
@@ -317,8 +317,8 @@ export function AgentManagerAgentic({
                 <Label>Bradie Endpoint</Label>
                 <div className={`flex items-center gap-1 text-xs ${
                   bradieStatus === 'online' ? 'text-green-600' : 
-                  bradieStatus === 'offline' ? 'text-red-600' : 
-                  'text-muted-foreground'
+                    bradieStatus === 'offline' ? 'text-red-600' : 
+                      'text-muted-foreground'
                 }`}>
                   {bradieStatus === 'checking' ? (
                     <Loader2 className="w-3 h-3 animate-spin" />
@@ -447,7 +447,7 @@ export function AgentManagerAgentic({
                     disabled={isPulling || ollamaStatus !== 'online'}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !isPulling) {
-                        handlePullModel()
+                        handlePullModel();
                       }
                     }}
                   />
@@ -562,5 +562,5 @@ export function AgentManagerAgentic({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

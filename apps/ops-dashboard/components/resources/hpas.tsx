@@ -1,124 +1,122 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type AutoscalingV2HorizontalPodAutoscaler as HorizontalPodAutoscaler } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
   CheckCircle,
-  TrendingUp,
+  Eye,
+  Minus,
+  Plus, 
+  RefreshCw, 
+  Trash2, 
   TrendingDown,
-  Minus
-} from 'lucide-react'
-import { 
-  useListAutoscalingV2NamespacedHorizontalPodAutoscalerQuery,
-  useListAutoscalingV2HorizontalPodAutoscalerForAllNamespacesQuery,
-  useDeleteAutoscalingV2NamespacedHorizontalPodAutoscaler
-} from '@/k8s'
-import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import { type AutoscalingV2HorizontalPodAutoscaler as HorizontalPodAutoscaler } from '@kubernetesjs/ops'
+  TrendingUp} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePreferredNamespace } from '@/contexts/NamespaceContext';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { 
+  useDeleteAutoscalingV2NamespacedHorizontalPodAutoscaler,
+  useListAutoscalingV2HorizontalPodAutoscalerForAllNamespacesQuery,
+  useListAutoscalingV2NamespacedHorizontalPodAutoscalerQuery} from '@/k8s';
 
 export function HPAsView() {
-  const [selectedHPA, setSelectedHPA] = useState<HorizontalPodAutoscaler | null>(null)
-  const { namespace } = usePreferredNamespace()
+  const [selectedHPA, setSelectedHPA] = useState<HorizontalPodAutoscaler | null>(null);
+  const { namespace } = usePreferredNamespace();
   
   const query = namespace === '_all' 
     ? useListAutoscalingV2HorizontalPodAutoscalerForAllNamespacesQuery({ query: {} })
-    : useListAutoscalingV2NamespacedHorizontalPodAutoscalerQuery({ path: { namespace }, query: {} })
+    : useListAutoscalingV2NamespacedHorizontalPodAutoscalerQuery({ path: { namespace }, query: {} });
     
-  const { data, isLoading, error, refetch } = query
-  const deleteHPA = useDeleteAutoscalingV2NamespacedHorizontalPodAutoscaler()
+  const { data, isLoading, error, refetch } = query;
+  const deleteHPA = useDeleteAutoscalingV2NamespacedHorizontalPodAutoscaler();
 
-  const hpas = data?.items || []
+  const hpas = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const handleDelete = async (hpa: HorizontalPodAutoscaler) => {
-    const name = hpa.metadata!.name!
-    const namespace = hpa.metadata!.namespace!
+    const name = hpa.metadata!.name!;
+    const namespace = hpa.metadata!.namespace!;
     
     const confirmed = await confirmDialog({
       title: 'Delete Horizontal Pod Autoscaler',
       description: `Are you sure you want to delete ${name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteHPA.mutateAsync({
           path: { namespace, name },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete HPA:', err)
-        alert(`Failed to delete HPA: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete HPA:', err);
+        alert(`Failed to delete HPA: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getScaleDirection = (current: number, desired: number) => {
-    if (current < desired) return 'up'
-    if (current > desired) return 'down'
-    return 'stable'
-  }
+    if (current < desired) return 'up';
+    if (current > desired) return 'down';
+    return 'stable';
+  };
 
   const getScaleIcon = (direction: string) => {
     switch (direction) {
-      case 'up':
-        return <TrendingUp className="w-4 h-4 text-green-600" />
-      case 'down':
-        return <TrendingDown className="w-4 h-4 text-blue-600" />
-      default:
-        return <Minus className="w-4 h-4 text-gray-600" />
+    case 'up':
+      return <TrendingUp className="w-4 h-4 text-green-600" />;
+    case 'down':
+      return <TrendingDown className="w-4 h-4 text-blue-600" />;
+    default:
+      return <Minus className="w-4 h-4 text-gray-600" />;
     }
-  }
+  };
 
   const getStatus = (hpa: HorizontalPodAutoscaler) => {
-    const conditions = hpa.status?.conditions || []
-    const ableToScale = conditions.find(c => c.type === 'AbleToScale')
-    const scalingActive = conditions.find(c => c.type === 'ScalingActive')
+    const conditions = hpa.status?.conditions || [];
+    const ableToScale = conditions.find(c => c.type === 'AbleToScale');
+    const scalingActive = conditions.find(c => c.type === 'ScalingActive');
     
-    if (ableToScale?.status === 'False') return 'Unable to Scale'
-    if (scalingActive?.status === 'True') return 'Active'
-    return 'Idle'
-  }
+    if (ableToScale?.status === 'False') return 'Unable to Scale';
+    if (scalingActive?.status === 'True') return 'Active';
+    return 'Idle';
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Active':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'Unable to Scale':
-        return <Badge variant="destructive" className="flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      default:
-        return <Badge variant="secondary">{status}</Badge>
+    case 'Active':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <CheckCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'Unable to Scale':
+      return <Badge variant="destructive" className="flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    default:
+      return <Badge variant="secondary">{status}</Badge>;
     }
-  }
+  };
 
   const getMetrics = (hpa: HorizontalPodAutoscaler) => {
-    const metrics = hpa.spec?.metrics || []
+    const metrics = hpa.spec?.metrics || [];
     return metrics.map(m => {
       if (m.type === 'Resource' && m.resource) {
-        return `${m.resource.name} (${m.resource.target?.averageUtilization || 'N/A'}%)`
+        return `${m.resource.name} (${m.resource.target?.averageUtilization || 'N/A'}%)`;
       }
-      return m.type || 'Unknown'
-    }).join(', ') || 'No metrics'
-  }
+      return m.type || 'Unknown';
+    }).join(', ') || 'No metrics';
+  };
 
   return (
     <div className="space-y-6">
@@ -171,9 +169,9 @@ export function HPAsView() {
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
               {hpas.filter(h => {
-                const current = h.status?.currentReplicas || 0
-                const desired = h.status?.desiredReplicas || 0
-                return current < desired
+                const current = h.status?.currentReplicas || 0;
+                const desired = h.status?.desiredReplicas || 0;
+                return current < desired;
               }).length}
             </div>
           </CardContent>
@@ -235,9 +233,9 @@ export function HPAsView() {
               </TableHeader>
               <TableBody>
                 {hpas.map((hpa) => {
-                  const current = hpa.status?.currentReplicas || 0
-                  const desired = hpa.status?.desiredReplicas || 0
-                  const direction = getScaleDirection(current, desired)
+                  const current = hpa.status?.currentReplicas || 0;
+                  const desired = hpa.status?.desiredReplicas || 0;
+                  const direction = getScaleDirection(current, desired);
                   
                   return (
                     <TableRow key={`${hpa.metadata?.namespace}/${hpa.metadata?.name}`}>
@@ -276,7 +274,7 @@ export function HPAsView() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  )
+                  );
                 })}
               </TableBody>
             </Table>
@@ -284,5 +282,5 @@ export function HPAsView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,130 +1,126 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import type { Endpoints } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
   CheckCircle,
-  Network,
-  Server
-} from 'lucide-react'
-import { 
-  useListCoreV1NamespacedEndpointsQuery,
-  useListCoreV1EndpointsForAllNamespacesQuery,
-  useDeleteCoreV1NamespacedEndpoints
-} from '@/k8s'
-import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import type { Endpoints } from '@kubernetesjs/ops'
+  Eye,
+  Network, 
+  RefreshCw,
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePreferredNamespace } from '@/contexts/NamespaceContext';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { 
+  useDeleteCoreV1NamespacedEndpoints,
+  useListCoreV1EndpointsForAllNamespacesQuery,
+  useListCoreV1NamespacedEndpointsQuery} from '@/k8s';
 
 export function EndpointsView() {
-  const [selectedEndpoint, setSelectedEndpoint] = useState<Endpoints | null>(null)
-  const { namespace } = usePreferredNamespace()
+  const [selectedEndpoint, setSelectedEndpoint] = useState<Endpoints | null>(null);
+  const { namespace } = usePreferredNamespace();
   
   const query = namespace === '_all' 
     ? useListCoreV1EndpointsForAllNamespacesQuery({ query: {} })
-    : useListCoreV1NamespacedEndpointsQuery({ path: { namespace }, query: {} })
+    : useListCoreV1NamespacedEndpointsQuery({ path: { namespace }, query: {} });
     
-  const { data, isLoading, error, refetch } = query
-  const deleteEndpoint = useDeleteCoreV1NamespacedEndpoints()
+  const { data, isLoading, error, refetch } = query;
+  const deleteEndpoint = useDeleteCoreV1NamespacedEndpoints();
 
-  const endpoints = data?.items || []
+  const endpoints = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const handleDelete = async (endpoint: Endpoints) => {
-    const name = endpoint.metadata!.name!
-    const namespace = endpoint.metadata!.namespace!
+    const name = endpoint.metadata!.name!;
+    const namespace = endpoint.metadata!.namespace!;
     
     const confirmed = await confirmDialog({
       title: 'Delete Endpoint',
       description: `Are you sure you want to delete ${name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteEndpoint.mutateAsync({
           path: { namespace, name },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete endpoint:', err)
-        alert(`Failed to delete endpoint: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete endpoint:', err);
+        alert(`Failed to delete endpoint: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getAddressCount = (endpoint: Endpoints): number => {
-    const subsets = endpoint.subsets || []
+    const subsets = endpoint.subsets || [];
     return subsets.reduce((sum, subset) => {
-      const addresses = subset.addresses || []
-      return sum + addresses.length
-    }, 0)
-  }
+      const addresses = subset.addresses || [];
+      return sum + addresses.length;
+    }, 0);
+  };
 
   const getPortCount = (endpoint: Endpoints): number => {
-    const subsets = endpoint.subsets || []
-    const uniquePorts = new Set<string>()
+    const subsets = endpoint.subsets || [];
+    const uniquePorts = new Set<string>();
     subsets.forEach(subset => {
-      const ports = subset.ports || []
+      const ports = subset.ports || [];
       ports.forEach(port => {
-        uniquePorts.add(`${port.name || 'unnamed'}:${port.port}/${port.protocol || 'TCP'}`)
-      })
-    })
-    return uniquePorts.size
-  }
+        uniquePorts.add(`${port.name || 'unnamed'}:${port.port}/${port.protocol || 'TCP'}`);
+      });
+    });
+    return uniquePorts.size;
+  };
 
   const getStatus = (endpoint: Endpoints) => {
-    const addressCount = getAddressCount(endpoint)
+    const addressCount = getAddressCount(endpoint);
     if (addressCount === 0) {
-      return 'No Endpoints'
+      return 'No Endpoints';
     }
-    return 'Ready'
-  }
+    return 'Ready';
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Ready':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'No Endpoints':
-        return <Badge variant="secondary" className="flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      default:
-        return <Badge>{status}</Badge>
+    case 'Ready':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <CheckCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'No Endpoints':
+      return <Badge variant="secondary" className="flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    default:
+      return <Badge>{status}</Badge>;
     }
-  }
+  };
 
   const getEndpointAddresses = (endpoint: Endpoints): string => {
-    const subsets = endpoint.subsets || []
-    const addresses: string[] = []
+    const subsets = endpoint.subsets || [];
+    const addresses: string[] = [];
     
     subsets.forEach(subset => {
-      const addrs = subset.addresses || []
+      const addrs = subset.addresses || [];
       addrs.forEach(addr => {
-        addresses.push(addr.ip)
-      })
-    })
+        addresses.push(addr.ip);
+      });
+    });
     
-    if (addresses.length === 0) return 'None'
-    if (addresses.length <= 3) return addresses.join(', ')
-    return `${addresses.slice(0, 3).join(', ')} +${addresses.length - 3} more`
-  }
+    if (addresses.length === 0) return 'None';
+    if (addresses.length <= 3) return addresses.join(', ');
+    return `${addresses.slice(0, 3).join(', ')} +${addresses.length - 3} more`;
+  };
 
   return (
     <div className="space-y-6">
@@ -278,5 +274,5 @@ export function EndpointsView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

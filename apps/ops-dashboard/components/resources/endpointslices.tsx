@@ -1,125 +1,122 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type DiscoveryK8sIoV1EndpointSlice as EndpointSlice } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
   CheckCircle,
-  Network,
-  Slice
-} from 'lucide-react'
-import { 
-  useListDiscoveryV1NamespacedEndpointSliceQuery,
-  useListDiscoveryV1EndpointSliceForAllNamespacesQuery,
-  useDeleteDiscoveryV1NamespacedEndpointSlice
-} from '@/k8s'
-import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import { type DiscoveryK8sIoV1EndpointSlice as EndpointSlice } from '@kubernetesjs/ops'
+  Eye,
+  Network, 
+  RefreshCw, 
+  Slice,
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePreferredNamespace } from '@/contexts/NamespaceContext';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { 
+  useDeleteDiscoveryV1NamespacedEndpointSlice,
+  useListDiscoveryV1EndpointSliceForAllNamespacesQuery,
+  useListDiscoveryV1NamespacedEndpointSliceQuery} from '@/k8s';
 
 export function EndpointSlicesView() {
-  const [selectedSlice, setSelectedSlice] = useState<EndpointSlice | null>(null)
-  const { namespace } = usePreferredNamespace()
+  const [selectedSlice, setSelectedSlice] = useState<EndpointSlice | null>(null);
+  const { namespace } = usePreferredNamespace();
   
   const query = namespace === '_all' 
     ? useListDiscoveryV1EndpointSliceForAllNamespacesQuery({ query: {} })
-    : useListDiscoveryV1NamespacedEndpointSliceQuery({ path: { namespace }, query: {} })
+    : useListDiscoveryV1NamespacedEndpointSliceQuery({ path: { namespace }, query: {} });
     
-  const { data, isLoading, error, refetch } = query
-  const deleteSlice = useDeleteDiscoveryV1NamespacedEndpointSlice()
+  const { data, isLoading, error, refetch } = query;
+  const deleteSlice = useDeleteDiscoveryV1NamespacedEndpointSlice();
 
-  const slices = data?.items || []
+  const slices = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const handleDelete = async (slice: EndpointSlice) => {
-    const name = slice.metadata!.name!
-    const namespace = slice.metadata!.namespace!
+    const name = slice.metadata!.name!;
+    const namespace = slice.metadata!.namespace!;
     
     const confirmed = await confirmDialog({
       title: 'Delete Endpoint Slice',
       description: `Are you sure you want to delete ${name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteSlice.mutateAsync({
           path: { namespace, name },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete endpoint slice:', err)
-        alert(`Failed to delete endpoint slice: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete endpoint slice:', err);
+        alert(`Failed to delete endpoint slice: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getEndpointCount = (slice: EndpointSlice): number => {
-    return slice.endpoints?.length || 0
-  }
+    return slice.endpoints?.length || 0;
+  };
 
   const getReadyEndpoints = (slice: EndpointSlice): number => {
-    const endpoints = slice.endpoints || []
-    return endpoints.filter(ep => ep.conditions?.ready === true).length
-  }
+    const endpoints = slice.endpoints || [];
+    return endpoints.filter(ep => ep.conditions?.ready === true).length;
+  };
 
   const getServiceName = (slice: EndpointSlice): string => {
     const label = slice.metadata?.labels?.['kubernetes.io/service-name'] as string | undefined;
     return label?.trim() ? label : 'Unknown';
-  }
+  };
 
   const getAddressType = (slice: EndpointSlice): string => {
     return slice.addressType ?? 'Unknown';
-  }
+  };
 
   const getPorts = (slice: EndpointSlice): string => {
-    const ports = slice.ports || []
-    if (ports.length === 0) return 'None'
-    return ports.map(p => `${p.name || 'unnamed'}:${p.port}/${p.protocol || 'TCP'}`).join(', ')
-  }
+    const ports = slice.ports || [];
+    if (ports.length === 0) return 'None';
+    return ports.map(p => `${p.name || 'unnamed'}:${p.port}/${p.protocol || 'TCP'}`).join(', ');
+  };
 
   const getStatus = (slice: EndpointSlice) => {
-    const total = getEndpointCount(slice)
-    const ready = getReadyEndpoints(slice)
+    const total = getEndpointCount(slice);
+    const ready = getReadyEndpoints(slice);
     
-    if (total === 0) return 'Empty'
-    if (ready === total) return 'All Ready'
-    if (ready === 0) return 'None Ready'
-    return 'Partial Ready'
-  }
+    if (total === 0) return 'Empty';
+    if (ready === total) return 'All Ready';
+    if (ready === 0) return 'None Ready';
+    return 'Partial Ready';
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'All Ready':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'Partial Ready':
-        return <Badge variant="warning" className="flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'None Ready':
-        return <Badge variant="destructive" className="flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      default:
-        return <Badge variant="secondary">{status}</Badge>
+    case 'All Ready':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <CheckCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'Partial Ready':
+      return <Badge variant="warning" className="flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'None Ready':
+      return <Badge variant="destructive" className="flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    default:
+      return <Badge variant="secondary">{status}</Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -276,5 +273,5 @@ export function EndpointSlicesView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,12 +1,12 @@
 import {
+  AgentType,
+  clearAgentConfig,
+  getAgentConfig,
+  getBradieDomain,
   getCurrentAgent,
   setAgent,
-  getBradieDomain,
-  setBradieDomain,
-  getAgentConfig,
   setAgentConfig,
-  clearAgentConfig,
-  AgentType,
+  setBradieDomain,
 } from '@/lib/agents/utils';
 
 // Mock localStorage

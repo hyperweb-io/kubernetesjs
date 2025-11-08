@@ -1,118 +1,116 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type PolicyV1PodDisruptionBudget as PodDisruptionBudget } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
   CheckCircle,
+  Eye,
+  Plus, 
+  RefreshCw, 
   Shield,
-  ShieldOff
-} from 'lucide-react'
-import { 
-  useListPolicyV1NamespacedPodDisruptionBudgetQuery,
-  useListPolicyV1PodDisruptionBudgetForAllNamespacesQuery,
-  useDeletePolicyV1NamespacedPodDisruptionBudget
-} from '@/k8s'
-import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import { type PolicyV1PodDisruptionBudget as PodDisruptionBudget } from '@kubernetesjs/ops'
+  ShieldOff,
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePreferredNamespace } from '@/contexts/NamespaceContext';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { 
+  useDeletePolicyV1NamespacedPodDisruptionBudget,
+  useListPolicyV1NamespacedPodDisruptionBudgetQuery,
+  useListPolicyV1PodDisruptionBudgetForAllNamespacesQuery} from '@/k8s';
 
 export function PDBsView() {
-  const [selectedPDB, setSelectedPDB] = useState<PodDisruptionBudget | null>(null)
-  const { namespace } = usePreferredNamespace()
+  const [selectedPDB, setSelectedPDB] = useState<PodDisruptionBudget | null>(null);
+  const { namespace } = usePreferredNamespace();
   
   const query = namespace === '_all' 
     ? useListPolicyV1PodDisruptionBudgetForAllNamespacesQuery({ query: {} })
-    : useListPolicyV1NamespacedPodDisruptionBudgetQuery({ path: { namespace }, query: {} })
+    : useListPolicyV1NamespacedPodDisruptionBudgetQuery({ path: { namespace }, query: {} });
     
-  const { data, isLoading, error, refetch } = query
-  const deletePDB = useDeletePolicyV1NamespacedPodDisruptionBudget()
+  const { data, isLoading, error, refetch } = query;
+  const deletePDB = useDeletePolicyV1NamespacedPodDisruptionBudget();
 
-  const pdbs = data?.items || []
+  const pdbs = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const handleDelete = async (pdb: PodDisruptionBudget) => {
-    const name = pdb.metadata!.name!
-    const namespace = pdb.metadata!.namespace!
+    const name = pdb.metadata!.name!;
+    const namespace = pdb.metadata!.namespace!;
     
     const confirmed = await confirmDialog({
       title: 'Delete Pod Disruption Budget',
       description: `Are you sure you want to delete ${name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deletePDB.mutateAsync({
           path: { namespace, name },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete PDB:', err)
-        alert(`Failed to delete PDB: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete PDB:', err);
+        alert(`Failed to delete PDB: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getStatus = (pdb: PodDisruptionBudget) => {
-    const currentHealthy = pdb.status?.currentHealthy || 0
-    const desiredHealthy = pdb.status?.desiredHealthy || 0
-    const disruptionsAllowed = pdb.status?.disruptionsAllowed || 0
+    const currentHealthy = pdb.status?.currentHealthy || 0;
+    const desiredHealthy = pdb.status?.desiredHealthy || 0;
+    const disruptionsAllowed = pdb.status?.disruptionsAllowed || 0;
     
     if (currentHealthy >= desiredHealthy && disruptionsAllowed > 0) {
-      return 'Ready'
+      return 'Ready';
     } else if (currentHealthy >= desiredHealthy) {
-      return 'Protected'
+      return 'Protected';
     } else {
-      return 'Not Ready'
+      return 'Not Ready';
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Ready':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'Protected':
-        return <Badge variant="warning" className="flex items-center gap-1">
-          <Shield className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'Not Ready':
-        return <Badge variant="destructive" className="flex items-center gap-1">
-          <ShieldOff className="w-3 h-3" />
-          {status}
-        </Badge>
-      default:
-        return <Badge>{status}</Badge>
+    case 'Ready':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <CheckCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'Protected':
+      return <Badge variant="warning" className="flex items-center gap-1">
+        <Shield className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'Not Ready':
+      return <Badge variant="destructive" className="flex items-center gap-1">
+        <ShieldOff className="w-3 h-3" />
+        {status}
+      </Badge>;
+    default:
+      return <Badge>{status}</Badge>;
     }
-  }
+  };
 
   const getSelector = (pdb: PodDisruptionBudget) => {
-    const selector = pdb.spec?.selector
-    if (!selector) return 'No selector'
+    const selector = pdb.spec?.selector;
+    if (!selector) return 'No selector';
     
     if (selector.matchLabels) {
       return Object.entries(selector.matchLabels)
         .map(([k, v]) => `${k}=${v}`)
-        .join(', ')
+        .join(', ');
     }
     
-    return 'Complex selector'
-  }
+    return 'Complex selector';
+  };
 
   return (
     <div className="space-y-6">
@@ -274,5 +272,5 @@ export function PDBsView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

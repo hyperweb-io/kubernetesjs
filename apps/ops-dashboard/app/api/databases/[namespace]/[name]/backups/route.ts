@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { InterwebClient as InterwebKubernetesClient } from '@kubernetesjs/ops';
 import { SetupClient } from '@kubernetesjs/client';
 import { PostgresDeployer } from '@kubernetesjs/client';
+import { InterwebClient as InterwebKubernetesClient } from '@kubernetesjs/ops';
+import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -85,7 +85,7 @@ export async function POST(
     if (type === 'onDemand') {
       // Auto-select method if none provided
       if (!method) {
-      const cluster: any = await (kube as any).readPostgresqlCnpgIoV1NamespacedCluster({ path: { namespace: ns, name } }).catch(() => null);
+        const cluster: any = await (kube as any).readPostgresqlCnpgIoV1NamespacedCluster({ path: { namespace: ns, name } }).catch(() => null);
         const hasBarman = Boolean(cluster?.spec?.backup?.barmanObjectStore);
         if (hasBarman) {
           method = 'barmanObjectStore';

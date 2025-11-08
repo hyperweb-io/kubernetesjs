@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+
 import { POST } from '@/app/api/databases/[namespace]/[name]/deploy/route';
 
 // Mock the dependencies

@@ -1,8 +1,9 @@
-'use client'
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Database, Plus, Search, Tag, FileCode2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Database, FileCode2,Plus, Search, Tag } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function RegistryPage() {
   return (
@@ -81,5 +82,5 @@ export default function RegistryPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

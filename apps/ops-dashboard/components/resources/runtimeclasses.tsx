@@ -1,80 +1,78 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type NodeK8sIoV1RuntimeClass as RuntimeClass } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
+  Box,
   Cpu,
-  Box
-} from 'lucide-react'
-import { 
-  useListNodeV1RuntimeClassQuery,
-  useDeleteNodeV1RuntimeClass
-} from '@/k8s'
-import { type NodeK8sIoV1RuntimeClass as RuntimeClass } from '@kubernetesjs/ops'
+  Eye,
+  Plus, 
+  RefreshCw, 
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { 
+  useDeleteNodeV1RuntimeClass,
+  useListNodeV1RuntimeClassQuery} from '@/k8s';
 
 export function RuntimeClassesView() {
-  const [selectedRuntimeClass, setSelectedRuntimeClass] = useState<RuntimeClass | null>(null)
+  const [selectedRuntimeClass, setSelectedRuntimeClass] = useState<RuntimeClass | null>(null);
   
-  const { data, isLoading, error, refetch } = useListNodeV1RuntimeClassQuery({ query: {} })
-  const deleteRuntimeClass = useDeleteNodeV1RuntimeClass()
+  const { data, isLoading, error, refetch } = useListNodeV1RuntimeClassQuery({ query: {} });
+  const deleteRuntimeClass = useDeleteNodeV1RuntimeClass();
 
-  const runtimeClasses = data?.items || []
+  const runtimeClasses = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const coerceString = (value: unknown): string | undefined => {
     if (typeof value === 'string') {
-      const trimmed = value.trim()
-      return trimmed.length > 0 ? trimmed : undefined
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : undefined;
     }
-    return undefined
-  }
+    return undefined;
+  };
 
   const handleDelete = async (rc: RuntimeClass) => {
-    const name = rc.metadata!.name!
+    const name = rc.metadata!.name!;
     
     const confirmed = await confirmDialog({
       title: 'Delete Runtime Class',
       description: `Are you sure you want to delete ${name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteRuntimeClass.mutateAsync({
           path: { name },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete runtime class:', err)
-        alert(`Failed to delete runtime class: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete runtime class:', err);
+        alert(`Failed to delete runtime class: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getHandlerBadge = (handler: string) => {
-    const knownHandlers = ['runc', 'nvidia', 'gvisor', 'kata-containers', 'crun']
-    const isKnown = knownHandlers.some(h => handler.toLowerCase().includes(h))
+    const knownHandlers = ['runc', 'nvidia', 'gvisor', 'kata-containers', 'crun'];
+    const isKnown = knownHandlers.some(h => handler.toLowerCase().includes(h));
     
     return (
       <Badge variant={isKnown ? 'default' : 'secondary'} className="flex items-center gap-1">
         <Box className="w-3 h-3" />
         {handler}
       </Badge>
-    )
-  }
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -239,5 +237,5 @@ export function RuntimeClassesView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

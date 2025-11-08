@@ -1,5 +1,5 @@
-import { ReplicaSetsView } from '@/components/resources/replicasets'
+import { ReplicaSetsView } from '@/components/resources/replicasets';
 
 export default function ReplicaSetsPage() {
-  return <ReplicaSetsView />
+  return <ReplicaSetsView />;
 }

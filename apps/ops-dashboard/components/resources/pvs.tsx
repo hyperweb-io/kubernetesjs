@@ -1,136 +1,134 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import type { PersistentVolume } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
   CheckCircle,
+  Eye,
   HardDrive,
   Link,
-  Link2Off
-} from 'lucide-react'
-import { 
-  useListCoreV1PersistentVolumeQuery,
-  useDeleteCoreV1PersistentVolume
-} from '@/k8s'
-import type { PersistentVolume } from '@kubernetesjs/ops'
+  Link2Off,
+  Plus, 
+  RefreshCw, 
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { 
+  useDeleteCoreV1PersistentVolume,
+  useListCoreV1PersistentVolumeQuery} from '@/k8s';
 
 export function PVsView() {
-  const [selectedPV, setSelectedPV] = useState<PersistentVolume | null>(null)
+  const [selectedPV, setSelectedPV] = useState<PersistentVolume | null>(null);
   
-  const { data, isLoading, error, refetch } = useListCoreV1PersistentVolumeQuery({ query: {} })
-  const deletePV = useDeleteCoreV1PersistentVolume()
+  const { data, isLoading, error, refetch } = useListCoreV1PersistentVolumeQuery({ query: {} });
+  const deletePV = useDeleteCoreV1PersistentVolume();
 
-  const pvs = data?.items || []
+  const pvs = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const coerceString = (value: unknown): string | undefined => {
     if (typeof value === 'string') {
-      const trimmed = value.trim()
-      return trimmed.length > 0 ? trimmed : undefined
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : undefined;
     }
-    return undefined
-  }
+    return undefined;
+  };
 
   const handleDelete = async (pv: PersistentVolume) => {
-    const name = pv.metadata!.name!
+    const name = pv.metadata!.name!;
     
     const confirmed = await confirmDialog({
       title: 'Delete Persistent Volume',
       description: `Are you sure you want to delete ${name}? This may cause data loss.`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deletePV.mutateAsync({
           path: { name },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete PV:', err)
-        alert(`Failed to delete PV: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete PV:', err);
+        alert(`Failed to delete PV: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getPhase = (pv: PersistentVolume): string => {
-    return pv.status?.phase || 'Unknown'
-  }
+    return pv.status?.phase || 'Unknown';
+  };
 
   const getStatusBadge = (phase: string) => {
     switch (phase) {
-      case 'Available':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          {phase}
-        </Badge>
-      case 'Bound':
-        return <Badge variant="default" className="flex items-center gap-1">
-          <Link className="w-3 h-3" />
-          {phase}
-        </Badge>
-      case 'Released':
-        return <Badge variant="warning" className="flex items-center gap-1">
-          <Link2Off className="w-3 h-3" />
-          {phase}
-        </Badge>
-      case 'Failed':
-        return <Badge variant="destructive" className="flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
-          {phase}
-        </Badge>
-      default:
-        return <Badge variant="secondary">{phase}</Badge>
+    case 'Available':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <CheckCircle className="w-3 h-3" />
+        {phase}
+      </Badge>;
+    case 'Bound':
+      return <Badge variant="default" className="flex items-center gap-1">
+        <Link className="w-3 h-3" />
+        {phase}
+      </Badge>;
+    case 'Released':
+      return <Badge variant="warning" className="flex items-center gap-1">
+        <Link2Off className="w-3 h-3" />
+        {phase}
+      </Badge>;
+    case 'Failed':
+      return <Badge variant="destructive" className="flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" />
+        {phase}
+      </Badge>;
+    default:
+      return <Badge variant="secondary">{phase}</Badge>;
     }
-  }
+  };
 
   const getAccessModes = (pv: PersistentVolume): string => {
-    const modes = pv.spec?.accessModes || []
+    const modes = pv.spec?.accessModes || [];
     const modeMap: Record<string, string> = {
-      'ReadWriteOnce': 'RWO',
-      'ReadOnlyMany': 'ROX',
-      'ReadWriteMany': 'RWX',
-      'ReadWriteOncePod': 'RWOP'
-    }
-    return modes.map(m => modeMap[m] || m).join(', ') || 'None'
-  }
+      ReadWriteOnce: 'RWO',
+      ReadOnlyMany: 'ROX',
+      ReadWriteMany: 'RWX',
+      ReadWriteOncePod: 'RWOP'
+    };
+    return modes.map(m => modeMap[m] || m).join(', ') || 'None';
+  };
 
   const getCapacity = (pv: PersistentVolume): string => {
-    return coerceString(pv.spec?.capacity?.storage) || 'Unknown'
-  }
+    return coerceString(pv.spec?.capacity?.storage) || 'Unknown';
+  };
 
   const getStorageClass = (pv: PersistentVolume): string => {
-    return coerceString(pv.spec?.storageClassName) || 'None'
-  }
+    return coerceString(pv.spec?.storageClassName) || 'None';
+  };
 
   const getReclaimPolicy = (pv: PersistentVolume): string => {
-    return coerceString(pv.spec?.persistentVolumeReclaimPolicy) || 'Retain'
-  }
+    return coerceString(pv.spec?.persistentVolumeReclaimPolicy) || 'Retain';
+  };
 
   const getClaimRef = (pv: PersistentVolume): string => {
-    const ref = pv.spec?.claimRef
-    if (!ref) return 'Unbound'
-    const namespace = coerceString(ref.namespace) || 'unknown'
-    const name = coerceString(ref.name) || 'unknown'
-    return `${namespace}/${name}`
-  }
+    const ref = pv.spec?.claimRef;
+    if (!ref) return 'Unbound';
+    const namespace = coerceString(ref.namespace) || 'unknown';
+    const name = coerceString(ref.name) || 'unknown';
+    return `${namespace}/${name}`;
+  };
 
   const getVolumeMode = (pv: PersistentVolume): string => {
-    return coerceString(pv.spec?.volumeMode) || 'Filesystem'
-  }
+    return coerceString(pv.spec?.volumeMode) || 'Filesystem';
+  };
 
   return (
     <div className="space-y-6">
@@ -192,17 +190,17 @@ export function PVsView() {
           <CardContent>
             <div className="text-2xl font-bold">
               {pvs.reduce((sum, pv) => {
-                const size = getCapacity(pv)
-                const match = size.match(/(\d+)([GMK]i)?/)
+                const size = getCapacity(pv);
+                const match = size.match(/(\d+)([GMK]i)?/);
                 if (match) {
-                  const value = parseInt(match[1])
-                  const unit = match[2] || 'Gi'
-                  if (unit === 'Gi') return sum + value
-                  if (unit === 'Mi') return sum + value / 1024
-                  if (unit === 'Ki') return sum + value / (1024 * 1024)
-                  if (unit === 'Ti') return sum + value * 1024
+                  const value = parseInt(match[1]);
+                  const unit = match[2] || 'Gi';
+                  if (unit === 'Gi') return sum + value;
+                  if (unit === 'Mi') return sum + value / 1024;
+                  if (unit === 'Ki') return sum + value / (1024 * 1024);
+                  if (unit === 'Ti') return sum + value * 1024;
                 }
-                return sum
+                return sum;
               }, 0).toFixed(1)} GB
             </div>
           </CardContent>

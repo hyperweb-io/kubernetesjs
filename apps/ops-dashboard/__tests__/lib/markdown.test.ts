@@ -1,12 +1,13 @@
 import fs from 'fs';
 import path from 'path';
+
 import {
-  extractMarkdownData,
-  isFileExists,
   extractCodeFromMd,
+  extractMarkdownData,
   getFileNames,
-  getPostsMetadata,
   getPostsInfo,
+  getPostsMetadata,
+  isFileExists,
 } from '@/lib/markdown';
 
 // Mock fs module
@@ -201,7 +202,7 @@ interface Props {
           });
           callback({
             type: 'code',
-            value: "interface Props {\n  title: string;\n}",
+            value: 'interface Props {\n  title: string;\n}',
             lang: 'typescript',
             meta: 'component'
           });
@@ -219,7 +220,7 @@ interface Props {
       expect(result[1]).toEqual({
         id: 'component',
         lang: 'typescript',
-        value: "interface Props {\n  title: string;\n}",
+        value: 'interface Props {\n  title: string;\n}',
       });
     });
 

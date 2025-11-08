@@ -1,61 +1,52 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import NextLink from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { NamespaceSwitcher } from '@/components/namespace-switcher';
-import { ContextSwitcher } from '@/components/context-switcher';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { InfraHeader } from '@/components/headers/infra-header';
-import { SmartObjectsHeader } from '@/components/headers/smart-objects-header';
-import { useKubernetes } from '../k8s/context';
 import {
-  Package,
-  Server,
-  Shield,
-  Settings,
-  Key,
-  Copy,
   Activity,
-  Home,
-  Menu,
-  PanelLeftClose,
-  FileCode2,
-  Layers,
+  BarChart,
+  Bot,
+  Boxes,
   Calendar,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Clock,
+  Copy,
+  Cpu,
+  Database,
+  FileCode2,
   Gauge,
+  Globe,
+  Grid3x3,
+  HardDrive,
+  Heart,
+  Home,
+  Key,
+  Layers,
+  LayoutDashboard,
+  Link,
+  LucideIcon,
+  Network,
+  Package,
+  Paperclip,
+  Server,
+  Settings,
+  Shield,
   ShieldCheck,
   Star,
-  Cpu,
-  Globe,
-  Network,
-  Link,
-  HardDrive,
-  Database,
-  Paperclip,
-  Bot,
   UserCheck,
   Users,
   Zap,
-  BarChart,
-  Grid3x3,
-  ChevronDown,
-  ChevronRight,
-  ChevronLeft,
-  Heart,
-  Code,
-  MessageSquare,
-  CloudIcon,
-  FunctionSquare,
-  Play,
-  Code2,
-  Boxes,
-  LayoutDashboard,
-  Rocket,
-  LucideIcon,
 } from 'lucide-react';
+import NextLink from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useCallback, useEffect,useState } from 'react';
+
+import { ContextSwitcher } from '@/components/context-switcher';
+import { InfraHeader } from '@/components/headers/infra-header';
+import { SmartObjectsHeader } from '@/components/headers/smart-objects-header';
+import { Button } from '@/components/ui/button';
+
+import { useKubernetes } from '../k8s/context';
 import { AdminHeader } from './headers/admin-header';
 
 interface DashboardLayoutHeaderProps {
@@ -69,15 +60,15 @@ interface DashboardLayoutHeaderProps {
 
 export function DashboardLayoutHeader(props: DashboardLayoutHeaderProps) {
   
-  const { mode,...restProps } = props
+  const { mode,...restProps } = props;
  
   if(mode === 'smart-objects') {
-    return <SmartObjectsHeader {...restProps} />
+    return <SmartObjectsHeader {...restProps} />;
   }
   if(mode === 'infra') {
-    return <InfraHeader {...restProps} />
+    return <InfraHeader {...restProps} />;
   }
-  return <AdminHeader {...restProps} />
+  return <AdminHeader {...restProps} />;
 }
 
 
@@ -232,8 +223,8 @@ export function DashboardLayout({
     if(mode === 'infra') {
       return infraNavigation;
     }
-    return []
-  }
+    return [];
+  };
 
   // Choose navigation based on context
   const navigationItems = getNavigationItems();

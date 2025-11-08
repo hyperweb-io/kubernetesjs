@@ -1,13 +1,14 @@
-'use client'
+'use client';
 
-import React, { useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
-import { AlertCircle } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogFooter,DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface CreateDatabasesDialogProps {
   open: boolean
@@ -28,8 +29,8 @@ interface CreateDatabasesDialogProps {
 
 export function CreateDatabasesDialog({ open, onOpenChange, onSubmit }: CreateDatabasesDialogProps) {
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Create DB form state (required fields)
 
@@ -45,22 +46,22 @@ export function CreateDatabasesDialog({ open, onOpenChange, onSubmit }: CreateDa
 
 
   const handleSubmit = async () => {
-    setError(null)
-    setIsSubmitting(true)
+    setError(null);
+    setIsSubmitting(true);
     
     try {
       // Basic validation
       if (!appUsername.trim()) {
-        setError('App username is required')
-        return
+        setError('App username is required');
+        return;
       }
       if (!appPassword.trim()) {
-        setError('App password is required')
-        return
+        setError('App password is required');
+        return;
       }
       if (!superuserPassword.trim()) {
-        setError('Superuser password is required')
-        return
+        setError('Superuser password is required');
+        return;
       }
       
       await onSubmit({
@@ -73,29 +74,29 @@ export function CreateDatabasesDialog({ open, onOpenChange, onSubmit }: CreateDa
         enablePooler,
         poolerName,
         poolerInstances,
-      })
-      onOpenChange(false)
+      });
+      onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create database')
+      setError(err instanceof Error ? err.message : 'Failed to create database');
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    setError(null)
-    onOpenChange(false)
+    setError(null);
+    onOpenChange(false);
     // Reset form to defaults
-    setInstances(1)
-    setStorage('1Gi')
-    setStorageClass('')
-    setAppUsername('appuser')
-    setAppPassword('appuser123!')
-    setSuperuserPassword('postgres123!')
-    setEnablePooler(true)
-    setPoolerName('postgres-pooler')
-    setPoolerInstances(1)
-  }
+    setInstances(1);
+    setStorage('1Gi');
+    setStorageClass('');
+    setAppUsername('appuser');
+    setAppPassword('appuser123!');
+    setSuperuserPassword('postgres123!');
+    setEnablePooler(true);
+    setPoolerName('postgres-pooler');
+    setPoolerInstances(1);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -226,5 +227,5 @@ export function CreateDatabasesDialog({ open, onOpenChange, onSubmit }: CreateDa
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

@@ -1,16 +1,15 @@
-import { screen, waitFor, fireEvent } from '@testing-library/react';
+import { fireEvent,screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { render } from '../../utils/test-utils';
-import { server } from '@/__mocks__/server';
+import { http, HttpResponse } from 'msw';
+
+import { API_BASE } from '@/__mocks__/handlers/common';
 import { 
   createPDBsList, 
   createPDBsListError,
-  createPDBsListSlow,
-  deletePDBHandler,
-  deletePDBErrorHandler
-} from '@/__mocks__/handlers/pdbs';
-import { http, HttpResponse } from 'msw';
-import { API_BASE } from '@/__mocks__/handlers/common';
+  createPDBsListSlow} from '@/__mocks__/handlers/pdbs';
+import { server } from '@/__mocks__/server';
+
+import { render } from '../../utils/test-utils';
 
 // Mock window.alert for testing
 const mockAlert = jest.spyOn(window, 'alert').mockImplementation(() => {});

@@ -1,13 +1,14 @@
-'use client'
+'use client';
 
-import React, { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { AlertCircle, Scale } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import type { AppsV1Deployment as Deployment } from '@kubernetesjs/ops'
+import type { AppsV1Deployment as Deployment } from '@kubernetesjs/ops';
+import { AlertCircle, Scale } from 'lucide-react';
+import React, { useEffect,useState } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter,DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface ScaleDeploymentDialogProps {
   deployment: Deployment | null
@@ -22,63 +23,63 @@ export function ScaleDeploymentDialog({
   onOpenChange,
   onScale 
 }: ScaleDeploymentDialogProps) {
-  const currentReplicas = deployment?.spec?.replicas || 0
-  const [replicas, setReplicas] = useState(currentReplicas.toString())
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const currentReplicas = deployment?.spec?.replicas || 0;
+  const [replicas, setReplicas] = useState(currentReplicas.toString());
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (deployment && open) {
-      setReplicas((deployment.spec?.replicas || 0).toString())
-      setError(null)
+      setReplicas((deployment.spec?.replicas || 0).toString());
+      setError(null);
     }
-  }, [deployment, open])
+  }, [deployment, open]);
 
   const handleSubmit = async () => {
-    setError(null)
+    setError(null);
     
-    const replicaCount = parseInt(replicas, 10)
+    const replicaCount = parseInt(replicas, 10);
     
     if (isNaN(replicaCount) || replicaCount < 0) {
-      setError('Please enter a valid number of replicas (0 or greater)')
-      return
+      setError('Please enter a valid number of replicas (0 or greater)');
+      return;
     }
     
     if (replicaCount > 100) {
-      setError('For safety, maximum replicas is limited to 100. Please contact admin for higher limits.')
-      return
+      setError('For safety, maximum replicas is limited to 100. Please contact admin for higher limits.');
+      return;
     }
     
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     
     try {
-      await onScale(replicaCount)
+      await onScale(replicaCount);
       // Only close dialog on successful scaling
-      onOpenChange(false)
+      onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to scale deployment')
+      setError(err instanceof Error ? err.message : 'Failed to scale deployment');
       // Don't close dialog on error - let user see the error message
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleCancel = () => {
-    setError(null)
-    setReplicas(currentReplicas.toString())
-    onOpenChange(false)
-  }
+    setError(null);
+    setReplicas(currentReplicas.toString());
+    onOpenChange(false);
+  };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !isSubmitting) {
-      handleSubmit()
+      handleSubmit();
     }
-  }
+  };
 
-  if (!deployment) return null
+  if (!deployment) return null;
 
-  const deploymentName = deployment.metadata?.name || 'Unknown'
-  const namespace = deployment.metadata?.namespace || 'default'
+  const deploymentName = deployment.metadata?.name || 'Unknown';
+  const namespace = deployment.metadata?.namespace || 'default';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -140,5 +141,5 @@ export function ScaleDeploymentDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

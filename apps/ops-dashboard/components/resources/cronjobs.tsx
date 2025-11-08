@@ -1,78 +1,77 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type BatchV1CronJob as CronJob } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
   CheckCircle,
   Clock,
+  Eye,
   Pause,
-  Play
-} from 'lucide-react'
-import { 
-  useListBatchV1NamespacedCronJobQuery,
-  useListBatchV1CronJobForAllNamespacesQuery,
-  useDeleteBatchV1NamespacedCronJob,
-  usePatchBatchV1NamespacedCronJob
-} from '@/k8s'
-import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import { type BatchV1CronJob as CronJob } from '@kubernetesjs/ops'
+  Play,
+  Plus, 
+  RefreshCw, 
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePreferredNamespace } from '@/contexts/NamespaceContext';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { 
+  useDeleteBatchV1NamespacedCronJob,
+  useListBatchV1CronJobForAllNamespacesQuery,
+  useListBatchV1NamespacedCronJobQuery,
+  usePatchBatchV1NamespacedCronJob
+} from '@/k8s';
 
 export function CronJobsView() {
-  const [selectedCronJob, setSelectedCronJob] = useState<CronJob | null>(null)
-  const { namespace } = usePreferredNamespace()
+  const [selectedCronJob, setSelectedCronJob] = useState<CronJob | null>(null);
+  const { namespace } = usePreferredNamespace();
   
   // Use k8s hooks directly
   const query = namespace === '_all' 
     ? useListBatchV1CronJobForAllNamespacesQuery({ query: {} })
-    : useListBatchV1NamespacedCronJobQuery({ path: { namespace }, query: {} })
+    : useListBatchV1NamespacedCronJobQuery({ path: { namespace }, query: {} });
     
-  const { data, isLoading, error, refetch } = query
-  const deleteCronJob = useDeleteBatchV1NamespacedCronJob()
-  const patchCronJob = usePatchBatchV1NamespacedCronJob()
+  const { data, isLoading, error, refetch } = query;
+  const deleteCronJob = useDeleteBatchV1NamespacedCronJob();
+  const patchCronJob = usePatchBatchV1NamespacedCronJob();
 
-  const cronjobs = data?.items || []
+  const cronjobs = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const handleDelete = async (cronjob: CronJob) => {
-    const name = cronjob.metadata!.name!
-    const namespace = cronjob.metadata!.namespace!
+    const name = cronjob.metadata!.name!;
+    const namespace = cronjob.metadata!.namespace!;
     
     const confirmed = await confirmDialog({
       title: 'Delete CronJob',
       description: `Are you sure you want to delete ${name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteCronJob.mutateAsync({
           path: { namespace, name },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete cronjob:', err)
-        alert(`Failed to delete cronjob: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete cronjob:', err);
+        alert(`Failed to delete cronjob: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const handleToggleSuspend = async (cronjob: CronJob) => {
-    const name = cronjob.metadata!.name!
-    const namespace = cronjob.metadata!.namespace!
-    const suspend = !cronjob.spec?.suspend
+    const name = cronjob.metadata!.name!;
+    const namespace = cronjob.metadata!.namespace!;
+    const suspend = !cronjob.spec?.suspend;
     
     try {
       await patchCronJob.mutateAsync({
@@ -81,63 +80,63 @@ export function CronJobsView() {
         body: {
           spec: { suspend }
         }
-      })
-      refetch()
+      });
+      refetch();
     } catch (err) {
-      console.error('Failed to update cronjob:', err)
-      alert(`Failed to update cronjob: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      console.error('Failed to update cronjob:', err);
+      alert(`Failed to update cronjob: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
-  }
+  };
 
   const getStatus = (cronjob: CronJob) => {
     if (cronjob.spec?.suspend) {
-      return 'Suspended'
+      return 'Suspended';
     }
-    return cronjob.status?.active && cronjob.status.active.length > 0 ? 'Active' : 'Idle'
-  }
+    return cronjob.status?.active && cronjob.status.active.length > 0 ? 'Active' : 'Idle';
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Active':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'Idle':
-        return <Badge variant="default" className="flex items-center gap-1">
-          <Clock className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'Suspended':
-        return <Badge variant="secondary" className="flex items-center gap-1">
-          <Pause className="w-3 h-3" />
-          {status}
-        </Badge>
-      default:
-        return <Badge>{status}</Badge>
+    case 'Active':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <CheckCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'Idle':
+      return <Badge variant="default" className="flex items-center gap-1">
+        <Clock className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'Suspended':
+      return <Badge variant="secondary" className="flex items-center gap-1">
+        <Pause className="w-3 h-3" />
+        {status}
+      </Badge>;
+    default:
+      return <Badge>{status}</Badge>;
     }
-  }
+  };
 
   const getLastScheduleTime = (cronjob: CronJob) => {
-    if (!cronjob.status?.lastScheduleTime) return 'Never'
-    const lastTime = new Date(cronjob.status.lastScheduleTime)
-    const now = new Date()
-    const diff = now.getTime() - lastTime.getTime()
+    if (!cronjob.status?.lastScheduleTime) return 'Never';
+    const lastTime = new Date(cronjob.status.lastScheduleTime);
+    const now = new Date();
+    const diff = now.getTime() - lastTime.getTime();
     
-    if (diff < 60000) return 'Just now'
-    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`
-    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`
-    return lastTime.toLocaleDateString()
-  }
+    if (diff < 60000) return 'Just now';
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+    return lastTime.toLocaleDateString();
+  };
 
   const getNextScheduleTime = (cronjob: CronJob) => {
-    if (cronjob.spec?.suspend) return 'Suspended'
+    if (cronjob.spec?.suspend) return 'Suspended';
     if (!cronjob.status?.lastScheduleTime && !cronjob.status?.lastSuccessfulTime) {
-      return 'Soon'
+      return 'Soon';
     }
     // Note: Actual next schedule calculation would require cron parsing
-    return 'Calculating...'
-  }
+    return 'Calculating...';
+  };
 
   return (
     <div className="space-y-6">
@@ -297,5 +296,5 @@ export function CronJobsView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

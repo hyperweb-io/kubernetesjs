@@ -1,5 +1,5 @@
-import { http, HttpResponse } from 'msw'
-import { type RequestHandler } from 'msw'
+import { http, HttpResponse } from 'msw';
+import { type RequestHandler } from 'msw';
 
 // Sample Volume Attachment data
 export const createVolumeAttachmentsListData = () => [
@@ -64,16 +64,16 @@ export const createVolumeAttachmentsListData = () => [
       }
     }
   }
-]
+];
 
 // Volume Attachment handlers
 export const createVolumeAttachmentDelete = (): RequestHandler =>
   http.delete('/apis/storage.k8s.io/v1/volumeattachments/:name', ({ params }) => {
-    const { name } = params
+    const { name } = params;
     return HttpResponse.json({ 
       message: `Volume attachment ${name} deleted successfully` 
-    })
-  })
+    });
+  });
 
 export const createVolumeAttachmentsList = (): RequestHandler =>
   http.get('/apis/storage.k8s.io/v1/volumeattachments', () => {
@@ -81,8 +81,8 @@ export const createVolumeAttachmentsList = (): RequestHandler =>
       apiVersion: 'storage.k8s.io/v1',
       kind: 'VolumeAttachmentList',
       items: createVolumeAttachmentsListData()
-    })
-  })
+    });
+  });
 
 // Error handlers
 export const createVolumeAttachmentsError = (): RequestHandler =>
@@ -90,15 +90,15 @@ export const createVolumeAttachmentsError = (): RequestHandler =>
     return HttpResponse.json(
       { error: 'Failed to fetch volume attachments' },
       { status: 500 }
-    )
-  })
+    );
+  });
 
 export const createVolumeAttachmentsSlow = (): RequestHandler =>
   http.get('/apis/storage.k8s.io/v1/volumeattachments', async () => {
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    await new Promise(resolve => setTimeout(resolve, 2000));
     return HttpResponse.json({
       apiVersion: 'storage.k8s.io/v1',
       kind: 'VolumeAttachmentList',
       items: createVolumeAttachmentsListData()
-    })
-  })
+    });
+  });

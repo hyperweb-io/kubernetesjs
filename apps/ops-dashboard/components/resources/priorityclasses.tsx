@@ -1,83 +1,81 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type SchedulingK8sIoV1PriorityClass as PriorityClass } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
+  Eye,
+  Plus, 
+  RefreshCw, 
   Star,
-  StarOff
-} from 'lucide-react'
-import { 
-  useListSchedulingV1PriorityClassQuery,
-  useDeleteSchedulingV1PriorityClass
-} from '@/k8s'
-import { type SchedulingK8sIoV1PriorityClass as PriorityClass } from '@kubernetesjs/ops'
+  StarOff,
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { 
+  useDeleteSchedulingV1PriorityClass,
+  useListSchedulingV1PriorityClassQuery} from '@/k8s';
 
 export function PriorityClassesView() {
-  const [selectedPriorityClass, setSelectedPriorityClass] = useState<PriorityClass | null>(null)
+  const [selectedPriorityClass, setSelectedPriorityClass] = useState<PriorityClass | null>(null);
   
-  const { data, isLoading, error, refetch } = useListSchedulingV1PriorityClassQuery({ query: {} })
-  const deletePriorityClass = useDeleteSchedulingV1PriorityClass()
+  const { data, isLoading, error, refetch } = useListSchedulingV1PriorityClassQuery({ query: {} });
+  const deletePriorityClass = useDeleteSchedulingV1PriorityClass();
 
-  const priorityClasses = data?.items || []
+  const priorityClasses = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const handleDelete = async (pc: PriorityClass) => {
-    const name = pc.metadata!.name!
+    const name = pc.metadata!.name!;
     
     const confirmed = await confirmDialog({
       title: 'Delete Priority Class',
       description: `Are you sure you want to delete ${name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deletePriorityClass.mutateAsync({
           path: { name },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete priority class:', err)
-        alert(`Failed to delete priority class: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete priority class:', err);
+        alert(`Failed to delete priority class: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getPriorityBadge = (value: number) => {
     if (value >= 1000000000) {
       return <Badge variant="destructive" className="flex items-center gap-1">
         <Star className="w-3 h-3" />
         System Critical
-      </Badge>
+      </Badge>;
     } else if (value >= 900000000) {
       return <Badge variant="warning" className="flex items-center gap-1">
         <Star className="w-3 h-3" />
         Cluster Critical
-      </Badge>
+      </Badge>;
     } else if (value > 0) {
       return <Badge variant="default">
         Priority {value}
-      </Badge>
+      </Badge>;
     } else {
       return <Badge variant="secondary" className="flex items-center gap-1">
         <StarOff className="w-3 h-3" />
         Default
-      </Badge>
+      </Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -228,5 +226,5 @@ export function PriorityClassesView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,7 +1,8 @@
-import React from 'react';
-import { render, screen, waitFor } from '@/__tests__/utils/test-utils';
-import { server } from '@/__mocks__/server';
 import { http, HttpResponse } from 'msw';
+import React from 'react';
+
+import { server } from '@/__mocks__/server';
+import { render, screen, waitFor } from '@/__tests__/utils/test-utils';
 import AdminPodsPage from '@/app/admin/pods/page';
 
 // Mock data

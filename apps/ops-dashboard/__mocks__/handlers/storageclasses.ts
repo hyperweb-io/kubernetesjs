@@ -1,4 +1,4 @@
-import { http, HttpResponse } from 'msw'
+import { http, HttpResponse } from 'msw';
 
 export const createStorageClassesListData = () => [
   {
@@ -67,17 +67,17 @@ export const createStorageClassesListData = () => [
       type: 'ssd'
     }
   }
-]
+];
 
 export const createStorageClassDelete = () =>
   http.delete('/apis/storage.k8s.io/v1/storageclasses/:name', ({ params }) => {
-    const { name } = params
+    const { name } = params;
     return HttpResponse.json({
       apiVersion: 'storage.k8s.io/v1',
       kind: 'StorageClass',
       metadata: { name }
-    })
-  })
+    });
+  });
 
 export const createStorageClassesList = () =>
   http.get('/apis/storage.k8s.io/v1/storageclasses', () => {
@@ -85,20 +85,20 @@ export const createStorageClassesList = () =>
       apiVersion: 'v1',
       kind: 'StorageClassList',
       items: createStorageClassesListData()
-    })
-  })
+    });
+  });
 
 export const createStorageClassesListError = () =>
   http.get('/apis/storage.k8s.io/v1/storageclasses', () => {
-    return HttpResponse.error()
-  })
+    return HttpResponse.error();
+  });
 
 export const createStorageClassesListSlow = () =>
   http.get('/apis/storage.k8s.io/v1/storageclasses', async () => {
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    await new Promise(resolve => setTimeout(resolve, 2000));
     return HttpResponse.json({
       apiVersion: 'v1',
       kind: 'StorageClassList',
       items: createStorageClassesListData()
-    })
-  })
+    });
+  });

@@ -1,8 +1,9 @@
-'use client'
+'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Database, Plus, Activity, Users, HardDrive } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Activity, Database, HardDrive,Plus, Users } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function DatabasesPage() {
   return (
@@ -81,5 +82,5 @@ export default function DatabasesPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,25 +1,22 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type AppsV1ReplicaSet as K8sReplicaSet } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Edit, 
-  Scale, 
-  Eye,
   AlertCircle,
-  CheckCircle,
-  Copy
-} from 'lucide-react'
-import { type AppsV1ReplicaSet as K8sReplicaSet } from '@kubernetesjs/ops'
-import { useReplicaSets, useDeleteReplicaSet, useScaleReplicaSet } from '@/hooks/useReplicaSets'
+  CheckCircle, 
+  Eye,
+  Plus, 
+  RefreshCw, 
+  Scale, 
+  Trash2} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { useDeleteReplicaSet, useReplicaSets, useScaleReplicaSet } from '@/hooks/useReplicaSets';
 
 interface ReplicaSet {
   name: string
@@ -35,35 +32,35 @@ interface ReplicaSet {
 }
 
 export function ReplicaSetsView() {
-  const [selectedReplicaSet, setSelectedReplicaSet] = useState<ReplicaSet | null>(null)
+  const [selectedReplicaSet, setSelectedReplicaSet] = useState<ReplicaSet | null>(null);
   
   // Use TanStack Query hooks
-  const { data, isLoading, error, refetch } = useReplicaSets()
-  const deleteReplicaSetMutation = useDeleteReplicaSet()
-  const scaleReplicaSetMutation = useScaleReplicaSet()
+  const { data, isLoading, error, refetch } = useReplicaSets();
+  const deleteReplicaSetMutation = useDeleteReplicaSet();
+  const scaleReplicaSetMutation = useScaleReplicaSet();
   
   // Helper function to determine replica set status
   function determineReplicaSetStatus(rs: K8sReplicaSet): ReplicaSet['status'] {
-    const status = rs.status
-    if (!status) return 'NotReady'
+    const status = rs.status;
+    if (!status) return 'NotReady';
     
-    const replicas = rs.spec?.replicas || 0
-    const readyReplicas = status.readyReplicas || 0
+    const replicas = rs.spec?.replicas || 0;
+    const readyReplicas = status.readyReplicas || 0;
     
     if (readyReplicas === replicas && replicas > 0) {
-      return 'Ready'
+      return 'Ready';
     } else if (readyReplicas !== replicas) {
-      return 'Scaling'
+      return 'Scaling';
     } else {
-      return 'NotReady'
+      return 'NotReady';
     }
   }
   
   // Helper to extract deployment name from owner references
   function getDeploymentName(rs: K8sReplicaSet): string | undefined {
-    const ownerRefs = rs.metadata?.ownerReferences || []
-    const deploymentRef = ownerRefs.find(ref => ref.kind === 'Deployment')
-    return deploymentRef?.name
+    const ownerRefs = rs.metadata?.ownerReferences || [];
+    const deploymentRef = ownerRefs.find(ref => ref.kind === 'Deployment');
+    return deploymentRef?.name;
   }
   
   // Format replica sets from query data
@@ -79,28 +76,28 @@ export function ReplicaSetsView() {
       status: determineReplicaSetStatus(item),
       deployment: getDeploymentName(item),
       k8sData: item
-    }
-  }) || []
+    };
+  }) || [];
 
   const handleRefresh = () => {
-    refetch()
-  }
+    refetch();
+  };
 
   const handleScale = async (replicaSet: ReplicaSet) => {
-    const newReplicas = prompt(`Scale ${replicaSet.name} to how many replicas?`, replicaSet.replicas.toString())
+    const newReplicas = prompt(`Scale ${replicaSet.name} to how many replicas?`, replicaSet.replicas.toString());
     if (newReplicas && !isNaN(Number(newReplicas))) {
       try {
         await scaleReplicaSetMutation.mutateAsync({
           name: replicaSet.name,
           replicas: Number(newReplicas),
           namespace: replicaSet.namespace
-        })
+        });
       } catch (err) {
-        console.error('Failed to scale replicaset:', err)
-        alert(`Failed to scale replicaset: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to scale replicaset:', err);
+        alert(`Failed to scale replicaset: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const handleDelete = async (replicaSet: ReplicaSet) => {
     const confirmed = await confirmDialog({
@@ -108,42 +105,42 @@ export function ReplicaSetsView() {
       description: `Are you sure you want to delete ${replicaSet.name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteReplicaSetMutation.mutateAsync({
           name: replicaSet.name,
           namespace: replicaSet.namespace
-        })
+        });
       } catch (err) {
-        console.error('Failed to delete replicaset:', err)
-        alert(`Failed to delete replicaset: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete replicaset:', err);
+        alert(`Failed to delete replicaset: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getStatusBadge = (status: ReplicaSet['status']) => {
     switch (status) {
-      case 'Ready':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'Scaling':
-        return <Badge variant="warning" className="flex items-center gap-1">
-          <Scale className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'NotReady':
-        return <Badge variant="destructive" className="flex items-center gap-1">
-          <AlertCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      default:
-        return <Badge>{status}</Badge>
+    case 'Ready':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <CheckCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'Scaling':
+      return <Badge variant="warning" className="flex items-center gap-1">
+        <Scale className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'NotReady':
+      return <Badge variant="destructive" className="flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    default:
+      return <Badge>{status}</Badge>;
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -312,5 +309,5 @@ export function ReplicaSetsView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

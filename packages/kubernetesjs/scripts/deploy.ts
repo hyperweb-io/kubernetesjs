@@ -1,5 +1,5 @@
-import { KubernetesClient } from "../src";
-import { createPostgresDeployment } from "./deployment";
+import { KubernetesClient } from '../src';
+import { createPostgresDeployment } from './deployment';
 
 // Create a client instance
 const client = new KubernetesClient({

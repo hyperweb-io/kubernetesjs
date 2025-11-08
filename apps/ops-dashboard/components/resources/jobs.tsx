@@ -1,122 +1,121 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+import { type BatchV1Job as Job } from '@kubernetesjs/ops';
 import { 
-  RefreshCw, 
-  Plus, 
-  Trash2, 
-  Eye,
   AlertCircle,
   CheckCircle,
   Clock,
+  Eye,
+  Plus, 
+  RefreshCw, 
+  Trash2, 
   XCircle
-} from 'lucide-react'
-import { 
-  useListBatchV1NamespacedJobQuery,
-  useListBatchV1JobForAllNamespacesQuery,
-  useDeleteBatchV1NamespacedJob
-} from '@/k8s'
-import { usePreferredNamespace } from '@/contexts/NamespaceContext'
-import { type BatchV1Job as Job } from '@kubernetesjs/ops'
+} from 'lucide-react';
+import { useState } from 'react';
 
-import { confirmDialog } from '@/hooks/useConfirm'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePreferredNamespace } from '@/contexts/NamespaceContext';
+import { confirmDialog } from '@/hooks/useConfirm';
+import { 
+  useDeleteBatchV1NamespacedJob,
+  useListBatchV1JobForAllNamespacesQuery,
+  useListBatchV1NamespacedJobQuery} from '@/k8s';
 
 export function JobsView() {
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null)
-  const { namespace } = usePreferredNamespace()
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const { namespace } = usePreferredNamespace();
   
   // Use k8s hooks directly
   const query = namespace === '_all' 
     ? useListBatchV1JobForAllNamespacesQuery({ query: {} })
-    : useListBatchV1NamespacedJobQuery({ path: { namespace }, query: {} })
+    : useListBatchV1NamespacedJobQuery({ path: { namespace }, query: {} });
     
-  const { data, isLoading, error, refetch } = query
-  const deleteJob = useDeleteBatchV1NamespacedJob()
+  const { data, isLoading, error, refetch } = query;
+  const deleteJob = useDeleteBatchV1NamespacedJob();
 
-  const jobs = data?.items || []
+  const jobs = data?.items || [];
 
-  const handleRefresh = () => refetch()
+  const handleRefresh = () => refetch();
 
   const handleDelete = async (job: Job) => {
-    const name = job.metadata!.name!
-    const namespace = job.metadata!.namespace!
+    const name = job.metadata!.name!;
+    const namespace = job.metadata!.namespace!;
     
     const confirmed = await confirmDialog({
       title: 'Delete Job',
       description: `Are you sure you want to delete ${name}?`,
       confirmText: 'Delete',
       confirmVariant: 'destructive'
-    })
+    });
     
     if (confirmed) {
       try {
         await deleteJob.mutateAsync({
           path: { namespace, name },
           query: {}
-        })
-        refetch()
+        });
+        refetch();
       } catch (err) {
-        console.error('Failed to delete job:', err)
-        alert(`Failed to delete job: ${err instanceof Error ? err.message : 'Unknown error'}`)
+        console.error('Failed to delete job:', err);
+        alert(`Failed to delete job: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     }
-  }
+  };
 
   const getStatus = (job: Job) => {
-    const conditions = job.status?.conditions || []
-    const succeeded = job.status?.succeeded || 0
-    const failed = job.status?.failed || 0
-    const active = job.status?.active || 0
+    const conditions = job.status?.conditions || [];
+    const succeeded = job.status?.succeeded || 0;
+    const failed = job.status?.failed || 0;
+    const active = job.status?.active || 0;
     
     if (conditions.find(c => c.type === 'Complete' && c.status === 'True')) {
-      return 'Completed'
+      return 'Completed';
     } else if (conditions.find(c => c.type === 'Failed' && c.status === 'True')) {
-      return 'Failed'
+      return 'Failed';
     } else if (active > 0) {
-      return 'Running'
+      return 'Running';
     } else {
-      return 'Pending'
+      return 'Pending';
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Completed':
-        return <Badge variant="success" className="flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'Running':
-        return <Badge variant="default" className="flex items-center gap-1">
-          <Clock className="w-3 h-3" />
-          {status}
-        </Badge>
-      case 'Failed':
-        return <Badge variant="destructive" className="flex items-center gap-1">
-          <XCircle className="w-3 h-3" />
-          {status}
-        </Badge>
-      default:
-        return <Badge variant="secondary">{status}</Badge>
+    case 'Completed':
+      return <Badge variant="success" className="flex items-center gap-1">
+        <CheckCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'Running':
+      return <Badge variant="default" className="flex items-center gap-1">
+        <Clock className="w-3 h-3" />
+        {status}
+      </Badge>;
+    case 'Failed':
+      return <Badge variant="destructive" className="flex items-center gap-1">
+        <XCircle className="w-3 h-3" />
+        {status}
+      </Badge>;
+    default:
+      return <Badge variant="secondary">{status}</Badge>;
     }
-  }
+  };
 
   const getDuration = (job: Job) => {
-    if (!job.status?.startTime) return 'Not started'
-    const start = new Date(job.status.startTime).getTime()
+    if (!job.status?.startTime) return 'Not started';
+    const start = new Date(job.status.startTime).getTime();
     const end = job.status.completionTime 
       ? new Date(job.status.completionTime).getTime() 
-      : Date.now()
-    const duration = Math.floor((end - start) / 1000)
+      : Date.now();
+    const duration = Math.floor((end - start) / 1000);
     
-    if (duration < 60) return `${duration}s`
-    if (duration < 3600) return `${Math.floor(duration / 60)}m ${duration % 60}s`
-    return `${Math.floor(duration / 3600)}h ${Math.floor((duration % 3600) / 60)}m`
-  }
+    if (duration < 60) return `${duration}s`;
+    if (duration < 3600) return `${Math.floor(duration / 60)}m ${duration % 60}s`;
+    return `${Math.floor(duration / 3600)}h ${Math.floor((duration % 3600) / 60)}m`;
+  };
 
   return (
     <div className="space-y-6">
@@ -275,5 +274,5 @@ export function JobsView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

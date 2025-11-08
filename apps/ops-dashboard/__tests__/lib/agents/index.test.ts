@@ -1,4 +1,4 @@
-import { OllamaClient, BradieClient } from '@/lib/agents/index';
+import { BradieClient,OllamaClient } from '@/lib/agents/index';
 
 describe('lib/agents/index', () => {
   it('should export OllamaClient', () => {

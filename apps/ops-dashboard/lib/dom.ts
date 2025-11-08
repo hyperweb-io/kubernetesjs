@@ -1,7 +1,7 @@
 export function lockPageScroll() {
-	document.body.style.overflow = 'hidden';
+  document.body.style.overflow = 'hidden';
 }
 
 export function unlockPageScroll() {
-	document.body.style.overflow = '';
+  document.body.style.overflow = '';
 }

@@ -1,9 +1,12 @@
+import './globals.css';
+
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import './globals.css';
-import { Providers } from './providers';
-import { AppLayout } from '@/components/app-layout';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
+
+import { AppLayout } from '@/components/app-layout';
+
+import { Providers } from './providers';
 
 const inter = Inter({ subsets: ['latin'] });
 

@@ -1,5 +1,5 @@
-import { DeploymentsView } from '@/components/resources/deployments'
+import { DeploymentsView } from '@/components/resources/deployments';
 
 export default function DeploymentsPage() {
-  return <DeploymentsView />
+  return <DeploymentsView />;
 }

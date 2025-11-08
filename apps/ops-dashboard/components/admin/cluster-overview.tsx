@@ -1,9 +1,10 @@
 'use client';
 
-import { useClusterStatus } from '@/hooks/use-cluster-status';
+import { RefreshCw } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { RefreshCw } from 'lucide-react';
+import { useClusterStatus } from '@/hooks/use-cluster-status';
+
 import { StatusIndicator } from './status-indicator';
 
 export function ClusterOverview() {

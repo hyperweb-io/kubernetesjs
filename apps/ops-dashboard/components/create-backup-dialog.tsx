@@ -1,11 +1,11 @@
 
-import { AlertCircle, Brain, Sparkles } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { DialogHeader, DialogFooter, Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { useState } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AgentProvider } from "agentic-kit";
+import { AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface CreateBackupDialogProps {
   backups: any
@@ -16,28 +16,28 @@ interface CreateBackupDialogProps {
 }
 
 export function CreateBackupDialog({backups, open, onOpenChange, onSubmit ,databaseStatus}: CreateBackupDialogProps) {
-  const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [methodChoice, setMethodChoice] = useState<'auto'|'barmanObjectStore'|'volumeSnapshot'>('auto');
   const handleCancel = () => {
-    setError(null)
-    onOpenChange(false)
-  }
+    setError(null);
+    onOpenChange(false);
+  };
 
   const handleSubmit = async (methodParam?: string) => {
-    setError(null)
-    setIsSubmitting(true)
+    setError(null);
+    setIsSubmitting(true);
     try {
-      await onSubmit(methodParam)
+      await onSubmit(methodParam);
       // Only close dialog on successful submission
-      onOpenChange(false)
+      onOpenChange(false);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to create backup')
+      setError(error instanceof Error ? error.message : 'Failed to create backup');
       // Don't close dialog on error - let user see the error message
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -91,31 +91,31 @@ export function CreateBackupDialog({backups, open, onOpenChange, onSubmit ,datab
             Cancel
           </Button>
           <Button
-              className="px-3 py-1 rounded bg-primary text-white disabled:opacity-50"
-              disabled={
-                isSubmitting ||
+            className="px-3 py-1 rounded bg-primary text-white disabled:opacity-50"
+            disabled={
+              isSubmitting ||
                 (backups.isFetched && (
                   (methodChoice === 'auto' && !(backups.data?.configured || backups.data?.snapshotSupported)) ||
                   (methodChoice === 'barmanObjectStore' && backups.data?.methodConfigured !== 'barmanObjectStore') ||
                   (methodChoice === 'volumeSnapshot' && !backups.data?.snapshotSupported)
                 ))
-              }
-              onClick={() => {
-                const methodParam = methodChoice === 'auto' ? undefined : methodChoice;
-                handleSubmit(methodParam)
-              }}
-              title={(() => {
-                if (!backups.isFetched) return 'Create on-demand backup';
-                if (methodChoice === 'auto' && !(backups.data?.configured || backups.data?.snapshotSupported)) return 'Configure backups (barman) or install VolumeSnapshot CRDs';
-                if (methodChoice === 'barmanObjectStore' && backups.data?.methodConfigured !== 'barmanObjectStore') return 'Cluster is not configured for barman backups';
-                if (methodChoice === 'volumeSnapshot' && !backups.data?.snapshotSupported) return 'VolumeSnapshot CRDs/CSI not available';
-                return 'Create on-demand backup';
-              })()}
-            >
-              {isSubmitting ? 'Creating…' : 'Create Backup'}
-            </Button>
+            }
+            onClick={() => {
+              const methodParam = methodChoice === 'auto' ? undefined : methodChoice;
+              handleSubmit(methodParam);
+            }}
+            title={(() => {
+              if (!backups.isFetched) return 'Create on-demand backup';
+              if (methodChoice === 'auto' && !(backups.data?.configured || backups.data?.snapshotSupported)) return 'Configure backups (barman) or install VolumeSnapshot CRDs';
+              if (methodChoice === 'barmanObjectStore' && backups.data?.methodConfigured !== 'barmanObjectStore') return 'Cluster is not configured for barman backups';
+              if (methodChoice === 'volumeSnapshot' && !backups.data?.snapshotSupported) return 'VolumeSnapshot CRDs/CSI not available';
+              return 'Create on-demand backup';
+            })()}
+          >
+            {isSubmitting ? 'Creating…' : 'Create Backup'}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

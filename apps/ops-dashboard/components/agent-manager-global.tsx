@@ -1,6 +1,20 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import {
+  AlertCircle,
+  Brain,
+  CheckCircle,
+  FolderOpen,
+  Globe,
+  Loader2,
+  Plus,
+  Server,
+  Sparkles,
+  Trash2} from 'lucide-react';
+import { useEffect,useState } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -8,33 +22,20 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import {
-  Loader2,
-  CheckCircle,
-  AlertCircle,
-  Server,
-  Brain,
-  Sparkles,
-  Plus,
-  Trash2,
-  FolderOpen,
-  Globe
-} from 'lucide-react'
-import { OllamaClient, BradieClient, type Session } from '@/lib/agents'
-import type { GlobalAgentConfig } from './ai-chat-global'
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BradieClient, OllamaClient, type Session } from '@/lib/agents';
+
+import type { GlobalAgentConfig } from './ai-chat-global';
 
 interface AgentManagerGlobalProps {
   isOpen: boolean
@@ -45,102 +46,102 @@ interface AgentManagerGlobalProps {
 
 export function AgentManagerGlobal({ isOpen, onClose, currentConfig, onConfigChange }: AgentManagerGlobalProps) {
   // Session Management State
-  const [sessions, setSessions] = useState<Session[]>([])
-  const [showCreateSession, setShowCreateSession] = useState(false)
-  const [projectName, setProjectName] = useState('')
-  const [projectPath, setProjectPath] = useState('')
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [showCreateSession, setShowCreateSession] = useState(false);
+  const [projectName, setProjectName] = useState('');
+  const [projectPath, setProjectPath] = useState('');
   
   // Model Management State
-  const [ollamaModels, setOllamaModels] = useState<string[]>(['llama2', 'mistral', 'mixtral'])
-  const [isLoadingModels, setIsLoadingModels] = useState(false)
+  const [ollamaModels, setOllamaModels] = useState<string[]>(['llama2', 'mistral', 'mixtral']);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
   
   // Endpoint State
-  const [bradieDomain, setBradieDomain] = useState(currentConfig.bradieDomain || 'http://localhost:3001')
-  const [ollamaEndpoint, setOllamaEndpoint] = useState(currentConfig.endpoint || 'http://localhost:11434')
-  const [isTestingConnection, setIsTestingConnection] = useState(false)
+  const [bradieDomain, setBradieDomain] = useState(currentConfig.bradieDomain || 'http://localhost:3001');
+  const [ollamaEndpoint, setOllamaEndpoint] = useState(currentConfig.endpoint || 'http://localhost:11434');
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
   
   // General State
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-  const [connectionStatus, setConnectionStatus] = useState<Record<string, boolean>>({})
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<Record<string, boolean>>({});
   
   // Load sessions from localStorage
   useEffect(() => {
-    const savedSessions = localStorage.getItem('ai-chat-bradie-sessions')
+    const savedSessions = localStorage.getItem('ai-chat-bradie-sessions');
     if (savedSessions) {
       try {
-        const parsed = JSON.parse(savedSessions)
+        const parsed = JSON.parse(savedSessions);
         setSessions(parsed.map((s: any) => ({
           ...s,
           createdAt: new Date(s.createdAt)
-        })))
+        })));
       } catch (err) {
-        console.error('Failed to load sessions:', err)
+        console.error('Failed to load sessions:', err);
       }
     }
-  }, [])
+  }, []);
 
   // Save sessions to localStorage
   const saveSessions = (newSessions: Session[]) => {
-    setSessions(newSessions)
-    localStorage.setItem('ai-chat-bradie-sessions', JSON.stringify(newSessions))
-  }
+    setSessions(newSessions);
+    localStorage.setItem('ai-chat-bradie-sessions', JSON.stringify(newSessions));
+  };
 
   // Test Ollama connection and load models
   const testOllamaConnection = async () => {
-    setIsTestingConnection(true)
-    setError(null)
+    setIsTestingConnection(true);
+    setError(null);
     
     try {
-      const client = new OllamaClient(ollamaEndpoint)
-      const models = await client.listModels()
-      setOllamaModels(models)
-      setConnectionStatus(prev => ({ ...prev, ollama: true }))
-      setSuccess('Successfully connected to Ollama')
+      const client = new OllamaClient(ollamaEndpoint);
+      const models = await client.listModels();
+      setOllamaModels(models);
+      setConnectionStatus(prev => ({ ...prev, ollama: true }));
+      setSuccess('Successfully connected to Ollama');
     } catch (err) {
-      console.error('Ollama connection error:', err)
-      setConnectionStatus(prev => ({ ...prev, ollama: false }))
-      setError('Failed to connect to Ollama. Please ensure Ollama is running.')
+      console.error('Ollama connection error:', err);
+      setConnectionStatus(prev => ({ ...prev, ollama: false }));
+      setError('Failed to connect to Ollama. Please ensure Ollama is running.');
     } finally {
-      setIsTestingConnection(false)
+      setIsTestingConnection(false);
     }
-  }
+  };
 
   // Test Bradie connection
   const testBradieConnection = async () => {
-    setIsTestingConnection(true)
-    setError(null)
+    setIsTestingConnection(true);
+    setError(null);
     
     try {
-      const client = new BradieClient(bradieDomain)
-      const isHealthy = await client.checkHealth()
-      setConnectionStatus(prev => ({ ...prev, bradie: isHealthy }))
+      const client = new BradieClient(bradieDomain);
+      const isHealthy = await client.checkHealth();
+      setConnectionStatus(prev => ({ ...prev, bradie: isHealthy }));
       if (isHealthy) {
-        setSuccess('Successfully connected to Bradie')
+        setSuccess('Successfully connected to Bradie');
       } else {
-        setError('Bradie backend is not responding')
+        setError('Bradie backend is not responding');
       }
     } catch (err) {
-      console.error('Bradie connection error:', err)
-      setConnectionStatus(prev => ({ ...prev, bradie: false }))
-      setError('Failed to connect to Bradie backend')
+      console.error('Bradie connection error:', err);
+      setConnectionStatus(prev => ({ ...prev, bradie: false }));
+      setError('Failed to connect to Bradie backend');
     } finally {
-      setIsTestingConnection(false)
+      setIsTestingConnection(false);
     }
-  }
+  };
 
   // Create new Bradie session
   const createSession = async () => {
     if (!projectName || !projectPath) {
-      setError('Please provide both project name and path')
-      return
+      setError('Please provide both project name and path');
+      return;
     }
 
     try {
-      const client = new BradieClient(bradieDomain)
-      const session = await client.createSession(projectName, projectPath)
-      const newSessions = [...sessions, session]
-      saveSessions(newSessions)
+      const client = new BradieClient(bradieDomain);
+      const session = await client.createSession(projectName, projectPath);
+      const newSessions = [...sessions, session];
+      saveSessions(newSessions);
       
       // Update config with new session
       onConfigChange({
@@ -148,31 +149,31 @@ export function AgentManagerGlobal({ isOpen, onClose, currentConfig, onConfigCha
         agent: 'bradie',
         bradieDomain,
         session
-      })
+      });
       
-      setShowCreateSession(false)
-      setProjectName('')
-      setProjectPath('')
-      setSuccess('Session created successfully')
+      setShowCreateSession(false);
+      setProjectName('');
+      setProjectPath('');
+      setSuccess('Session created successfully');
     } catch (err) {
-      console.error('Failed to create session:', err)
-      setError('Failed to create session')
+      console.error('Failed to create session:', err);
+      setError('Failed to create session');
     }
-  }
+  };
 
   // Delete session
   const deleteSession = (sessionId: string) => {
-    const newSessions = sessions.filter(s => s.id !== sessionId)
-    saveSessions(newSessions)
+    const newSessions = sessions.filter(s => s.id !== sessionId);
+    saveSessions(newSessions);
     
     // If deleted session was active, clear it
     if (currentConfig.session?.id === sessionId) {
       onConfigChange({
         ...currentConfig,
         session: null
-      })
+      });
     }
-  }
+  };
 
   // Apply configuration
   const applyConfig = () => {
@@ -182,11 +183,11 @@ export function AgentManagerGlobal({ isOpen, onClose, currentConfig, onConfigCha
       model: currentConfig.model,
       bradieDomain: bradieDomain,
       session: currentConfig.session
-    }
+    };
     
-    onConfigChange(newConfig)
-    onClose()
-  }
+    onConfigChange(newConfig);
+    onClose();
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -345,8 +346,8 @@ export function AgentManagerGlobal({ isOpen, onClose, currentConfig, onConfigCha
                         variant="ghost"
                         size="icon"
                         onClick={(e) => {
-                          e.stopPropagation()
-                          deleteSession(session.id)
+                          e.stopPropagation();
+                          deleteSession(session.id);
                         }}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -387,9 +388,9 @@ export function AgentManagerGlobal({ isOpen, onClose, currentConfig, onConfigCha
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      setShowCreateSession(false)
-                      setProjectName('')
-                      setProjectPath('')
+                      setShowCreateSession(false);
+                      setProjectName('');
+                      setProjectPath('');
                     }}
                   >
                     Cancel
@@ -424,5 +425,5 @@ export function AgentManagerGlobal({ isOpen, onClose, currentConfig, onConfigCha
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
