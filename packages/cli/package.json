@@ -1,6 +1,6 @@
 {
   "name": "@kubernetesjs/cli",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "description": "KubernetesJS CLI",
   "keywords": [

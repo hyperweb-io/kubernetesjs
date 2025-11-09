@@ -1,6 +1,6 @@
 {
   "name": "@kubernetesjs/client",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Client for KubernetesJS ops workflows",
   "main": "./index.js",
   "types": "./index.d.ts",
@@ -24,8 +24,8 @@
     "operators:teardown": "ts-node --swc scripts/setup-operators.ts teardown --config __fixtures__/config/setup.cnpg-minio.yaml"
   },
   "dependencies": {
-    "@kubernetesjs/ops": "workspace:^",
     "@kubernetesjs/manifests": "workspace:^",
+    "@kubernetesjs/ops": "workspace:^",
     "axios": "^1.7.2",
     "chalk": "^4.1.0",
     "js-yaml": "^4.1.0",

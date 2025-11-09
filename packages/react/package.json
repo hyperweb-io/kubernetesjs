@@ -1,6 +1,6 @@
 {
   "name": "@kubernetesjs/react",
-  "version": "0.7.4",
+  "version": "0.7.5",
   "author": "Dan Lynch <pyramation@gmail.com>",
   "description": "Fully Typed Kubernetes React Hooks",
   "keywords": [
