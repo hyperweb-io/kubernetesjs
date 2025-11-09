@@ -17,13 +17,12 @@ describe('Infrastructure Overview Page', () => {
   it('should render all resource cards', () => {
     render(<InfrastructureOverviewPage />);
     
-    // Check all resource cards are present
+    // Check all resource cards are present (Templates card has been removed)
     expect(screen.getByText('View All')).toBeInTheDocument();
     expect(screen.getByText('Deployments')).toBeInTheDocument();
     expect(screen.getByText('Services')).toBeInTheDocument();
     expect(screen.getByText('Secrets')).toBeInTheDocument();
     expect(screen.getByText('ConfigMaps')).toBeInTheDocument();
-    expect(screen.getByText('Templates')).toBeInTheDocument();
     expect(screen.getByText('ReplicaSets')).toBeInTheDocument();
     expect(screen.getByText('Pods')).toBeInTheDocument();
   });
@@ -31,13 +30,12 @@ describe('Infrastructure Overview Page', () => {
   it('should render resource descriptions', () => {
     render(<InfrastructureOverviewPage />);
     
-    // Check resource descriptions
+    // Check resource descriptions (Templates card has been removed)
     expect(screen.getByText('See all resources in one dashboard')).toBeInTheDocument();
     expect(screen.getByText('Manage and monitor your deployments')).toBeInTheDocument();
     expect(screen.getByText('Manage your services and networking')).toBeInTheDocument();
     expect(screen.getByText('Manage sensitive data and credentials')).toBeInTheDocument();
     expect(screen.getByText('Manage application configuration data')).toBeInTheDocument();
-    expect(screen.getByText('Manage and deploy resource templates')).toBeInTheDocument();
     expect(screen.getByText('Manage and monitor your replica sets')).toBeInTheDocument();
     expect(screen.getByText('Monitor and manage individual pods')).toBeInTheDocument();
   });
@@ -77,13 +75,12 @@ describe('Infrastructure Overview Page', () => {
   it('should render all resource links with correct hrefs', () => {
     render(<InfrastructureOverviewPage />);
     
-    // Check all resource links have correct hrefs
+    // Check all resource links have correct hrefs (Templates card has been removed)
     expect(screen.getByRole('link', { name: /view all/i })).toHaveAttribute('href', '/i/all');
     expect(screen.getByRole('link', { name: /deployments/i })).toHaveAttribute('href', '/i/deployments');
     expect(screen.getByRole('link', { name: /services/i })).toHaveAttribute('href', '/i/services');
     expect(screen.getByRole('link', { name: /secrets/i })).toHaveAttribute('href', '/i/secrets');
     expect(screen.getByRole('link', { name: /configmaps/i })).toHaveAttribute('href', '/i/configmaps');
-    expect(screen.getByRole('link', { name: /templates/i })).toHaveAttribute('href', '/i/templates');
     expect(screen.getByRole('link', { name: /replicasets/i })).toHaveAttribute('href', '/i/replicasets');
     expect(screen.getByRole('link', { name: /pods/i })).toHaveAttribute('href', '/i/pods');
   });

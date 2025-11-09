@@ -266,8 +266,10 @@ describe('useCreateNamespace', () => {
       });
     });
 
-    expect(result.current.isSuccess).toBe(true);
-  });
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true)
+    })
+  })
 
   it('should create namespace without labels', async () => {
     server.use(createNamespace());

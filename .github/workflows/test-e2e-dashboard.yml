@@ -79,7 +79,7 @@ jobs:
       - name: Run all E2E tests
         run: |
           cd apps/ops-dashboard
-          pnpm run test:e2e || true # Ignore failures for now
+          pnpm run test:e2e
         env:
           K8S_API: http://127.0.0.1:8001
           NODE_ENV: test
