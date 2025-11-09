@@ -1,6 +1,7 @@
 {
   "name": "@kubernetesjs/ops-cli",
   "version": "0.0.2",
+  "author": "Anmol1696 <anmol1696@gmail.com>",
   "description": "KubernetesJS Ops CLI",
   "main": "./index.js",
   "types": "./index.d.ts",
@@ -18,8 +19,8 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@kubernetesjs/client": "^0.0.2",
-    "@kubernetesjs/ops": "^0.0.2",
+    "@kubernetesjs/client": "workspace:^",
+    "@kubernetesjs/ops": "workspace:^",
     "chalk": "^4.1.0",
     "commander": "^11.0.0",
     "inquirer": "^9.2.0"

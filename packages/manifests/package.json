@@ -1,6 +1,7 @@
 {
   "name": "@kubernetesjs/manifests",
   "version": "0.0.2",
+  "author": "Anmol1696 <anmol1696@gmail.com>",
   "description": "Curated operator manifests for KubernetesJS ops",
   "main": "./index.js",
   "types": "./index.d.ts",
@@ -22,7 +23,7 @@
     "codegen": "ts-node scripts/codegen-operators.ts"
   },
   "dependencies": {
-    "@kubernetesjs/ops": "0.0.2",
+    "@kubernetesjs/ops": "workspace:^",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {

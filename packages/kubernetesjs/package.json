@@ -1,7 +1,7 @@
 {
   "name": "kubernetesjs",
   "version": "0.7.4",
-  "author": "Dan Lynch <pyramation@gmail.com>",
+  "author": "Anmol1696 <anmol1696@gmail.com>",
   "description": "Fully Typed Kubernetes",
   "keywords": [
     "kubernetes",
