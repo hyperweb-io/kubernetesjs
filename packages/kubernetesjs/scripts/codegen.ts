@@ -1,5 +1,6 @@
 import { writeFileSync } from 'fs';
-import { getDefaultSchemaSDKOptions, generateOpenApiClient } from 'schema-sdk';
+import { generateOpenApiClient,getDefaultSchemaSDKOptions } from 'schema-sdk';
+
 import schema from './swagger.json';
 
 const options = getDefaultSchemaSDKOptions({

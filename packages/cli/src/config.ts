@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
+import * as yaml from 'js-yaml';
 import { homedir } from 'os';
 import { join } from 'path';
-import * as yaml from 'js-yaml';
 
 const KUBECONFIG_PATH = join(homedir(), '.kubeconfig');
 

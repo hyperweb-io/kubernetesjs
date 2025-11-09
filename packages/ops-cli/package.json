@@ -1,0 +1,33 @@
+{
+  "name": "@kubernetesjs/ops-cli",
+  "version": "0.0.1",
+  "description": "KubernetesJS Ops CLI",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "module": "./esm/index.js",
+  "publishConfig": {
+    "access": "restricted",
+    "directory": "dist"
+  },
+  "scripts": {
+    "copy": "copyfiles -f ../../LICENSE README.md package.json dist",
+    "clean": "rimraf dist",
+    "prepare": "pnpm run build",
+    "build": "pnpm run clean && tsc && tsc -p tsconfig.esm.json && pnpm run copy",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "@kubernetesjs/client": "workspace:^",
+    "@kubernetesjs/ops": "workspace:^",
+    "chalk": "^4.1.0",
+    "commander": "^11.0.0",
+    "inquirer": "^9.2.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.3"
+  },
+  "bin": {
+    "k8sops": "./index.js"
+  }
+}

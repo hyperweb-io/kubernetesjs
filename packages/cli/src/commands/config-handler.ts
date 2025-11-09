@@ -1,8 +1,10 @@
-import { CLIOptions, Inquirerer } from 'inquirerer';
-import { ParsedArgs } from 'minimist';
 import chalk from 'chalk';
 import * as fs from 'fs';
-import { readYamlFile, inferResourceType } from '../config';
+import { CLIOptions, Inquirerer } from 'inquirerer';
+import { ParsedArgs } from 'minimist';
+
+import { inferResourceType,readYamlFile } from '../config';
+import type { CommandHandler } from '../types';
 
 /**
  * Handle the --config flag by parsing the YAML file and executing the appropriate command
@@ -15,7 +17,7 @@ export default async (
   argv: Partial<ParsedArgs>,
   prompter: Inquirerer,
   options: CLIOptions,
-  commandMap: Record<string, Function>
+  commandMap: Record<string, CommandHandler>
 ): Promise<boolean> => {
   if (!argv.config) {
     return false;
@@ -56,4 +58,4 @@ export default async (
     console.error(chalk.red(`Error processing config file: ${error}`));
     return true;
   }
-}
+};

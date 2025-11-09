@@ -1,9 +1,10 @@
-import { CLIOptions, Inquirerer, OptionValue, Question } from 'inquirerer';
-import { ParsedArgs } from 'minimist';
 import chalk from 'chalk';
-import { KubernetesClient } from 'kubernetesjs';
-import { getCurrentNamespace, readYamlFile } from '../config';
 import * as fs from 'fs';
+import { CLIOptions, Inquirerer, OptionValue, Question } from 'inquirerer';
+import { KubernetesClient } from 'kubernetesjs';
+import { ParsedArgs } from 'minimist';
+
+import { getCurrentNamespace, readYamlFile } from '../config';
 
 async function promptResourceType(prompter: Inquirerer, argv: Partial<ParsedArgs>): Promise<string> {
   const resourceTypes = [
@@ -40,49 +41,49 @@ async function promptResourceSelection(
   let resources: any[] = [];
   
   switch (resourceType) {
-    case 'pod':
-      const pods = await client.listCoreV1NamespacedPod({
-        path: { namespace },
-        query: { limit: 100 }
-      });
-      resources = pods.items || [];
-      break;
+  case 'pod':
+    const pods = await client.listCoreV1NamespacedPod({
+      path: { namespace },
+      query: { limit: 100 }
+    });
+    resources = pods.items || [];
+    break;
       
-    case 'service':
-      const services = await client.listCoreV1NamespacedService({
-        path: { namespace },
-        query: { limit: 100 }
-      });
-      resources = services.items || [];
-      break;
+  case 'service':
+    const services = await client.listCoreV1NamespacedService({
+      path: { namespace },
+      query: { limit: 100 }
+    });
+    resources = services.items || [];
+    break;
       
-    case 'deployment':
-      const deployments = await client.listAppsV1NamespacedDeployment({
-        path: { namespace },
-        query: { limit: 100 }
-      });
-      resources = deployments.items || [];
-      break;
+  case 'deployment':
+    const deployments = await client.listAppsV1NamespacedDeployment({
+      path: { namespace },
+      query: { limit: 100 }
+    });
+    resources = deployments.items || [];
+    break;
       
-    case 'configmap':
-      const configmaps = await client.listCoreV1NamespacedConfigMap({
-        path: { namespace },
-        query: { limit: 100 }
-      });
-      resources = configmaps.items || [];
-      break;
+  case 'configmap':
+    const configmaps = await client.listCoreV1NamespacedConfigMap({
+      path: { namespace },
+      query: { limit: 100 }
+    });
+    resources = configmaps.items || [];
+    break;
       
-    case 'secret':
-      const secrets = await client.listCoreV1NamespacedSecret({
-        path: { namespace },
-        query: { limit: 100 }
-      });
-      resources = secrets.items || [];
-      break;
+  case 'secret':
+    const secrets = await client.listCoreV1NamespacedSecret({
+      path: { namespace },
+      query: { limit: 100 }
+    });
+    resources = secrets.items || [];
+    break;
       
-    default:
-      console.log(chalk.yellow(`Resource type '${resourceType}' not implemented yet for selection`));
-      return [];
+  default:
+    console.log(chalk.yellow(`Resource type '${resourceType}' not implemented yet for selection`));
+    return [];
   }
   
   if (resources.length === 0) {
@@ -108,7 +109,7 @@ async function promptResourceSelection(
   ({ selectedResources } = await prompter.prompt(argv, [question]));
   return selectedResources
     .filter(res=>res.selected)
-    .map(res=>res.value)
+    .map(res=>res.value);
 }
 
 async function deleteResource(
@@ -119,73 +120,73 @@ async function deleteResource(
 ): Promise<void> {
   try {
     switch (resourceType) {
-      case 'pod':
-        await client.deleteCoreV1NamespacedPod({
-          path: { 
-            namespace,
-            name: resourceName
-          },
-          query: {
+    case 'pod':
+      await client.deleteCoreV1NamespacedPod({
+        path: { 
+          namespace,
+          name: resourceName
+        },
+        query: {
             
-          }
-        });
-        console.log(chalk.green(`Pod "${resourceName}" deleted successfully`));
-        break;
+        }
+      });
+      console.log(chalk.green(`Pod "${resourceName}" deleted successfully`));
+      break;
         
-      case 'service':
-        await client.deleteCoreV1NamespacedService({
-          path: { 
-            namespace,
-            name: resourceName
-          },
-          query: {
+    case 'service':
+      await client.deleteCoreV1NamespacedService({
+        path: { 
+          namespace,
+          name: resourceName
+        },
+        query: {
             
-          }
-        });
-        console.log(chalk.green(`Service "${resourceName}" deleted successfully`));
-        break;
+        }
+      });
+      console.log(chalk.green(`Service "${resourceName}" deleted successfully`));
+      break;
         
-      case 'deployment':
-        await client.deleteAppsV1NamespacedDeployment({
-          path: { 
-            namespace,
-            name: resourceName
-          },
-          query: {
+    case 'deployment':
+      await client.deleteAppsV1NamespacedDeployment({
+        path: { 
+          namespace,
+          name: resourceName
+        },
+        query: {
             
-          }
-        });
-        console.log(chalk.green(`Deployment "${resourceName}" deleted successfully`));
-        break;
+        }
+      });
+      console.log(chalk.green(`Deployment "${resourceName}" deleted successfully`));
+      break;
         
-      case 'configmap':
-        await client.deleteCoreV1NamespacedConfigMap({
-          path: { 
-            namespace,
-            name: resourceName
-          },
-          query: {
+    case 'configmap':
+      await client.deleteCoreV1NamespacedConfigMap({
+        path: { 
+          namespace,
+          name: resourceName
+        },
+        query: {
             
-          }
-        });
-        console.log(chalk.green(`ConfigMap "${resourceName}" deleted successfully`));
-        break;
+        }
+      });
+      console.log(chalk.green(`ConfigMap "${resourceName}" deleted successfully`));
+      break;
         
-      case 'secret':
-        await client.deleteCoreV1NamespacedSecret({
-          path: { 
-            namespace,
-            name: resourceName
-          },
-          query: {
+    case 'secret':
+      await client.deleteCoreV1NamespacedSecret({
+        path: { 
+          namespace,
+          name: resourceName
+        },
+        query: {
             
-          }
-        });
-        console.log(chalk.green(`Secret "${resourceName}" deleted successfully`));
-        break;
+        }
+      });
+      console.log(chalk.green(`Secret "${resourceName}" deleted successfully`));
+      break;
         
-      default:
-        console.log(chalk.yellow(`Resource type '${resourceType}' not implemented yet for deletion`));
+    default:
+      console.log(chalk.yellow(`Resource type '${resourceType}' not implemented yet for deletion`));
     }
   } catch (error) {
     console.error(chalk.red(`Error deleting ${resourceType} "${resourceName}": ${error}`));
@@ -197,8 +198,8 @@ async function deleteFromYaml(client: KubernetesClient, filePath: string, namesp
     const content = readYamlFile(filePath);
     
     const resources = Array.isArray(content) ? content : 
-                     (content.kind === 'List' && Array.isArray(content.items)) ? content.items : 
-                     [content];
+      (content.kind === 'List' && Array.isArray(content.items)) ? content.items : 
+        [content];
     
     for (const resource of resources) {
       const kind = resource.kind.toLowerCase();

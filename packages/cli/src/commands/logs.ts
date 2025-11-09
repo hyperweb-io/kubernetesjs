@@ -1,7 +1,8 @@
-import { CLIOptions, Inquirerer, Question } from 'inquirerer';
-import { ParsedArgs } from 'minimist';
 import chalk from 'chalk';
+import { CLIOptions, Inquirerer, Question } from 'inquirerer';
 import { KubernetesClient } from 'kubernetesjs';
+import { ParsedArgs } from 'minimist';
+
 import { getCurrentNamespace } from '../config';
 
 async function promptPodName(

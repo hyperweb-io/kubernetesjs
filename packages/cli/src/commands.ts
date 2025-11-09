@@ -1,22 +1,22 @@
 import { CLIOptions, Inquirerer } from 'inquirerer';
 import { ParsedArgs } from 'minimist';
 
-import { readAndParsePackageJson } from './package';
-import { extractFirst, usageText } from './utils';
-
-// Commands
-import deploy from './commands/deploy';
-import get from './commands/get';
-import describe from './commands/describe';
-import logs from './commands/logs';
 import apply from './commands/apply';
-import deleteCmd from './commands/delete';
-import exec from './commands/exec';
-import portForward from './commands/port-forward';
 import clusterInfo from './commands/cluster-info';
 import config from './commands/config';
+import deleteCmd from './commands/delete';
+// Commands
+import deploy from './commands/deploy';
+import describe from './commands/describe';
+import exec from './commands/exec';
+import get from './commands/get';
+import logs from './commands/logs';
+import portForward from './commands/port-forward';
+import { readAndParsePackageJson } from './package';
+import type { CommandHandler } from './types';
+import { extractFirst, usageText } from './utils';
 
-const commandMap: Record<string, Function> = {
+const commandMap: Record<string, CommandHandler> = {
   deploy,
   get,
   describe,

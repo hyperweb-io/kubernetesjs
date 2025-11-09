@@ -1,7 +1,7 @@
 
-import React, { createContext, useContext, useMemo, useState } from 'react'
-import { KubernetesClient } from 'kubernetesjs'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { KubernetesClient } from 'kubernetesjs';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 
 // Configuration types
 export interface KubernetesConfig {
@@ -29,7 +29,7 @@ const queryClient = new QueryClient({
       gcTime: 5 * 60 * 1000, // 5 minutes
     },
   },
-})
+});
 
 // Provider props
 interface KubernetesProviderProps {
@@ -45,25 +45,25 @@ export function KubernetesProvider({
   const [config, setConfig] = useState<KubernetesConfig>({
     restEndpoint: initialConfig?.restEndpoint,
     headers: initialConfig?.headers || {},
-  })
+  });
 
   // Create client instance
   const client = useMemo(() => {
     return new KubernetesClient({
       restEndpoint: config.restEndpoint,
-    })
-  }, [config.restEndpoint])
+    });
+  }, [config.restEndpoint]);
 
   // Update config function
   const updateConfig = (newConfig: Partial<KubernetesConfig>) => {
-    setConfig(prev => ({ ...prev, ...newConfig }))
-  }
+    setConfig(prev => ({ ...prev, ...newConfig }));
+  };
 
   const contextValue: KubernetesContextValue = {
     client,
     config,
     updateConfig,
-  }
+  };
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -71,17 +71,17 @@ export function KubernetesProvider({
         {children}
       </KubernetesContext.Provider>
     </QueryClientProvider>
-  )
+  );
 }
 
 // Hook to use Kubernetes context
 export function useKubernetes(): KubernetesContextValue {
-  const context = useContext(KubernetesContext)
+  const context = useContext(KubernetesContext);
   if (!context) {
-    throw new Error('useKubernetes must be used within a KubernetesProvider')
+    throw new Error('useKubernetes must be used within a KubernetesProvider');
   }
-  return context
+  return context;
 }
 
 // Export query client for use in hooks
-export { queryClient }
+export { queryClient };

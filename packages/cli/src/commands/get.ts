@@ -1,7 +1,8 @@
-import { CLIOptions, Inquirerer, Question } from 'inquirerer';
-import { ParsedArgs } from 'minimist';
 import chalk from 'chalk';
+import { CLIOptions, Inquirerer, Question } from 'inquirerer';
 import { KubernetesClient } from 'kubernetesjs';
+import { ParsedArgs } from 'minimist';
+
 import { getCurrentNamespace } from '../config';
 
 async function promptResourceType(prompter: Inquirerer, argv: Partial<ParsedArgs>): Promise<string> {
@@ -142,53 +143,53 @@ export default async (
     }
 
     switch (resourceType) {
-      case 'pods':
-        const pods = await client.listCoreV1NamespacedPod({
-          path: { namespace },
-          query: { limit: 100 }
-        });
+    case 'pods':
+      const pods = await client.listCoreV1NamespacedPod({
+        path: { namespace },
+        query: { limit: 100 }
+      });
         
-        console.log(chalk.bold('NAME'.padEnd(50) + 'READY'.padEnd(10) + 'STATUS'.padEnd(15) + 'RESTARTS'.padEnd(10) + 'AGE'));
+      console.log(chalk.bold('NAME'.padEnd(50) + 'READY'.padEnd(10) + 'STATUS'.padEnd(15) + 'RESTARTS'.padEnd(10) + 'AGE'));
         
-        if (pods.items && pods.items.length > 0) {
-          pods.items.forEach(formatPodData);
-        } else {
-          console.log(chalk.yellow('No pods found'));
-        }
-        break;
+      if (pods.items && pods.items.length > 0) {
+        pods.items.forEach(formatPodData);
+      } else {
+        console.log(chalk.yellow('No pods found'));
+      }
+      break;
         
-      case 'services':
-        const services = await client.listCoreV1NamespacedService({
-          path: { namespace },
-          query: { limit: 100 }
-        });
+    case 'services':
+      const services = await client.listCoreV1NamespacedService({
+        path: { namespace },
+        query: { limit: 100 }
+      });
         
-        console.log(chalk.bold('NAME'.padEnd(30) + 'TYPE'.padEnd(15) + 'CLUSTER-IP'.padEnd(20) + 'EXTERNAL-IP'.padEnd(20) + 'PORT(S)'.padEnd(20) + 'AGE'));
+      console.log(chalk.bold('NAME'.padEnd(30) + 'TYPE'.padEnd(15) + 'CLUSTER-IP'.padEnd(20) + 'EXTERNAL-IP'.padEnd(20) + 'PORT(S)'.padEnd(20) + 'AGE'));
         
-        if (services.items && services.items.length > 0) {
-          services.items.forEach(formatServiceData);
-        } else {
-          console.log(chalk.yellow('No services found'));
-        }
-        break;
+      if (services.items && services.items.length > 0) {
+        services.items.forEach(formatServiceData);
+      } else {
+        console.log(chalk.yellow('No services found'));
+      }
+      break;
         
-      case 'deployments':
-        const deployments = await client.listAppsV1NamespacedDeployment({
-          path: { namespace },
-          query: { limit: 100 }
-        });
+    case 'deployments':
+      const deployments = await client.listAppsV1NamespacedDeployment({
+        path: { namespace },
+        query: { limit: 100 }
+      });
         
-        console.log(chalk.bold('NAME'.padEnd(30) + 'READY'.padEnd(10) + 'UP-TO-DATE'.padEnd(10) + 'AVAILABLE'.padEnd(10) + 'AGE'));
+      console.log(chalk.bold('NAME'.padEnd(30) + 'READY'.padEnd(10) + 'UP-TO-DATE'.padEnd(10) + 'AVAILABLE'.padEnd(10) + 'AGE'));
         
-        if (deployments.items && deployments.items.length > 0) {
-          deployments.items.forEach(formatDeploymentData);
-        } else {
-          console.log(chalk.yellow('No deployments found'));
-        }
-        break;
+      if (deployments.items && deployments.items.length > 0) {
+        deployments.items.forEach(formatDeploymentData);
+      } else {
+        console.log(chalk.yellow('No deployments found'));
+      }
+      break;
         
-      default:
-        console.log(chalk.yellow(`Resource type '${resourceType}' not implemented yet`));
+    default:
+      console.log(chalk.yellow(`Resource type '${resourceType}' not implemented yet`));
     }
   } catch (error) {
     console.error(chalk.red(`Error: ${error}`));

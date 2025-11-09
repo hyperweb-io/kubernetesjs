@@ -1,0 +1,39 @@
+{
+  "name": "@kubernetesjs/client",
+  "version": "0.0.1",
+  "description": "Client for KubernetesJS ops workflows",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "module": "./esm/index.js",
+  "publishConfig": {
+    "access": "restricted",
+    "directory": "dist"
+  },
+  "scripts": {
+    "copy": "copyfiles -f ../../LICENSE README.md package.json dist",
+    "clean": "rimraf dist",
+    "prepare": "pnpm run build",
+    "build": "pnpm run clean && tsc && tsc -p tsconfig.esm.json && pnpm run copy",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "tests:unit": "jest --selectProjects unit",
+    "tests:integration": "jest --selectProjects integration",
+    "tests:e2e": "E2E_TESTS=true jest --selectProjects e2e",
+    "proxy": "kubectl proxy --port=8001 --accept-hosts='^.*$' --address='0.0.0.0'",
+    "operators:setup": "ts-node --swc scripts/setup-operators.ts setup --config __fixtures__/config/setup.cnpg-minio.yaml",
+    "operators:teardown": "ts-node --swc scripts/setup-operators.ts teardown --config __fixtures__/config/setup.cnpg-minio.yaml"
+  },
+  "dependencies": {
+    "@kubernetesjs/ops": "workspace:^",
+    "@kubernetesjs/manifests": "workspace:^",
+    "axios": "^1.7.2",
+    "chalk": "^4.1.0",
+    "js-yaml": "^4.1.0",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.5",
+    "@types/pg": "^8.11.10",
+    "ts-node": "^10.9.2"
+  }
+}

@@ -112,25 +112,25 @@ export class APIClient {
     // If baseUrl is a relative proxy path (e.g. '/api/k8s'), build manually
     if (this.baseUrl.startsWith('/')) {
       // Remove any trailing slash from baseUrl, ensure endpoint starts with '/'
-      const base = this.baseUrl.replace(/\/$/, '')
-      let url = `${base}${endpoint}`
+      const base = this.baseUrl.replace(/\/$/, '');
+      let url = `${base}${endpoint}`;
       if (query) {
         // Build query params as a simple record so URLSearchParams can accept it
-        const record: Record<string, string> = {}
+        const record: Record<string, string> = {};
         Object.keys(query).forEach(key => {
-          record[key] = String(query[key])
-        })
-        const params = new URLSearchParams(record).toString()
-        if (params) url += `?${params}`
+          record[key] = String(query[key]);
+        });
+        const params = new URLSearchParams(record).toString();
+        if (params) url += `?${params}`;
       }
-      return url
+      return url;
     }
     // Otherwise, treat baseUrl as an absolute URL
-    const url = new URL(endpoint, this.baseUrl)
+    const url = new URL(endpoint, this.baseUrl);
     if (query) {
-      Object.keys(query).forEach(key => url.searchParams.append(key, query[key]))
+      Object.keys(query).forEach(key => url.searchParams.append(key, query[key]));
     }
-    return url.toString()
+    return url.toString();
   }
 
   private async request<Resp>(options: RequestOptions<any>): Promise<Resp> {

@@ -1,7 +1,7 @@
-import { CLIOptions, Inquirerer } from 'inquirerer';
-import { ParsedArgs } from 'minimist';
 import chalk from 'chalk';
+import { CLIOptions, Inquirerer } from 'inquirerer';
 import { KubernetesClient } from 'kubernetesjs';
+import { ParsedArgs } from 'minimist';
 
 export default async (
   _argv: Partial<ParsedArgs>,
@@ -25,7 +25,7 @@ export default async (
     });
     console.log(chalk.bold('\nAPI Versions:'));
     if (apiVersions.apiVersion) {
-      console.log(apiVersions.apiVersion)
+      console.log(apiVersions.apiVersion);
     }
     
   } catch (error) {

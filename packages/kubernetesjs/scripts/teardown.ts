@@ -1,5 +1,5 @@
-import { KubernetesClient } from "../src";
-import { cleanupPostgres } from "./cleanup";
+import { KubernetesClient } from '../src';
+import { cleanupPostgres } from './cleanup';
 
 // Create a client instance
 const client = new KubernetesClient({

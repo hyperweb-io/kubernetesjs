@@ -1,9 +1,10 @@
-import { CLIOptions, Inquirerer, Question } from 'inquirerer';
-import { ParsedArgs } from 'minimist';
 import chalk from 'chalk';
-import { KubernetesClient } from 'kubernetesjs';
-import { getCurrentNamespace } from '../config';
 import { spawn } from 'child_process';
+import { CLIOptions, Inquirerer, Question } from 'inquirerer';
+import { KubernetesClient } from 'kubernetesjs';
+import { ParsedArgs } from 'minimist';
+
+import { getCurrentNamespace } from '../config';
 
 async function promptServiceName(
   prompter: Inquirerer, 

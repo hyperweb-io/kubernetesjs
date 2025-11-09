@@ -1,0 +1,10 @@
+apiVersion: kubernetesjs.dev/v1
+kind: ClusterSetup
+metadata:
+  name: e2e-simple
+  namespace: interweb-system
+spec:
+  operators: []
+  networking:
+    ingressClass: nginx
+    domain: example.test
