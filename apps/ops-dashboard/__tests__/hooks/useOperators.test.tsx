@@ -238,9 +238,11 @@ describe('useOperatorMutation', () => {
         await result.current.installOperator.mutateAsync('cert-manager');
       });
 
-      expect(result.current.installOperator.isSuccess).toBe(true);
-      expect(result.current.installOperator.data).toBeDefined();
-    });
+      await waitFor(() => {
+        expect(result.current.installOperator.isSuccess).toBe(true)
+      })
+      expect(result.current.installOperator.data).toBeDefined()
+    })
 
     it('should handle install operator errors', async () => {
       server.use(createInstallOperatorError('cert-manager', 500, 'Installation failed'));
@@ -255,9 +257,11 @@ describe('useOperatorMutation', () => {
         }
       });
 
-      expect(result.current.installOperator.isError).toBe(true);
-      expect(result.current.installOperator.error).toBeDefined();
-    });
+      await waitFor(() => {
+        expect(result.current.installOperator.isError).toBe(true)
+      })
+      expect(result.current.installOperator.error).toBeDefined()
+    })
 
     it('should handle slow install operations', async () => {
       server.use(createInstallOperatorSlow('cert-manager', 1000));
@@ -287,9 +291,11 @@ describe('useOperatorMutation', () => {
         await result.current.installOperator.mutateAsync('cert-manager');
       });
 
-      expect(result.current.installOperator.isSuccess).toBe(true);
-    });
-  });
+      await waitFor(() => {
+        expect(result.current.installOperator.isSuccess).toBe(true)
+      })
+    })
+  })
 
   describe('Uninstall operator', () => {
     it('should uninstall operator successfully', async () => {
@@ -301,9 +307,11 @@ describe('useOperatorMutation', () => {
         await result.current.uninstallOperator.mutateAsync('cert-manager');
       });
 
-      expect(result.current.uninstallOperator.isSuccess).toBe(true);
-      expect(result.current.uninstallOperator.data).toBeDefined();
-    });
+      await waitFor(() => {
+        expect(result.current.uninstallOperator.isSuccess).toBe(true)
+      })
+      expect(result.current.uninstallOperator.data).toBeDefined()
+    })
 
     it('should handle uninstall operator errors', async () => {
       server.use(createUninstallOperatorError('cert-manager', 500, 'Uninstallation failed'));
@@ -318,9 +326,11 @@ describe('useOperatorMutation', () => {
         }
       });
 
-      expect(result.current.uninstallOperator.isError).toBe(true);
-      expect(result.current.uninstallOperator.error).toBeDefined();
-    });
+      await waitFor(() => {
+        expect(result.current.uninstallOperator.isError).toBe(true)
+      })
+      expect(result.current.uninstallOperator.error).toBeDefined()
+    })
 
     it('should invalidate queries on successful uninstall', async () => {
       server.use(createUninstallOperator('cert-manager'));
@@ -375,14 +385,18 @@ describe('useOperatorMutation', () => {
         await result.current.installOperator.mutateAsync('cert-manager');
       });
 
-      expect(result.current.installOperator.isSuccess).toBe(true);
+      await waitFor(() => {
+        expect(result.current.installOperator.isSuccess).toBe(true)
+      })
 
       // Install second operator
       await act(async () => {
         await result.current.installOperator.mutateAsync('cloudnative-pg');
       });
 
-      expect(result.current.installOperator.isSuccess).toBe(true);
-    });
-  });
-});
+      await waitFor(() => {
+        expect(result.current.installOperator.isSuccess).toBe(true)
+      })
+    })
+  })
+})

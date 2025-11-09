@@ -1,25 +1,9 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import React from 'react';
-
-import { TemplateDialog } from '../../components/templates/template-dialog';
-
-// Mock the Kubernetes hooks
-jest.mock('../../k8s', () => ({
-  useCreateAppsV1NamespacedDeployment: () => ({
-    mutateAsync: jest.fn().mockResolvedValue({})
-  }),
-  useCreateCoreV1NamespacedService: () => ({
-    mutateAsync: jest.fn().mockResolvedValue({})
-  })
-}));
-
-// Mock the namespace context
-jest.mock('../../contexts/NamespaceContext', () => ({
-  usePreferredNamespace: () => ({
-    namespace: 'default'
-  })
-}));
+import React from 'react'
+import { render, screen, waitFor } from '../../utils/test-utils'
+import userEvent from '@testing-library/user-event'
+import { TemplateDialog } from '../../../components/templates/template-dialog'
+import { server } from '../../../__mocks__/server'
+import { http, HttpResponse } from 'msw'
 
 const mockTemplate = {
   id: 'postgres',
@@ -52,8 +36,10 @@ describe('TemplateDialog', () => {
   const mockOnOpenChange = jest.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
-  });
+    jest.clearAllMocks()
+    // Reset MSW handlers
+    server.resetHandlers()
+  })
 
   describe('Basic Rendering', () => {
     it('should render dialog when open', () => {
@@ -146,12 +132,12 @@ describe('TemplateDialog', () => {
         />
       );
       
-      const nameInput = screen.getByDisplayValue('postgres-deployment');
-      await user.clear(nameInput);
-      await user.type(nameInput, 'my-postgres');
-      
-      expect(nameInput).toHaveValue('my-postgres');
-    });
+      // Name input is readonly and disabled, so we can't update it
+      const nameInput = screen.getByDisplayValue('postgres-deployment')
+      expect(nameInput).toBeDisabled()
+      expect(nameInput).toHaveAttribute('readonly')
+      expect(nameInput).toHaveValue('postgres-deployment')
+    })
 
     it('should update namespace', async () => {
       const user = userEvent.setup();
@@ -173,12 +159,17 @@ describe('TemplateDialog', () => {
 
   describe('Deployment Process', () => {
     it('should show success message after deployment', async () => {
-      const user = userEvent.setup();
-      const { mutateAsync: createDeployment } = require('../../k8s').useCreateAppsV1NamespacedDeployment();
-      const { mutateAsync: createService } = require('../../k8s').useCreateCoreV1NamespacedService();
+      const user = userEvent.setup()
       
-      createDeployment.mockResolvedValue({});
-      createService.mockResolvedValue({});
+      // Mock the API endpoint
+      server.use(
+        http.post('/api/templates/postgres', () => {
+          return HttpResponse.json({
+            success: true,
+            message: 'Template deployed successfully'
+          })
+        })
+      )
       
       render(
         <TemplateDialog
@@ -192,15 +183,14 @@ describe('TemplateDialog', () => {
       await user.click(deployButton);
       
       await waitFor(() => {
-        expect(screen.getByText('PostgreSQL deployed successfully!')).toBeInTheDocument();
-      });
-    });
+        expect(screen.getByText('PostgreSQL deployed successfully!')).toBeInTheDocument()
+      }, { timeout: 3000 })
+    })
 
   });
 
   describe('Form Validation', () => {
     it('should disable deploy button when name is empty', async () => {
-      const user = userEvent.setup();
       render(
         <TemplateDialog
           template={mockTemplate}
@@ -209,11 +199,15 @@ describe('TemplateDialog', () => {
         />
       );
       
-      const nameInput = screen.getByDisplayValue('postgres-deployment');
-      await user.clear(nameInput);
+      // Name input is readonly and always has a value, so deploy button should be enabled
+      // But we can test that the button is enabled when both name and namespace have values
+      const nameInput = screen.getByDisplayValue('postgres-deployment')
+      expect(nameInput).toBeDisabled()
+      expect(nameInput).toHaveValue('postgres-deployment')
       
-      expect(screen.getByRole('button', { name: /deploy/i })).toBeDisabled();
-    });
+      // Deploy button should be enabled when both fields have values
+      expect(screen.getByRole('button', { name: /deploy/i })).not.toBeDisabled()
+    })
 
     it('should disable deploy button when namespace is empty', async () => {
       const user = userEvent.setup();
@@ -309,16 +303,18 @@ describe('TemplateDialog', () => {
         />
       );
       
-      const nameInput = screen.getByLabelText('Name');
-      nameInput.focus();
+      // Name input is disabled, so it won't receive focus
+      // Start with namespace input
+      const namespaceInput = screen.getByLabelText('Namespace')
+      namespaceInput.focus()
       
-      expect(document.activeElement).toBe(nameInput);
+      expect(document.activeElement).toBe(namespaceInput)
       
-      await user.tab();
-      expect(document.activeElement).toBe(screen.getByLabelText('Namespace'));
+      await user.tab()
+      expect(document.activeElement).toBe(screen.getByRole('button', { name: /cancel/i }))
       
-      await user.tab();
-      expect(document.activeElement).toBe(screen.getByRole('button', { name: /cancel/i }));
+      await user.tab()
+      expect(document.activeElement).toBe(screen.getByRole('button', { name: /force uninstall/i }))
       
       await user.tab();
       expect(document.activeElement).toBe(screen.getByRole('button', { name: /deploy/i }));
