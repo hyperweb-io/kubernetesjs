@@ -6,7 +6,7 @@
   "types": "./index.d.ts",
   "module": "./esm/index.js",
   "publishConfig": {
-    "access": "restricted",
+    "access": "public",
     "directory": "dist"
   },
   "scripts": {
@@ -24,8 +24,8 @@
     "operators:teardown": "ts-node --swc scripts/setup-operators.ts teardown --config __fixtures__/config/setup.cnpg-minio.yaml"
   },
   "dependencies": {
-    "@kubernetesjs/manifests": "workspace:^",
-    "@kubernetesjs/ops": "workspace:^",
+    "@kubernetesjs/manifests": "^0.0.2",
+    "@kubernetesjs/ops": "^0.0.2",
     "axios": "^1.7.2",
     "chalk": "^4.1.0",
     "js-yaml": "^4.1.0",
@@ -35,5 +35,6 @@
     "@types/js-yaml": "^4.0.5",
     "@types/pg": "^8.11.10",
     "ts-node": "^10.9.2"
-  }
+  },
+  "gitHead": "c10664b145a63bb4cda0896246a3613c7867379b"
 }
