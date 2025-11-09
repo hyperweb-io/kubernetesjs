@@ -3,6 +3,11 @@
   "version": "independent",
   "npmClient": "pnpm",
   "command": {
+    "version": {
+      "ignoreChanges": [
+        "apps/**"
+      ]
+    },
     "publish": {
       "conventionalCommits": true,
       "message": "chore(release): publish"

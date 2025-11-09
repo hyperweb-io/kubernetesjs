@@ -1,6 +1,10 @@
 {
   "name": "@kubernetesjs/ops-dashboard",
   "version": "0.1.1",
+  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -103,5 +107,5 @@
     "typescript": "^5.3.3",
     "whatwg-fetch": "^3.6.20"
   },
-  "gitHead": "c10664b145a63bb4cda0896246a3613c7867379b"
+  "gitHead": "7a287d53ac16f99c39aa0b996eb1e60a97ae93e3"
 }
